@@ -1,4 +1,4 @@
-import { PrismaClient, User, Funnel, Domain } from '../generated/prisma-client';
+import { PrismaClient, User, Funnel, Domain, DomainType, DomainStatus } from '../generated/prisma-client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { testPrisma } from './setup';
@@ -20,9 +20,12 @@ export interface TestFunnel {
 export interface TestDomain {
   id: number;
   hostname: string;
-  type: string;
-  status: string;
+  type: DomainType;
+  status: DomainStatus;
   userId: number;
+  cloudflareHostnameId?: string | null;
+  cloudflareZoneId?: string | null;
+  cloudflareRecordId?: string | null;
 }
 
 export class TestHelpers {
@@ -57,8 +60,8 @@ export class TestHelpers {
     return await testPrisma.domain.create({
       data: {
         hostname: `test${randomId}.example.com`,
-        type: 'CUSTOM_DOMAIN',
-        status: 'PENDING',
+        type: DomainType.CUSTOM_DOMAIN,
+        status: DomainStatus.PENDING,
         userId,
         ...overrides
       }

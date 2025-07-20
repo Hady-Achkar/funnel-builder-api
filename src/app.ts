@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -10,7 +10,7 @@ import funnelRoutes from './routes/funnels';
 import pageRoutes from './routes/pages';
 import domainRoutes from './routes/domains';
 
-export function createServer() {
+export function createServer(): Express {
   const app = express();
 
   // Security middleware

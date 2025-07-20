@@ -164,7 +164,7 @@ describe('DomainService', () => {
       const domain = await TestHelpers.createTestDomain(user.id);
       
       // Mock cache miss first
-      mockCache.memoize.mockImplementation(async (key, fn) => fn());
+      mockCache.memoize.mockImplementation(async (key: string, fn: () => any) => fn());
 
       const result = await DomainService.getUserDomains(user.id);
 

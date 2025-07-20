@@ -38,9 +38,12 @@ export interface DomainWithConnections {
   sslStatus: SslStatus;
   userId: number;
   cloudflareHostnameId: string | null;
+  cloudflareZoneId: string | null;
+  cloudflareRecordId: string | null;
   verificationToken: string | null;
   ownershipVerification: any;
   dnsInstructions: any;
+  sslValidationRecords: any;
   lastVerifiedAt: Date | null;
   funnelConnections: {
     id: number;
