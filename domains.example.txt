@@ -1,0 +1,509 @@
+import { factories } from '@strapi/strapi';
+import type { Strapi } from '@strapi/strapi';
+import type { Context } from 'koa';
+import axios, { AxiosInstance } from 'axios';
+import dns from 'dns';
+import psl, { ParsedDomain } from 'psl';
+
+const zoneCache = new Map<string, string>();
+
+const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
+const CF_API_TOKEN = strapi.config.get('server.cfApiToken') as string;
+if (!CF_API_TOKEN) throw new Error('Missing Cloudflare API token');
+
+const CF_ACCOUNT_ID = strapi.config.get('server.cfAccountId') as string;
+if (!CF_ACCOUNT_ID) throw new Error('Missing Cloudflare Account ID');
+
+const CLOUDFLARE_SAAS_TARGET = 'fallback.digitalsite.ai';
+
+const cf: AxiosInstance = axios.create({
+  baseURL: CF_API_BASE,
+  headers: {
+    Authorization: `Bearer ${CF_API_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+});
+
+async function getZoneId(hostname: string): Promise<string> {
+  const parsed = psl.parse(hostname);
+  if (typeof (parsed as ParsedDomain).domain !== 'string') {
+    throw new Error(`Cannot derive root domain from: ${hostname}`);
+  }
+  const rootDomain = (parsed as ParsedDomain).domain;
+  if (zoneCache.has(rootDomain)) {
+    return zoneCache.get(rootDomain)!;
+  }
+  const resp = await cf.get('/zones', {
+    params: { name: rootDomain, status: 'active' },
+  });
+  if (!resp.data.success || resp.data.result.length === 0) {
+    throw new Error(`Cloudflare zone not found for domain: ${rootDomain}`);
+  }
+  const id = resp.data.result[0].id;
+  zoneCache.set(rootDomain, id);
+  return id;
+}
+
+async function createRecord(zoneId: string, record: { type: string; name: string; content: string; ttl?: number; proxied?: boolean }) {
+  const resp = await cf.post(`/zones/${zoneId}/dns_records`, record);
+  if (!resp.data.success) {
+    const errs = resp.data.errors.map((e: any) => e.message).join('; ');
+    throw new Error(`Cloudflare createRecord error: ${errs}`);
+  }
+  return resp.data.result;
+}
+
+async function deleteRecord(zoneId: string, recordId: string): Promise<void> {
+  const resp = await cf.delete(`/zones/${zoneId}/dns_records/${recordId}`);
+  if (!resp.data.success) {
+    const errs = resp.data.errors.map((e: any) => e.message).join('; ');
+    throw new Error(`Cloudflare deleteRecord error: ${errs}`);
+  }
+}
+
+const resolver = new dns.Resolver();
+resolver.setServers(['1.1.1.1', '8.8.8.8']);
+
+function validateHostname(hostname: unknown): string {
+  if (typeof hostname !== 'string') {
+    throw new Error('Hostname must be a string');
+  }
+  const trimmed = hostname.trim().toLowerCase();
+  if (!trimmed) {
+    throw new Error('Hostname cannot be empty');
+  }
+  if (trimmed.length > 253) {
+    throw new Error('Hostname exceeds maximum length of 253 characters');
+  }
+  const labels = trimmed.split('.');
+  if (labels.length < 2) {
+    throw new Error('Hostname must have at least one subdomain and a TLD');
+  }
+  const tld = labels[labels.length - 1];
+  if (!/^[a-z]{2,}$/.test(tld)) {
+    throw new Error('Invalid TLD format');
+  }
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
+    if (!label) {
+      throw new Error('Domain labels cannot be empty');
+    }
+    if (label.length > 63) {
+      throw new Error(`Domain label "${label}" exceeds maximum length of 63 characters`);
+    }
+    if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(label)) {
+      throw new Error(`Invalid domain label: "${label}". Labels must start and end with letter/number and contain only letters, numbers or hyphens`);
+    }
+  }
+  return trimmed;
+}
+
+function validateSubdomain(sub: unknown): string {
+  if (typeof sub !== 'string') {
+    throw new Error('Subdomain must be a string');
+  }
+  const trimmed = sub.trim().toLowerCase();
+  if (!trimmed) {
+    throw new Error('Subdomain cannot be empty');
+  }
+  if (trimmed.length > 63) {
+    throw new Error('Subdomain exceeds maximum length of 63 characters');
+  }
+  if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(trimmed)) {
+    throw new Error('Invalid subdomain format. Subdomains must start and end with letter/number and contain only letters, numbers or hyphens');
+  }
+  const reservedNames = ['www', 'mail', 'admin', 'api', 'ftp', 'smtp', 'pop', 'ns1', 'ns2', 'cpanel', 'webmail'];
+  if (reservedNames.includes(trimmed)) {
+    throw new Error(`"${trimmed}" is a reserved subdomain name and cannot be used`);
+  }
+  return trimmed;
+}
+
+const addCustomHostname = async (hostname, zoneId, sslMethod = 'http') => {
+  const url = `/zones/${zoneId}/custom_hostnames`;
+  const payload = {
+    hostname,
+    ssl: {
+      method: sslMethod,
+      type: 'dv',
+      settings: { http2: 'on', min_tls_version: '1.2' },
+    },
+  };
+  const response = await cf.post(url, payload);
+  return response.data.result;
+};
+
+const getCustomHostnameDetails = async (customHostnameId, zoneId) => {
+  const url = `/zones/${zoneId}/custom_hostnames/${customHostnameId}`;
+  const response = await cf.get(url);
+  return response.data.result;
+};
+
+export default factories.createCoreController('api::domain.domain', ({ strapi }: { strapi: Strapi }) => ({
+  async create(ctx: Context) {
+    try {
+      const user = ctx.state.user;
+      if (!user) {
+        return ctx.unauthorized('Authentication is required.');
+      }
+      const maxCustomDomains = user?.maximum_custom_domains_allowed;
+      const userCustomDomains = await strapi.db.query('api::domain.domain').count({ where: { users_permissions_user: user.id, type: 'CustomDomain' } });
+      if (userCustomDomains >= maxCustomDomains) {
+        strapi.log.warn(`[Domain Create] User has reached maximum custom domains limit: ${maxCustomDomains}`);
+        return ctx.badRequest(`You have reached your limit of ${maxCustomDomains} custom domain(s).`);
+      }
+      const { hostname: domainName } = ctx.request.body;
+      if (!domainName) {
+        strapi.log.warn('[Domain Create] Missing domainName in request');
+        return ctx.badRequest('Domain name is required.');
+      }
+      validateHostname(domainName);
+
+      const existingDomain = await strapi.db.query('api::domain.domain').findOne({ where: { domainName } });
+      if (existingDomain) {
+        return ctx.badRequest('This domain name is taken, please choose another one.');
+      }
+
+      // 1. Cloudflare Zone config
+      const zoneId = strapi.config.get('server.cfZoneId') as string;
+      strapi.log.info(`[Domain Create] Using Cloudflare zone ID: ${zoneId}`);
+
+      // 2. Build DNS instructions
+      const parsedDomain = psl.parse(domainName) as psl.ParsedDomain;
+      strapi.log.debug('[Domain Create] Parsed domain parts:', parsedDomain);
+      // Reject apex domains; require "www" or any other subdomain
+      if (!parsedDomain.subdomain) {
+        strapi.log.warn('[Domain Create] Apex domain detected; a subdomain is required');
+        return ctx.badRequest('Please provide a subdomain (e.g. www.example.com)');
+      }
+
+      // 3. Create hostname in CF
+      strapi.log.debug('[Domain Create] Calling addCustomHostname()');
+      const initialHostname = await addCustomHostname(domainName, zoneId);
+      strapi.log.debug('[Domain Create] addCustomHostname() result:', initialHostname);
+
+      // 4. Fetch details (for SSL TXT)
+      strapi.log.debug('[Domain Create] Fetching hostname details');
+      const detailedHostname = await getCustomHostnameDetails(initialHostname.id, zoneId);
+      strapi.log.debug('[Domain Create] getCustomHostnameDetails() result:', detailedHostname);
+
+      const { id, status, ssl } = detailedHostname;
+      const ownershipVerificationRecord = initialHostname.ownership_verification;
+      strapi.log.info(`[Domain Create] Parsed custom hostname ID: ${id}, status: ${status}, sslStatus: ${ssl?.status}`);
+
+      // 5. Persist to DB
+      strapi.log.debug('[Domain Create] Saving new domain to DB');
+      const newDomain = await strapi.db.query('api::domain.domain').create({
+        data: {
+          domainName,
+          type: 'CustomDomain',
+          users_permissions_user: user.id,
+          custom_hostname_id: id,
+          is_verified: false,
+          is_active: false,
+          verificationToken: ownershipVerificationRecord.value,
+          ownership_verification: ownershipVerificationRecord,
+          CName_verification_instructions: {
+            type: 'CNAME',
+            name: parsedDomain.subdomain,
+            value: 'fallback.digitalsite.ai',
+            purpose: `Live Traffic`,
+          },
+          ssl_status: ssl?.status,
+          overall_status: status,
+        },
+      });
+      strapi.log.info('[Domain Create] New domain record created:', newDomain);
+
+      const splittedOwnerVerificationName = ownershipVerificationRecord.name.split('.');
+
+      const setupInstructions = {
+        records: [
+          {
+            type: 'TXT',
+            name: splittedOwnerVerificationName[0],
+            value: ownershipVerificationRecord.value,
+            purpose: `Domain Ownership Verification`,
+          },
+          {
+            type: 'CNAME',
+            name: parsedDomain.subdomain,
+            value: 'fallback.digitalsite.ai',
+            purpose: `Live Traffic`,
+          },
+        ],
+      };
+      strapi.log.debug('[Domain Create] setupInstructions:', setupInstructions);
+
+      // 6. Respond
+      strapi.log.info('[Domain Create] Domain registered successfully');
+      return ctx.send({
+        message: 'Domain registered. Please add ALL of the following DNS records at your domain provider.',
+        domain: newDomain,
+        setupInstructions,
+      });
+    } catch (error) {
+      const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
+      strapi.log.error(`[Domain Create] Error: ${errMsg}`, { stack: error.stack });
+      return ctx.badRequest(errMsg || 'Failed to create domain.');
+    }
+  },
+
+  async verify(ctx: Context) {
+    try {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized('Authentication required');
+      const { hostname } = ctx.request.body;
+      if (!hostname) return ctx.badRequest('Hostname is required.');
+
+      const domainRecord = await strapi.db.query('api::domain.domain').findOne({
+        where: { domainName: hostname, users_permissions_user: user.id },
+      });
+      if (!domainRecord) return ctx.notFound('Domain not found.');
+
+      if (domainRecord.is_active) return ctx.send({ message: 'Domain is already active.', domain: domainRecord, isFullyActive: true });
+
+      const { custom_hostname_id } = domainRecord;
+      if (!custom_hostname_id) return ctx.badRequest('Domain is not configured correctly.');
+
+      const zoneId = strapi.config.get('server.cfZoneId') as string;
+      const cfHostname = await getCustomHostnameDetails(custom_hostname_id, zoneId);
+      const { status, ssl } = cfHostname;
+
+      const dataToUpdate: any = { overall_status: status, ssl_status: ssl?.status };
+      let message = `Verification is still in progress. Status: "${status}", SSL: "${ssl?.status}".`;
+      let isFullyActive = false;
+      let nextStep = null;
+
+      if (status === 'active' && ssl?.status === 'active') {
+        dataToUpdate.is_verified = true;
+        dataToUpdate.is_active = true;
+        message = 'Congratulations! Your domain is fully configured and active.';
+        isFullyActive = true;
+      } else if (ssl?.validation_records) {
+        nextStep = ssl.validation_records[0];
+      }
+
+      const updatedDomain = await strapi.db.query('api::domain.domain').update({
+        where: { id: domainRecord.id },
+        data: dataToUpdate,
+      });
+
+      return ctx.send({ message, domain: updatedDomain, isFullyActive, nextStep });
+    } catch (error) {
+      const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
+      strapi.log.error(`[Domain Verify] Error: ${errMsg}`);
+      return ctx.badRequest(errMsg || 'Failed to verify domain.');
+    }
+  },
+
+  async delete(ctx: Context) {
+    try {
+      const { hostname } = ctx.request.body;
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized('Authentication required');
+
+      const record = await strapi.db.query('api::domain.domain').findOne({ where: { domainName: hostname, users_permissions_user: user.id } });
+      if (!record) return ctx.notFound('Domain not found or not owned');
+
+      strapi.log.info(`[Domain Delete] Starting deletion for ${hostname}`);
+
+      // Delete custom hostname from Cloudflare if it exists
+      if (record.custom_hostname_id) {
+        try {
+          const zoneId = strapi.config.get('server.cfZoneId') as string;
+          const deleteUrl = `/zones/${zoneId}/custom_hostnames/${record.custom_hostname_id}`;
+
+          strapi.log.info(`[Domain Delete] Deleting custom hostname ${record.custom_hostname_id} from Cloudflare`);
+          const response = await cf.delete(deleteUrl);
+
+          if (response.data.success) {
+            strapi.log.info(`[Domain Delete] Successfully deleted custom hostname ${record.custom_hostname_id}`);
+          } else {
+            strapi.log.warn(`[Domain Delete] Cloudflare deletion warning:`, response.data.errors);
+          }
+        } catch (cfError: any) {
+          if (cfError.response?.status === 404) {
+            strapi.log.warn(`[Domain Delete] Custom hostname ${record.custom_hostname_id} not found in Cloudflare (already deleted)`);
+          } else {
+            strapi.log.error(`[Domain Delete] Failed to delete custom hostname from Cloudflare:`, cfError.response?.data || cfError.message);
+            // Continue with database deletion even if Cloudflare deletion fails
+          }
+        }
+      }
+
+      // Legacy cleanup for old DNS-based records (if they exist)
+      if (record.cfVerifyRecordId) {
+        try {
+          const platformZoneId = await getZoneId(strapi.config.get('server.platformMainDomain') as string);
+          await deleteRecord(platformZoneId, record.cfVerifyRecordId);
+          strapi.log.info(`[Domain Delete] Deleted verify record ${record.cfVerifyRecordId}`);
+        } catch (err) {
+          strapi.log.warn(`[Domain Delete] Failed to delete verify record:`, err.message);
+        }
+      }
+
+      if (record.cfFinalRecordId) {
+        try {
+          const userZoneId = await getZoneId(hostname);
+          await deleteRecord(userZoneId, record.cfFinalRecordId);
+          strapi.log.info(`[Domain Delete] Deleted final record ${record.cfFinalRecordId}`);
+        } catch (err) {
+          strapi.log.warn(`[Domain Delete] Failed to delete final record:`, err.message);
+        }
+      } else if (record.is_active && record.domainName.split('.').length === 2) {
+        strapi.log.warn(`[Domain Delete] No specific cfFinalRecordId stored for active apex domain ${hostname}. Manual cleanup might be needed for all A records.`);
+      }
+
+      // Delete from database
+      await strapi.db.query('api::domain.domain').delete({ where: { id: record.id } });
+      strapi.log.info(`[Domain Delete] Successfully deleted domain ${hostname} from database`);
+
+      return ctx.send({
+        message: 'Domain deleted successfully',
+        details: {
+          hostname,
+          custom_hostname_deleted: !!record.custom_hostname_id,
+          dns_records_cleaned: !!(record.cfVerifyRecordId || record.cfFinalRecordId),
+        },
+      });
+    } catch (err: any) {
+      strapi.log.error('[Domain Delete] Error:', err);
+      return ctx.internalServerError(err.message || 'Deletion failed');
+    }
+  },
+
+  async find(ctx: Context) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized('Authentication required');
+    const domains = await strapi.db.query('api::domain.domain').findMany({ where: { users_permissions_user: user.id } });
+    return ctx.send(domains);
+  },
+
+  async createSubdomain(ctx: Context) {
+    try {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized('Authentication required');
+
+      const maxSubdomains = user?.maximum_subdomains_allowed;
+      const userSubdomains = await strapi.db.query('api::domain.domain').count({ where: { users_permissions_user: user.id, type: 'Subdomain' } });
+      if (userSubdomains >= maxSubdomains) {
+        strapi.log.warn(`[Domain Create] User has reached maximum Subdomains limit: ${maxSubdomains}`);
+        return ctx.badRequest(`You have reached your limit of ${maxSubdomains} Subdomain(s).`);
+      }
+
+      const { subdomain: rawSub } = ctx.request.body as { subdomain?: unknown };
+      const sub = validateSubdomain(rawSub);
+
+      const full = `${sub}.mydigitalsite.io`;
+      const exists = await strapi.db.query('api::domain.domain').findOne({ where: { domainName: full } });
+      if (exists) return ctx.badRequest('Subdomain already registered');
+
+      if (!CLOUDFLARE_SAAS_TARGET) {
+        throw new Error('CLOUDFLARE_SAAS_TARGET is not configured.');
+      }
+
+      strapi.log.info(`[createSubdomain] Creating subdomain: ${full}`);
+
+      try {
+        // 1. Create the domain record directly (since it's our own subdomain)
+        const newDomain = await strapi.db.query('api::domain.domain').create({
+          data: {
+            domainName: full,
+            type: 'Subdomain',
+            users_permissions_user: user.id,
+            is_verified: true,
+            is_active: true,
+            ssl_status: 'active',
+            overall_status: 'active',
+          },
+        });
+
+        strapi.log.info(`[createSubdomain] Created domain record with ID: ${newDomain.id}`);
+
+        // 2. Create the A record in Cloudflare
+        const rec = await createRecord('20a12454de43d1afbfb97f68fb56a213', {
+          type: 'A',
+          name: sub,
+          content: '74.234.194.84',
+          ttl: 3600,
+          proxied: true,
+        });
+
+        strapi.log.info(`[createSubdomain] Created A record with ID: ${rec.id}`);
+
+        // 3. Update the domain record with the DNS record ID
+        await strapi.db.query('api::domain.domain').update({
+          where: { id: newDomain.id },
+          data: { cfFinalRecordId: rec.id },
+        });
+
+        // 4. Get the updated domain record
+        const finalRecord = await strapi.db.query('api::domain.domain').findOne({
+          where: { id: newDomain.id },
+        });
+
+        strapi.log.info(`[createSubdomain] Successfully created subdomain: ${full}`);
+
+        return ctx.send({
+          domain: finalRecord,
+          message: 'Subdomain created and activated successfully.',
+        });
+      } catch (createError: any) {
+        strapi.log.error('[createSubdomain] Creation error:', createError);
+        throw createError;
+      }
+    } catch (err: any) {
+      strapi.log.error('[Domain createSubdomain] Error:', err);
+      return ctx.internalServerError(err.message || 'Subdomain creation failed');
+    }
+  },
+
+  async getVerificationInstructions(ctx: Context) {
+    try {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized('Authentication required');
+
+      const { hostname } = ctx.request.query as { hostname?: string };
+      if (!hostname) return ctx.badRequest('Hostname is required.');
+
+      const domainRecord = await strapi.db.query('api::domain.domain').findOne({
+        where: { domainName: hostname, users_permissions_user: user.id },
+        select: ['ownership_verification', 'CName_verification_instructions'],
+      });
+
+      if (!domainRecord) return ctx.notFound('Domain not found.');
+
+      const splittedOwnershipVerificationName = domainRecord.ownership_verification.name.split('.');
+
+      const { type, name, value } = domainRecord.CName_verification_instructions;
+      return ctx.send({
+        ownership_verification: {
+          ...domainRecord.ownership_verification,
+          name: splittedOwnershipVerificationName[0],
+        },
+        CName_verification_instructions: { type, name, value },
+      });
+    } catch (error: any) {
+      strapi.log.error('[Domain getVerificationInstructions] Error:', error);
+      return ctx.internalServerError(error.message || 'Failed to get verification instructions');
+    }
+  },
+  async getPublicFunnel(ctx: Context) {
+    try {
+      const { subdomain: rawHost, funnelId } = ctx.query as { subdomain?: unknown; funnelId?: string };
+      const subdomain = validateHostname(rawHost);
+      if (!funnelId) return ctx.badRequest('funnelId required');
+      const rec = await strapi.db.query('api::domain.domain').findOne({ where: { domainName: subdomain, is_verified: true }, populate: ['funnels'] });
+      if (!rec) return ctx.notFound('Domain not found or not verified');
+      const link = rec.funnels.find((fn) => fn.id.toString() === funnelId);
+      if (!link) return ctx.notFound('Funnel not linked');
+      const funnel = await strapi.db.query('api::funnel.funnel').findOne({ where: { id: funnelId, status: 'Live' }, populate: ['funnelsetting', 'pages', 'results'] });
+      if (!funnel) return ctx.notFound('Funnel not available');
+      return ctx.send({ funnel, message: 'Funnel data retrieved successfully' });
+    } catch (err: any) {
+      strapi.log.error('[Domain getPublicFunnel] Error:', err);
+      return ctx.internalServerError(err.message || 'Error fetching funnel');
+    }
+  },
+}));
