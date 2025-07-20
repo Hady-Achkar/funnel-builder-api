@@ -42,6 +42,7 @@
     "vitest": "^1.0.4",
     "@vitest/coverage-v8": "^1.0.4",
     "@vitest/ui": "^1.0.4",
+    "@types/vitest": "^1.0.4",
     "supertest": "^6.3.3",
     "@types/supertest": "^6.0.2",
     "redis-memory-server": "^0.10.0"

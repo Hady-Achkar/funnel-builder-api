@@ -46,7 +46,7 @@ export function createServer(): Express {
   app.use('/api/domains', domainRoutes);
 
   // Health check endpoint
-  app.get('/health', async (req, res) => {
+  app.get('/health', async (req: express.Request, res: express.Response) => {
     const healthStatus = {
       status: 'OK',
       timestamp: new Date().toISOString(),
@@ -66,7 +66,7 @@ export function createServer(): Express {
   });
 
   // Root endpoint
-  app.get('/', (req, res) => {
+  app.get('/', (req: express.Request, res: express.Response) => {
     res.json({
       message: 'Funnel Builder API',
       version: '1.0.0',
@@ -83,7 +83,7 @@ export function createServer(): Express {
   });
 
   // 404 handler
-  app.use('*', (req, res) => {
+  app.use('*', (req: express.Request, res: express.Response) => {
     res.status(404).json({
       error: 'Not Found',
       message: `Route ${req.originalUrl} not found`,
@@ -92,7 +92,7 @@ export function createServer(): Express {
   });
 
   // Global error handler
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('Global error handler:', err);
 
     // Don't leak error details in production
