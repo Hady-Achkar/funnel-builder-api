@@ -106,14 +106,17 @@ jobs:
       with:
         version: ${{ env.PNPM_VERSION }}
 
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile --prod
+    - name: Install all dependencies for build
+      run: pnpm install --frozen-lockfile
+
+    - name: Generate Prisma client
+      run: pnpm exec prisma generate
 
     - name: Build application
       run: pnpm run build
 
-    - name: Generate Prisma client
-      run: pnpm exec prisma generate
+    - name: Prune dev dependencies
+      run: pnpm prune --prod
 
     - name: Create deployment package
       run: |
