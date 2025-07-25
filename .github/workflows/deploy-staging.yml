@@ -233,8 +233,34 @@ jobs:
         # Run database migrations
         npx prisma migrate deploy
         
+        # Verify build files exist
+        echo "Verifying build files..."
+        ls -la dist/
+        if [ ! -f dist/index.js ]; then
+          echo "ERROR: dist/index.js not found!"
+          exit 1
+        fi
+        
         # Start application with PM2
-        pm2 start ecosystem.config.js || pm2 start dist/index.js --name funnel-builder-staging
+        echo "Starting application with PM2..."
+        if [ -f ecosystem.config.js ]; then
+          echo "Using ecosystem.config.js"
+          pm2 start ecosystem.config.js
+        else
+          echo "Using direct PM2 start command"
+          pm2 start dist/index.js --name funnel-builder-staging
+        fi
+        
+        # Show PM2 status
+        echo "PM2 processes:"
+        pm2 list
+        
+        # Show PM2 logs if process failed
+        if ! pm2 describe funnel-builder-staging > /dev/null 2>&1; then
+          echo "Process failed to start. Checking logs..."
+          pm2 logs --lines 20
+        fi
+        
         pm2 save
         
         echo "Staging deployment completed successfully!"
@@ -334,11 +360,28 @@ jobs:
             echo "Staging deployment completed!"
           fi
 
-    - name: Health check staging
-      run: |
-        sleep 30
-        curl -f http://${{ secrets.AZURE_STAGING_HOST }}:3001/health || exit 1
-        echo "Staging deployment health check passed!"
+    - name: Verify deployment and health check
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.AZURE_STAGING_HOST }}
+        username: ${{ secrets.AZURE_STAGING_USERNAME }}
+        key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
+        port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
+        script: |
+          echo "Waiting 30 seconds for application to start..."
+          sleep 30
+          
+          echo "Checking PM2 status:"
+          pm2 list
+          
+          echo "Checking if application is listening on port 3001:"
+          netstat -tlnp | grep :3001 || echo "Port 3001 not in use"
+          
+          echo "Testing health endpoint:"
+          curl -f http://localhost:3001/health || echo "Health check failed"
+          
+          echo "Checking PM2 logs for any errors:"
+          pm2 logs funnel-builder-staging --lines 10 || echo "No logs available"
 
     - name: Run smoke tests on staging
       run: |
