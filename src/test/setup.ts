@@ -17,6 +17,23 @@ export const testPrisma = new PrismaClient({
 
 // Setup before all tests
 beforeAll(async () => {
+  // Run migrations to ensure database schema is up to date
+  try {
+    await testPrisma.$executeRawUnsafe(`
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT FROM information_schema.columns 
+                       WHERE table_name = 'users' 
+                       AND column_name = 'passwordResetToken') THEN
+          ALTER TABLE users ADD COLUMN "passwordResetToken" TEXT UNIQUE;
+          ALTER TABLE users ADD COLUMN "passwordResetExpiresAt" TIMESTAMP(3);
+        END IF;
+      END $$;
+    `);
+  } catch (error) {
+    console.warn('Migration error:', error);
+  }
+
   // Reset test database
   try {
     // Drop all data from test database

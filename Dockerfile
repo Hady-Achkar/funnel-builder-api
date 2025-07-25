@@ -21,4 +21,5 @@ RUN pnpm exec prisma generate
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+# Run migrations and start the application
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm start"]
