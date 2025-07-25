@@ -91,7 +91,6 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: ${{ vars.ENABLE_STAGING_DEPLOY == 'true' || github.event_name == 'workflow_dispatch' }}
     
     steps:
     - name: Check deployment secrets
