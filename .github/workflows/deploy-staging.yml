@@ -95,19 +95,28 @@ jobs:
     steps:
     - name: Check deployment secrets
       run: |
-        if [ -z "${{ secrets.AZURE_STAGING_HOST }}" ]; then
-          echo "ERROR: AZURE_STAGING_HOST secret is not set"
+        echo "Checking secrets availability..."
+        echo "AZURE_STAGING_HOST length: ${#AZURE_STAGING_HOST}"
+        echo "AZURE_STAGING_USERNAME length: ${#AZURE_STAGING_USERNAME}"
+        echo "AZURE_STAGING_SSH_KEY length: ${#AZURE_STAGING_SSH_KEY}"
+        
+        if [ -z "$AZURE_STAGING_HOST" ]; then
+          echo "ERROR: AZURE_STAGING_HOST secret is not set or empty"
           exit 1
         fi
-        if [ -z "${{ secrets.AZURE_STAGING_USERNAME }}" ]; then
-          echo "ERROR: AZURE_STAGING_USERNAME secret is not set"
+        if [ -z "$AZURE_STAGING_USERNAME" ]; then
+          echo "ERROR: AZURE_STAGING_USERNAME secret is not set or empty"
           exit 1
         fi
-        if [ -z "${{ secrets.AZURE_STAGING_SSH_KEY }}" ]; then
-          echo "ERROR: AZURE_STAGING_SSH_KEY secret is not set"
+        if [ -z "$AZURE_STAGING_SSH_KEY" ]; then
+          echo "ERROR: AZURE_STAGING_SSH_KEY secret is not set or empty"
           exit 1
         fi
         echo "✅ All required secrets are configured"
+      env:
+        AZURE_STAGING_HOST: ${{ secrets.AZURE_STAGING_HOST }}
+        AZURE_STAGING_USERNAME: ${{ secrets.AZURE_STAGING_USERNAME }}
+        AZURE_STAGING_SSH_KEY: ${{ secrets.AZURE_STAGING_SSH_KEY }}
 
     - name: Checkout code
       uses: actions/checkout@v4
