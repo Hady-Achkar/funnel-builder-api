@@ -218,6 +218,10 @@ jobs:
         sudo chown -R $USER:$USER /opt/funnel-builder-staging
         cd /opt/funnel-builder-staging
         
+        # Install production dependencies on the server
+        echo "Installing production dependencies on server..."
+        npm install --omit=dev
+        
         # Load environment variables
         if [ -f .env.staging ]; then
           source .env.staging
