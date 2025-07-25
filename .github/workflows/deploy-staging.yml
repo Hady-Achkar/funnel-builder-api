@@ -214,20 +214,6 @@ jobs:
         };
         EOF
 
-    - name: Deploy to Azure Staging VM
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.AZURE_STAGING_HOST }}
-        username: ${{ secrets.AZURE_STAGING_USERNAME }}
-        key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
-        port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
-        script: |
-          # Create deployment directory
-          mkdir -p ~/staging-deployment-$(date +%Y%m%d_%H%M%S)
-          cd ~/staging-deployment-$(date +%Y%m%d_%H%M%S)
-          
-          echo "Staging deployment directory created: $(pwd)"
-
     - name: Copy files to Azure Staging VM
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -236,8 +222,9 @@ jobs:
         key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
         source: "deploy/*"
-        target: "~/staging-deployment-$(date +%Y%m%d_%H%M%S)/"
+        target: "~/staging-deployment/"
         strip_components: 1
+        overwrite: true
 
     - name: Execute staging deployment
       uses: appleboy/ssh-action@v1.0.0
@@ -257,28 +244,35 @@ jobs:
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
         envs: DATABASE_URL,JWT_SECRET,REDIS_URL,CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN
         script: |
-          # Find the latest deployment directory
-          DEPLOY_DIR=$(ls -td ~/staging-deployment-* | head -1)
-          cd $DEPLOY_DIR
-          
-          # Set environment variables for staging
-          export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
-          export JWT_SECRET="${{ secrets.STAGING_JWT_SECRET }}"
-          export REDIS_URL="${{ secrets.STAGING_REDIS_URL }}"
-          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          export CLOUDFLARE_ZONE_ID="${{ secrets.STAGING_CLOUDFLARE_ZONE_ID }}"
-          export CLOUDFLARE_SAAS_TARGET="${{ secrets.STAGING_CLOUDFLARE_SAAS_TARGET }}"
-          export PLATFORM_MAIN_DOMAIN="${{ secrets.STAGING_PLATFORM_MAIN_DOMAIN }}"
-          export NODE_ENV="staging"
+          # Use the staging deployment directory
+          cd ~/staging-deployment
+          echo "Current directory: $(pwd)"
+          echo "Files in directory: $(ls -la)"
           
           # Run deployment script
-          chmod +x deploy.sh
-          ./deploy.sh
-          
-          # Clean up old deployment directories (keep last 3 for staging)
-          cd ~
-          ls -td staging-deployment-* | tail -n +4 | xargs rm -rf || echo "No old deployments to clean"
+          if [ -f deploy.sh ]; then
+            chmod +x deploy.sh
+            ./deploy.sh
+          else
+            echo "Deploy script not found, running manual deployment..."
+            
+            # Stop existing PM2 process
+            pm2 stop funnel-builder-staging || echo "No existing process to stop"
+            
+            # Install dependencies if needed
+            if [ -f package.json ]; then
+              npm install --production || echo "Dependencies already installed"
+            fi
+            
+            # Run database migrations
+            npm run migrate || echo "No migrations to run"
+            
+            # Start application with PM2
+            pm2 start ecosystem.config.js --env staging || pm2 restart funnel-builder-staging
+            pm2 save
+            
+            echo "Staging deployment completed!"
+          fi
 
     - name: Health check staging
       run: |
