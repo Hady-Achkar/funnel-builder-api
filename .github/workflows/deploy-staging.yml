@@ -215,7 +215,20 @@ jobs:
         cd /opt/funnel-builder-staging
         
         # Load environment variables
-        source .env.staging
+        if [ -f .env.staging ]; then
+          source .env.staging
+          echo "Environment variables loaded from .env.staging"
+        else
+          echo "Warning: .env.staging not found in $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+          echo "Setting default environment variables..."
+          export DATABASE_URL="postgresql://staging_user:staging_password_change_me@localhost:5433/funnel_builder_staging"
+          export REDIS_URL="redis://localhost:6380"
+          export JWT_SECRET="staging-jwt-secret-change-this-in-production"
+          export NODE_ENV="staging"
+          export PORT="3001"
+        fi
         
         # Run database migrations
         npx prisma migrate deploy
