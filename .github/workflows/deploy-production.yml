@@ -154,6 +154,16 @@ jobs:
         sudo chown -R $USER:$USER /opt/funnel-builder
         cd /opt/funnel-builder
         
+        # Install pnpm if not available on server
+        if ! command -v pnpm &> /dev/null; then
+          echo "Installing pnpm on server..."
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          export PATH="$HOME/.local/share/pnpm:$PATH"
+        fi
+        
+        # Install production dependencies
+        pnpm install --prod --frozen-lockfile
+        
         # Run database migrations
         DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
         

@@ -218,9 +218,16 @@ jobs:
         sudo chown -R $USER:$USER /opt/funnel-builder-staging
         cd /opt/funnel-builder-staging
         
+        # Install pnpm if not available on server
+        if ! command -v pnpm &> /dev/null; then
+          echo "Installing pnpm on server..."
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          export PATH="$HOME/.local/share/pnpm:$PATH"
+        fi
+        
         # Install production dependencies on the server
         echo "Installing production dependencies on server..."
-        npm install --omit=dev
+        pnpm install --prod --frozen-lockfile
         
         # Load environment variables
         if [ -f .env.staging ]; then
@@ -357,7 +364,13 @@ jobs:
             
             # Install dependencies if needed
             if [ -f package.json ]; then
-              npm install --production || echo "Dependencies already installed"
+              # Install pnpm if not available
+              if ! command -v pnpm &> /dev/null; then
+                echo "Installing pnpm..."
+                curl -fsSL https://get.pnpm.io/install.sh | sh -
+                export PATH="$HOME/.local/share/pnpm:$PATH"
+              fi
+              pnpm install --prod --frozen-lockfile || echo "Dependencies already installed"
             fi
             
             # Load environment variables and run migrations  
