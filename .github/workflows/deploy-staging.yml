@@ -234,7 +234,7 @@ jobs:
         npx prisma migrate deploy
         
         # Start application with PM2
-        pm2 start ecosystem.config.js || pm2 start dist/server.js --name funnel-builder-staging
+        pm2 start ecosystem.config.js || pm2 start dist/index.js --name funnel-builder-staging
         pm2 save
         
         echo "Staging deployment completed successfully!"
@@ -248,7 +248,7 @@ jobs:
         module.exports = {
           apps: [{
             name: 'funnel-builder-staging',
-            script: 'dist/server.js',
+            script: 'dist/index.js',
             instances: 1,
             exec_mode: 'cluster',
             env: {
