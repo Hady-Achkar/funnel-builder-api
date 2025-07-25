@@ -208,6 +208,9 @@ jobs:
           echo "Docker Compose installation completed"
         fi
         
+        # Stop and remove existing containers
+        sudo docker-compose -f docker-compose.staging.yml down || echo "No existing containers to stop"
+        
         # Start Docker services
         sudo docker-compose -f docker-compose.staging.yml up -d
         
@@ -321,6 +324,8 @@ jobs:
           
           # Start Docker services for manual deployment
           if [ -f docker-compose.staging.yml ]; then
+            echo "Stopping existing Docker services..."
+            sudo docker-compose -f docker-compose.staging.yml down || echo "No existing containers to stop"
             echo "Starting Docker services..."
             sudo docker-compose -f docker-compose.staging.yml up -d
             sleep 10
