@@ -141,8 +141,12 @@ jobs:
     - name: Build application
       run: pnpm run build
 
-    - name: Prune dev dependencies
-      run: pnpm prune --prod
+    - name: Install production dependencies  
+      run: |
+        # Remove all node_modules first
+        rm -rf node_modules
+        # Install only production dependencies
+        pnpm install --prod --frozen-lockfile
 
     - name: Create deployment package
       run: |
@@ -240,6 +244,14 @@ jobs:
           echo "ERROR: dist/index.js not found!"
           exit 1
         fi
+        
+        # Check first few lines of dist/index.js to see what modules it requires
+        echo "Checking dist/index.js content:"
+        head -n 10 dist/index.js
+        
+        # Verify node_modules has production dependencies
+        echo "Checking node_modules structure:"
+        ls -la node_modules/ | head -20
         
         # Start application with PM2
         echo "Starting application with PM2..."
