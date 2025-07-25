@@ -155,10 +155,10 @@ jobs:
         cd /opt/funnel-builder
         
         # Run database migrations
-        DATABASE_URL=$DATABASE_URL pnpm exec prisma migrate deploy
+        DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
         
         # Start application with PM2
-        pm2 start ecosystem.config.js || pm2 start dist/index.js --name funnel-builder
+        pm2 start ecosystem.config.js || pm2 start dist/server.js --name funnel-builder
         pm2 save
         
         echo "Deployment completed successfully!"
@@ -172,7 +172,7 @@ jobs:
         module.exports = {
           apps: [{
             name: 'funnel-builder',
-            script: 'dist/index.js',
+            script: 'dist/server.js',
             instances: 1,
             exec_mode: 'cluster',
             env: {

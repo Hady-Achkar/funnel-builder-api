@@ -180,10 +180,10 @@ jobs:
         cd /opt/funnel-builder-staging
         
         # Run database migrations
-        DATABASE_URL=$DATABASE_URL pnpm exec prisma migrate deploy
+        DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
         
         # Start application with PM2
-        pm2 start ecosystem.config.js || pm2 start dist/index.js --name funnel-builder-staging
+        pm2 start ecosystem.config.js || pm2 start dist/server.js --name funnel-builder-staging
         pm2 save
         
         echo "Staging deployment completed successfully!"
@@ -265,7 +265,7 @@ jobs:
             fi
             
             # Run database migrations
-            npm run migrate || echo "No migrations to run"
+            npx prisma migrate deploy || echo "No migrations to run"
             
             # Start application with PM2
             pm2 start ecosystem.config.js --env staging || pm2 restart funnel-builder-staging
