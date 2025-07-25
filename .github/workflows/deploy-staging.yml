@@ -91,8 +91,25 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_STAGING_DEPLOY == 'true' || github.event_name == 'workflow_dispatch' }}
     
     steps:
+    - name: Check deployment secrets
+      run: |
+        if [ -z "${{ secrets.AZURE_STAGING_HOST }}" ]; then
+          echo "ERROR: AZURE_STAGING_HOST secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ secrets.AZURE_STAGING_USERNAME }}" ]; then
+          echo "ERROR: AZURE_STAGING_USERNAME secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ secrets.AZURE_STAGING_SSH_KEY }}" ]; then
+          echo "ERROR: AZURE_STAGING_SSH_KEY secret is not set"
+          exit 1
+        fi
+        echo "✅ All required secrets are configured"
+
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -171,7 +188,7 @@ jobs:
         module.exports = {
           apps: [{
             name: 'funnel-builder-staging',
-            script: 'dist/index.js',
+            script: 'dist/server.js',
             instances: 1,
             exec_mode: 'cluster',
             env: {
@@ -181,7 +198,9 @@ jobs:
             error_file: '/var/log/funnel-builder-staging/error.log',
             out_file: '/var/log/funnel-builder-staging/out.log',
             log_file: '/var/log/funnel-builder-staging/combined.log',
-            time: true
+            time: true,
+            wait_ready: true,
+            listen_timeout: 10000
           }]
         };
         EOF
@@ -213,11 +232,21 @@ jobs:
 
     - name: Execute staging deployment
       uses: appleboy/ssh-action@v1.0.0
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        REDIS_URL: ${{ secrets.REDIS_URL }}
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        CLOUDFLARE_SAAS_TARGET: ${{ secrets.CLOUDFLARE_SAAS_TARGET }}
+        PLATFORM_MAIN_DOMAIN: ${{ secrets.PLATFORM_MAIN_DOMAIN }}
       with:
         host: ${{ secrets.AZURE_STAGING_HOST }}
         username: ${{ secrets.AZURE_STAGING_USERNAME }}
         key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
+        envs: DATABASE_URL,JWT_SECRET,REDIS_URL,CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN
         script: |
           # Find the latest deployment directory
           DEPLOY_DIR=$(ls -td ~/staging-deployment-* | head -1)
