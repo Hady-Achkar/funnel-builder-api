@@ -153,6 +153,8 @@ jobs:
         cp package.json deploy/
         cp pnpm-lock.yaml deploy/
         cp -r prisma/ deploy/
+        cp docker-compose.staging.yml deploy/
+        cp .env.staging deploy/
         
         # Create deployment scripts
         cat > deploy/deploy.sh << 'EOF'
@@ -160,6 +162,13 @@ jobs:
         set -e
         
         echo "Starting staging deployment..."
+        
+        # Start Docker services
+        docker-compose -f docker-compose.staging.yml up -d
+        
+        # Wait for services to be ready
+        echo "Waiting for database to be ready..."
+        sleep 10
         
         # Stop existing application
         pm2 stop funnel-builder-staging || echo "No existing process to stop"
@@ -179,8 +188,11 @@ jobs:
         sudo chown -R $USER:$USER /opt/funnel-builder-staging
         cd /opt/funnel-builder-staging
         
+        # Load environment variables
+        source .env.staging
+        
         # Run database migrations
-        DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
+        npx prisma migrate deploy
         
         # Start application with PM2
         pm2 start ecosystem.config.js || pm2 start dist/server.js --name funnel-builder-staging
@@ -229,9 +241,6 @@ jobs:
     - name: Execute staging deployment
       uses: appleboy/ssh-action@v1.0.0
       env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        REDIS_URL: ${{ secrets.REDIS_URL }}
         CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
@@ -242,16 +251,17 @@ jobs:
         username: ${{ secrets.AZURE_STAGING_USERNAME }}
         key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
-        envs: DATABASE_URL,JWT_SECRET,REDIS_URL,CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN
+        envs: CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN
         script: |
           # Use the staging deployment directory
           cd ~/staging-deployment
           echo "Current directory: $(pwd)"
           echo "Files in directory: $(ls -la)"
           
-          # Debug environment variables
-          echo "DATABASE_URL length: ${#DATABASE_URL}"
-          echo "DATABASE_URL preview: ${DATABASE_URL:0:20}..."
+          # Check Docker and Docker Compose
+          echo "Checking Docker installation..."
+          docker --version
+          docker-compose --version
           
           # Run deployment script
           if [ -f deploy.sh ]; then
@@ -268,8 +278,9 @@ jobs:
               npm install --production || echo "Dependencies already installed"
             fi
             
-            # Run database migrations
-            DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy || echo "No migrations to run"
+            # Load environment variables and run migrations
+            source .env.staging
+            npx prisma migrate deploy || echo "No migrations to run"
             
             # Start application with PM2
             pm2 start ecosystem.config.js --env staging || pm2 restart funnel-builder-staging
