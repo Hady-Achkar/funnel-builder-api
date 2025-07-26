@@ -132,6 +132,10 @@ jobs:
           npx prisma generate
         fi
         cp -r src/generated/ deploy/
+        
+        # Also copy to dist/generated for runtime access
+        mkdir -p deploy/dist/generated
+        cp -r src/generated/prisma-client deploy/dist/generated/
         cp -r node_modules/ deploy/
         cp package.json deploy/
         cp pnpm-lock.yaml deploy/
@@ -175,6 +179,10 @@ jobs:
         
         # Generate Prisma client
         npx prisma generate
+        
+        # Copy Prisma client to expected location
+        mkdir -p dist/generated
+        cp -r src/generated/prisma-client dist/generated/ 2>/dev/null || echo "Prisma client copy skipped"
         
         # Run database migrations
         DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
