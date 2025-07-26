@@ -12,6 +12,7 @@ import { setPrismaClient as setDomainPrisma } from '../../services/domain.servic
 // Mock CloudFlare API service for integration tests
 vi.mock('../../services/cloudflare/cloudflare-api.service', () => ({
   CloudFlareAPIService: vi.fn().mockImplementation(() => ({
+    isConfigured: vi.fn().mockReturnValue(true),
     createCustomHostname: vi.fn().mockResolvedValue({
       id: 'cf-hostname-123',
       hostname: 'test.example.com',
