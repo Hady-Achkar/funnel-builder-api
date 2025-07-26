@@ -264,7 +264,7 @@ jobs:
           export REDIS_URL="redis://localhost:6380"
           export JWT_SECRET="staging-jwt-secret-change-this-in-production"
           export NODE_ENV="staging"
-          export PORT="3001"
+          export PORT="5000"
         fi
         
         # Generate Prisma client on the server
@@ -341,7 +341,7 @@ jobs:
             --time \
             -- \
             --env NODE_ENV=staging \
-            --env PORT=3001 \
+            --env PORT=5000 \
             --env DATABASE_URL="$DATABASE_URL" \
             --env REDIS_URL="$REDIS_URL" \
             --env JWT_SECRET="$JWT_SECRET"
@@ -498,15 +498,15 @@ jobs:
           echo "Checking PM2 process details:"
           pm2 describe funnel-builder-staging || echo "Process not found"
           
-          echo "Checking if application is listening on port 3001:"
-          sudo netstat -tlnp | grep :3001 || echo "Port 3001 not in use"
-          sudo lsof -i :3001 || echo "No process on port 3001"
+          echo "Checking if application is listening on port 5000:"
+          sudo netstat -tlnp | grep :5000 || echo "Port 5000 not in use"
+          sudo lsof -i :5000 || echo "No process on port 5000"
           
           echo "Checking running node processes:"
           ps aux | grep node | grep -v grep || echo "No node processes found"
           
           echo "Testing health endpoint:"
-          if curl -f -m 10 http://localhost:3001/health; then
+          if curl -f -m 10 http://localhost:5000/health; then
             echo "✅ Health check passed!"
           else
             echo "❌ Health check failed"
@@ -553,16 +553,16 @@ jobs:
     - name: Run smoke tests on staging
       run: |
         # Basic API tests
-        STAGING_URL="http://${{ secrets.AZURE_STAGING_HOST }}:3001"
+        STAGING_URL="http://${{ secrets.AZURE_STAGING_HOST }}:5000"
         STAGING_DOMAIN="https://new-api-dev.digitalsite.com"
         
         # Test direct port
-        echo "Testing direct access on port 3001..."
-        curl -f "$STAGING_URL/health" || echo "Direct port test failed"
+        echo "Testing direct access on port 5000..."
+        curl -f -m 30 "$STAGING_URL/health" || echo "Direct port test failed"
         
         # Test via domain (might not have SSL yet)
         echo "Testing domain access..."
-        if curl -f -k "$STAGING_DOMAIN/health" 2>/dev/null; then
+        if curl -f -k -m 30 "$STAGING_DOMAIN/health" 2>/dev/null; then
           echo "✅ Domain test passed"
         else
           echo "⚠️ Domain test failed (SSL might not be configured yet)"
@@ -574,7 +574,7 @@ jobs:
       run: |
         echo "✅ Staging deployment completed successfully!"
         echo "🚀 Application endpoints:"
-        echo "   - Direct: http://${{ secrets.AZURE_STAGING_HOST }}:3001"
+        echo "   - Direct: http://${{ secrets.AZURE_STAGING_HOST }}:5000"
         echo "   - Domain: https://new-api-dev.digitalsite.com"
         echo "📋 Ready for testing on develop branch"
         echo ""

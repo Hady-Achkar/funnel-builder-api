@@ -11,7 +11,7 @@ module.exports = {
     // Environment variables
     env_staging: {
       NODE_ENV: 'staging',
-      PORT: 3001,
+      PORT: 5000,
       DATABASE_URL: 'postgresql://staging_user:staging_password_change_me@localhost:5433/funnel_builder_staging',
       REDIS_URL: 'redis://localhost:6380',
       JWT_SECRET: 'staging-jwt-secret-change-this-in-production',
@@ -43,7 +43,7 @@ module.exports = {
     // Post-start actions
     post_start: [
       'echo "Application started successfully"',
-      'curl -s http://localhost:3001/health || echo "Health check failed"'
+      'curl -s http://localhost:5000/health || echo "Health check failed"'
     ]
   }]
 };

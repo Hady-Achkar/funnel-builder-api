@@ -8,11 +8,11 @@ module.exports = {
     node_args: '--max-old-space-size=1024',
     env: {
       NODE_ENV: 'development',
-      PORT: 3000
+      PORT: 5000
     },
     env_staging: {
       NODE_ENV: 'staging',
-      PORT: 3001,
+      PORT: 5000,
       DATABASE_URL: 'postgresql://staging_user:staging_password_change_me@localhost:5433/funnel_builder_staging',
       REDIS_URL: 'redis://localhost:6380',
       JWT_SECRET: 'staging-jwt-secret-change-this-in-production',
@@ -25,7 +25,7 @@ module.exports = {
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 5000
     },
     error_file: './logs/error.log',
     out_file: './logs/out.log',

@@ -17,7 +17,7 @@ echo "2. Updating environment file with CloudFlare dummy values..."
 cat > .env.staging << 'EOF'
 # Staging Environment Variables
 NODE_ENV=staging
-PORT=3001
+PORT=5000
 
 # Domain Configuration
 API_DOMAIN=new-api-dev.digitalsite.com
@@ -55,7 +55,7 @@ mkdir -p dist/generated
 cp -r src/generated/prisma-client dist/generated/ 2>/dev/null || true
 
 echo "6. Testing direct startup first..."
-echo "Command: NODE_ENV=staging PORT=3001 node dist/index.js"
+echo "Command: NODE_ENV=staging PORT=5000 node dist/index.js"
 timeout 3s node dist/index.js && echo "Direct startup test passed" || echo "Direct startup test completed"
 
 echo "7. Starting with PM2..."
@@ -76,10 +76,10 @@ pm2 list
 echo ""
 
 echo "10. Testing health endpoint..."
-if curl -f -s http://localhost:3001/health > /dev/null 2>&1; then
+if curl -f -s http://localhost:5000/health > /dev/null 2>&1; then
     echo "✅ SUCCESS! Application is running"
     echo "Health check response:"
-    curl -s http://localhost:3001/health
+    curl -s http://localhost:5000/health
 else
     echo "❌ Still not working. Checking logs..."
     echo ""

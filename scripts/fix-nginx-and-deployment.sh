@@ -62,7 +62,7 @@ server {
 
     # Proxy all requests to Node.js funnel-builder-api
     location / {
-        proxy_pass http://localhost:3001;
+        proxy_pass http://localhost:5000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -92,7 +92,7 @@ server {
 
     # API documentation endpoint (if needed)
     location /api-docs {
-        proxy_pass http://localhost:3001/api-docs;
+        proxy_pass http://localhost:5000/api-docs;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -142,7 +142,7 @@ echo "   Updating environment configuration..."
 cat > .env.staging << 'ENVEOF'
 # Staging Environment Variables
 NODE_ENV=staging
-PORT=3001
+PORT=5000
 
 # Domain Configuration
 API_DOMAIN=new-api-dev.digitalsite.com
@@ -193,7 +193,7 @@ module.exports = {
     node_args: '--max-old-space-size=1024',
     env: {
       NODE_ENV: 'staging',
-      PORT: 3001
+      PORT: 5000
     },
     error_file: './logs/error.log',
     out_file: './logs/out.log',
@@ -220,10 +220,10 @@ echo "6. Testing application startup..."
 sleep 10
 
 # Test local connection
-if curl -f -s http://localhost:3001/health > /dev/null 2>&1; then
-    echo "   ✓ Application responding on port 3001"
+if curl -f -s http://localhost:5000/health > /dev/null 2>&1; then
+    echo "   ✓ Application responding on port 5000"
 else
-    echo "   ✗ Application not responding on port 3001"
+    echo "   ✗ Application not responding on port 5000"
     echo "   Checking PM2 logs..."
     pm2 logs funnel-builder-staging --lines 20 --nostream
 fi
@@ -262,14 +262,14 @@ echo ""
 echo "=== Deployment Summary ==="
 echo "✓ nginx configuration updated with HTTPS"
 echo "✓ SSL certificate configured"
-echo "✓ funnel-builder-api configured for port 3001"
+echo "✓ funnel-builder-api configured for port 5000"
 echo "✓ PM2 process started"
 echo "✓ nginx reloaded"
 echo ""
 echo "Your services:"
 echo "- Strapi backend: api-dev.digitalsite.com (port 1337)"
 echo "- Frontend: dev.digitalsite.com (port 3000)"
-echo "- Funnel API: new-api-dev.digitalsite.com (port 3001)"
+echo "- Funnel API: new-api-dev.digitalsite.com (port 5000)"
 echo ""
 echo "Check status with:"
 echo "  pm2 list"
