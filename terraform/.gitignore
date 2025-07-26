@@ -1,0 +1,43 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+*.tfplan.*
+
+# Environment-specific files with secrets
+*.auto.tfvars
+secrets.tfvars
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files except the example ones
+*.tfvars
+!environments/dev.tfvars
+!environments/prod.tfvars
+
+# Include override files are used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+*tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
