@@ -6,7 +6,22 @@ import { TestHelpers, testPrisma } from '../helpers';
 import { DomainType, DomainStatus, SslStatus } from '../../generated/prisma-client';
 
 // Mock CloudFlare API service
-vi.mock('../../services/cloudflare/cloudflare-api.service');
+const mockCloudFlareService = {
+  isConfigured: vi.fn().mockReturnValue(true),
+  createCustomHostname: vi.fn(),
+  getCustomHostname: vi.fn(),
+  getConfig: vi.fn(),
+  createSubdomainRecord: vi.fn(),
+  deleteCustomHostname: vi.fn(),
+  deleteDNSRecord: vi.fn()
+};
+
+vi.mock('../../services/cloudflare/cloudflare-api.service', () => {
+  return {
+    CloudFlareAPIService: vi.fn().mockImplementation(() => mockCloudFlareService)
+  };
+});
+
 vi.mock('../../services/cache/cache.service');
 
 describe('DomainService', () => {
@@ -28,10 +43,14 @@ describe('DomainService', () => {
     user = await TestHelpers.createTestUser();
 
     // Setup mocks
-    mockCloudFlare = vi.mocked(CloudFlareAPIService.prototype);
+    mockCloudFlare = mockCloudFlareService;
     mockCache = vi.mocked(cacheService);
 
+    // Reset all mock functions
     vi.clearAllMocks();
+    
+    // Reset default return values for each test
+    mockCloudFlare.isConfigured.mockReturnValue(true);
   });
 
   describe('createCustomDomain', () => {
@@ -103,6 +122,20 @@ describe('DomainService', () => {
         })
       ).rejects.toThrow('Failed to create custom domain');
     });
+
+    it('should throw error when CloudFlare is not configured', async () => {
+      const hostname = 'www.example.com';
+      
+      // Mock CloudFlare as not configured
+      mockCloudFlare.isConfigured.mockReturnValue(false);
+
+      await expect(
+        DomainService.createCustomDomain(user.id, {
+          hostname,
+          type: DomainType.CUSTOM_DOMAIN
+        })
+      ).rejects.toThrow('CloudFlare is not configured for custom domain creation');
+    });
   });
 
   describe('createSubdomain', () => {
@@ -157,6 +190,15 @@ describe('DomainService', () => {
         DomainService.createSubdomain(user.id, { subdomain: 'www' })
       ).rejects.toThrow('reserved subdomain name');
     });
+
+    it('should throw error when CloudFlare is not configured for subdomains', async () => {
+      // Mock CloudFlare as not configured
+      mockCloudFlare.isConfigured.mockReturnValue(false);
+
+      await expect(
+        DomainService.createSubdomain(user.id, { subdomain: 'mystore' })
+      ).rejects.toThrow('CloudFlare is not configured for subdomain creation');
+    });
   });
 
   describe('getUserDomains', () => {
@@ -192,6 +234,22 @@ describe('DomainService', () => {
       expect(result.status).toBe(DomainStatus.ACTIVE);
       expect(result.sslStatus).toBe(SslStatus.ACTIVE);
       expect(result.lastVerifiedAt).toBeTruthy();
+    });
+
+    it('should return cached status when CloudFlare is not configured', async () => {
+      const domain = await TestHelpers.createTestDomain(user.id, {
+        cloudflareHostnameId: 'cf-123',
+        status: DomainStatus.PENDING
+      });
+
+      // Mock CloudFlare as not configured
+      mockCloudFlare.isConfigured.mockReturnValue(false);
+
+      const result = await DomainService.verifyDomain(domain.id, user.id);
+
+      // Should return the domain without making CloudFlare calls
+      expect(result.status).toBe(DomainStatus.PENDING);
+      expect(mockCloudFlare.getCustomHostname).not.toHaveBeenCalled();
     });
 
     it('should throw error for domain not found', async () => {
@@ -266,6 +324,26 @@ describe('DomainService', () => {
       await DomainService.deleteDomain(domain.id, user.id);
 
       // Verify domain is still deleted from database
+      const deletedDomain = await testPrisma.domain.findUnique({
+        where: { id: domain.id }
+      });
+      expect(deletedDomain).toBeNull();
+    });
+
+    it('should skip CloudFlare cleanup when not configured', async () => {
+      const domain = await TestHelpers.createTestDomain(user.id, {
+        cloudflareHostnameId: 'cf-123'
+      });
+
+      // Mock CloudFlare as not configured
+      mockCloudFlare.isConfigured.mockReturnValue(false);
+
+      await DomainService.deleteDomain(domain.id, user.id);
+
+      // Should not call CloudFlare cleanup methods
+      expect(mockCloudFlare.deleteCustomHostname).not.toHaveBeenCalled();
+
+      // Domain should still be deleted
       const deletedDomain = await testPrisma.domain.findUnique({
         where: { id: domain.id }
       });

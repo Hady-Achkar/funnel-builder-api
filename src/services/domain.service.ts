@@ -18,7 +18,7 @@ let prisma = new PrismaClient();
 // Lazy-loaded CloudFlare service
 let cloudflare: CloudFlareAPIService | null = null;
 
-function getCloudFlareService(): CloudFlareAPIService {
+export function getCloudFlareService(): CloudFlareAPIService {
   if (!cloudflare) {
     cloudflare = new CloudFlareAPIService();
   }
