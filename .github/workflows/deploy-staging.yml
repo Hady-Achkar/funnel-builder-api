@@ -165,6 +165,7 @@ jobs:
         cp docker-compose.staging.yml deploy/
         cp .env.staging deploy/
         cp ecosystem.config.js deploy/
+        cp ecosystem.staging.config.js deploy/ || echo "No staging ecosystem config"
         cp -r nginx/ deploy/ || echo "No nginx directory to copy"
         cp -r scripts/ deploy/ || echo "No scripts directory to copy"
         
@@ -287,16 +288,49 @@ jobs:
         [ -d "node_modules/express" ] && echo "✓ Express found" || echo "✗ Express missing"
         [ -d "node_modules/@prisma/client" ] && echo "✓ Prisma client found" || echo "✗ Prisma client missing"
         [ -d "node_modules/dotenv" ] && echo "✓ Dotenv found" || echo "✗ Dotenv missing"
+        [ -d "node_modules/redis" ] && echo "✓ Redis found" || echo "✗ Redis missing"
+        [ -d "node_modules/jsonwebtoken" ] && echo "✓ JWT found" || echo "✗ JWT missing"
+        [ -d "node_modules/bcryptjs" ] && echo "✓ Bcryptjs found" || echo "✗ Bcryptjs missing"
+        [ -d "node_modules/cors" ] && echo "✓ CORS found" || echo "✗ CORS missing"
+        [ -d "node_modules/helmet" ] && echo "✓ Helmet found" || echo "✗ Helmet missing"
+        
+        # Verify Prisma client is generated in the right location
+        echo "Checking Prisma client generation:"
+        if [ -d "src/generated/prisma-client" ]; then
+          echo "✓ Prisma client found at src/generated/prisma-client"
+          ls -la src/generated/prisma-client/ | head -5
+        else
+          echo "✗ Prisma client not found at expected location"
+          echo "Searching for Prisma client:"
+          find . -name "@prisma" -type d 2>/dev/null | head -10
+        fi
         
         # Start application with PM2
         echo "Starting application with PM2..."
+        
+        # First, try to start the app directly to catch any immediate errors
+        echo "Testing direct startup first..."
+        timeout 5s node dist/index.js || echo "Direct startup test completed/failed"
+        
         if [ -f ecosystem.config.js ]; then
           echo "Using ecosystem.config.js with staging environment"
-          pm2 start ecosystem.config.js --env staging
+          # Delete any existing PM2 process with the same name
+          pm2 delete funnel-builder-staging 2>/dev/null || true
+          
+          # Start with PM2
+          pm2 start ecosystem.config.js --env staging --update-env
         else
           echo "ERROR: ecosystem.config.js not found!"
           echo "Creating temporary PM2 config..."
+          pm2 delete funnel-builder-staging 2>/dev/null || true
           pm2 start dist/index.js --name funnel-builder-staging \
+            --interpreter node \
+            --log ./logs/app.log \
+            --error ./logs/error.log \
+            --out ./logs/out.log \
+            --merge-logs \
+            --time \
+            -- \
             --env NODE_ENV=staging \
             --env PORT=3001 \
             --env DATABASE_URL="$DATABASE_URL" \
@@ -477,8 +511,39 @@ jobs:
           echo "Checking PM2 logs for any errors:"
           pm2 logs funnel-builder-staging --lines 50 --nostream || echo "No logs available"
           
+          echo "Checking error log file directly:"
+          if [ -f /opt/funnel-builder-staging/logs/error.log ]; then
+            echo "=== Error log contents ==="
+            tail -n 100 /opt/funnel-builder-staging/logs/error.log
+          else
+            echo "Error log not found at expected location"
+            echo "Checking PM2 log location:"
+            pm2 describe funnel-builder-staging | grep "error log path" || true
+            # Try to find and read the actual error log
+            ERROR_LOG=$(pm2 describe funnel-builder-staging | grep "error log path" | awk -F'│' '{print $3}' | xargs)
+            if [ -f "$ERROR_LOG" ]; then
+              echo "=== PM2 Error log contents from $ERROR_LOG ==="
+              tail -n 100 "$ERROR_LOG"
+            fi
+          fi
+          
           echo "Checking system logs:"
           sudo journalctl -u pm2-$USER -n 50 --no-pager || echo "No system logs available"
+          
+          echo "Checking node_modules for critical dependencies:"
+          cd /opt/funnel-builder-staging
+          [ -d "node_modules/express" ] && echo "✓ Express found" || echo "✗ Express missing"
+          [ -d "node_modules/@prisma/client" ] && echo "✓ Prisma client found" || echo "✗ Prisma client missing"
+          [ -d "node_modules/dotenv" ] && echo "✓ Dotenv found" || echo "✗ Dotenv missing"
+          [ -d "node_modules/jsonwebtoken" ] && echo "✓ JWT found" || echo "✗ JWT missing"
+          [ -d "node_modules/bcryptjs" ] && echo "✓ Bcryptjs found" || echo "✗ Bcryptjs missing"
+          
+          echo "Checking if Prisma client is generated:"
+          [ -d "src/generated/prisma-client" ] && echo "✓ Prisma client generated" || echo "✗ Prisma client not generated"
+          
+          echo "Attempting to start app directly to see error:"
+          cd /opt/funnel-builder-staging
+          timeout 10s node dist/index.js || echo "Direct start failed"
 
     - name: Run smoke tests on staging
       run: |
