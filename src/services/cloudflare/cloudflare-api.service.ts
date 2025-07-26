@@ -36,17 +36,17 @@ export class CloudFlareAPIService {
     const platformMainDomain = process.env.PLATFORM_MAIN_DOMAIN;
 
     // Only throw error if this is production and tokens are missing
-    if (process.env.NODE_ENV === 'production' && !apiToken) {
+    if (process.env.NODE_ENV === "production" && !apiToken) {
       throw new Error("Missing CloudFlare API token");
     }
 
     // For staging/development, allow dummy values
     return {
-      apiToken: apiToken || 'dummy-token',
-      accountId: accountId || 'dummy-account',
-      zoneId: zoneId || 'dummy-zone',
-      saasTarget: saasTarget || 'dummy-target.com',
-      platformMainDomain: platformMainDomain || 'digitalsite.ai',
+      apiToken: apiToken || "dummy-token",
+      accountId: accountId || "dummy-account",
+      zoneId: zoneId || "dummy-zone",
+      saasTarget: saasTarget || "dummy-target.com",
+      platformMainDomain: platformMainDomain || "digitalsite.ai",
     };
   }
 
@@ -215,9 +215,9 @@ export class CloudFlareAPIService {
    */
   isConfigured(): boolean {
     return (
-      this.config.apiToken !== 'dummy-token' &&
-      this.config.accountId !== 'dummy-account' &&
-      this.config.zoneId !== 'dummy-zone' &&
+      this.config.apiToken !== "dummy-token" &&
+      this.config.accountId !== "dummy-account" &&
+      this.config.zoneId !== "dummy-zone" &&
       !!this.config.apiToken
     );
   }
