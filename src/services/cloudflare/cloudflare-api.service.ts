@@ -35,18 +35,18 @@ export class CloudFlareAPIService {
     const saasTarget = process.env.CLOUDFLARE_SAAS_TARGET;
     const platformMainDomain = process.env.PLATFORM_MAIN_DOMAIN;
 
-    if (!apiToken) throw new Error("Missing CloudFlare API token");
-    if (!accountId) throw new Error("Missing CloudFlare Account ID");
-    if (!zoneId) throw new Error("Missing CloudFlare Zone ID");
-    if (!saasTarget) throw new Error("Missing CloudFlare SaaS target");
-    if (!platformMainDomain) throw new Error("Missing platform main domain");
+    // Only throw error if this is production and tokens are missing
+    if (process.env.NODE_ENV === 'production' && !apiToken) {
+      throw new Error("Missing CloudFlare API token");
+    }
 
+    // For staging/development, allow dummy values
     return {
-      apiToken,
-      accountId,
-      zoneId,
-      saasTarget,
-      platformMainDomain,
+      apiToken: apiToken || 'dummy-token',
+      accountId: accountId || 'dummy-account',
+      zoneId: zoneId || 'dummy-zone',
+      saasTarget: saasTarget || 'dummy-target.com',
+      platformMainDomain: platformMainDomain || 'digitalsite.ai',
     };
   }
 
@@ -208,6 +208,18 @@ export class CloudFlareAPIService {
    */
   getConfig(): CloudFlareConfig {
     return { ...this.config };
+  }
+
+  /**
+   * Check if CloudFlare is properly configured
+   */
+  isConfigured(): boolean {
+    return (
+      this.config.apiToken !== 'dummy-token' &&
+      this.config.accountId !== 'dummy-account' &&
+      this.config.zoneId !== 'dummy-zone' &&
+      !!this.config.apiToken
+    );
   }
 
   /**

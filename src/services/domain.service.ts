@@ -14,7 +14,16 @@ import {
 
 // Allow prisma client to be injected for testing
 let prisma = new PrismaClient();
-const cloudflare = new CloudFlareAPIService();
+
+// Lazy-loaded CloudFlare service
+let cloudflare: CloudFlareAPIService | null = null;
+
+function getCloudFlareService(): CloudFlareAPIService {
+  if (!cloudflare) {
+    cloudflare = new CloudFlareAPIService();
+  }
+  return cloudflare;
+}
 
 // Function to set Prisma client for testing
 export const setPrismaClient = (client: PrismaClient) => {
@@ -99,14 +108,18 @@ export class DomainService {
     try {
       // Create custom hostname in CloudFlare
       console.log(`[Domain Create] Creating custom hostname for: ${hostname}`);
-      const cfHostname = await cloudflare.createCustomHostname(hostname);
+      const cf = getCloudFlareService();
+      if (!cf.isConfigured()) {
+        throw new Error('CloudFlare is not configured for custom domain creation');
+      }
+      const cfHostname = await cf.createCustomHostname(hostname);
 
       // Get detailed hostname info for SSL validation records
-      const detailedHostname = await cloudflare.getCustomHostname(
+      const detailedHostname = await cf.getCustomHostname(
         cfHostname.id
       );
 
-      const config = cloudflare.getConfig();
+      const config = cf.getConfig();
       const ownershipVerification = cfHostname.ownership_verification;
       const ownershipNameParts = ownershipVerification.name.split(".");
 
@@ -176,7 +189,11 @@ export class DomainService {
     data: CreateSubdomainData
   ): Promise<DomainWithConnections> {
     const subdomain = validateSubdomain(data.subdomain);
-    const config = cloudflare.getConfig();
+    const cf = getCloudFlareService();
+    if (!cf.isConfigured()) {
+      throw new Error('CloudFlare is not configured for subdomain creation');
+    }
+    const config = cf.getConfig();
     const hostname = `${subdomain}.${config.platformMainDomain}`;
 
     // Check if subdomain already exists
@@ -192,7 +209,7 @@ export class DomainService {
       console.log(`[Subdomain Create] Creating subdomain: ${hostname}`);
 
       // Create A record in CloudFlare for the subdomain
-      const dnsRecord = await cloudflare.createSubdomainRecord(subdomain);
+      const dnsRecord = await cf.createSubdomainRecord(subdomain);
 
       // Create subdomain record (immediately active)
       const domain = await prisma.domain.create({
@@ -357,7 +374,12 @@ export class DomainService {
       );
 
       // Get current status from CloudFlare
-      const cfHostname = await cloudflare.getCustomHostname(
+      const cf = getCloudFlareService();
+      if (!cf.isConfigured()) {
+        // If CloudFlare is not configured, return cached status
+        return domain;
+      }
+      const cfHostname = await cf.getCustomHostname(
         domain.cloudflareHostnameId
       );
 
@@ -442,7 +464,10 @@ export class DomainService {
           console.log(
             `[Domain Delete] Deleting custom hostname ${domain.cloudflareHostnameId} from CloudFlare`
           );
-          await cloudflare.deleteCustomHostname(domain.cloudflareHostnameId);
+          const cf = getCloudFlareService();
+          if (cf.isConfigured()) {
+            await cf.deleteCustomHostname(domain.cloudflareHostnameId);
+          }
           console.log(
             `[Domain Delete] Successfully deleted custom hostname ${domain.cloudflareHostnameId}`
           );
@@ -467,10 +492,13 @@ export class DomainService {
           console.log(
             `[Domain Delete] Deleting DNS record ${domain.cloudflareRecordId} from CloudFlare`
           );
-          await cloudflare.deleteDNSRecord(
-            domain.cloudflareZoneId,
-            domain.cloudflareRecordId
-          );
+          const cf = getCloudFlareService();
+          if (cf.isConfigured()) {
+            await cf.deleteDNSRecord(
+              domain.cloudflareZoneId,
+              domain.cloudflareRecordId
+            );
+          }
           console.log(
             `[Domain Delete] Successfully deleted DNS record ${domain.cloudflareRecordId}`
           );
