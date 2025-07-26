@@ -115,19 +115,28 @@ jobs:
     - name: Build application
       run: pnpm run build
 
-    - name: Prune dev dependencies
-      run: pnpm prune --prod
+    - name: Install production dependencies  
+      run: |
+        # Remove all node_modules first
+        rm -rf node_modules
+        # Install only production dependencies
+        pnpm install --prod --frozen-lockfile
 
     - name: Create deployment package
       run: |
         mkdir -p deploy
         cp -r dist/ deploy/
+        # Ensure Prisma client is generated before copying
+        if [ ! -d "src/generated/prisma-client" ]; then
+          echo "Prisma client not found, generating..."
+          npx prisma generate
+        fi
         cp -r src/generated/ deploy/
         cp -r node_modules/ deploy/
         cp package.json deploy/
         cp pnpm-lock.yaml deploy/
         cp -r prisma/ deploy/
-        cp ecosystem.config.js deploy/ || echo "ecosystem.config.js not found, skipping"
+        cp ecosystem.config.js deploy/
         
         # Create deployment scripts
         cat > deploy/deploy.sh << 'EOF'
@@ -164,38 +173,35 @@ jobs:
         # Install production dependencies
         pnpm install --prod --frozen-lockfile
         
+        # Generate Prisma client
+        npx prisma generate
+        
         # Run database migrations
         DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
         
+        # Install PM2 globally if not present
+        if ! command -v pm2 &> /dev/null; then
+          echo "Installing PM2 globally..."
+          npm install -g pm2
+        fi
+        
+        # Create logs directory
+        mkdir -p logs
+        
         # Start application with PM2
-        pm2 start ecosystem.config.js || pm2 start dist/index.js --name funnel-builder
+        if [ -f ecosystem.config.js ]; then
+          pm2 start ecosystem.config.js --env production
+        else
+          pm2 start dist/index.js --name funnel-builder
+        fi
         pm2 save
+        pm2 startup || echo "PM2 startup already configured"
         
         echo "Deployment completed successfully!"
         EOF
         
         chmod +x deploy/deploy.sh
 
-    - name: Create ecosystem.config.js
-      run: |
-        cat > deploy/ecosystem.config.js << 'EOF'
-        module.exports = {
-          apps: [{
-            name: 'funnel-builder',
-            script: 'dist/index.js',
-            instances: 1,
-            exec_mode: 'cluster',
-            env: {
-              NODE_ENV: 'production',
-              PORT: 3000
-            },
-            error_file: '/var/log/funnel-builder/error.log',
-            out_file: '/var/log/funnel-builder/out.log',
-            log_file: '/var/log/funnel-builder/combined.log',
-            time: true
-          }]
-        };
-        EOF
 
     - name: Deploy to Azure VM
       uses: appleboy/ssh-action@v1.0.0
@@ -256,9 +262,19 @@ jobs:
 
     - name: Health check
       run: |
-        sleep 30
-        curl -f http://${{ secrets.AZURE_PROD_HOST }}:3000/health || exit 1
-        echo "Production deployment health check passed!"
+        echo "Waiting for application to start..."
+        for i in {1..6}; do
+          echo "Health check attempt $i/6:"
+          if curl -f -m 10 http://${{ secrets.AZURE_PROD_HOST }}:3000/health; then
+            echo "Production deployment health check passed!"
+            exit 0
+          else
+            echo "Health check failed, waiting 10 seconds..."
+            sleep 10
+          fi
+        done
+        echo "Health check failed after 6 attempts"
+        exit 1
 
     - name: Notify deployment success
       run: |
