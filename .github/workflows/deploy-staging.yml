@@ -506,16 +506,12 @@ jobs:
           ps aux | grep node | grep -v grep || echo "No node processes found"
           
           echo "Testing health endpoint:"
-          for i in {1..5}; do
-            echo "Attempt $i/5:"
-            if curl -f -m 10 http://localhost:3001/health; then
-              echo "Health check passed!"
-              break
-            else
-              echo "Health check failed, waiting 10 seconds..."
-              sleep 10
-            fi
-          done
+          if curl -f -m 10 http://localhost:3001/health; then
+            echo "✅ Health check passed!"
+          else
+            echo "❌ Health check failed"
+            exit 1
+          fi
           
           echo "Checking PM2 logs for any errors:"
           pm2 logs funnel-builder-staging --lines 50 --nostream || echo "No logs available"
@@ -566,7 +562,11 @@ jobs:
         
         # Test via domain (might not have SSL yet)
         echo "Testing domain access..."
-        curl -f -k "$STAGING_DOMAIN/health" || echo "Domain test failed (SSL might not be configured yet)"
+        if curl -f -k "$STAGING_DOMAIN/health" 2>/dev/null; then
+          echo "✅ Domain test passed"
+        else
+          echo "⚠️ Domain test failed (SSL might not be configured yet)"
+        fi
         
         echo "✅ Staging deployment completed!"
 
