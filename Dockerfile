@@ -26,4 +26,4 @@ RUN pnpm prune --prod
 EXPOSE 3000
 
 # Run migrations and start the application
-CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm start"]
+CMD ["sh", "-c", "pnpm exec prisma generate && pnpm exec prisma migrate deploy && pnpm start"]

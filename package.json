@@ -10,10 +10,10 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage",
-    "test:ui": "vitest --ui",
+    "test": "prisma generate && vitest",
+    "test:watch": "prisma generate && vitest --watch",
+    "test:coverage": "prisma generate && vitest --coverage",
+    "test:ui": "prisma generate && vitest --ui",
     "prepare": "echo 'Husky disabled - run: chmod +x .husky/* to enable'"
   },
   "dependencies": {
