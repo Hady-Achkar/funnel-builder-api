@@ -12,5 +12,5 @@ if [[ "$branch" != "main" && "$branch" != "develop" && ! $branch =~ $valid_patte
   exit 1
 fi
 
-# Run lint-staged (which will run tests and linting)
-pnpm lint-staged
+# Run all tests before commit
+pnpm test --run

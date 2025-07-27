@@ -54,11 +54,7 @@
     "typescript": "^5.3.3",
     "vitest": "^3.2.4"
   },
-  "lint-staged": {
-    "*.{js,ts}": [
-      "pnpm test --run --reporter=verbose"
-    ]
-  },
+  "lint-staged": {},
   "keywords": [
     "express",
     "typescript",
