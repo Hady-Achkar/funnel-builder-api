@@ -15,10 +15,12 @@ model User {
   password               String
   passwordResetToken     String?   @unique
   passwordResetExpiresAt DateTime?
+  isAdmin                Boolean   @default(false)
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   funnels                Funnel[]
   domains                Domain[]
+  templates              Template[]
 
   @@map("users")
 }
@@ -31,11 +33,14 @@ model Funnel {
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   pages             Page[]
   domainConnections FunnelDomain[]
+  templateId        Int?           // Track which template this funnel was created from
+  template          Template?      @relation(fields: [templateId], references: [id])
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
   @@index([userId])
   @@index([status])
+  @@index([templateId])
   @@map("funnels")
 }
 
@@ -129,4 +134,82 @@ model Page {
   updatedAt DateTime @updatedAt
 
   @@map("pages")
+}
+
+// Template System Models
+model TemplateCategory {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  icon        String?    // Icon class or emoji
+  order       Int        @default(0)
+  isActive    Boolean    @default(true)
+  templates   Template[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("template_categories")
+}
+
+model Template {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  slug               String             @unique
+  description        String?
+  categoryId         Int
+  category           TemplateCategory   @relation(fields: [categoryId], references: [id])
+  thumbnailImage     String?            // Main thumbnail image URL
+  previewImages      TemplateImage[]    // Additional preview images
+  pages              TemplatePages[]    // Template page data
+  tags               String[]           // Search tags
+  usageCount         Int                @default(0)
+  isActive           Boolean            @default(true)
+  isPublic           Boolean            @default(true)
+  createdByUserId    Int
+  createdBy          User               @relation(fields: [createdByUserId], references: [id])
+  funnelsCreated     Funnel[]           // Track funnels created from this template
+  metadata           Json?              // Additional template settings
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive, isPublic])
+  @@index([createdByUserId])
+  @@map("templates")
+}
+
+model TemplateImage {
+  id          Int      @id @default(autoincrement())
+  templateId  Int
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  imageUrl    String   // Azure Blob Storage URL
+  imageType   String   // thumbnail, preview, screenshot
+  order       Int      @default(0)
+  caption     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([templateId])
+  @@map("template_images")
+}
+
+model TemplatePages {
+  id              Int      @id @default(autoincrement())
+  templateId      Int
+  template        Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  name            String
+  content         String?  // Page content (HTML, JSON, etc.)
+  order           Int
+  settings        Json?    // Page-specific settings
+  linkingIdPrefix String?  // Prefix for generating unique linking IDs
+  metadata        Json?    // Additional page data
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([templateId])
+  @@map("template_pages")
 }

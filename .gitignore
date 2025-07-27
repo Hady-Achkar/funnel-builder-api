@@ -6,6 +6,8 @@ dist/
 .env.test.local
 .env.production.local
 
+./src/generated/prisma-client/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

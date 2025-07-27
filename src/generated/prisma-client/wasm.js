@@ -129,6 +129,7 @@ exports.Prisma.UserScalarFieldEnum = {
   password: 'password',
   passwordResetToken: 'passwordResetToken',
   passwordResetExpiresAt: 'passwordResetExpiresAt',
+  isAdmin: 'isAdmin',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -138,6 +139,7 @@ exports.Prisma.FunnelScalarFieldEnum = {
   name: 'name',
   status: 'status',
   userId: 'userId',
+  templateId: 'templateId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -180,6 +182,59 @@ exports.Prisma.PageScalarFieldEnum = {
   order: 'order',
   linkingId: 'linkingId',
   funnelId: 'funnelId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TemplateCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  icon: 'icon',
+  order: 'order',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  categoryId: 'categoryId',
+  thumbnailImage: 'thumbnailImage',
+  tags: 'tags',
+  usageCount: 'usageCount',
+  isActive: 'isActive',
+  isPublic: 'isPublic',
+  createdByUserId: 'createdByUserId',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TemplateImageScalarFieldEnum = {
+  id: 'id',
+  templateId: 'templateId',
+  imageUrl: 'imageUrl',
+  imageType: 'imageType',
+  order: 'order',
+  caption: 'caption',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TemplatePagesScalarFieldEnum = {
+  id: 'id',
+  templateId: 'templateId',
+  name: 'name',
+  content: 'content',
+  order: 'order',
+  settings: 'settings',
+  linkingIdPrefix: 'linkingIdPrefix',
+  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -234,7 +289,11 @@ exports.Prisma.ModelName = {
   Funnel: 'Funnel',
   Domain: 'Domain',
   FunnelDomain: 'FunnelDomain',
-  Page: 'Page'
+  Page: 'Page',
+  TemplateCategory: 'TemplateCategory',
+  Template: 'Template',
+  TemplateImage: 'TemplateImage',
+  TemplatePages: 'TemplatePages'
 };
 
 /**

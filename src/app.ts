@@ -9,6 +9,7 @@ import userRoutes from './routes/users';
 import funnelRoutes from './routes/funnels';
 import pageRoutes from './routes/pages';
 import domainRoutes from './routes/domains';
+import templateRoutes from './routes/template.routes';
 
 export function createServer(): Express {
   const app = express();
@@ -44,6 +45,7 @@ export function createServer(): Express {
   app.use('/api/funnels', funnelRoutes);
   app.use('/api/pages', pageRoutes);
   app.use('/api/domains', domainRoutes);
+  app.use('/api', templateRoutes);
 
   // Health check endpoint
   app.get('/health', async (req: express.Request, res: express.Response) => {
@@ -77,6 +79,7 @@ export function createServer(): Express {
         funnels: '/api/funnels',
         pages: '/api/pages',
         domains: '/api/domains',
+        templates: '/api/templates',
         health: '/health'
       }
     });
