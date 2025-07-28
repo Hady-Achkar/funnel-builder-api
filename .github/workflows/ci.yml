@@ -48,7 +48,7 @@ jobs:
     - name: Generate Prisma client
       run: pnpm exec prisma generate
       env:
-        DATABASE_URL: postgresql://localhost:5432/test
+        DATABASE_URL: ${{ secrets.CI_DATABASE_URL || 'postgresql://localhost:5432/test' }}
 
     - name: TypeScript check
       run: pnpm exec tsc --noEmit
@@ -116,19 +116,19 @@ jobs:
     - name: Generate Prisma client
       run: pnpm exec prisma generate
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+        DATABASE_URL: ${{ secrets.CI_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/funnel_builder_test' }}
 
     - name: Run database migrations
       run: pnpm exec prisma migrate deploy
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+        DATABASE_URL: ${{ secrets.CI_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/funnel_builder_test' }}
 
     - name: Run tests
       run: pnpm test run
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
-        REDIS_URL: redis://localhost:6379
-        JWT_SECRET: test-secret-key
+        DATABASE_URL: ${{ secrets.CI_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/funnel_builder_test' }}
+        REDIS_URL: ${{ secrets.CI_REDIS_URL || 'redis://localhost:6379' }}
+        JWT_SECRET: ${{ secrets.CI_JWT_SECRET || 'test-secret-key' }}
         NODE_ENV: test
 
     - name: Upload test results
@@ -163,13 +163,7 @@ jobs:
 
     - name: Check for known vulnerabilities
       run: |
-        if pnpm audit --audit-level critical --json > audit-results.json; then
-          echo "✅ No critical vulnerabilities found"
-        else
-          echo "❌ Critical vulnerabilities detected"
-          cat audit-results.json
-          exit 1
-        fi
+        pnpm audit --audit-level critical || exit 1
 
   docker-build:
     runs-on: ubuntu-latest
@@ -193,18 +187,13 @@ jobs:
 
     - name: Test Docker image
       run: |
-        echo "Testing Docker image build..."
-        
-        # Run container and check if it starts properly
         docker run --rm \
-          -e DATABASE_URL=postgresql://test:test@localhost:5432/test \
+          -e DATABASE_URL=${{ secrets.CI_DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }} \
           -e NODE_ENV=production \
-          -e JWT_SECRET=test-secret \
-          -e REDIS_URL=redis://localhost:6379 \
+          -e JWT_SECRET=${{ secrets.CI_JWT_SECRET || 'test-secret' }} \
+          -e REDIS_URL=${{ secrets.CI_REDIS_URL || 'redis://localhost:6379' }} \
           funnel-builder:test \
-          node -e "console.log('Container can execute Node.js'); process.exit(0)"
-        
-        echo "✅ Docker image built successfully and can run Node.js"
+          node -e "console.log('Container started successfully'); process.exit(0)"
 
   notify-status:
     runs-on: ubuntu-latest
@@ -218,13 +207,8 @@ jobs:
               "${{ needs.test.result }}" == "success" && 
               "${{ needs.security-scan.result }}" == "success" && 
               "${{ needs.docker-build.result }}" == "success" ]]; then
-          echo "✅ All CI checks passed!"
-          echo "🚀 Ready for deployment"
+          echo "✅ All CI checks passed"
         else
-          echo "❌ Some CI checks failed:"
-          echo "  - Lint & TypeCheck: ${{ needs.lint-and-typecheck.result }}"
-          echo "  - Tests: ${{ needs.test.result }}"
-          echo "  - Security: ${{ needs.security-scan.result }}"
-          echo "  - Docker: ${{ needs.docker-build.result }}"
+          echo "❌ CI checks failed"
           exit 1
         fi

@@ -17,6 +17,7 @@
     "prepare": "echo 'Husky disabled - run: chmod +x .husky/* to enable'"
   },
   "dependencies": {
+    "@azure/functions": "4.7.2-preview",
     "@azure/storage-blob": "^12.28.0",
     "@prisma/client": "^5.7.1",
     "@types/multer": "^2.0.0",

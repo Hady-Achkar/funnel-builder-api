@@ -96,24 +96,10 @@ jobs:
     steps:
     - name: Check deployment secrets
       run: |
-        echo "Checking secrets availability..."
-        echo "AZURE_STAGING_HOST length: ${#AZURE_STAGING_HOST}"
-        echo "AZURE_STAGING_USERNAME length: ${#AZURE_STAGING_USERNAME}"
-        echo "AZURE_STAGING_SSH_KEY length: ${#AZURE_STAGING_SSH_KEY}"
-        
-        if [ -z "$AZURE_STAGING_HOST" ]; then
-          echo "ERROR: AZURE_STAGING_HOST secret is not set or empty"
+        if [ -z "$AZURE_STAGING_HOST" ] || [ -z "$AZURE_STAGING_USERNAME" ] || [ -z "$AZURE_STAGING_SSH_KEY" ]; then
+          echo "ERROR: Required secrets are not configured"
           exit 1
         fi
-        if [ -z "$AZURE_STAGING_USERNAME" ]; then
-          echo "ERROR: AZURE_STAGING_USERNAME secret is not set or empty"
-          exit 1
-        fi
-        if [ -z "$AZURE_STAGING_SSH_KEY" ]; then
-          echo "ERROR: AZURE_STAGING_SSH_KEY secret is not set or empty"
-          exit 1
-        fi
-        echo "✅ All required secrets are configured"
       env:
         AZURE_STAGING_HOST: ${{ secrets.AZURE_STAGING_HOST }}
         AZURE_STAGING_USERNAME: ${{ secrets.AZURE_STAGING_USERNAME }}
@@ -173,222 +159,85 @@ jobs:
         cp -r nginx/ deploy/ || echo "No nginx directory to copy"
         cp -r scripts/ deploy/ || echo "No scripts directory to copy"
         
-        # Create deployment scripts
+        # Create deployment script
         cat > deploy/deploy.sh << 'EOF'
         #!/bin/bash
         set -e
         
-        echo "Starting staging deployment..."
-        
-        # Save current directory (where docker-compose files are)
         DEPLOY_SOURCE_DIR=$(pwd)
         
-        # Install Docker if not present
+        # Install Docker and Docker Compose if needed
         if ! command -v docker &> /dev/null; then
-          echo "Docker not found, installing..."
           curl -fsSL https://get.docker.com -o get-docker.sh
           sudo sh get-docker.sh
           sudo usermod -aG docker $USER
           sudo systemctl start docker
           sudo systemctl enable docker
-          echo "Docker installation completed"
         fi
         
-        # Install Docker Compose if not present
         if ! command -v docker-compose &> /dev/null; then
-          echo "Installing Docker Compose..."
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
-          echo "Docker Compose installation completed"
         fi
         
-        # Stop and remove existing containers from source directory
+        # Manage Docker services
         cd $DEPLOY_SOURCE_DIR
-        sudo docker-compose -f docker-compose.staging.yml down || echo "No existing containers to stop"
-        
-        # Start Docker services from source directory
+        sudo docker-compose -f docker-compose.staging.yml down || true
         sudo docker-compose -f docker-compose.staging.yml up -d
-        
-        # Wait for services to be ready
-        echo "Waiting for database to be ready..."
         sleep 15
         
-        # Install PM2 globally if not present
+        # Install PM2 if needed
         if ! command -v pm2 &> /dev/null; then
-          echo "Installing PM2 globally..."
           npm install -g pm2
         fi
         
         # Stop existing application
-        pm2 stop funnel-builder-staging || echo "No existing process to stop"
-        pm2 delete funnel-builder-staging || echo "No existing process to delete"
+        pm2 stop funnel-builder-staging || true
+        pm2 delete funnel-builder-staging || true
         
-        # Backup current deployment
-        if [ -d "/opt/funnel-builder-staging" ]; then
-          sudo cp -r /opt/funnel-builder-staging /opt/funnel-builder-staging.backup.$(date +%Y%m%d_%H%M%S)
-        fi
-        
-        # Create application directory and logs directory
+        # Backup and deploy
+        [ -d "/opt/funnel-builder-staging" ] && sudo cp -r /opt/funnel-builder-staging /opt/funnel-builder-staging.backup.$(date +%Y%m%d_%H%M%S)
         sudo mkdir -p /opt/funnel-builder-staging/logs
-        
-        # Copy new files
         sudo cp -r $DEPLOY_SOURCE_DIR/* /opt/funnel-builder-staging/
-        
-        # Set permissions
         sudo chown -R $USER:$USER /opt/funnel-builder-staging
         cd /opt/funnel-builder-staging
         
-        # Install pnpm if not available on server
+        # Install pnpm if needed
         if ! command -v pnpm &> /dev/null; then
-          echo "Installing pnpm on server..."
           curl -fsSL https://get.pnpm.io/install.sh | sh -
           export PATH="$HOME/.local/share/pnpm:$PATH"
         fi
         
-        # Install production dependencies on the server
-        echo "Installing production dependencies on server..."
+        # Install dependencies and generate Prisma client
         pnpm install --prod --frozen-lockfile
-        
-        # Load environment variables
-        if [ -f .env.staging ]; then
-          set -a
-          source .env.staging
-          set +a
-          echo "Environment variables loaded from .env.staging"
-        else
-          echo "Warning: .env.staging not found in $(pwd)"
-          echo "Files in current directory:"
-          ls -la
-          echo "Setting default environment variables..."
-          export DATABASE_URL="postgresql://staging_user:staging_password_change_me@localhost:5433/funnel_builder_staging"
-          export REDIS_URL="redis://localhost:6380"
-          export JWT_SECRET="staging-jwt-secret-change-this-in-production"
-          export NODE_ENV="staging"
-          export PORT="5000"
-        fi
-        
-        # Generate Prisma client on the server
-        echo "Generating Prisma client..."
         npx prisma generate
         
-        # Copy Prisma client to expected location
-        echo "Copying Prisma client to runtime location..."
+        # Copy Prisma client to runtime location
         mkdir -p dist/generated
-        cp -r src/generated/prisma-client dist/generated/ 2>/dev/null || echo "Prisma client copy skipped"
+        cp -r src/generated/prisma-client dist/generated/ 2>/dev/null || true
         
-        # Run database migrations
-        echo "Running database migrations..."
-        npx prisma migrate deploy || echo "Migration failed, continuing..."
-        
-        # Verify build files exist
-        echo "Verifying build files..."
-        ls -la dist/
-        if [ ! -f dist/index.js ]; then
-          echo "ERROR: dist/index.js not found!"
-          exit 1
-        fi
-        
-        # Check first few lines of dist/index.js to see what modules it requires
-        echo "Checking dist/index.js content:"
-        head -n 10 dist/index.js
-        
-        # Verify node_modules has production dependencies
-        echo "Checking for critical dependencies:"
-        [ -d "node_modules/express" ] && echo "✓ Express found" || echo "✗ Express missing"
-        [ -d "node_modules/@prisma/client" ] && echo "✓ Prisma client found" || echo "✗ Prisma client missing"
-        [ -d "node_modules/dotenv" ] && echo "✓ Dotenv found" || echo "✗ Dotenv missing"
-        [ -d "node_modules/redis" ] && echo "✓ Redis found" || echo "✗ Redis missing"
-        [ -d "node_modules/jsonwebtoken" ] && echo "✓ JWT found" || echo "✗ JWT missing"
-        [ -d "node_modules/bcryptjs" ] && echo "✓ Bcryptjs found" || echo "✗ Bcryptjs missing"
-        [ -d "node_modules/cors" ] && echo "✓ CORS found" || echo "✗ CORS missing"
-        [ -d "node_modules/helmet" ] && echo "✓ Helmet found" || echo "✗ Helmet missing"
-        
-        # Verify Prisma client is generated in the right location
-        echo "Checking Prisma client generation:"
-        if [ -d "src/generated/prisma-client" ]; then
-          echo "✓ Prisma client found at src/generated/prisma-client"
-          ls -la src/generated/prisma-client/ | head -5
-        else
-          echo "✗ Prisma client not found at expected location"
-          echo "Searching for Prisma client:"
-          find . -name "@prisma" -type d 2>/dev/null | head -10
-        fi
+        # Run migrations
+        npx prisma migrate deploy || true
         
         # Start application with PM2
-        echo "Starting application with PM2..."
-        
-        # First, try to start the app directly to catch any immediate errors
-        echo "Testing direct startup first..."
-        timeout 5s node dist/index.js || echo "Direct startup test completed/failed"
-        
         if [ -f ecosystem.config.js ]; then
-          echo "Using ecosystem.config.js with staging environment"
-          # Delete any existing PM2 process with the same name
-          pm2 delete funnel-builder-staging 2>/dev/null || true
-          
-          # Start with PM2
           pm2 start ecosystem.config.js --env staging --update-env
         else
           echo "ERROR: ecosystem.config.js not found!"
-          echo "Creating temporary PM2 config..."
-          pm2 delete funnel-builder-staging 2>/dev/null || true
-          pm2 start dist/index.js --name funnel-builder-staging \
-            --interpreter node \
-            --log ./logs/app.log \
-            --error ./logs/error.log \
-            --out ./logs/out.log \
-            --merge-logs \
-            --time \
-            -- \
-            --env NODE_ENV=staging \
-            --env PORT=5000 \
-            --env DATABASE_URL="$DATABASE_URL" \
-            --env REDIS_URL="$REDIS_URL" \
-            --env JWT_SECRET="$JWT_SECRET"
-        fi
-        
-        # Wait for process to start
-        sleep 5
-        
-        # Show PM2 status
-        echo "PM2 processes:"
-        pm2 list
-        
-        # Show process details
-        echo "Process details:"
-        pm2 describe funnel-builder-staging || echo "Could not get process details"
-        
-        # Show PM2 logs
-        echo "Recent PM2 logs:"
-        pm2 logs funnel-builder-staging --lines 30 --nostream || echo "No logs available"
-        
-        # Check if process is running
-        if pm2 pid funnel-builder-staging > /dev/null 2>&1; then
-          echo "✅ PM2 process is running"
-          pm2 save
-          pm2 startup || echo "PM2 startup already configured"
-        else
-          echo "❌ PM2 process failed to start"
-          echo "Checking error logs:"
-          [ -f logs/error.log ] && tail -n 50 logs/error.log
           exit 1
         fi
         
-        echo "Staging deployment completed successfully!"
+        sleep 5
+        pm2 save
+        pm2 startup || true
         
-        # Setup nginx if not already configured
+        # Setup nginx if needed
         if ! [ -f /etc/nginx/sites-enabled/new-api-dev.digitalsite.com ]; then
-          echo "Setting up nginx..."
-          cd /opt/funnel-builder-staging
           if [ -f scripts/setup-nginx-initial.sh ]; then
             chmod +x scripts/setup-nginx-initial.sh
             sudo ./scripts/setup-nginx-initial.sh
-            echo "Nginx HTTP setup complete. SSL certificate needs to be added manually."
-            echo "To add SSL, SSH to the server and run:"
-            echo "  cd /opt/funnel-builder-staging && sudo ./scripts/setup-ssl.sh"
           fi
         else
-          echo "Nginx already configured, reloading..."
           sudo nginx -t && sudo systemctl reload nginx
         fi
         
@@ -417,68 +266,39 @@ jobs:
         CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         CLOUDFLARE_SAAS_TARGET: ${{ secrets.CLOUDFLARE_SAAS_TARGET }}
         PLATFORM_MAIN_DOMAIN: ${{ secrets.PLATFORM_MAIN_DOMAIN }}
+        DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        REDIS_URL: ${{ secrets.STAGING_REDIS_URL }}
+        JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+        NODE_ENV: staging
+        PORT: 5000
       with:
         host: ${{ secrets.AZURE_STAGING_HOST }}
         username: ${{ secrets.AZURE_STAGING_USERNAME }}
         key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
-        envs: CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN
+        envs: CLOUDFLARE_API_TOKEN,CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_ZONE_ID,CLOUDFLARE_SAAS_TARGET,PLATFORM_MAIN_DOMAIN,DATABASE_URL,REDIS_URL,JWT_SECRET,NODE_ENV,PORT
         script: |
-          # Use the staging deployment directory
           cd ~/staging-deployment
-          echo "Current directory: $(pwd)"
-          echo "Files in directory: $(ls -la)"
           
-          # Check if Docker services are running
-          echo "Checking Docker services..."
-          if [ -f docker-compose.staging.yml ]; then
-            echo "Docker Compose file found - services should be managed by deploy.sh"
-          fi
+          # Export environment variables
+          export DATABASE_URL="$DATABASE_URL"
+          export REDIS_URL="$REDIS_URL"
+          export JWT_SECRET="$JWT_SECRET"
+          export NODE_ENV="$NODE_ENV"
+          export PORT="$PORT"
+          export CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN"
+          export CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID"
+          export CLOUDFLARE_ZONE_ID="$CLOUDFLARE_ZONE_ID"
+          export CLOUDFLARE_SAAS_TARGET="$CLOUDFLARE_SAAS_TARGET"
+          export PLATFORM_MAIN_DOMAIN="$PLATFORM_MAIN_DOMAIN"
           
           # Run deployment script
           if [ -f deploy.sh ]; then
             chmod +x deploy.sh
             ./deploy.sh
           else
-            echo "Deploy script not found, running manual deployment..."
-            
-            # Stop existing PM2 process
-            pm2 stop funnel-builder-staging || echo "No existing process to stop"
-            
-            # Install dependencies if needed
-            if [ -f package.json ]; then
-              # Install pnpm if not available
-              if ! command -v pnpm &> /dev/null; then
-                echo "Installing pnpm..."
-                curl -fsSL https://get.pnpm.io/install.sh | sh -
-                export PATH="$HOME/.local/share/pnpm:$PATH"
-              fi
-              pnpm install --prod --frozen-lockfile || echo "Dependencies already installed"
-            fi
-            
-            # Load environment variables
-            if [ -f .env.staging ]; then
-              source .env.staging
-            else
-              echo "Warning: .env.staging not found, using default DATABASE_URL"
-              export DATABASE_URL="postgresql://staging_user:staging_password_change_me@localhost:5433/funnel_builder_staging"
-            fi
-            
-            # Generate Prisma client and run migrations
-            npx prisma generate || echo "Prisma generate failed"
-            npx prisma migrate deploy || echo "No migrations to run"
-            
-            # Start application with PM2
-            if [ -f ecosystem.config.js ]; then
-              pm2 start ecosystem.config.js --env staging || pm2 restart funnel-builder-staging
-              pm2 save
-            else
-              echo "ERROR: ecosystem.config.js not found!"
-              pm2 start dist/index.js --name funnel-builder-staging
-              pm2 save
-            fi
-            
-            echo "Staging deployment completed!"
+            echo "ERROR: deploy.sh not found"
+            exit 1
           fi
 
     - name: Verify deployment and health check
@@ -489,96 +309,34 @@ jobs:
         key: ${{ secrets.AZURE_STAGING_SSH_KEY }}
         port: ${{ secrets.AZURE_STAGING_PORT || 22 }}
         script: |
-          echo "Waiting 30 seconds for application to start..."
           sleep 30
           
-          echo "Checking PM2 status:"
+          # Check PM2 status
           pm2 list
           
-          echo "Checking PM2 process details:"
-          pm2 describe funnel-builder-staging || echo "Process not found"
-          
-          echo "Checking if application is listening on port 5000:"
-          sudo netstat -tlnp | grep :5000 || echo "Port 5000 not in use"
-          sudo lsof -i :5000 || echo "No process on port 5000"
-          
-          echo "Checking running node processes:"
-          ps aux | grep node | grep -v grep || echo "No node processes found"
-          
-          echo "Testing health endpoint:"
+          # Test health endpoint
           if curl -f -m 10 http://localhost:5000/health; then
-            echo "✅ Health check passed!"
+            echo "✅ Health check passed"
           else
             echo "❌ Health check failed"
+            # Show recent logs for debugging
+            pm2 logs funnel-builder-staging --lines 30 --nostream || true
             exit 1
           fi
-          
-          echo "Checking PM2 logs for any errors:"
-          pm2 logs funnel-builder-staging --lines 50 --nostream || echo "No logs available"
-          
-          echo "Checking error log file directly:"
-          if [ -f /opt/funnel-builder-staging/logs/error.log ]; then
-            echo "=== Error log contents ==="
-            tail -n 100 /opt/funnel-builder-staging/logs/error.log
-          else
-            echo "Error log not found at expected location"
-            echo "Checking PM2 log location:"
-            pm2 describe funnel-builder-staging | grep "error log path" || true
-            # Try to find and read the actual error log
-            ERROR_LOG=$(pm2 describe funnel-builder-staging | grep "error log path" | awk -F'│' '{print $3}' | xargs)
-            if [ -f "$ERROR_LOG" ]; then
-              echo "=== PM2 Error log contents from $ERROR_LOG ==="
-              tail -n 100 "$ERROR_LOG"
-            fi
-          fi
-          
-          echo "Checking system logs:"
-          sudo journalctl -u pm2-$USER -n 50 --no-pager || echo "No system logs available"
-          
-          echo "Checking node_modules for critical dependencies:"
-          cd /opt/funnel-builder-staging
-          [ -d "node_modules/express" ] && echo "✓ Express found" || echo "✗ Express missing"
-          [ -d "node_modules/@prisma/client" ] && echo "✓ Prisma client found" || echo "✗ Prisma client missing"
-          [ -d "node_modules/dotenv" ] && echo "✓ Dotenv found" || echo "✗ Dotenv missing"
-          [ -d "node_modules/jsonwebtoken" ] && echo "✓ JWT found" || echo "✗ JWT missing"
-          [ -d "node_modules/bcryptjs" ] && echo "✓ Bcryptjs found" || echo "✗ Bcryptjs missing"
-          
-          echo "Checking if Prisma client is generated:"
-          [ -d "src/generated/prisma-client" ] && echo "✓ Prisma client generated" || echo "✗ Prisma client not generated"
-          
-          echo "Attempting to start app directly to see error:"
-          cd /opt/funnel-builder-staging
-          timeout 10s node dist/index.js || echo "Direct start failed"
 
     - name: Run smoke tests on staging
       run: |
-        # Basic API tests
         STAGING_URL="http://${{ secrets.AZURE_STAGING_HOST }}:5000"
         STAGING_DOMAIN="https://new-api-dev.digitalsite.com"
         
         # Test direct port
-        echo "Testing direct access on port 5000..."
         curl -f -m 30 "$STAGING_URL/health" || echo "Direct port test failed"
         
-        # Test via domain (might not have SSL yet)
-        echo "Testing domain access..."
-        if curl -f -k -m 30 "$STAGING_DOMAIN/health" 2>/dev/null; then
-          echo "✅ Domain test passed"
-        else
-          echo "⚠️ Domain test failed (SSL might not be configured yet)"
-        fi
-        
-        echo "✅ Staging deployment completed!"
+        # Test via domain
+        curl -f -k -m 30 "$STAGING_DOMAIN/health" 2>/dev/null || echo "Domain test failed (SSL might not be configured yet)"
 
     - name: Notify staging deployment success
       run: |
-        echo "✅ Staging deployment completed successfully!"
-        echo "🚀 Application endpoints:"
-        echo "   - Direct: http://${{ secrets.AZURE_STAGING_HOST }}:5000"
-        echo "   - Domain: https://new-api-dev.digitalsite.com"
-        echo "📋 Ready for testing on develop branch"
-        echo ""
-        echo "Note: If this is the first deployment, you may need to:"
-        echo "1. SSH into the server"
-        echo "2. Run: cd /opt/funnel-builder-staging && sudo ./scripts/setup-ssl.sh"
-        echo "3. Follow the prompts to complete SSL setup"
+        echo "✅ Staging deployment completed"
+        echo "Direct: http://${{ secrets.AZURE_STAGING_HOST }}:5000"
+        echo "Domain: https://new-api-dev.digitalsite.com"
