@@ -428,4 +428,149 @@ describe('API Integration Tests', () => {
         .expect(404);
     });
   });
+
+  describe('Funnel Duplication Flow', () => {
+    it('should duplicate funnel with pages successfully', async () => {
+      // Create original funnel
+      const funnelResponse = await request(app)
+        .post('/api/funnels')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Original Funnel', status: 'live' })
+        .expect(201);
+
+      const originalFunnelId = funnelResponse.body.funnel.id;
+
+      // Add pages to the original funnel
+      await request(app)
+        .post(`/api/pages/funnels/${originalFunnelId}/pages`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ 
+          name: 'Landing Page', 
+          content: '<h1>Welcome to my funnel</h1>', 
+          order: 1,
+          linkingId: 'landing'
+        })
+        .expect(201);
+
+      await request(app)
+        .post(`/api/pages/funnels/${originalFunnelId}/pages`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ 
+          name: 'Thank You Page', 
+          content: '<h1>Thank you for visiting!</h1>', 
+          order: 2,
+          linkingId: 'thankyou'
+        })
+        .expect(201);
+
+      // Duplicate the funnel
+      const duplicateResponse = await request(app)
+        .post(`/api/funnels/${originalFunnelId}/duplicate`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(201);
+
+      const duplicatedFunnel = duplicateResponse.body.funnel;
+
+      // Verify duplicated funnel properties
+      expect(duplicatedFunnel.id).not.toBe(originalFunnelId);
+      expect(duplicatedFunnel.name).toBe('Original Funnel (Copy)');
+      expect(duplicatedFunnel.status).toBe('live');
+      expect(duplicatedFunnel.userId).toBe(user.id);
+      expect(duplicatedFunnel.pages).toHaveLength(2);
+
+      // Verify pages were duplicated correctly
+      const landingPage = duplicatedFunnel.pages.find((p: any) => p.order === 1);
+      const thankYouPage = duplicatedFunnel.pages.find((p: any) => p.order === 2);
+
+      expect(landingPage).toBeTruthy();
+      expect(landingPage.name).toBe('Landing Page');
+      expect(landingPage.content).toBe('<h1>Welcome to my funnel</h1>');
+      expect(landingPage.linkingId).toBe('landing');
+
+      expect(thankYouPage).toBeTruthy();
+      expect(thankYouPage.name).toBe('Thank You Page');
+      expect(thankYouPage.content).toBe('<h1>Thank you for visiting!</h1>');
+      expect(thankYouPage.linkingId).toBe('thankyou');
+
+      // Verify both funnels exist independently
+      const originalFunnelCheck = await request(app)
+        .get(`/api/funnels/${originalFunnelId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      const duplicatedFunnelCheck = await request(app)
+        .get(`/api/funnels/${duplicatedFunnel.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(originalFunnelCheck.body.funnel.name).toBe('Original Funnel');
+      expect(duplicatedFunnelCheck.body.funnel.name).toBe('Original Funnel (Copy)');
+    });
+
+    it('should duplicate empty funnel successfully', async () => {
+      // Create funnel without pages
+      const funnelResponse = await request(app)
+        .post('/api/funnels')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Empty Funnel', status: 'draft' })
+        .expect(201);
+
+      const originalFunnelId = funnelResponse.body.funnel.id;
+
+      // Duplicate the funnel
+      const duplicateResponse = await request(app)
+        .post(`/api/funnels/${originalFunnelId}/duplicate`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(201);
+
+      const duplicatedFunnel = duplicateResponse.body.funnel;
+
+      expect(duplicatedFunnel.name).toBe('Empty Funnel (Copy)');
+      expect(duplicatedFunnel.status).toBe('draft');
+      expect(duplicatedFunnel.pages).toHaveLength(0);
+    });
+
+    it('should return 404 when trying to duplicate non-existent funnel', async () => {
+      await request(app)
+        .post('/api/funnels/999999/duplicate')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it('should return 400 for invalid funnel ID', async () => {
+      const response = await request(app)
+        .post('/api/funnels/invalid/duplicate')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
+
+      expect(response.body).toEqual({ error: 'Invalid funnel ID' });
+    });
+
+    it('should prevent unauthorized users from duplicating funnels', async () => {
+      // Create funnel as first user
+      const funnelResponse = await request(app)
+        .post('/api/funnels')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Private Funnel', status: 'draft' })
+        .expect(201);
+
+      const funnelId = funnelResponse.body.funnel.id;
+
+      // Create another user
+      const otherUser = await TestHelpers.createTestUser();
+      const otherUserToken = TestHelpers.generateJWTToken(otherUser.id);
+
+      // Try to duplicate as other user (should fail)
+      await request(app)
+        .post(`/api/funnels/${funnelId}/duplicate`)
+        .set('Authorization', `Bearer ${otherUserToken}`)
+        .expect(404);
+    });
+
+    it('should require authentication for duplication', async () => {
+      await request(app)
+        .post('/api/funnels/1/duplicate')
+        .expect(401);
+    });
+  });
 });

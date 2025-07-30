@@ -104,4 +104,28 @@ export class FunnelController {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+
+  static async duplicateFunnel(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.userId!;
+      const funnelId = parseInt(req.params.id);
+
+      if (isNaN(funnelId)) {
+        res.status(400).json({ error: 'Invalid funnel ID' });
+        return;
+      }
+
+      const duplicatedFunnel = await FunnelService.duplicateFunnel(funnelId, userId);
+      res.status(201).json({ funnel: duplicatedFunnel });
+    } catch (error: any) {
+      console.error('Duplicate funnel error:', error);
+      
+      if (error.message === 'Funnel not found') {
+        res.status(404).json({ error: 'Funnel not found' });
+        return;
+      }
+      
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 }

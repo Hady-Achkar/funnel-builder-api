@@ -109,4 +109,45 @@ export class FunnelService {
       }
     });
   }
+
+  static async duplicateFunnel(funnelId: number, userId: number): Promise<FunnelWithPages> {
+    const originalFunnel = await prisma.funnel.findFirst({
+      where: { 
+        id: funnelId,
+        userId
+      },
+      include: {
+        pages: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+
+    if (!originalFunnel) {
+      throw new Error('Funnel not found');
+    }
+
+    const duplicatedFunnel = await prisma.funnel.create({
+      data: {
+        name: `${originalFunnel.name} (Copy)`,
+        status: originalFunnel.status,
+        userId,
+        pages: {
+          create: originalFunnel.pages.map(page => ({
+            name: page.name,
+            content: page.content,
+            order: page.order,
+            linkingId: page.linkingId
+          }))
+        }
+      },
+      include: {
+        pages: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+
+    return duplicatedFunnel;
+  }
 }

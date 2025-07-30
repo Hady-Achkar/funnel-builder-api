@@ -11,5 +11,6 @@ router.get("/", FunnelController.getUserFunnels);
 router.get("/:id", FunnelController.getFunnelById);
 router.put("/:id", FunnelController.updateFunnel);
 router.delete("/:id", FunnelController.deleteFunnel);
+router.post("/:id/duplicate", FunnelController.duplicateFunnel);
 
 export default router;
