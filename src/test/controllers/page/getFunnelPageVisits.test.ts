@@ -126,7 +126,7 @@ describe("getFunnelPageVisits Controller", () => {
 
       setMockReq({ 
         params: { funnelId: emptyFunnel.id.toString() },
-        user
+        userId: user.id
       });
 
       await getFunnelPageVisits(getMockReq(), getMockRes());

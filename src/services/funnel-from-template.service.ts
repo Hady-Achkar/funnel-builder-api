@@ -63,7 +63,7 @@ export class FunnelFromTemplateService {
     const funnel = await prisma.funnel.create({
       data: {
         name: data.funnelName,
-        status: 'draft',
+        status: 'DRAFT',
         userId: data.userId,
         templateId: data.templateId,
       },

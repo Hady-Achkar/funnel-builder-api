@@ -33,8 +33,8 @@ describe("createTheme", () => {
       updatedAt: new Date(),
     };
 
-    mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(mockFunnel);
+    (mockPrisma.$transaction as any).mockImplementation(async (callback) => {
       return callback({
         theme: {
           create: async () => mockCreatedTheme,
@@ -103,7 +103,7 @@ describe("createTheme", () => {
   it("should throw error when funnel not found", async () => {
     // Arrange
     const themeData = createThemeData();
-    mockPrisma.funnel.findFirst.mockResolvedValue(null);
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(null);
 
     // Act & Assert
     await expect(createTheme(themeData, userId)).rejects.toThrow(
@@ -115,7 +115,7 @@ describe("createTheme", () => {
     // Arrange
     const themeData = createThemeData();
     const mockFunnel = { id: funnelId, userId, themeId: 2 }; // Already has a theme
-    mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(mockFunnel);
 
     // Act & Assert
     await expect(createTheme(themeData, userId)).rejects.toThrow(
@@ -128,8 +128,8 @@ describe("createTheme", () => {
     const themeData = createThemeData();
     const mockFunnel = { id: funnelId, userId, themeId: null };
     
-    mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
-    mockPrisma.$transaction.mockRejectedValue({ code: "P2002" });
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(mockFunnel);
+    (mockPrisma.$transaction as any).mockRejectedValue({ code: "P2002" });
 
     // Act & Assert
     await expect(createTheme(themeData, userId)).rejects.toThrow(
@@ -142,8 +142,8 @@ describe("createTheme", () => {
     const themeData = createThemeData();
     const mockFunnel = { id: funnelId, userId, themeId: null };
     
-    mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
-    mockPrisma.$transaction.mockRejectedValue({ code: "P2003" });
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(mockFunnel);
+    (mockPrisma.$transaction as any).mockRejectedValue({ code: "P2003" });
 
     // Act & Assert
     await expect(createTheme(themeData, userId)).rejects.toThrow(
@@ -170,8 +170,8 @@ describe("createTheme", () => {
       updatedAt: new Date(),
     };
 
-    mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    (mockPrisma.funnel.findFirst as any).mockResolvedValue(mockFunnel);
+    (mockPrisma.$transaction as any).mockImplementation(async (callback) => {
       return callback({
         theme: {
           create: async () => mockCreatedTheme,

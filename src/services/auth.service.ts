@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { PrismaClient } from "../generated/prisma-client";
 
 // Allow prisma client to be injected for testing

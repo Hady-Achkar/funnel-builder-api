@@ -46,7 +46,12 @@ export const getFunnelById = async (
         themeId: cachedFunnel.themeId,
         createdAt: cachedFunnel.createdAt,
         updatedAt: cachedFunnel.updatedAt,
-        pages: cachedFunnel.pages,
+        pages: cachedFunnel.pages.map(page => ({
+          ...page,
+          seoTitle: page.seoTitle ?? null,
+          seoDescription: page.seoDescription ?? null,
+          seoKeywords: page.seoKeywords ?? null
+        })),
         theme: cachedFunnel.theme,
       };
     }

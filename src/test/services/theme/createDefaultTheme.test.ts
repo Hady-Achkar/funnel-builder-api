@@ -28,7 +28,7 @@ describe("createDefaultTheme", () => {
       updatedAt: new Date(),
     };
 
-    mockPrisma.theme.create.mockResolvedValue(mockCreatedTheme);
+    (mockPrisma.theme.create as any).mockResolvedValue(mockCreatedTheme);
 
     // Act
     const result = await createDefaultTheme();
@@ -55,7 +55,7 @@ describe("createDefaultTheme", () => {
 
   it("should handle P2002 error for duplicate theme name", async () => {
     // Arrange
-    mockPrisma.theme.create.mockRejectedValue({ code: "P2002" });
+    (mockPrisma.theme.create as any).mockRejectedValue({ code: "P2002" });
 
     // Act & Assert
     await expect(createDefaultTheme()).rejects.toThrow(
@@ -65,7 +65,7 @@ describe("createDefaultTheme", () => {
 
   it("should handle unexpected errors", async () => {
     // Arrange
-    mockPrisma.theme.create.mockRejectedValue(new Error("Database connection failed"));
+    (mockPrisma.theme.create as any).mockRejectedValue(new Error("Database connection failed"));
 
     // Act & Assert
     await expect(createDefaultTheme()).rejects.toThrow(

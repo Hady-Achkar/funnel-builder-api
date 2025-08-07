@@ -18,17 +18,17 @@ vi.mock("../../../services/cache/cache.service", () => ({
 // Create mock Prisma client
 export const mockPrisma = {
   theme: {
-    create: vi.fn(),
-    findMany: vi.fn(),
-    findFirst: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
+    create: vi.fn() as any,
+    findMany: vi.fn() as any,
+    findFirst: vi.fn() as any,
+    update: vi.fn() as any,
+    delete: vi.fn() as any,
   },
   funnel: {
-    findFirst: vi.fn(),
-    update: vi.fn(),
+    findFirst: vi.fn() as any,
+    update: vi.fn() as any,
   },
-  $transaction: vi.fn(),
+  $transaction: vi.fn() as any,
 } as unknown as PrismaClient;
 
 // Helper function to create complete theme data

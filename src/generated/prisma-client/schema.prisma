@@ -9,16 +9,16 @@ datasource db {
 }
 
 model User {
-  id                     Int       @id @default(autoincrement())
-  email                  String    @unique
+  id                     Int        @id @default(autoincrement())
+  email                  String     @unique
   name                   String?
   password               String
-  passwordResetToken     String?   @unique
+  passwordResetToken     String?    @unique
   passwordResetExpiresAt DateTime?
-  isAdmin                Boolean   @default(false)
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  maximumFunnels Int? 
+  isAdmin                Boolean    @default(false)
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  maximumFunnels         Int?
   funnels                Funnel[]
   domains                Domain[]
   templates              Template[]
@@ -32,7 +32,7 @@ model Funnel {
   status            FunnelStatus   @default(DRAFT)
   userId            Int
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId        Int?           // Track which template this funnel was created from
+  templateId        Int? // Track which template this funnel was created from
   template          Template?      @relation(fields: [templateId], references: [id])
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -100,19 +100,19 @@ model FunnelDomain {
 }
 
 model Page {
-  id        Int      @id @default(autoincrement())
-  name      String
-  content   String?
-  order     Int
-  linkingId String?
+  id             Int      @id @default(autoincrement())
+  name           String
+  content        String?
+  order          Int
+  linkingId      String?
   seoTitle       String?
   seoDescription String?
   seoKeywords    String?
-  visits    Int      @default(0)
-  funnelId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  funnel    Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  visits         Int      @default(0)
+  funnelId       Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  funnel         Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
 
   @@unique([funnelId, linkingId])
   @@map("pages")
@@ -126,7 +126,7 @@ model Session {
   interactions Json     @default("{}")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   @@index([sessionId])
   @@index([funnelId])
   @@index([createdAt])
@@ -156,12 +156,12 @@ enum SslStatus {
 model Theme {
   id              Int          @id @default(autoincrement())
   name            String       @default("Default Theme")
-  backgroundColor String       @default("#0e1e12")   
-  textColor       String       @default("#d4ecd0")   
-  buttonColor     String       @default("#387e3d")  
-  buttonTextColor String       @default("#e8f5e9")  
-  borderColor     String       @default("#214228")  
-  optionColor     String       @default("#16331b")  
+  backgroundColor String       @default("#0e1e12")
+  textColor       String       @default("#d4ecd0")
+  buttonColor     String       @default("#387e3d")
+  buttonTextColor String       @default("#e8f5e9")
+  borderColor     String       @default("#214228")
+  optionColor     String       @default("#16331b")
   fontFamily      String       @default("Inter, sans-serif")
   borderRadius    BorderRadius @default(SOFT)
   createdAt       DateTime     @default(now())
@@ -184,7 +184,7 @@ model TemplateCategory {
   name        String     @unique
   slug        String     @unique
   description String?
-  icon        String?    // Icon class or emoji
+  icon        String? // Icon class or emoji
   order       Int        @default(0)
   isActive    Boolean    @default(true)
   templates   Template[]
@@ -197,25 +197,25 @@ model TemplateCategory {
 }
 
 model Template {
-  id                 Int                @id @default(autoincrement())
-  name               String
-  slug               String             @unique
-  description        String?
-  categoryId         Int
-  category           TemplateCategory   @relation(fields: [categoryId], references: [id])
-  thumbnailImage     String?            // Main thumbnail image URL
-  previewImages      TemplateImage[]    // Additional preview images
-  pages              TemplatePages[]    // Template page data
-  tags               String[]           // Search tags
-  usageCount         Int                @default(0)
-  isActive           Boolean            @default(true)
-  isPublic           Boolean            @default(true)
-  createdByUserId    Int
-  createdBy          User               @relation(fields: [createdByUserId], references: [id])
-  funnelsCreated     Funnel[]           // Track funnels created from this template
-  metadata           Json?              // Additional template settings
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id              Int              @id @default(autoincrement())
+  name            String
+  slug            String           @unique
+  description     String?
+  categoryId      Int
+  category        TemplateCategory @relation(fields: [categoryId], references: [id])
+  thumbnailImage  String? // Main thumbnail image URL
+  previewImages   TemplateImage[] // Additional preview images
+  pages           TemplatePages[] // Template page data
+  tags            String[] // Search tags
+  usageCount      Int              @default(0)
+  isActive        Boolean          @default(true)
+  isPublic        Boolean          @default(true)
+  createdByUserId Int
+  createdBy       User             @relation(fields: [createdByUserId], references: [id])
+  funnelsCreated  Funnel[] // Track funnels created from this template
+  metadata        Json? // Additional template settings
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([slug])
   @@index([categoryId])
@@ -225,15 +225,15 @@ model Template {
 }
 
 model TemplateImage {
-  id          Int      @id @default(autoincrement())
-  templateId  Int
-  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  imageUrl    String   // Azure Blob Storage URL
-  imageType   String   // thumbnail, preview, screenshot
-  order       Int      @default(0)
-  caption     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  templateId Int
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  imageUrl   String // Azure Blob Storage URL
+  imageType  String // thumbnail, preview, screenshot
+  order      Int      @default(0)
+  caption    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([templateId])
   @@map("template_images")
@@ -244,11 +244,11 @@ model TemplatePages {
   templateId      Int
   template        Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
   name            String
-  content         String?  // Page content (HTML, JSON, etc.)
+  content         String? // Page content (HTML, JSON, etc.)
   order           Int
-  settings        Json?    // Page-specific settings
-  linkingIdPrefix String?  // Prefix for generating unique linking IDs
-  metadata        Json?    // Additional page data
+  settings        Json? // Page-specific settings
+  linkingIdPrefix String? // Prefix for generating unique linking IDs
+  metadata        Json? // Additional page data
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

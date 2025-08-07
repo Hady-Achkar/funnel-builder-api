@@ -39,6 +39,16 @@ export type FunnelDomain = $Result.DefaultSelection<Prisma.$FunnelDomainPayload>
  */
 export type Page = $Result.DefaultSelection<Prisma.$PagePayload>
 /**
+ * Model Session
+ * 
+ */
+export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
+/**
+ * Model Theme
+ * 
+ */
+export type Theme = $Result.DefaultSelection<Prisma.$ThemePayload>
+/**
  * Model TemplateCategory
  * 
  */
@@ -63,7 +73,17 @@ export type TemplatePages = $Result.DefaultSelection<Prisma.$TemplatePagesPayloa
  * Enums
  */
 export namespace $Enums {
-  export const DomainType: {
+  export const FunnelStatus: {
+  DRAFT: 'DRAFT',
+  LIVE: 'LIVE',
+  ARCHIVED: 'ARCHIVED',
+  SHARED: 'SHARED'
+};
+
+export type FunnelStatus = (typeof FunnelStatus)[keyof typeof FunnelStatus]
+
+
+export const DomainType: {
   CUSTOM_DOMAIN: 'CUSTOM_DOMAIN',
   SUBDOMAIN: 'SUBDOMAIN'
 };
@@ -91,7 +111,20 @@ export const SslStatus: {
 
 export type SslStatus = (typeof SslStatus)[keyof typeof SslStatus]
 
+
+export const BorderRadius: {
+  NONE: 'NONE',
+  SOFT: 'SOFT',
+  ROUNDED: 'ROUNDED'
+};
+
+export type BorderRadius = (typeof BorderRadius)[keyof typeof BorderRadius]
+
 }
+
+export type FunnelStatus = $Enums.FunnelStatus
+
+export const FunnelStatus: typeof $Enums.FunnelStatus
 
 export type DomainType = $Enums.DomainType
 
@@ -105,9 +138,13 @@ export type SslStatus = $Enums.SslStatus
 
 export const SslStatus: typeof $Enums.SslStatus
 
+export type BorderRadius = $Enums.BorderRadius
+
+export const BorderRadius: typeof $Enums.BorderRadius
+
 /**
  * ##  Prisma Client ʲˢ
- * 
+ *
  * Type-safe database client for TypeScript & Node.js
  * @example
  * ```
@@ -116,19 +153,19 @@ export const SslStatus: typeof $Enums.SslStatus
  * const users = await prisma.user.findMany()
  * ```
  *
- * 
+ *
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
 
     /**
    * ##  Prisma Client ʲˢ
-   * 
+   *
    * Type-safe database client for TypeScript & Node.js
    * @example
    * ```
@@ -137,12 +174,12 @@ export class PrismaClient<
    * const users = await prisma.user.findMany()
    * ```
    *
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
 
   /**
    * Connect with the database
@@ -167,7 +204,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -179,7 +216,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -190,7 +227,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -202,7 +239,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -226,7 +263,9 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs>
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
+    extArgs: ExtArgs
+  }>>
 
       /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -236,7 +275,7 @@ export class PrismaClient<
     * const users = await prisma.user.findMany()
     * ```
     */
-  get user(): Prisma.UserDelegate<ExtArgs>;
+  get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.funnel`: Exposes CRUD operations for the **Funnel** model.
@@ -246,7 +285,7 @@ export class PrismaClient<
     * const funnels = await prisma.funnel.findMany()
     * ```
     */
-  get funnel(): Prisma.FunnelDelegate<ExtArgs>;
+  get funnel(): Prisma.FunnelDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.domain`: Exposes CRUD operations for the **Domain** model.
@@ -256,7 +295,7 @@ export class PrismaClient<
     * const domains = await prisma.domain.findMany()
     * ```
     */
-  get domain(): Prisma.DomainDelegate<ExtArgs>;
+  get domain(): Prisma.DomainDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.funnelDomain`: Exposes CRUD operations for the **FunnelDomain** model.
@@ -266,7 +305,7 @@ export class PrismaClient<
     * const funnelDomains = await prisma.funnelDomain.findMany()
     * ```
     */
-  get funnelDomain(): Prisma.FunnelDomainDelegate<ExtArgs>;
+  get funnelDomain(): Prisma.FunnelDomainDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.page`: Exposes CRUD operations for the **Page** model.
@@ -276,7 +315,27 @@ export class PrismaClient<
     * const pages = await prisma.page.findMany()
     * ```
     */
-  get page(): Prisma.PageDelegate<ExtArgs>;
+  get page(): Prisma.PageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.session`: Exposes CRUD operations for the **Session** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Sessions
+    * const sessions = await prisma.session.findMany()
+    * ```
+    */
+  get session(): Prisma.SessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.theme`: Exposes CRUD operations for the **Theme** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Themes
+    * const themes = await prisma.theme.findMany()
+    * ```
+    */
+  get theme(): Prisma.ThemeDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.templateCategory`: Exposes CRUD operations for the **TemplateCategory** model.
@@ -286,7 +345,7 @@ export class PrismaClient<
     * const templateCategories = await prisma.templateCategory.findMany()
     * ```
     */
-  get templateCategory(): Prisma.TemplateCategoryDelegate<ExtArgs>;
+  get templateCategory(): Prisma.TemplateCategoryDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.template`: Exposes CRUD operations for the **Template** model.
@@ -296,7 +355,7 @@ export class PrismaClient<
     * const templates = await prisma.template.findMany()
     * ```
     */
-  get template(): Prisma.TemplateDelegate<ExtArgs>;
+  get template(): Prisma.TemplateDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.templateImage`: Exposes CRUD operations for the **TemplateImage** model.
@@ -306,7 +365,7 @@ export class PrismaClient<
     * const templateImages = await prisma.templateImage.findMany()
     * ```
     */
-  get templateImage(): Prisma.TemplateImageDelegate<ExtArgs>;
+  get templateImage(): Prisma.TemplateImageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.templatePages`: Exposes CRUD operations for the **TemplatePages** model.
@@ -316,7 +375,7 @@ export class PrismaClient<
     * const templatePages = await prisma.templatePages.findMany()
     * ```
     */
-  get templatePages(): Prisma.TemplatePagesDelegate<ExtArgs>;
+  get templatePages(): Prisma.TemplatePagesDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -337,7 +396,6 @@ export namespace Prisma {
   export import PrismaClientRustPanicError = runtime.PrismaClientRustPanicError
   export import PrismaClientInitializationError = runtime.PrismaClientInitializationError
   export import PrismaClientValidationError = runtime.PrismaClientValidationError
-  export import NotFoundError = runtime.NotFoundError
 
   /**
    * Re-export of sql-template-tag
@@ -358,7 +416,7 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics 
+   * Metrics
    */
   export type Metrics = runtime.Metrics
   export type Metric<T> = runtime.Metric<T>
@@ -376,14 +434,14 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 5.22.0
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Prisma Client JS version: 6.13.0
+   * Query Engine version: 361e86d0ea4987e9f53a565309b3eed797a6bcbd
    */
   export type PrismaVersion = {
     client: string
   }
 
-  export const prismaVersion: PrismaVersion 
+  export const prismaVersion: PrismaVersion
 
   /**
    * Utility Types
@@ -399,15 +457,15 @@ export namespace Prisma {
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   namespace NullTypes {
     /**
     * Type of `Prisma.DbNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class DbNull {
@@ -417,9 +475,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.JsonNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class JsonNull {
@@ -429,9 +487,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.AnyNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class AnyNull {
@@ -442,21 +500,21 @@ export namespace Prisma {
 
   /**
    * Helper for filtering JSON entries that have `null` on the database (empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const DbNull: NullTypes.DbNull
 
   /**
    * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const JsonNull: NullTypes.JsonNull
 
   /**
    * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const AnyNull: NullTypes.AnyNull
@@ -644,7 +702,7 @@ export namespace Prisma {
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
     ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? K : never]-?: O[P]} & O
+      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
     : never>;
 
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
@@ -763,6 +821,8 @@ export namespace Prisma {
     Domain: 'Domain',
     FunnelDomain: 'FunnelDomain',
     Page: 'Page',
+    Session: 'Session',
+    Theme: 'Theme',
     TemplateCategory: 'TemplateCategory',
     Template: 'Template',
     TemplateImage: 'TemplateImage',
@@ -776,13 +836,16 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
+  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+    globalOmitOptions: {
+      omit: GlobalOmitOptions
+    }
     meta: {
-      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "templateCategory" | "template" | "templateImage" | "templatePages"
+      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePages"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -837,6 +900,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.UserUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
           }
           upsert: {
             args: Prisma.UserUpsertArgs<ExtArgs>
@@ -908,6 +975,10 @@ export namespace Prisma {
             args: Prisma.FunnelUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.FunnelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelPayload>[]
+          }
           upsert: {
             args: Prisma.FunnelUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$FunnelPayload>
@@ -977,6 +1048,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.DomainUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DomainUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DomainPayload>[]
           }
           upsert: {
             args: Prisma.DomainUpsertArgs<ExtArgs>
@@ -1048,6 +1123,10 @@ export namespace Prisma {
             args: Prisma.FunnelDomainUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.FunnelDomainUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelDomainPayload>[]
+          }
           upsert: {
             args: Prisma.FunnelDomainUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$FunnelDomainPayload>
@@ -1118,6 +1197,10 @@ export namespace Prisma {
             args: Prisma.PageUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.PageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagePayload>[]
+          }
           upsert: {
             args: Prisma.PageUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$PagePayload>
@@ -1133,6 +1216,154 @@ export namespace Prisma {
           count: {
             args: Prisma.PageCountArgs<ExtArgs>
             result: $Utils.Optional<PageCountAggregateOutputType> | number
+          }
+        }
+      }
+      Session: {
+        payload: Prisma.$SessionPayload<ExtArgs>
+        fields: Prisma.SessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          findFirst: {
+            args: Prisma.SessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          findMany: {
+            args: Prisma.SessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          create: {
+            args: Prisma.SessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          createMany: {
+            args: Prisma.SessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          delete: {
+            args: Prisma.SessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          update: {
+            args: Prisma.SessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.SessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.SessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          aggregate: {
+            args: Prisma.SessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSession>
+          }
+          groupBy: {
+            args: Prisma.SessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SessionCountArgs<ExtArgs>
+            result: $Utils.Optional<SessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      Theme: {
+        payload: Prisma.$ThemePayload<ExtArgs>
+        fields: Prisma.ThemeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ThemeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ThemeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          findFirst: {
+            args: Prisma.ThemeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ThemeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          findMany: {
+            args: Prisma.ThemeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>[]
+          }
+          create: {
+            args: Prisma.ThemeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          createMany: {
+            args: Prisma.ThemeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ThemeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>[]
+          }
+          delete: {
+            args: Prisma.ThemeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          update: {
+            args: Prisma.ThemeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          deleteMany: {
+            args: Prisma.ThemeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ThemeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ThemeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>[]
+          }
+          upsert: {
+            args: Prisma.ThemeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemePayload>
+          }
+          aggregate: {
+            args: Prisma.ThemeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTheme>
+          }
+          groupBy: {
+            args: Prisma.ThemeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ThemeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ThemeCountArgs<ExtArgs>
+            result: $Utils.Optional<ThemeCountAggregateOutputType> | number
           }
         }
       }
@@ -1187,6 +1418,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.TemplateCategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TemplateCategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplateCategoryPayload>[]
           }
           upsert: {
             args: Prisma.TemplateCategoryUpsertArgs<ExtArgs>
@@ -1258,6 +1493,10 @@ export namespace Prisma {
             args: Prisma.TemplateUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.TemplateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>[]
+          }
           upsert: {
             args: Prisma.TemplateUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
@@ -1327,6 +1566,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.TemplateImageUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TemplateImageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplateImagePayload>[]
           }
           upsert: {
             args: Prisma.TemplateImageUpsertArgs<ExtArgs>
@@ -1398,6 +1641,10 @@ export namespace Prisma {
             args: Prisma.TemplatePagesUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.TemplatePagesUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>[]
+          }
           upsert: {
             args: Prisma.TemplatePagesUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
@@ -1459,16 +1706,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1483,8 +1738,35 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
+    /**
+     * Global configuration for omitting model fields by default.
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   omit: {
+     *     user: {
+     *       password: true
+     *     }
+     *   }
+     * })
+     * ```
+     */
+    omit?: Prisma.GlobalOmitConfig
   }
-
+  export type GlobalOmitConfig = {
+    user?: UserOmit
+    funnel?: FunnelOmit
+    domain?: DomainOmit
+    funnelDomain?: FunnelDomainOmit
+    page?: PageOmit
+    session?: SessionOmit
+    theme?: ThemeOmit
+    templateCategory?: TemplateCategoryOmit
+    template?: TemplateOmit
+    templateImage?: TemplateImageOmit
+    templatePages?: TemplatePagesOmit
+  }
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -1493,10 +1775,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -1525,6 +1812,7 @@ export namespace Prisma {
     | 'createManyAndReturn'
     | 'update'
     | 'updateMany'
+    | 'updateManyAndReturn'
     | 'upsert'
     | 'delete'
     | 'deleteMany'
@@ -1626,13 +1914,13 @@ export namespace Prisma {
    */
 
   export type FunnelCountOutputType = {
-    pages: number
     domainConnections: number
+    pages: number
   }
 
   export type FunnelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    pages?: boolean | FunnelCountOutputTypeCountPagesArgs
     domainConnections?: boolean | FunnelCountOutputTypeCountDomainConnectionsArgs
+    pages?: boolean | FunnelCountOutputTypeCountPagesArgs
   }
 
   // Custom InputTypes
@@ -1649,15 +1937,15 @@ export namespace Prisma {
   /**
    * FunnelCountOutputType without action
    */
-  export type FunnelCountOutputTypeCountPagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: PageWhereInput
+  export type FunnelCountOutputTypeCountDomainConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FunnelDomainWhereInput
   }
 
   /**
    * FunnelCountOutputType without action
    */
-  export type FunnelCountOutputTypeCountDomainConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: FunnelDomainWhereInput
+  export type FunnelCountOutputTypeCountPagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PageWhereInput
   }
 
 
@@ -1790,10 +2078,12 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     id: number | null
+    maximumFunnels: number | null
   }
 
   export type UserSumAggregateOutputType = {
     id: number | null
+    maximumFunnels: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1806,6 +2096,7 @@ export namespace Prisma {
     isAdmin: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    maximumFunnels: number | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1818,6 +2109,7 @@ export namespace Prisma {
     isAdmin: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    maximumFunnels: number | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1830,16 +2122,19 @@ export namespace Prisma {
     isAdmin: number
     createdAt: number
     updatedAt: number
+    maximumFunnels: number
     _all: number
   }
 
 
   export type UserAvgAggregateInputType = {
     id?: true
+    maximumFunnels?: true
   }
 
   export type UserSumAggregateInputType = {
     id?: true
+    maximumFunnels?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -1852,6 +2147,7 @@ export namespace Prisma {
     isAdmin?: true
     createdAt?: true
     updatedAt?: true
+    maximumFunnels?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1864,6 +2160,7 @@ export namespace Prisma {
     isAdmin?: true
     createdAt?: true
     updatedAt?: true
+    maximumFunnels?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1876,6 +2173,7 @@ export namespace Prisma {
     isAdmin?: true
     createdAt?: true
     updatedAt?: true
+    maximumFunnels?: true
     _all?: true
   }
 
@@ -1975,6 +2273,7 @@ export namespace Prisma {
     isAdmin: boolean
     createdAt: Date
     updatedAt: Date
+    maximumFunnels: number | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -2006,6 +2305,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    maximumFunnels?: boolean
     funnels?: boolean | User$funnelsArgs<ExtArgs>
     domains?: boolean | User$domainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
@@ -2022,6 +2322,20 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    maximumFunnels?: boolean
+  }, ExtArgs["result"]["user"]>
+
+  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    password?: boolean
+    passwordResetToken?: boolean
+    passwordResetExpiresAt?: boolean
+    isAdmin?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    maximumFunnels?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -2034,8 +2348,10 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    maximumFunnels?: boolean
   }
 
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "password" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "createdAt" | "updatedAt" | "maximumFunnels", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnels?: boolean | User$funnelsArgs<ExtArgs>
     domains?: boolean | User$domainsArgs<ExtArgs>
@@ -2043,6 +2359,7 @@ export namespace Prisma {
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
@@ -2061,18 +2378,19 @@ export namespace Prisma {
       isAdmin: boolean
       createdAt: Date
       updatedAt: Date
+      maximumFunnels: number | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
 
   type UserGetPayload<S extends boolean | null | undefined | UserDefaultArgs> = $Result.GetResult<Prisma.$UserPayload, S>
 
-  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: UserCountAggregateInputType | true
     }
 
-  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
     /**
      * Find zero or one User that matches the filter.
@@ -2085,10 +2403,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one User that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one User that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {UserFindUniqueOrThrowArgs} args - Arguments to find a User
      * @example
@@ -2099,7 +2417,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter.
@@ -2114,7 +2432,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter or
@@ -2130,7 +2448,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Users that matches the filter.
@@ -2148,7 +2466,7 @@ export namespace Prisma {
      * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User.
@@ -2162,7 +2480,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Users.
@@ -2190,7 +2508,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.createManyAndReturn({ 
+     * const userWithIdOnly = await prisma.user.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -2200,7 +2518,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User.
@@ -2214,7 +2532,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User.
@@ -2231,7 +2549,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Users.
@@ -2267,6 +2585,36 @@ export namespace Prisma {
     updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Users and returns the data updated in the database.
+     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Users and only return the `id`
+     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one User.
      * @param {UserUpsertArgs} args - Arguments to update or create a User.
      * @example
@@ -2283,7 +2631,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -2423,11 +2771,11 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    funnels<T extends User$funnelsArgs<ExtArgs> = {}>(args?: Subset<T, User$funnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany"> | Null>
-    domains<T extends User$domainsArgs<ExtArgs> = {}>(args?: Subset<T, User$domainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany"> | Null>
-    templates<T extends User$templatesArgs<ExtArgs> = {}>(args?: Subset<T, User$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany"> | Null>
+    funnels<T extends User$funnelsArgs<ExtArgs> = {}>(args?: Subset<T, User$funnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    domains<T extends User$domainsArgs<ExtArgs> = {}>(args?: Subset<T, User$domainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    templates<T extends User$templatesArgs<ExtArgs> = {}>(args?: Subset<T, User$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2455,7 +2803,7 @@ export namespace Prisma {
 
   /**
    * Fields of the User model
-   */ 
+   */
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'Int'>
     readonly email: FieldRef<"User", 'String'>
@@ -2466,6 +2814,7 @@ export namespace Prisma {
     readonly isAdmin: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly maximumFunnels: FieldRef<"User", 'Int'>
   }
     
 
@@ -2478,6 +2827,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2497,6 +2850,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2514,6 +2871,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2563,6 +2924,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2611,6 +2976,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2654,6 +3023,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2683,6 +3056,10 @@ export namespace Prisma {
      */
     select?: UserSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * The data used to create many Users.
      */
     data: UserCreateManyInput | UserCreateManyInput[]
@@ -2697,6 +3074,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2723,6 +3104,36 @@ export namespace Prisma {
      * Filter which Users to update
      */
     where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * User updateManyAndReturn
+   */
+  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * The data used to update Users.
+     */
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
+    /**
+     * Filter which Users to update
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2733,6 +3144,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2760,6 +3175,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2777,6 +3196,10 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
+    /**
+     * Limit how many Users to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2787,6 +3210,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2808,6 +3235,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -2828,6 +3259,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -2847,6 +3282,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2870,32 +3309,36 @@ export namespace Prisma {
     id: number | null
     userId: number | null
     templateId: number | null
+    themeId: number | null
   }
 
   export type FunnelSumAggregateOutputType = {
     id: number | null
     userId: number | null
     templateId: number | null
+    themeId: number | null
   }
 
   export type FunnelMinAggregateOutputType = {
     id: number | null
     name: string | null
-    status: string | null
+    status: $Enums.FunnelStatus | null
     userId: number | null
     templateId: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    themeId: number | null
   }
 
   export type FunnelMaxAggregateOutputType = {
     id: number | null
     name: string | null
-    status: string | null
+    status: $Enums.FunnelStatus | null
     userId: number | null
     templateId: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    themeId: number | null
   }
 
   export type FunnelCountAggregateOutputType = {
@@ -2906,6 +3349,7 @@ export namespace Prisma {
     templateId: number
     createdAt: number
     updatedAt: number
+    themeId: number
     _all: number
   }
 
@@ -2914,12 +3358,14 @@ export namespace Prisma {
     id?: true
     userId?: true
     templateId?: true
+    themeId?: true
   }
 
   export type FunnelSumAggregateInputType = {
     id?: true
     userId?: true
     templateId?: true
+    themeId?: true
   }
 
   export type FunnelMinAggregateInputType = {
@@ -2930,6 +3376,7 @@ export namespace Prisma {
     templateId?: true
     createdAt?: true
     updatedAt?: true
+    themeId?: true
   }
 
   export type FunnelMaxAggregateInputType = {
@@ -2940,6 +3387,7 @@ export namespace Prisma {
     templateId?: true
     createdAt?: true
     updatedAt?: true
+    themeId?: true
   }
 
   export type FunnelCountAggregateInputType = {
@@ -2950,6 +3398,7 @@ export namespace Prisma {
     templateId?: true
     createdAt?: true
     updatedAt?: true
+    themeId?: true
     _all?: true
   }
 
@@ -3042,11 +3491,12 @@ export namespace Prisma {
   export type FunnelGroupByOutputType = {
     id: number
     name: string
-    status: string
+    status: $Enums.FunnelStatus
     userId: number
     templateId: number | null
     createdAt: Date
     updatedAt: Date
+    themeId: number | null
     _count: FunnelCountAggregateOutputType | null
     _avg: FunnelAvgAggregateOutputType | null
     _sum: FunnelSumAggregateOutputType | null
@@ -3076,10 +3526,12 @@ export namespace Prisma {
     templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    themeId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    pages?: boolean | Funnel$pagesArgs<ExtArgs>
-    domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     template?: boolean | Funnel$templateArgs<ExtArgs>
+    domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
+    pages?: boolean | Funnel$pagesArgs<ExtArgs>
     _count?: boolean | FunnelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
@@ -3091,8 +3543,24 @@ export namespace Prisma {
     templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    themeId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     template?: boolean | Funnel$templateArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
+  }, ExtArgs["result"]["funnel"]>
+
+  export type FunnelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    status?: boolean
+    userId?: boolean
+    templateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    themeId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    template?: boolean | Funnel$templateArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
   export type FunnelSelectScalar = {
@@ -3103,48 +3571,59 @@ export namespace Prisma {
     templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    themeId?: boolean
   }
 
+  export type FunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "userId" | "templateId" | "createdAt" | "updatedAt" | "themeId", ExtArgs["result"]["funnel"]>
   export type FunnelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    pages?: boolean | Funnel$pagesArgs<ExtArgs>
-    domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     template?: boolean | Funnel$templateArgs<ExtArgs>
+    domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
+    pages?: boolean | Funnel$pagesArgs<ExtArgs>
     _count?: boolean | FunnelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type FunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     template?: boolean | Funnel$templateArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
+  }
+  export type FunnelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    template?: boolean | Funnel$templateArgs<ExtArgs>
+    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }
 
   export type $FunnelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Funnel"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      pages: Prisma.$PagePayload<ExtArgs>[]
-      domainConnections: Prisma.$FunnelDomainPayload<ExtArgs>[]
       template: Prisma.$TemplatePayload<ExtArgs> | null
+      domainConnections: Prisma.$FunnelDomainPayload<ExtArgs>[]
+      theme: Prisma.$ThemePayload<ExtArgs> | null
+      pages: Prisma.$PagePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
-      status: string
+      status: $Enums.FunnelStatus
       userId: number
       templateId: number | null
       createdAt: Date
       updatedAt: Date
+      themeId: number | null
     }, ExtArgs["result"]["funnel"]>
     composites: {}
   }
 
   type FunnelGetPayload<S extends boolean | null | undefined | FunnelDefaultArgs> = $Result.GetResult<Prisma.$FunnelPayload, S>
 
-  type FunnelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<FunnelFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type FunnelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FunnelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: FunnelCountAggregateInputType | true
     }
 
-  export interface FunnelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface FunnelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Funnel'], meta: { name: 'Funnel' } }
     /**
      * Find zero or one Funnel that matches the filter.
@@ -3157,10 +3636,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends FunnelFindUniqueArgs>(args: SelectSubset<T, FunnelFindUniqueArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends FunnelFindUniqueArgs>(args: SelectSubset<T, FunnelFindUniqueArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Funnel that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one Funnel that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {FunnelFindUniqueOrThrowArgs} args - Arguments to find a Funnel
      * @example
@@ -3171,7 +3650,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends FunnelFindUniqueOrThrowArgs>(args: SelectSubset<T, FunnelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends FunnelFindUniqueOrThrowArgs>(args: SelectSubset<T, FunnelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Funnel that matches the filter.
@@ -3186,7 +3665,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends FunnelFindFirstArgs>(args?: SelectSubset<T, FunnelFindFirstArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends FunnelFindFirstArgs>(args?: SelectSubset<T, FunnelFindFirstArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Funnel that matches the filter or
@@ -3202,7 +3681,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends FunnelFindFirstOrThrowArgs>(args?: SelectSubset<T, FunnelFindFirstOrThrowArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends FunnelFindFirstOrThrowArgs>(args?: SelectSubset<T, FunnelFindFirstOrThrowArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Funnels that matches the filter.
@@ -3220,7 +3699,7 @@ export namespace Prisma {
      * const funnelWithIdOnly = await prisma.funnel.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends FunnelFindManyArgs>(args?: SelectSubset<T, FunnelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends FunnelFindManyArgs>(args?: SelectSubset<T, FunnelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Funnel.
@@ -3234,7 +3713,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends FunnelCreateArgs>(args: SelectSubset<T, FunnelCreateArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends FunnelCreateArgs>(args: SelectSubset<T, FunnelCreateArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Funnels.
@@ -3262,7 +3741,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Funnels and only return the `id`
-     * const funnelWithIdOnly = await prisma.funnel.createManyAndReturn({ 
+     * const funnelWithIdOnly = await prisma.funnel.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -3272,7 +3751,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends FunnelCreateManyAndReturnArgs>(args?: SelectSubset<T, FunnelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends FunnelCreateManyAndReturnArgs>(args?: SelectSubset<T, FunnelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Funnel.
@@ -3286,7 +3765,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends FunnelDeleteArgs>(args: SelectSubset<T, FunnelDeleteArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends FunnelDeleteArgs>(args: SelectSubset<T, FunnelDeleteArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Funnel.
@@ -3303,7 +3782,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends FunnelUpdateArgs>(args: SelectSubset<T, FunnelUpdateArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends FunnelUpdateArgs>(args: SelectSubset<T, FunnelUpdateArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Funnels.
@@ -3339,6 +3818,36 @@ export namespace Prisma {
     updateMany<T extends FunnelUpdateManyArgs>(args: SelectSubset<T, FunnelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Funnels and returns the data updated in the database.
+     * @param {FunnelUpdateManyAndReturnArgs} args - Arguments to update many Funnels.
+     * @example
+     * // Update many Funnels
+     * const funnel = await prisma.funnel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Funnels and only return the `id`
+     * const funnelWithIdOnly = await prisma.funnel.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FunnelUpdateManyAndReturnArgs>(args: SelectSubset<T, FunnelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one Funnel.
      * @param {FunnelUpsertArgs} args - Arguments to update or create a Funnel.
      * @example
@@ -3355,7 +3864,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends FunnelUpsertArgs>(args: SelectSubset<T, FunnelUpsertArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends FunnelUpsertArgs>(args: SelectSubset<T, FunnelUpsertArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -3495,12 +4004,13 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__FunnelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__FunnelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    pages<T extends Funnel$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany"> | Null>
-    domainConnections<T extends Funnel$domainConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$domainConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany"> | Null>
-    template<T extends Funnel$templateArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$templateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    template<T extends Funnel$templateArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$templateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    domainConnections<T extends Funnel$domainConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$domainConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    theme<T extends Funnel$themeArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$themeArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    pages<T extends Funnel$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3528,15 +4038,16 @@ export namespace Prisma {
 
   /**
    * Fields of the Funnel model
-   */ 
+   */
   interface FunnelFieldRefs {
     readonly id: FieldRef<"Funnel", 'Int'>
     readonly name: FieldRef<"Funnel", 'String'>
-    readonly status: FieldRef<"Funnel", 'String'>
+    readonly status: FieldRef<"Funnel", 'FunnelStatus'>
     readonly userId: FieldRef<"Funnel", 'Int'>
     readonly templateId: FieldRef<"Funnel", 'Int'>
     readonly createdAt: FieldRef<"Funnel", 'DateTime'>
     readonly updatedAt: FieldRef<"Funnel", 'DateTime'>
+    readonly themeId: FieldRef<"Funnel", 'Int'>
   }
     
 
@@ -3549,6 +4060,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3568,6 +4083,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -3585,6 +4104,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3634,6 +4157,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -3682,6 +4209,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -3725,6 +4256,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -3754,6 +4289,10 @@ export namespace Prisma {
      */
     select?: FunnelSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * The data used to create many Funnels.
      */
     data: FunnelCreateManyInput | FunnelCreateManyInput[]
@@ -3772,6 +4311,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3798,6 +4341,40 @@ export namespace Prisma {
      * Filter which Funnels to update
      */
     where?: FunnelWhereInput
+    /**
+     * Limit how many Funnels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Funnel updateManyAndReturn
+   */
+  export type FunnelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Funnel
+     */
+    select?: FunnelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
+     * The data used to update Funnels.
+     */
+    data: XOR<FunnelUpdateManyMutationInput, FunnelUncheckedUpdateManyInput>
+    /**
+     * Filter which Funnels to update
+     */
+    where?: FunnelWhereInput
+    /**
+     * Limit how many Funnels to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3808,6 +4385,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3835,6 +4416,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -3852,26 +4437,29 @@ export namespace Prisma {
      * Filter which Funnels to delete
      */
     where?: FunnelWhereInput
+    /**
+     * Limit how many Funnels to delete.
+     */
+    limit?: number
   }
 
   /**
-   * Funnel.pages
+   * Funnel.template
    */
-  export type Funnel$pagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Funnel$templateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Page
+     * Select specific fields to fetch from the Template
      */
-    select?: PageSelect<ExtArgs> | null
+    select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: PageInclude<ExtArgs> | null
-    where?: PageWhereInput
-    orderBy?: PageOrderByWithRelationInput | PageOrderByWithRelationInput[]
-    cursor?: PageWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: PageScalarFieldEnum | PageScalarFieldEnum[]
+    include?: TemplateInclude<ExtArgs> | null
+    where?: TemplateWhereInput
   }
 
   /**
@@ -3882,6 +4470,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3895,18 +4487,46 @@ export namespace Prisma {
   }
 
   /**
-   * Funnel.template
+   * Funnel.theme
    */
-  export type Funnel$templateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Funnel$themeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Template
+     * Select specific fields to fetch from the Theme
      */
-    select?: TemplateSelect<ExtArgs> | null
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplateInclude<ExtArgs> | null
-    where?: TemplateWhereInput
+    include?: ThemeInclude<ExtArgs> | null
+    where?: ThemeWhereInput
+  }
+
+  /**
+   * Funnel.pages
+   */
+  export type Funnel$pagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Page
+     */
+    select?: PageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PageInclude<ExtArgs> | null
+    where?: PageWhereInput
+    orderBy?: PageOrderByWithRelationInput | PageOrderByWithRelationInput[]
+    cursor?: PageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PageScalarFieldEnum | PageScalarFieldEnum[]
   }
 
   /**
@@ -3917,6 +4537,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Funnel
      */
     select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4254,6 +4878,29 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["domain"]>
 
+  export type DomainSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    hostname?: boolean
+    type?: boolean
+    status?: boolean
+    sslStatus?: boolean
+    userId?: boolean
+    cloudflareHostnameId?: boolean
+    cloudflareZoneId?: boolean
+    cloudflareRecordId?: boolean
+    verificationToken?: boolean
+    ownershipVerification?: boolean
+    dnsInstructions?: boolean
+    sslCertificateId?: boolean
+    sslValidationRecords?: boolean
+    lastVerifiedAt?: boolean
+    expiresAt?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["domain"]>
+
   export type DomainSelectScalar = {
     id?: boolean
     hostname?: boolean
@@ -4276,12 +4923,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type DomainOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hostname" | "type" | "status" | "sslStatus" | "userId" | "cloudflareHostnameId" | "cloudflareZoneId" | "cloudflareRecordId" | "verificationToken" | "ownershipVerification" | "dnsInstructions" | "sslCertificateId" | "sslValidationRecords" | "lastVerifiedAt" | "expiresAt" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["domain"]>
   export type DomainInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     funnelConnections?: boolean | Domain$funnelConnectionsArgs<ExtArgs>
     _count?: boolean | DomainCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DomainIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DomainIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
 
@@ -4317,12 +4968,12 @@ export namespace Prisma {
 
   type DomainGetPayload<S extends boolean | null | undefined | DomainDefaultArgs> = $Result.GetResult<Prisma.$DomainPayload, S>
 
-  type DomainCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<DomainFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type DomainCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DomainFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: DomainCountAggregateInputType | true
     }
 
-  export interface DomainDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface DomainDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Domain'], meta: { name: 'Domain' } }
     /**
      * Find zero or one Domain that matches the filter.
@@ -4335,10 +4986,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends DomainFindUniqueArgs>(args: SelectSubset<T, DomainFindUniqueArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends DomainFindUniqueArgs>(args: SelectSubset<T, DomainFindUniqueArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Domain that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one Domain that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {DomainFindUniqueOrThrowArgs} args - Arguments to find a Domain
      * @example
@@ -4349,7 +5000,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends DomainFindUniqueOrThrowArgs>(args: SelectSubset<T, DomainFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends DomainFindUniqueOrThrowArgs>(args: SelectSubset<T, DomainFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Domain that matches the filter.
@@ -4364,7 +5015,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends DomainFindFirstArgs>(args?: SelectSubset<T, DomainFindFirstArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends DomainFindFirstArgs>(args?: SelectSubset<T, DomainFindFirstArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Domain that matches the filter or
@@ -4380,7 +5031,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends DomainFindFirstOrThrowArgs>(args?: SelectSubset<T, DomainFindFirstOrThrowArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends DomainFindFirstOrThrowArgs>(args?: SelectSubset<T, DomainFindFirstOrThrowArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Domains that matches the filter.
@@ -4398,7 +5049,7 @@ export namespace Prisma {
      * const domainWithIdOnly = await prisma.domain.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends DomainFindManyArgs>(args?: SelectSubset<T, DomainFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends DomainFindManyArgs>(args?: SelectSubset<T, DomainFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Domain.
@@ -4412,7 +5063,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends DomainCreateArgs>(args: SelectSubset<T, DomainCreateArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends DomainCreateArgs>(args: SelectSubset<T, DomainCreateArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Domains.
@@ -4440,7 +5091,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Domains and only return the `id`
-     * const domainWithIdOnly = await prisma.domain.createManyAndReturn({ 
+     * const domainWithIdOnly = await prisma.domain.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -4450,7 +5101,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends DomainCreateManyAndReturnArgs>(args?: SelectSubset<T, DomainCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends DomainCreateManyAndReturnArgs>(args?: SelectSubset<T, DomainCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Domain.
@@ -4464,7 +5115,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends DomainDeleteArgs>(args: SelectSubset<T, DomainDeleteArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends DomainDeleteArgs>(args: SelectSubset<T, DomainDeleteArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Domain.
@@ -4481,7 +5132,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends DomainUpdateArgs>(args: SelectSubset<T, DomainUpdateArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends DomainUpdateArgs>(args: SelectSubset<T, DomainUpdateArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Domains.
@@ -4517,6 +5168,36 @@ export namespace Prisma {
     updateMany<T extends DomainUpdateManyArgs>(args: SelectSubset<T, DomainUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Domains and returns the data updated in the database.
+     * @param {DomainUpdateManyAndReturnArgs} args - Arguments to update many Domains.
+     * @example
+     * // Update many Domains
+     * const domain = await prisma.domain.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Domains and only return the `id`
+     * const domainWithIdOnly = await prisma.domain.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DomainUpdateManyAndReturnArgs>(args: SelectSubset<T, DomainUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one Domain.
      * @param {DomainUpsertArgs} args - Arguments to update or create a Domain.
      * @example
@@ -4533,7 +5214,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends DomainUpsertArgs>(args: SelectSubset<T, DomainUpsertArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends DomainUpsertArgs>(args: SelectSubset<T, DomainUpsertArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -4673,10 +5354,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__DomainClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__DomainClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    funnelConnections<T extends Domain$funnelConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Domain$funnelConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany"> | Null>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    funnelConnections<T extends Domain$funnelConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Domain$funnelConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4704,7 +5385,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Domain model
-   */ 
+   */
   interface DomainFieldRefs {
     readonly id: FieldRef<"Domain", 'Int'>
     readonly hostname: FieldRef<"Domain", 'String'>
@@ -4738,6 +5419,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -4756,6 +5441,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -4773,6 +5462,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Domain
      */
     select?: DomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4822,6 +5515,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -4870,6 +5567,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -4913,6 +5614,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -4942,6 +5647,10 @@ export namespace Prisma {
      */
     select?: DomainSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * The data used to create many Domains.
      */
     data: DomainCreateManyInput | DomainCreateManyInput[]
@@ -4960,6 +5669,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Domain
      */
     select?: DomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4986,6 +5699,40 @@ export namespace Prisma {
      * Filter which Domains to update
      */
     where?: DomainWhereInput
+    /**
+     * Limit how many Domains to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Domain updateManyAndReturn
+   */
+  export type DomainUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Domain
+     */
+    select?: DomainSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
+     * The data used to update Domains.
+     */
+    data: XOR<DomainUpdateManyMutationInput, DomainUncheckedUpdateManyInput>
+    /**
+     * Filter which Domains to update
+     */
+    where?: DomainWhereInput
+    /**
+     * Limit how many Domains to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DomainIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4996,6 +5743,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Domain
      */
     select?: DomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5023,6 +5774,10 @@ export namespace Prisma {
      */
     select?: DomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: DomainInclude<ExtArgs> | null
@@ -5040,6 +5795,10 @@ export namespace Prisma {
      * Filter which Domains to delete
      */
     where?: DomainWhereInput
+    /**
+     * Limit how many Domains to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5050,6 +5809,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5070,6 +5833,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Domain
      */
     select?: DomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5291,8 +6058,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
     domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["funnelDomain"]>
 
   export type FunnelDomainSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5302,8 +6069,19 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
     domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["funnelDomain"]>
+
+  export type FunnelDomainSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    funnelId?: boolean
+    domainId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["funnelDomain"]>
 
   export type FunnelDomainSelectScalar = {
@@ -5315,20 +6093,25 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type FunnelDomainOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "funnelId" | "domainId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["funnelDomain"]>
   export type FunnelDomainInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
     domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
   export type FunnelDomainIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
     domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type FunnelDomainIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    domain?: boolean | DomainDefaultArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
 
   export type $FunnelDomainPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FunnelDomain"
     objects: {
-      funnel: Prisma.$FunnelPayload<ExtArgs>
       domain: Prisma.$DomainPayload<ExtArgs>
+      funnel: Prisma.$FunnelPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5343,12 +6126,12 @@ export namespace Prisma {
 
   type FunnelDomainGetPayload<S extends boolean | null | undefined | FunnelDomainDefaultArgs> = $Result.GetResult<Prisma.$FunnelDomainPayload, S>
 
-  type FunnelDomainCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<FunnelDomainFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type FunnelDomainCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FunnelDomainFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: FunnelDomainCountAggregateInputType | true
     }
 
-  export interface FunnelDomainDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface FunnelDomainDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FunnelDomain'], meta: { name: 'FunnelDomain' } }
     /**
      * Find zero or one FunnelDomain that matches the filter.
@@ -5361,10 +6144,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends FunnelDomainFindUniqueArgs>(args: SelectSubset<T, FunnelDomainFindUniqueArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends FunnelDomainFindUniqueArgs>(args: SelectSubset<T, FunnelDomainFindUniqueArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one FunnelDomain that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one FunnelDomain that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {FunnelDomainFindUniqueOrThrowArgs} args - Arguments to find a FunnelDomain
      * @example
@@ -5375,7 +6158,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends FunnelDomainFindUniqueOrThrowArgs>(args: SelectSubset<T, FunnelDomainFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends FunnelDomainFindUniqueOrThrowArgs>(args: SelectSubset<T, FunnelDomainFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first FunnelDomain that matches the filter.
@@ -5390,7 +6173,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends FunnelDomainFindFirstArgs>(args?: SelectSubset<T, FunnelDomainFindFirstArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends FunnelDomainFindFirstArgs>(args?: SelectSubset<T, FunnelDomainFindFirstArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first FunnelDomain that matches the filter or
@@ -5406,7 +6189,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends FunnelDomainFindFirstOrThrowArgs>(args?: SelectSubset<T, FunnelDomainFindFirstOrThrowArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends FunnelDomainFindFirstOrThrowArgs>(args?: SelectSubset<T, FunnelDomainFindFirstOrThrowArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more FunnelDomains that matches the filter.
@@ -5424,7 +6207,7 @@ export namespace Prisma {
      * const funnelDomainWithIdOnly = await prisma.funnelDomain.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends FunnelDomainFindManyArgs>(args?: SelectSubset<T, FunnelDomainFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends FunnelDomainFindManyArgs>(args?: SelectSubset<T, FunnelDomainFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a FunnelDomain.
@@ -5438,7 +6221,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends FunnelDomainCreateArgs>(args: SelectSubset<T, FunnelDomainCreateArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends FunnelDomainCreateArgs>(args: SelectSubset<T, FunnelDomainCreateArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many FunnelDomains.
@@ -5466,7 +6249,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many FunnelDomains and only return the `id`
-     * const funnelDomainWithIdOnly = await prisma.funnelDomain.createManyAndReturn({ 
+     * const funnelDomainWithIdOnly = await prisma.funnelDomain.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -5476,7 +6259,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends FunnelDomainCreateManyAndReturnArgs>(args?: SelectSubset<T, FunnelDomainCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends FunnelDomainCreateManyAndReturnArgs>(args?: SelectSubset<T, FunnelDomainCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a FunnelDomain.
@@ -5490,7 +6273,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends FunnelDomainDeleteArgs>(args: SelectSubset<T, FunnelDomainDeleteArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends FunnelDomainDeleteArgs>(args: SelectSubset<T, FunnelDomainDeleteArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one FunnelDomain.
@@ -5507,7 +6290,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends FunnelDomainUpdateArgs>(args: SelectSubset<T, FunnelDomainUpdateArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends FunnelDomainUpdateArgs>(args: SelectSubset<T, FunnelDomainUpdateArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more FunnelDomains.
@@ -5543,6 +6326,36 @@ export namespace Prisma {
     updateMany<T extends FunnelDomainUpdateManyArgs>(args: SelectSubset<T, FunnelDomainUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more FunnelDomains and returns the data updated in the database.
+     * @param {FunnelDomainUpdateManyAndReturnArgs} args - Arguments to update many FunnelDomains.
+     * @example
+     * // Update many FunnelDomains
+     * const funnelDomain = await prisma.funnelDomain.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FunnelDomains and only return the `id`
+     * const funnelDomainWithIdOnly = await prisma.funnelDomain.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FunnelDomainUpdateManyAndReturnArgs>(args: SelectSubset<T, FunnelDomainUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one FunnelDomain.
      * @param {FunnelDomainUpsertArgs} args - Arguments to update or create a FunnelDomain.
      * @example
@@ -5559,7 +6372,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends FunnelDomainUpsertArgs>(args: SelectSubset<T, FunnelDomainUpsertArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends FunnelDomainUpsertArgs>(args: SelectSubset<T, FunnelDomainUpsertArgs<ExtArgs>>): Prisma__FunnelDomainClient<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -5699,10 +6512,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__FunnelDomainClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__FunnelDomainClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    domain<T extends DomainDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DomainDefaultArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    domain<T extends DomainDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DomainDefaultArgs<ExtArgs>>): Prisma__DomainClient<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5730,7 +6543,7 @@ export namespace Prisma {
 
   /**
    * Fields of the FunnelDomain model
-   */ 
+   */
   interface FunnelDomainFieldRefs {
     readonly id: FieldRef<"FunnelDomain", 'Int'>
     readonly funnelId: FieldRef<"FunnelDomain", 'Int'>
@@ -5751,6 +6564,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -5769,6 +6586,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -5786,6 +6607,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5835,6 +6660,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -5883,6 +6712,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -5926,6 +6759,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -5955,6 +6792,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * The data used to create many FunnelDomains.
      */
     data: FunnelDomainCreateManyInput | FunnelDomainCreateManyInput[]
@@ -5973,6 +6814,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5999,6 +6844,40 @@ export namespace Prisma {
      * Filter which FunnelDomains to update
      */
     where?: FunnelDomainWhereInput
+    /**
+     * Limit how many FunnelDomains to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FunnelDomain updateManyAndReturn
+   */
+  export type FunnelDomainUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelDomain
+     */
+    select?: FunnelDomainSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
+     * The data used to update FunnelDomains.
+     */
+    data: XOR<FunnelDomainUpdateManyMutationInput, FunnelDomainUncheckedUpdateManyInput>
+    /**
+     * Filter which FunnelDomains to update
+     */
+    where?: FunnelDomainWhereInput
+    /**
+     * Limit how many FunnelDomains to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelDomainIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6009,6 +6888,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6036,6 +6919,10 @@ export namespace Prisma {
      */
     select?: FunnelDomainSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelDomainInclude<ExtArgs> | null
@@ -6053,6 +6940,10 @@ export namespace Prisma {
      * Filter which FunnelDomains to delete
      */
     where?: FunnelDomainWhereInput
+    /**
+     * Limit how many FunnelDomains to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6063,6 +6954,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the FunnelDomain
      */
     select?: FunnelDomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelDomain
+     */
+    omit?: FunnelDomainOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6085,12 +6980,14 @@ export namespace Prisma {
   export type PageAvgAggregateOutputType = {
     id: number | null
     order: number | null
+    visits: number | null
     funnelId: number | null
   }
 
   export type PageSumAggregateOutputType = {
     id: number | null
     order: number | null
+    visits: number | null
     funnelId: number | null
   }
 
@@ -6100,6 +6997,10 @@ export namespace Prisma {
     content: string | null
     order: number | null
     linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
+    visits: number | null
     funnelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6111,6 +7012,10 @@ export namespace Prisma {
     content: string | null
     order: number | null
     linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
+    visits: number | null
     funnelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6122,6 +7027,10 @@ export namespace Prisma {
     content: number
     order: number
     linkingId: number
+    seoTitle: number
+    seoDescription: number
+    seoKeywords: number
+    visits: number
     funnelId: number
     createdAt: number
     updatedAt: number
@@ -6132,12 +7041,14 @@ export namespace Prisma {
   export type PageAvgAggregateInputType = {
     id?: true
     order?: true
+    visits?: true
     funnelId?: true
   }
 
   export type PageSumAggregateInputType = {
     id?: true
     order?: true
+    visits?: true
     funnelId?: true
   }
 
@@ -6147,6 +7058,10 @@ export namespace Prisma {
     content?: true
     order?: true
     linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
+    visits?: true
     funnelId?: true
     createdAt?: true
     updatedAt?: true
@@ -6158,6 +7073,10 @@ export namespace Prisma {
     content?: true
     order?: true
     linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
+    visits?: true
     funnelId?: true
     createdAt?: true
     updatedAt?: true
@@ -6169,6 +7088,10 @@ export namespace Prisma {
     content?: true
     order?: true
     linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
+    visits?: true
     funnelId?: true
     createdAt?: true
     updatedAt?: true
@@ -6267,6 +7190,10 @@ export namespace Prisma {
     content: string | null
     order: number
     linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
+    visits: number
     funnelId: number
     createdAt: Date
     updatedAt: Date
@@ -6297,6 +7224,10 @@ export namespace Prisma {
     content?: boolean
     order?: boolean
     linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
+    visits?: boolean
     funnelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6309,6 +7240,26 @@ export namespace Prisma {
     content?: boolean
     order?: boolean
     linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
+    visits?: boolean
+    funnelId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["page"]>
+
+  export type PageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    content?: boolean
+    order?: boolean
+    linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
+    visits?: boolean
     funnelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6321,15 +7272,23 @@ export namespace Prisma {
     content?: boolean
     order?: boolean
     linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
+    visits?: boolean
     funnelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "content" | "order" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "visits" | "funnelId" | "createdAt" | "updatedAt", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
   export type PageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type PageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
 
@@ -6344,6 +7303,10 @@ export namespace Prisma {
       content: string | null
       order: number
       linkingId: string | null
+      seoTitle: string | null
+      seoDescription: string | null
+      seoKeywords: string | null
+      visits: number
       funnelId: number
       createdAt: Date
       updatedAt: Date
@@ -6353,12 +7316,12 @@ export namespace Prisma {
 
   type PageGetPayload<S extends boolean | null | undefined | PageDefaultArgs> = $Result.GetResult<Prisma.$PagePayload, S>
 
-  type PageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<PageFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type PageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: PageCountAggregateInputType | true
     }
 
-  export interface PageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface PageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Page'], meta: { name: 'Page' } }
     /**
      * Find zero or one Page that matches the filter.
@@ -6371,10 +7334,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends PageFindUniqueArgs>(args: SelectSubset<T, PageFindUniqueArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends PageFindUniqueArgs>(args: SelectSubset<T, PageFindUniqueArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Page that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one Page that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {PageFindUniqueOrThrowArgs} args - Arguments to find a Page
      * @example
@@ -6385,7 +7348,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends PageFindUniqueOrThrowArgs>(args: SelectSubset<T, PageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends PageFindUniqueOrThrowArgs>(args: SelectSubset<T, PageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Page that matches the filter.
@@ -6400,7 +7363,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends PageFindFirstArgs>(args?: SelectSubset<T, PageFindFirstArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends PageFindFirstArgs>(args?: SelectSubset<T, PageFindFirstArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Page that matches the filter or
@@ -6416,7 +7379,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends PageFindFirstOrThrowArgs>(args?: SelectSubset<T, PageFindFirstOrThrowArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends PageFindFirstOrThrowArgs>(args?: SelectSubset<T, PageFindFirstOrThrowArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Pages that matches the filter.
@@ -6434,7 +7397,7 @@ export namespace Prisma {
      * const pageWithIdOnly = await prisma.page.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends PageFindManyArgs>(args?: SelectSubset<T, PageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany">>
+    findMany<T extends PageFindManyArgs>(args?: SelectSubset<T, PageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Page.
@@ -6448,7 +7411,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends PageCreateArgs>(args: SelectSubset<T, PageCreateArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends PageCreateArgs>(args: SelectSubset<T, PageCreateArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Pages.
@@ -6476,7 +7439,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Pages and only return the `id`
-     * const pageWithIdOnly = await prisma.page.createManyAndReturn({ 
+     * const pageWithIdOnly = await prisma.page.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -6486,7 +7449,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends PageCreateManyAndReturnArgs>(args?: SelectSubset<T, PageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends PageCreateManyAndReturnArgs>(args?: SelectSubset<T, PageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Page.
@@ -6500,7 +7463,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends PageDeleteArgs>(args: SelectSubset<T, PageDeleteArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends PageDeleteArgs>(args: SelectSubset<T, PageDeleteArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Page.
@@ -6517,7 +7480,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends PageUpdateArgs>(args: SelectSubset<T, PageUpdateArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends PageUpdateArgs>(args: SelectSubset<T, PageUpdateArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Pages.
@@ -6553,6 +7516,36 @@ export namespace Prisma {
     updateMany<T extends PageUpdateManyArgs>(args: SelectSubset<T, PageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Pages and returns the data updated in the database.
+     * @param {PageUpdateManyAndReturnArgs} args - Arguments to update many Pages.
+     * @example
+     * // Update many Pages
+     * const page = await prisma.page.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Pages and only return the `id`
+     * const pageWithIdOnly = await prisma.page.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PageUpdateManyAndReturnArgs>(args: SelectSubset<T, PageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one Page.
      * @param {PageUpsertArgs} args - Arguments to update or create a Page.
      * @example
@@ -6569,7 +7562,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends PageUpsertArgs>(args: SelectSubset<T, PageUpsertArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends PageUpsertArgs>(args: SelectSubset<T, PageUpsertArgs<ExtArgs>>): Prisma__PageClient<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -6709,9 +7702,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__PageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__PageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6739,13 +7732,17 @@ export namespace Prisma {
 
   /**
    * Fields of the Page model
-   */ 
+   */
   interface PageFieldRefs {
     readonly id: FieldRef<"Page", 'Int'>
     readonly name: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'String'>
     readonly order: FieldRef<"Page", 'Int'>
     readonly linkingId: FieldRef<"Page", 'String'>
+    readonly seoTitle: FieldRef<"Page", 'String'>
+    readonly seoDescription: FieldRef<"Page", 'String'>
+    readonly seoKeywords: FieldRef<"Page", 'String'>
+    readonly visits: FieldRef<"Page", 'Int'>
     readonly funnelId: FieldRef<"Page", 'Int'>
     readonly createdAt: FieldRef<"Page", 'DateTime'>
     readonly updatedAt: FieldRef<"Page", 'DateTime'>
@@ -6761,6 +7758,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Page
      */
     select?: PageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6780,6 +7781,10 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
@@ -6797,6 +7802,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Page
      */
     select?: PageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6846,6 +7855,10 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
@@ -6894,6 +7907,10 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
@@ -6937,6 +7954,10 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
@@ -6966,6 +7987,10 @@ export namespace Prisma {
      */
     select?: PageSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * The data used to create many Pages.
      */
     data: PageCreateManyInput | PageCreateManyInput[]
@@ -6984,6 +8009,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Page
      */
     select?: PageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7010,6 +8039,40 @@ export namespace Prisma {
      * Filter which Pages to update
      */
     where?: PageWhereInput
+    /**
+     * Limit how many Pages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Page updateManyAndReturn
+   */
+  export type PageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Page
+     */
+    select?: PageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
+     * The data used to update Pages.
+     */
+    data: XOR<PageUpdateManyMutationInput, PageUncheckedUpdateManyInput>
+    /**
+     * Filter which Pages to update
+     */
+    where?: PageWhereInput
+    /**
+     * Limit how many Pages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PageIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -7020,6 +8083,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Page
      */
     select?: PageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7047,6 +8114,10 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
@@ -7064,6 +8135,10 @@ export namespace Prisma {
      * Filter which Pages to delete
      */
     where?: PageWhereInput
+    /**
+     * Limit how many Pages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7075,9 +8150,2252 @@ export namespace Prisma {
      */
     select?: PageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Page
+     */
+    omit?: PageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Session
+   */
+
+  export type AggregateSession = {
+    _count: SessionCountAggregateOutputType | null
+    _avg: SessionAvgAggregateOutputType | null
+    _sum: SessionSumAggregateOutputType | null
+    _min: SessionMinAggregateOutputType | null
+    _max: SessionMaxAggregateOutputType | null
+  }
+
+  export type SessionAvgAggregateOutputType = {
+    funnelId: number | null
+    visitedPages: number | null
+  }
+
+  export type SessionSumAggregateOutputType = {
+    funnelId: number | null
+    visitedPages: number[]
+  }
+
+  export type SessionMinAggregateOutputType = {
+    id: string | null
+    sessionId: string | null
+    funnelId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionMaxAggregateOutputType = {
+    id: string | null
+    sessionId: string | null
+    funnelId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionCountAggregateOutputType = {
+    id: number
+    sessionId: number
+    funnelId: number
+    visitedPages: number
+    interactions: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SessionAvgAggregateInputType = {
+    funnelId?: true
+    visitedPages?: true
+  }
+
+  export type SessionSumAggregateInputType = {
+    funnelId?: true
+    visitedPages?: true
+  }
+
+  export type SessionMinAggregateInputType = {
+    id?: true
+    sessionId?: true
+    funnelId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionMaxAggregateInputType = {
+    id?: true
+    sessionId?: true
+    funnelId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionCountAggregateInputType = {
+    id?: true
+    sessionId?: true
+    funnelId?: true
+    visitedPages?: true
+    interactions?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Session to aggregate.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Sessions
+    **/
+    _count?: true | SessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SessionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SessionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SessionMaxAggregateInputType
+  }
+
+  export type GetSessionAggregateType<T extends SessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSession[P]>
+      : GetScalarType<T[P], AggregateSession[P]>
+  }
+
+
+
+
+  export type SessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionWhereInput
+    orderBy?: SessionOrderByWithAggregationInput | SessionOrderByWithAggregationInput[]
+    by: SessionScalarFieldEnum[] | SessionScalarFieldEnum
+    having?: SessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SessionCountAggregateInputType | true
+    _avg?: SessionAvgAggregateInputType
+    _sum?: SessionSumAggregateInputType
+    _min?: SessionMinAggregateInputType
+    _max?: SessionMaxAggregateInputType
+  }
+
+  export type SessionGroupByOutputType = {
+    id: string
+    sessionId: string
+    funnelId: number
+    visitedPages: number[]
+    interactions: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: SessionCountAggregateOutputType | null
+    _avg: SessionAvgAggregateOutputType | null
+    _sum: SessionSumAggregateOutputType | null
+    _min: SessionMinAggregateOutputType | null
+    _max: SessionMaxAggregateOutputType | null
+  }
+
+  type GetSessionGroupByPayload<T extends SessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SessionGroupByOutputType[P]>
+            : GetScalarType<T[P], SessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    funnelId?: boolean
+    visitedPages?: boolean
+    interactions?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    funnelId?: boolean
+    visitedPages?: boolean
+    interactions?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    funnelId?: boolean
+    visitedPages?: boolean
+    interactions?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectScalar = {
+    id?: boolean
+    sessionId?: boolean
+    funnelId?: boolean
+    visitedPages?: boolean
+    interactions?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionId" | "funnelId" | "visitedPages" | "interactions" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+
+  export type $SessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Session"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      sessionId: string
+      funnelId: number
+      visitedPages: number[]
+      interactions: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["session"]>
+    composites: {}
+  }
+
+  type SessionGetPayload<S extends boolean | null | undefined | SessionDefaultArgs> = $Result.GetResult<Prisma.$SessionPayload, S>
+
+  type SessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SessionCountAggregateInputType | true
+    }
+
+  export interface SessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Session'], meta: { name: 'Session' } }
+    /**
+     * Find zero or one Session that matches the filter.
+     * @param {SessionFindUniqueArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SessionFindUniqueArgs>(args: SelectSubset<T, SessionFindUniqueArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Session that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SessionFindUniqueOrThrowArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SessionFindUniqueOrThrowArgs>(args: SelectSubset<T, SessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Session that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindFirstArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SessionFindFirstArgs>(args?: SelectSubset<T, SessionFindFirstArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Session that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindFirstOrThrowArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SessionFindFirstOrThrowArgs>(args?: SelectSubset<T, SessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Sessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Sessions
+     * const sessions = await prisma.session.findMany()
+     * 
+     * // Get first 10 Sessions
+     * const sessions = await prisma.session.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sessionWithIdOnly = await prisma.session.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SessionFindManyArgs>(args?: SelectSubset<T, SessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Session.
+     * @param {SessionCreateArgs} args - Arguments to create a Session.
+     * @example
+     * // Create one Session
+     * const Session = await prisma.session.create({
+     *   data: {
+     *     // ... data to create a Session
+     *   }
+     * })
+     * 
+     */
+    create<T extends SessionCreateArgs>(args: SelectSubset<T, SessionCreateArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Sessions.
+     * @param {SessionCreateManyArgs} args - Arguments to create many Sessions.
+     * @example
+     * // Create many Sessions
+     * const session = await prisma.session.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SessionCreateManyArgs>(args?: SelectSubset<T, SessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Sessions and returns the data saved in the database.
+     * @param {SessionCreateManyAndReturnArgs} args - Arguments to create many Sessions.
+     * @example
+     * // Create many Sessions
+     * const session = await prisma.session.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Sessions and only return the `id`
+     * const sessionWithIdOnly = await prisma.session.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SessionCreateManyAndReturnArgs>(args?: SelectSubset<T, SessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Session.
+     * @param {SessionDeleteArgs} args - Arguments to delete one Session.
+     * @example
+     * // Delete one Session
+     * const Session = await prisma.session.delete({
+     *   where: {
+     *     // ... filter to delete one Session
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SessionDeleteArgs>(args: SelectSubset<T, SessionDeleteArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Session.
+     * @param {SessionUpdateArgs} args - Arguments to update one Session.
+     * @example
+     * // Update one Session
+     * const session = await prisma.session.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SessionUpdateArgs>(args: SelectSubset<T, SessionUpdateArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Sessions.
+     * @param {SessionDeleteManyArgs} args - Arguments to filter Sessions to delete.
+     * @example
+     * // Delete a few Sessions
+     * const { count } = await prisma.session.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SessionDeleteManyArgs>(args?: SelectSubset<T, SessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Sessions
+     * const session = await prisma.session.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SessionUpdateManyArgs>(args: SelectSubset<T, SessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Sessions and returns the data updated in the database.
+     * @param {SessionUpdateManyAndReturnArgs} args - Arguments to update many Sessions.
+     * @example
+     * // Update many Sessions
+     * const session = await prisma.session.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Sessions and only return the `id`
+     * const sessionWithIdOnly = await prisma.session.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SessionUpdateManyAndReturnArgs>(args: SelectSubset<T, SessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Session.
+     * @param {SessionUpsertArgs} args - Arguments to update or create a Session.
+     * @example
+     * // Update or create a Session
+     * const session = await prisma.session.upsert({
+     *   create: {
+     *     // ... data to create a Session
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Session we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SessionUpsertArgs>(args: SelectSubset<T, SessionUpsertArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionCountArgs} args - Arguments to filter Sessions to count.
+     * @example
+     * // Count the number of Sessions
+     * const count = await prisma.session.count({
+     *   where: {
+     *     // ... the filter for the Sessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends SessionCountArgs>(
+      args?: Subset<T, SessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Session.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SessionAggregateArgs>(args: Subset<T, SessionAggregateArgs>): Prisma.PrismaPromise<GetSessionAggregateType<T>>
+
+    /**
+     * Group by Session.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SessionGroupByArgs['orderBy'] }
+        : { orderBy?: SessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Session model
+   */
+  readonly fields: SessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Session.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Session model
+   */
+  interface SessionFieldRefs {
+    readonly id: FieldRef<"Session", 'String'>
+    readonly sessionId: FieldRef<"Session", 'String'>
+    readonly funnelId: FieldRef<"Session", 'Int'>
+    readonly visitedPages: FieldRef<"Session", 'Int[]'>
+    readonly interactions: FieldRef<"Session", 'Json'>
+    readonly createdAt: FieldRef<"Session", 'DateTime'>
+    readonly updatedAt: FieldRef<"Session", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Session findUnique
+   */
+  export type SessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session findUniqueOrThrow
+   */
+  export type SessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session findFirst
+   */
+  export type SessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Sessions.
+     */
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session findFirstOrThrow
+   */
+  export type SessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Sessions.
+     */
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session findMany
+   */
+  export type SessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter, which Sessions to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session create
+   */
+  export type SessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Session.
+     */
+    data: XOR<SessionCreateInput, SessionUncheckedCreateInput>
+  }
+
+  /**
+   * Session createMany
+   */
+  export type SessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Sessions.
+     */
+    data: SessionCreateManyInput | SessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Session createManyAndReturn
+   */
+  export type SessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many Sessions.
+     */
+    data: SessionCreateManyInput | SessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Session update
+   */
+  export type SessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Session.
+     */
+    data: XOR<SessionUpdateInput, SessionUncheckedUpdateInput>
+    /**
+     * Choose, which Session to update.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session updateMany
+   */
+  export type SessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Sessions.
+     */
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyInput>
+    /**
+     * Filter which Sessions to update
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Session updateManyAndReturn
+   */
+  export type SessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data used to update Sessions.
+     */
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyInput>
+    /**
+     * Filter which Sessions to update
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Session upsert
+   */
+  export type SessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Session to update in case it exists.
+     */
+    where: SessionWhereUniqueInput
+    /**
+     * In case the Session found by the `where` argument doesn't exist, create a new Session with this data.
+     */
+    create: XOR<SessionCreateInput, SessionUncheckedCreateInput>
+    /**
+     * In case the Session was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SessionUpdateInput, SessionUncheckedUpdateInput>
+  }
+
+  /**
+   * Session delete
+   */
+  export type SessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Filter which Session to delete.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session deleteMany
+   */
+  export type SessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Sessions to delete
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Session without action
+   */
+  export type SessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Theme
+   */
+
+  export type AggregateTheme = {
+    _count: ThemeCountAggregateOutputType | null
+    _avg: ThemeAvgAggregateOutputType | null
+    _sum: ThemeSumAggregateOutputType | null
+    _min: ThemeMinAggregateOutputType | null
+    _max: ThemeMaxAggregateOutputType | null
+  }
+
+  export type ThemeAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ThemeSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ThemeMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    backgroundColor: string | null
+    textColor: string | null
+    buttonColor: string | null
+    buttonTextColor: string | null
+    borderColor: string | null
+    optionColor: string | null
+    fontFamily: string | null
+    borderRadius: $Enums.BorderRadius | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ThemeMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    backgroundColor: string | null
+    textColor: string | null
+    buttonColor: string | null
+    buttonTextColor: string | null
+    borderColor: string | null
+    optionColor: string | null
+    fontFamily: string | null
+    borderRadius: $Enums.BorderRadius | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ThemeCountAggregateOutputType = {
+    id: number
+    name: number
+    backgroundColor: number
+    textColor: number
+    buttonColor: number
+    buttonTextColor: number
+    borderColor: number
+    optionColor: number
+    fontFamily: number
+    borderRadius: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ThemeAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type ThemeSumAggregateInputType = {
+    id?: true
+  }
+
+  export type ThemeMinAggregateInputType = {
+    id?: true
+    name?: true
+    backgroundColor?: true
+    textColor?: true
+    buttonColor?: true
+    buttonTextColor?: true
+    borderColor?: true
+    optionColor?: true
+    fontFamily?: true
+    borderRadius?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ThemeMaxAggregateInputType = {
+    id?: true
+    name?: true
+    backgroundColor?: true
+    textColor?: true
+    buttonColor?: true
+    buttonTextColor?: true
+    borderColor?: true
+    optionColor?: true
+    fontFamily?: true
+    borderRadius?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ThemeCountAggregateInputType = {
+    id?: true
+    name?: true
+    backgroundColor?: true
+    textColor?: true
+    buttonColor?: true
+    buttonTextColor?: true
+    borderColor?: true
+    optionColor?: true
+    fontFamily?: true
+    borderRadius?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ThemeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Theme to aggregate.
+     */
+    where?: ThemeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Themes to fetch.
+     */
+    orderBy?: ThemeOrderByWithRelationInput | ThemeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ThemeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Themes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Themes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Themes
+    **/
+    _count?: true | ThemeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ThemeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ThemeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ThemeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ThemeMaxAggregateInputType
+  }
+
+  export type GetThemeAggregateType<T extends ThemeAggregateArgs> = {
+        [P in keyof T & keyof AggregateTheme]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTheme[P]>
+      : GetScalarType<T[P], AggregateTheme[P]>
+  }
+
+
+
+
+  export type ThemeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ThemeWhereInput
+    orderBy?: ThemeOrderByWithAggregationInput | ThemeOrderByWithAggregationInput[]
+    by: ThemeScalarFieldEnum[] | ThemeScalarFieldEnum
+    having?: ThemeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ThemeCountAggregateInputType | true
+    _avg?: ThemeAvgAggregateInputType
+    _sum?: ThemeSumAggregateInputType
+    _min?: ThemeMinAggregateInputType
+    _max?: ThemeMaxAggregateInputType
+  }
+
+  export type ThemeGroupByOutputType = {
+    id: number
+    name: string
+    backgroundColor: string
+    textColor: string
+    buttonColor: string
+    buttonTextColor: string
+    borderColor: string
+    optionColor: string
+    fontFamily: string
+    borderRadius: $Enums.BorderRadius
+    createdAt: Date
+    updatedAt: Date
+    _count: ThemeCountAggregateOutputType | null
+    _avg: ThemeAvgAggregateOutputType | null
+    _sum: ThemeSumAggregateOutputType | null
+    _min: ThemeMinAggregateOutputType | null
+    _max: ThemeMaxAggregateOutputType | null
+  }
+
+  type GetThemeGroupByPayload<T extends ThemeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ThemeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ThemeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ThemeGroupByOutputType[P]>
+            : GetScalarType<T[P], ThemeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ThemeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    backgroundColor?: boolean
+    textColor?: boolean
+    buttonColor?: boolean
+    buttonTextColor?: boolean
+    borderColor?: boolean
+    optionColor?: boolean
+    fontFamily?: boolean
+    borderRadius?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | Theme$funnelArgs<ExtArgs>
+  }, ExtArgs["result"]["theme"]>
+
+  export type ThemeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    backgroundColor?: boolean
+    textColor?: boolean
+    buttonColor?: boolean
+    buttonTextColor?: boolean
+    borderColor?: boolean
+    optionColor?: boolean
+    fontFamily?: boolean
+    borderRadius?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["theme"]>
+
+  export type ThemeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    backgroundColor?: boolean
+    textColor?: boolean
+    buttonColor?: boolean
+    buttonTextColor?: boolean
+    borderColor?: boolean
+    optionColor?: boolean
+    fontFamily?: boolean
+    borderRadius?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["theme"]>
+
+  export type ThemeSelectScalar = {
+    id?: boolean
+    name?: boolean
+    backgroundColor?: boolean
+    textColor?: boolean
+    buttonColor?: boolean
+    buttonTextColor?: boolean
+    borderColor?: boolean
+    optionColor?: boolean
+    fontFamily?: boolean
+    borderRadius?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ThemeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "backgroundColor" | "textColor" | "buttonColor" | "buttonTextColor" | "borderColor" | "optionColor" | "fontFamily" | "borderRadius" | "createdAt" | "updatedAt", ExtArgs["result"]["theme"]>
+  export type ThemeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | Theme$funnelArgs<ExtArgs>
+  }
+  export type ThemeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ThemeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $ThemePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Theme"
+    objects: {
+      funnel: Prisma.$FunnelPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      backgroundColor: string
+      textColor: string
+      buttonColor: string
+      buttonTextColor: string
+      borderColor: string
+      optionColor: string
+      fontFamily: string
+      borderRadius: $Enums.BorderRadius
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["theme"]>
+    composites: {}
+  }
+
+  type ThemeGetPayload<S extends boolean | null | undefined | ThemeDefaultArgs> = $Result.GetResult<Prisma.$ThemePayload, S>
+
+  type ThemeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ThemeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ThemeCountAggregateInputType | true
+    }
+
+  export interface ThemeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Theme'], meta: { name: 'Theme' } }
+    /**
+     * Find zero or one Theme that matches the filter.
+     * @param {ThemeFindUniqueArgs} args - Arguments to find a Theme
+     * @example
+     * // Get one Theme
+     * const theme = await prisma.theme.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ThemeFindUniqueArgs>(args: SelectSubset<T, ThemeFindUniqueArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Theme that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ThemeFindUniqueOrThrowArgs} args - Arguments to find a Theme
+     * @example
+     * // Get one Theme
+     * const theme = await prisma.theme.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ThemeFindUniqueOrThrowArgs>(args: SelectSubset<T, ThemeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Theme that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeFindFirstArgs} args - Arguments to find a Theme
+     * @example
+     * // Get one Theme
+     * const theme = await prisma.theme.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ThemeFindFirstArgs>(args?: SelectSubset<T, ThemeFindFirstArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Theme that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeFindFirstOrThrowArgs} args - Arguments to find a Theme
+     * @example
+     * // Get one Theme
+     * const theme = await prisma.theme.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ThemeFindFirstOrThrowArgs>(args?: SelectSubset<T, ThemeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Themes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Themes
+     * const themes = await prisma.theme.findMany()
+     * 
+     * // Get first 10 Themes
+     * const themes = await prisma.theme.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const themeWithIdOnly = await prisma.theme.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ThemeFindManyArgs>(args?: SelectSubset<T, ThemeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Theme.
+     * @param {ThemeCreateArgs} args - Arguments to create a Theme.
+     * @example
+     * // Create one Theme
+     * const Theme = await prisma.theme.create({
+     *   data: {
+     *     // ... data to create a Theme
+     *   }
+     * })
+     * 
+     */
+    create<T extends ThemeCreateArgs>(args: SelectSubset<T, ThemeCreateArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Themes.
+     * @param {ThemeCreateManyArgs} args - Arguments to create many Themes.
+     * @example
+     * // Create many Themes
+     * const theme = await prisma.theme.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ThemeCreateManyArgs>(args?: SelectSubset<T, ThemeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Themes and returns the data saved in the database.
+     * @param {ThemeCreateManyAndReturnArgs} args - Arguments to create many Themes.
+     * @example
+     * // Create many Themes
+     * const theme = await prisma.theme.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Themes and only return the `id`
+     * const themeWithIdOnly = await prisma.theme.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ThemeCreateManyAndReturnArgs>(args?: SelectSubset<T, ThemeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Theme.
+     * @param {ThemeDeleteArgs} args - Arguments to delete one Theme.
+     * @example
+     * // Delete one Theme
+     * const Theme = await prisma.theme.delete({
+     *   where: {
+     *     // ... filter to delete one Theme
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ThemeDeleteArgs>(args: SelectSubset<T, ThemeDeleteArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Theme.
+     * @param {ThemeUpdateArgs} args - Arguments to update one Theme.
+     * @example
+     * // Update one Theme
+     * const theme = await prisma.theme.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ThemeUpdateArgs>(args: SelectSubset<T, ThemeUpdateArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Themes.
+     * @param {ThemeDeleteManyArgs} args - Arguments to filter Themes to delete.
+     * @example
+     * // Delete a few Themes
+     * const { count } = await prisma.theme.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ThemeDeleteManyArgs>(args?: SelectSubset<T, ThemeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Themes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Themes
+     * const theme = await prisma.theme.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ThemeUpdateManyArgs>(args: SelectSubset<T, ThemeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Themes and returns the data updated in the database.
+     * @param {ThemeUpdateManyAndReturnArgs} args - Arguments to update many Themes.
+     * @example
+     * // Update many Themes
+     * const theme = await prisma.theme.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Themes and only return the `id`
+     * const themeWithIdOnly = await prisma.theme.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ThemeUpdateManyAndReturnArgs>(args: SelectSubset<T, ThemeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Theme.
+     * @param {ThemeUpsertArgs} args - Arguments to update or create a Theme.
+     * @example
+     * // Update or create a Theme
+     * const theme = await prisma.theme.upsert({
+     *   create: {
+     *     // ... data to create a Theme
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Theme we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ThemeUpsertArgs>(args: SelectSubset<T, ThemeUpsertArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Themes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeCountArgs} args - Arguments to filter Themes to count.
+     * @example
+     * // Count the number of Themes
+     * const count = await prisma.theme.count({
+     *   where: {
+     *     // ... the filter for the Themes we want to count
+     *   }
+     * })
+    **/
+    count<T extends ThemeCountArgs>(
+      args?: Subset<T, ThemeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ThemeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Theme.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ThemeAggregateArgs>(args: Subset<T, ThemeAggregateArgs>): Prisma.PrismaPromise<GetThemeAggregateType<T>>
+
+    /**
+     * Group by Theme.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ThemeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ThemeGroupByArgs['orderBy'] }
+        : { orderBy?: ThemeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ThemeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetThemeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Theme model
+   */
+  readonly fields: ThemeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Theme.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ThemeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    funnel<T extends Theme$funnelArgs<ExtArgs> = {}>(args?: Subset<T, Theme$funnelArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Theme model
+   */
+  interface ThemeFieldRefs {
+    readonly id: FieldRef<"Theme", 'Int'>
+    readonly name: FieldRef<"Theme", 'String'>
+    readonly backgroundColor: FieldRef<"Theme", 'String'>
+    readonly textColor: FieldRef<"Theme", 'String'>
+    readonly buttonColor: FieldRef<"Theme", 'String'>
+    readonly buttonTextColor: FieldRef<"Theme", 'String'>
+    readonly borderColor: FieldRef<"Theme", 'String'>
+    readonly optionColor: FieldRef<"Theme", 'String'>
+    readonly fontFamily: FieldRef<"Theme", 'String'>
+    readonly borderRadius: FieldRef<"Theme", 'BorderRadius'>
+    readonly createdAt: FieldRef<"Theme", 'DateTime'>
+    readonly updatedAt: FieldRef<"Theme", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Theme findUnique
+   */
+  export type ThemeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter, which Theme to fetch.
+     */
+    where: ThemeWhereUniqueInput
+  }
+
+  /**
+   * Theme findUniqueOrThrow
+   */
+  export type ThemeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter, which Theme to fetch.
+     */
+    where: ThemeWhereUniqueInput
+  }
+
+  /**
+   * Theme findFirst
+   */
+  export type ThemeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter, which Theme to fetch.
+     */
+    where?: ThemeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Themes to fetch.
+     */
+    orderBy?: ThemeOrderByWithRelationInput | ThemeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Themes.
+     */
+    cursor?: ThemeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Themes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Themes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Themes.
+     */
+    distinct?: ThemeScalarFieldEnum | ThemeScalarFieldEnum[]
+  }
+
+  /**
+   * Theme findFirstOrThrow
+   */
+  export type ThemeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter, which Theme to fetch.
+     */
+    where?: ThemeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Themes to fetch.
+     */
+    orderBy?: ThemeOrderByWithRelationInput | ThemeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Themes.
+     */
+    cursor?: ThemeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Themes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Themes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Themes.
+     */
+    distinct?: ThemeScalarFieldEnum | ThemeScalarFieldEnum[]
+  }
+
+  /**
+   * Theme findMany
+   */
+  export type ThemeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter, which Themes to fetch.
+     */
+    where?: ThemeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Themes to fetch.
+     */
+    orderBy?: ThemeOrderByWithRelationInput | ThemeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Themes.
+     */
+    cursor?: ThemeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Themes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Themes.
+     */
+    skip?: number
+    distinct?: ThemeScalarFieldEnum | ThemeScalarFieldEnum[]
+  }
+
+  /**
+   * Theme create
+   */
+  export type ThemeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Theme.
+     */
+    data: XOR<ThemeCreateInput, ThemeUncheckedCreateInput>
+  }
+
+  /**
+   * Theme createMany
+   */
+  export type ThemeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Themes.
+     */
+    data: ThemeCreateManyInput | ThemeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Theme createManyAndReturn
+   */
+  export type ThemeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * The data used to create many Themes.
+     */
+    data: ThemeCreateManyInput | ThemeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Theme update
+   */
+  export type ThemeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Theme.
+     */
+    data: XOR<ThemeUpdateInput, ThemeUncheckedUpdateInput>
+    /**
+     * Choose, which Theme to update.
+     */
+    where: ThemeWhereUniqueInput
+  }
+
+  /**
+   * Theme updateMany
+   */
+  export type ThemeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Themes.
+     */
+    data: XOR<ThemeUpdateManyMutationInput, ThemeUncheckedUpdateManyInput>
+    /**
+     * Filter which Themes to update
+     */
+    where?: ThemeWhereInput
+    /**
+     * Limit how many Themes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Theme updateManyAndReturn
+   */
+  export type ThemeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * The data used to update Themes.
+     */
+    data: XOR<ThemeUpdateManyMutationInput, ThemeUncheckedUpdateManyInput>
+    /**
+     * Filter which Themes to update
+     */
+    where?: ThemeWhereInput
+    /**
+     * Limit how many Themes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Theme upsert
+   */
+  export type ThemeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Theme to update in case it exists.
+     */
+    where: ThemeWhereUniqueInput
+    /**
+     * In case the Theme found by the `where` argument doesn't exist, create a new Theme with this data.
+     */
+    create: XOR<ThemeCreateInput, ThemeUncheckedCreateInput>
+    /**
+     * In case the Theme was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ThemeUpdateInput, ThemeUncheckedUpdateInput>
+  }
+
+  /**
+   * Theme delete
+   */
+  export type ThemeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
+    /**
+     * Filter which Theme to delete.
+     */
+    where: ThemeWhereUniqueInput
+  }
+
+  /**
+   * Theme deleteMany
+   */
+  export type ThemeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Themes to delete
+     */
+    where?: ThemeWhereInput
+    /**
+     * Limit how many Themes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Theme.funnel
+   */
+  export type Theme$funnelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Funnel
+     */
+    select?: FunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelInclude<ExtArgs> | null
+    where?: FunnelWhereInput
+  }
+
+  /**
+   * Theme without action
+   */
+  export type ThemeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Theme
+     */
+    select?: ThemeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Theme
+     */
+    omit?: ThemeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeInclude<ExtArgs> | null
   }
 
 
@@ -7331,6 +10649,18 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["templateCategory"]>
 
+  export type TemplateCategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    icon?: boolean
+    order?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["templateCategory"]>
+
   export type TemplateCategorySelectScalar = {
     id?: boolean
     name?: boolean
@@ -7343,11 +10673,13 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type TemplateCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "icon" | "order" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["templateCategory"]>
   export type TemplateCategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     templates?: boolean | TemplateCategory$templatesArgs<ExtArgs>
     _count?: boolean | TemplateCategoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TemplateCategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TemplateCategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $TemplateCategoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TemplateCategory"
@@ -7370,12 +10702,12 @@ export namespace Prisma {
 
   type TemplateCategoryGetPayload<S extends boolean | null | undefined | TemplateCategoryDefaultArgs> = $Result.GetResult<Prisma.$TemplateCategoryPayload, S>
 
-  type TemplateCategoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<TemplateCategoryFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type TemplateCategoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemplateCategoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: TemplateCategoryCountAggregateInputType | true
     }
 
-  export interface TemplateCategoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface TemplateCategoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemplateCategory'], meta: { name: 'TemplateCategory' } }
     /**
      * Find zero or one TemplateCategory that matches the filter.
@@ -7388,10 +10720,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends TemplateCategoryFindUniqueArgs>(args: SelectSubset<T, TemplateCategoryFindUniqueArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends TemplateCategoryFindUniqueArgs>(args: SelectSubset<T, TemplateCategoryFindUniqueArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one TemplateCategory that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one TemplateCategory that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {TemplateCategoryFindUniqueOrThrowArgs} args - Arguments to find a TemplateCategory
      * @example
@@ -7402,7 +10734,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends TemplateCategoryFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateCategoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends TemplateCategoryFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateCategoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplateCategory that matches the filter.
@@ -7417,7 +10749,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends TemplateCategoryFindFirstArgs>(args?: SelectSubset<T, TemplateCategoryFindFirstArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends TemplateCategoryFindFirstArgs>(args?: SelectSubset<T, TemplateCategoryFindFirstArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplateCategory that matches the filter or
@@ -7433,7 +10765,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends TemplateCategoryFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateCategoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends TemplateCategoryFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateCategoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more TemplateCategories that matches the filter.
@@ -7451,7 +10783,7 @@ export namespace Prisma {
      * const templateCategoryWithIdOnly = await prisma.templateCategory.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends TemplateCategoryFindManyArgs>(args?: SelectSubset<T, TemplateCategoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends TemplateCategoryFindManyArgs>(args?: SelectSubset<T, TemplateCategoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a TemplateCategory.
@@ -7465,7 +10797,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends TemplateCategoryCreateArgs>(args: SelectSubset<T, TemplateCategoryCreateArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends TemplateCategoryCreateArgs>(args: SelectSubset<T, TemplateCategoryCreateArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many TemplateCategories.
@@ -7493,7 +10825,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many TemplateCategories and only return the `id`
-     * const templateCategoryWithIdOnly = await prisma.templateCategory.createManyAndReturn({ 
+     * const templateCategoryWithIdOnly = await prisma.templateCategory.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -7503,7 +10835,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends TemplateCategoryCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateCategoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends TemplateCategoryCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateCategoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a TemplateCategory.
@@ -7517,7 +10849,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends TemplateCategoryDeleteArgs>(args: SelectSubset<T, TemplateCategoryDeleteArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends TemplateCategoryDeleteArgs>(args: SelectSubset<T, TemplateCategoryDeleteArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one TemplateCategory.
@@ -7534,7 +10866,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends TemplateCategoryUpdateArgs>(args: SelectSubset<T, TemplateCategoryUpdateArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends TemplateCategoryUpdateArgs>(args: SelectSubset<T, TemplateCategoryUpdateArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more TemplateCategories.
@@ -7570,6 +10902,36 @@ export namespace Prisma {
     updateMany<T extends TemplateCategoryUpdateManyArgs>(args: SelectSubset<T, TemplateCategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more TemplateCategories and returns the data updated in the database.
+     * @param {TemplateCategoryUpdateManyAndReturnArgs} args - Arguments to update many TemplateCategories.
+     * @example
+     * // Update many TemplateCategories
+     * const templateCategory = await prisma.templateCategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TemplateCategories and only return the `id`
+     * const templateCategoryWithIdOnly = await prisma.templateCategory.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TemplateCategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplateCategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one TemplateCategory.
      * @param {TemplateCategoryUpsertArgs} args - Arguments to update or create a TemplateCategory.
      * @example
@@ -7586,7 +10948,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends TemplateCategoryUpsertArgs>(args: SelectSubset<T, TemplateCategoryUpsertArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends TemplateCategoryUpsertArgs>(args: SelectSubset<T, TemplateCategoryUpsertArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -7726,9 +11088,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__TemplateCategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__TemplateCategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    templates<T extends TemplateCategory$templatesArgs<ExtArgs> = {}>(args?: Subset<T, TemplateCategory$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany"> | Null>
+    templates<T extends TemplateCategory$templatesArgs<ExtArgs> = {}>(args?: Subset<T, TemplateCategory$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7756,7 +11118,7 @@ export namespace Prisma {
 
   /**
    * Fields of the TemplateCategory model
-   */ 
+   */
   interface TemplateCategoryFieldRefs {
     readonly id: FieldRef<"TemplateCategory", 'Int'>
     readonly name: FieldRef<"TemplateCategory", 'String'>
@@ -7780,6 +11142,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -7798,6 +11164,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -7815,6 +11185,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateCategory
      */
     select?: TemplateCategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7864,6 +11238,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -7912,6 +11290,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -7955,6 +11337,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -7984,6 +11370,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * The data used to create many TemplateCategories.
      */
     data: TemplateCategoryCreateManyInput | TemplateCategoryCreateManyInput[]
@@ -7998,6 +11388,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateCategory
      */
     select?: TemplateCategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8024,6 +11418,36 @@ export namespace Prisma {
      * Filter which TemplateCategories to update
      */
     where?: TemplateCategoryWhereInput
+    /**
+     * Limit how many TemplateCategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TemplateCategory updateManyAndReturn
+   */
+  export type TemplateCategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemplateCategory
+     */
+    select?: TemplateCategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update TemplateCategories.
+     */
+    data: XOR<TemplateCategoryUpdateManyMutationInput, TemplateCategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which TemplateCategories to update
+     */
+    where?: TemplateCategoryWhereInput
+    /**
+     * Limit how many TemplateCategories to update.
+     */
+    limit?: number
   }
 
   /**
@@ -8034,6 +11458,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateCategory
      */
     select?: TemplateCategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8061,6 +11489,10 @@ export namespace Prisma {
      */
     select?: TemplateCategorySelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateCategoryInclude<ExtArgs> | null
@@ -8078,6 +11510,10 @@ export namespace Prisma {
      * Filter which TemplateCategories to delete
      */
     where?: TemplateCategoryWhereInput
+    /**
+     * Limit how many TemplateCategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -8088,6 +11524,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Template
      */
     select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8108,6 +11548,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateCategory
      */
     select?: TemplateCategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateCategory
+     */
+    omit?: TemplateCategoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8416,6 +11860,25 @@ export namespace Prisma {
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["template"]>
 
+  export type TemplateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    categoryId?: boolean
+    thumbnailImage?: boolean
+    tags?: boolean
+    usageCount?: boolean
+    isActive?: boolean
+    isPublic?: boolean
+    createdByUserId?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["template"]>
+
   export type TemplateSelectScalar = {
     id?: boolean
     name?: boolean
@@ -8433,6 +11896,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "categoryId" | "thumbnailImage" | "tags" | "usageCount" | "isActive" | "isPublic" | "createdByUserId" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["template"]>
   export type TemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
     previewImages?: boolean | Template$previewImagesArgs<ExtArgs>
@@ -8442,6 +11906,10 @@ export namespace Prisma {
     _count?: boolean | TemplateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TemplateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TemplateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -8476,12 +11944,12 @@ export namespace Prisma {
 
   type TemplateGetPayload<S extends boolean | null | undefined | TemplateDefaultArgs> = $Result.GetResult<Prisma.$TemplatePayload, S>
 
-  type TemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<TemplateFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type TemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemplateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: TemplateCountAggregateInputType | true
     }
 
-  export interface TemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface TemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Template'], meta: { name: 'Template' } }
     /**
      * Find zero or one Template that matches the filter.
@@ -8494,10 +11962,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends TemplateFindUniqueArgs>(args: SelectSubset<T, TemplateFindUniqueArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends TemplateFindUniqueArgs>(args: SelectSubset<T, TemplateFindUniqueArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Template that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one Template that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {TemplateFindUniqueOrThrowArgs} args - Arguments to find a Template
      * @example
@@ -8508,7 +11976,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends TemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends TemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Template that matches the filter.
@@ -8523,7 +11991,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends TemplateFindFirstArgs>(args?: SelectSubset<T, TemplateFindFirstArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends TemplateFindFirstArgs>(args?: SelectSubset<T, TemplateFindFirstArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Template that matches the filter or
@@ -8539,7 +12007,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends TemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends TemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Templates that matches the filter.
@@ -8557,7 +12025,7 @@ export namespace Prisma {
      * const templateWithIdOnly = await prisma.template.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends TemplateFindManyArgs>(args?: SelectSubset<T, TemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany">>
+    findMany<T extends TemplateFindManyArgs>(args?: SelectSubset<T, TemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Template.
@@ -8571,7 +12039,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends TemplateCreateArgs>(args: SelectSubset<T, TemplateCreateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends TemplateCreateArgs>(args: SelectSubset<T, TemplateCreateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Templates.
@@ -8599,7 +12067,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Templates and only return the `id`
-     * const templateWithIdOnly = await prisma.template.createManyAndReturn({ 
+     * const templateWithIdOnly = await prisma.template.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -8609,7 +12077,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends TemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends TemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Template.
@@ -8623,7 +12091,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends TemplateDeleteArgs>(args: SelectSubset<T, TemplateDeleteArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends TemplateDeleteArgs>(args: SelectSubset<T, TemplateDeleteArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Template.
@@ -8640,7 +12108,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends TemplateUpdateArgs>(args: SelectSubset<T, TemplateUpdateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends TemplateUpdateArgs>(args: SelectSubset<T, TemplateUpdateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Templates.
@@ -8676,6 +12144,36 @@ export namespace Prisma {
     updateMany<T extends TemplateUpdateManyArgs>(args: SelectSubset<T, TemplateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Templates and returns the data updated in the database.
+     * @param {TemplateUpdateManyAndReturnArgs} args - Arguments to update many Templates.
+     * @example
+     * // Update many Templates
+     * const template = await prisma.template.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Templates and only return the `id`
+     * const templateWithIdOnly = await prisma.template.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TemplateUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one Template.
      * @param {TemplateUpsertArgs} args - Arguments to update or create a Template.
      * @example
@@ -8692,7 +12190,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends TemplateUpsertArgs>(args: SelectSubset<T, TemplateUpsertArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends TemplateUpsertArgs>(args: SelectSubset<T, TemplateUpsertArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -8832,13 +12330,13 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__TemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__TemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    category<T extends TemplateCategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateCategoryDefaultArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    previewImages<T extends Template$previewImagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$previewImagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findMany"> | Null>
-    pages<T extends Template$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany"> | Null>
-    createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    funnelsCreated<T extends Template$funnelsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, Template$funnelsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany"> | Null>
+    category<T extends TemplateCategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateCategoryDefaultArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    previewImages<T extends Template$previewImagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$previewImagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pages<T extends Template$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    funnelsCreated<T extends Template$funnelsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, Template$funnelsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8866,7 +12364,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Template model
-   */ 
+   */
   interface TemplateFieldRefs {
     readonly id: FieldRef<"Template", 'Int'>
     readonly name: FieldRef<"Template", 'String'>
@@ -8895,6 +12393,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -8913,6 +12415,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -8930,6 +12436,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Template
      */
     select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8979,6 +12489,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -9027,6 +12541,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -9070,6 +12588,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -9099,6 +12621,10 @@ export namespace Prisma {
      */
     select?: TemplateSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * The data used to create many Templates.
      */
     data: TemplateCreateManyInput | TemplateCreateManyInput[]
@@ -9117,6 +12643,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Template
      */
     select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -9143,6 +12673,40 @@ export namespace Prisma {
      * Filter which Templates to update
      */
     where?: TemplateWhereInput
+    /**
+     * Limit how many Templates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Template updateManyAndReturn
+   */
+  export type TemplateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Template
+     */
+    select?: TemplateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
+     * The data used to update Templates.
+     */
+    data: XOR<TemplateUpdateManyMutationInput, TemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which Templates to update
+     */
+    where?: TemplateWhereInput
+    /**
+     * Limit how many Templates to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemplateIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9153,6 +12717,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Template
      */
     select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -9180,6 +12748,10 @@ export namespace Prisma {
      */
     select?: TemplateSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateInclude<ExtArgs> | null
@@ -9197,6 +12769,10 @@ export namespace Prisma {
      * Filter which Templates to delete
      */
     where?: TemplateWhereInput
+    /**
+     * Limit how many Templates to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -9207,6 +12783,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateImage
      */
     select?: TemplateImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -9228,6 +12808,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -9248,6 +12832,10 @@ export namespace Prisma {
      */
     select?: FunnelSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Funnel
+     */
+    omit?: FunnelOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: FunnelInclude<ExtArgs> | null
@@ -9267,6 +12855,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Template
      */
     select?: TemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Template
+     */
+    omit?: TemplateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -9519,6 +13111,18 @@ export namespace Prisma {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["templateImage"]>
 
+  export type TemplateImageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    imageUrl?: boolean
+    imageType?: boolean
+    order?: boolean
+    caption?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | TemplateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["templateImage"]>
+
   export type TemplateImageSelectScalar = {
     id?: boolean
     templateId?: boolean
@@ -9530,10 +13134,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type TemplateImageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "imageUrl" | "imageType" | "order" | "caption" | "createdAt" | "updatedAt", ExtArgs["result"]["templateImage"]>
   export type TemplateImageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
   export type TemplateImageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | TemplateDefaultArgs<ExtArgs>
+  }
+  export type TemplateImageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
 
@@ -9557,12 +13165,12 @@ export namespace Prisma {
 
   type TemplateImageGetPayload<S extends boolean | null | undefined | TemplateImageDefaultArgs> = $Result.GetResult<Prisma.$TemplateImagePayload, S>
 
-  type TemplateImageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<TemplateImageFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type TemplateImageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemplateImageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: TemplateImageCountAggregateInputType | true
     }
 
-  export interface TemplateImageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface TemplateImageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemplateImage'], meta: { name: 'TemplateImage' } }
     /**
      * Find zero or one TemplateImage that matches the filter.
@@ -9575,10 +13183,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends TemplateImageFindUniqueArgs>(args: SelectSubset<T, TemplateImageFindUniqueArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends TemplateImageFindUniqueArgs>(args: SelectSubset<T, TemplateImageFindUniqueArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one TemplateImage that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one TemplateImage that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {TemplateImageFindUniqueOrThrowArgs} args - Arguments to find a TemplateImage
      * @example
@@ -9589,7 +13197,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends TemplateImageFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateImageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends TemplateImageFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateImageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplateImage that matches the filter.
@@ -9604,7 +13212,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends TemplateImageFindFirstArgs>(args?: SelectSubset<T, TemplateImageFindFirstArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends TemplateImageFindFirstArgs>(args?: SelectSubset<T, TemplateImageFindFirstArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplateImage that matches the filter or
@@ -9620,7 +13228,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends TemplateImageFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateImageFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends TemplateImageFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateImageFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more TemplateImages that matches the filter.
@@ -9638,7 +13246,7 @@ export namespace Prisma {
      * const templateImageWithIdOnly = await prisma.templateImage.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends TemplateImageFindManyArgs>(args?: SelectSubset<T, TemplateImageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findMany">>
+    findMany<T extends TemplateImageFindManyArgs>(args?: SelectSubset<T, TemplateImageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a TemplateImage.
@@ -9652,7 +13260,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends TemplateImageCreateArgs>(args: SelectSubset<T, TemplateImageCreateArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends TemplateImageCreateArgs>(args: SelectSubset<T, TemplateImageCreateArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many TemplateImages.
@@ -9680,7 +13288,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many TemplateImages and only return the `id`
-     * const templateImageWithIdOnly = await prisma.templateImage.createManyAndReturn({ 
+     * const templateImageWithIdOnly = await prisma.templateImage.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -9690,7 +13298,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends TemplateImageCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateImageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends TemplateImageCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateImageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a TemplateImage.
@@ -9704,7 +13312,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends TemplateImageDeleteArgs>(args: SelectSubset<T, TemplateImageDeleteArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends TemplateImageDeleteArgs>(args: SelectSubset<T, TemplateImageDeleteArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one TemplateImage.
@@ -9721,7 +13329,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends TemplateImageUpdateArgs>(args: SelectSubset<T, TemplateImageUpdateArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends TemplateImageUpdateArgs>(args: SelectSubset<T, TemplateImageUpdateArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more TemplateImages.
@@ -9757,6 +13365,36 @@ export namespace Prisma {
     updateMany<T extends TemplateImageUpdateManyArgs>(args: SelectSubset<T, TemplateImageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more TemplateImages and returns the data updated in the database.
+     * @param {TemplateImageUpdateManyAndReturnArgs} args - Arguments to update many TemplateImages.
+     * @example
+     * // Update many TemplateImages
+     * const templateImage = await prisma.templateImage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TemplateImages and only return the `id`
+     * const templateImageWithIdOnly = await prisma.templateImage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TemplateImageUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplateImageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one TemplateImage.
      * @param {TemplateImageUpsertArgs} args - Arguments to update or create a TemplateImage.
      * @example
@@ -9773,7 +13411,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends TemplateImageUpsertArgs>(args: SelectSubset<T, TemplateImageUpsertArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends TemplateImageUpsertArgs>(args: SelectSubset<T, TemplateImageUpsertArgs<ExtArgs>>): Prisma__TemplateImageClient<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -9913,9 +13551,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__TemplateImageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__TemplateImageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    template<T extends TemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateDefaultArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    template<T extends TemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateDefaultArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9943,7 +13581,7 @@ export namespace Prisma {
 
   /**
    * Fields of the TemplateImage model
-   */ 
+   */
   interface TemplateImageFieldRefs {
     readonly id: FieldRef<"TemplateImage", 'Int'>
     readonly templateId: FieldRef<"TemplateImage", 'Int'>
@@ -9966,6 +13604,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -9984,6 +13626,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -10001,6 +13647,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateImage
      */
     select?: TemplateImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -10050,6 +13700,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -10098,6 +13752,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -10141,6 +13799,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -10170,6 +13832,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * The data used to create many TemplateImages.
      */
     data: TemplateImageCreateManyInput | TemplateImageCreateManyInput[]
@@ -10188,6 +13854,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateImage
      */
     select?: TemplateImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -10214,6 +13884,40 @@ export namespace Prisma {
      * Filter which TemplateImages to update
      */
     where?: TemplateImageWhereInput
+    /**
+     * Limit how many TemplateImages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TemplateImage updateManyAndReturn
+   */
+  export type TemplateImageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemplateImage
+     */
+    select?: TemplateImageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
+     * The data used to update TemplateImages.
+     */
+    data: XOR<TemplateImageUpdateManyMutationInput, TemplateImageUncheckedUpdateManyInput>
+    /**
+     * Filter which TemplateImages to update
+     */
+    where?: TemplateImageWhereInput
+    /**
+     * Limit how many TemplateImages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemplateImageIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -10224,6 +13928,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateImage
      */
     select?: TemplateImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -10251,6 +13959,10 @@ export namespace Prisma {
      */
     select?: TemplateImageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplateImageInclude<ExtArgs> | null
@@ -10268,6 +13980,10 @@ export namespace Prisma {
      * Filter which TemplateImages to delete
      */
     where?: TemplateImageWhereInput
+    /**
+     * Limit how many TemplateImages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -10278,6 +13994,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplateImage
      */
     select?: TemplateImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplateImage
+     */
+    omit?: TemplateImageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -10540,6 +14260,20 @@ export namespace Prisma {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["templatePages"]>
 
+  export type TemplatePagesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    name?: boolean
+    content?: boolean
+    order?: boolean
+    settings?: boolean
+    linkingIdPrefix?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | TemplateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["templatePages"]>
+
   export type TemplatePagesSelectScalar = {
     id?: boolean
     templateId?: boolean
@@ -10553,10 +14287,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type TemplatePagesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "name" | "content" | "order" | "settings" | "linkingIdPrefix" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["templatePages"]>
   export type TemplatePagesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
   export type TemplatePagesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | TemplateDefaultArgs<ExtArgs>
+  }
+  export type TemplatePagesIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
 
@@ -10582,12 +14320,12 @@ export namespace Prisma {
 
   type TemplatePagesGetPayload<S extends boolean | null | undefined | TemplatePagesDefaultArgs> = $Result.GetResult<Prisma.$TemplatePagesPayload, S>
 
-  type TemplatePagesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<TemplatePagesFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type TemplatePagesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemplatePagesFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: TemplatePagesCountAggregateInputType | true
     }
 
-  export interface TemplatePagesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface TemplatePagesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemplatePages'], meta: { name: 'TemplatePages' } }
     /**
      * Find zero or one TemplatePages that matches the filter.
@@ -10600,10 +14338,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends TemplatePagesFindUniqueArgs>(args: SelectSubset<T, TemplatePagesFindUniqueArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends TemplatePagesFindUniqueArgs>(args: SelectSubset<T, TemplatePagesFindUniqueArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one TemplatePages that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one TemplatePages that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {TemplatePagesFindUniqueOrThrowArgs} args - Arguments to find a TemplatePages
      * @example
@@ -10614,7 +14352,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends TemplatePagesFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplatePagesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends TemplatePagesFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplatePagesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplatePages that matches the filter.
@@ -10629,7 +14367,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends TemplatePagesFindFirstArgs>(args?: SelectSubset<T, TemplatePagesFindFirstArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends TemplatePagesFindFirstArgs>(args?: SelectSubset<T, TemplatePagesFindFirstArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first TemplatePages that matches the filter or
@@ -10645,7 +14383,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends TemplatePagesFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplatePagesFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends TemplatePagesFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplatePagesFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more TemplatePages that matches the filter.
@@ -10663,7 +14401,7 @@ export namespace Prisma {
      * const templatePagesWithIdOnly = await prisma.templatePages.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends TemplatePagesFindManyArgs>(args?: SelectSubset<T, TemplatePagesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends TemplatePagesFindManyArgs>(args?: SelectSubset<T, TemplatePagesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a TemplatePages.
@@ -10677,7 +14415,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends TemplatePagesCreateArgs>(args: SelectSubset<T, TemplatePagesCreateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends TemplatePagesCreateArgs>(args: SelectSubset<T, TemplatePagesCreateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many TemplatePages.
@@ -10705,7 +14443,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many TemplatePages and only return the `id`
-     * const templatePagesWithIdOnly = await prisma.templatePages.createManyAndReturn({ 
+     * const templatePagesWithIdOnly = await prisma.templatePages.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -10715,7 +14453,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends TemplatePagesCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplatePagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends TemplatePagesCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplatePagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a TemplatePages.
@@ -10729,7 +14467,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends TemplatePagesDeleteArgs>(args: SelectSubset<T, TemplatePagesDeleteArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends TemplatePagesDeleteArgs>(args: SelectSubset<T, TemplatePagesDeleteArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one TemplatePages.
@@ -10746,7 +14484,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends TemplatePagesUpdateArgs>(args: SelectSubset<T, TemplatePagesUpdateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends TemplatePagesUpdateArgs>(args: SelectSubset<T, TemplatePagesUpdateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more TemplatePages.
@@ -10782,6 +14520,36 @@ export namespace Prisma {
     updateMany<T extends TemplatePagesUpdateManyArgs>(args: SelectSubset<T, TemplatePagesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more TemplatePages and returns the data updated in the database.
+     * @param {TemplatePagesUpdateManyAndReturnArgs} args - Arguments to update many TemplatePages.
+     * @example
+     * // Update many TemplatePages
+     * const templatePages = await prisma.templatePages.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TemplatePages and only return the `id`
+     * const templatePagesWithIdOnly = await prisma.templatePages.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TemplatePagesUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplatePagesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one TemplatePages.
      * @param {TemplatePagesUpsertArgs} args - Arguments to update or create a TemplatePages.
      * @example
@@ -10798,7 +14566,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends TemplatePagesUpsertArgs>(args: SelectSubset<T, TemplatePagesUpsertArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends TemplatePagesUpsertArgs>(args: SelectSubset<T, TemplatePagesUpsertArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -10938,9 +14706,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__TemplatePagesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__TemplatePagesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    template<T extends TemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateDefaultArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    template<T extends TemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateDefaultArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10968,7 +14736,7 @@ export namespace Prisma {
 
   /**
    * Fields of the TemplatePages model
-   */ 
+   */
   interface TemplatePagesFieldRefs {
     readonly id: FieldRef<"TemplatePages", 'Int'>
     readonly templateId: FieldRef<"TemplatePages", 'Int'>
@@ -10993,6 +14761,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11011,6 +14783,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11028,6 +14804,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplatePages
      */
     select?: TemplatePagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -11077,6 +14857,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11125,6 +14909,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11168,6 +14956,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11197,6 +14989,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * The data used to create many TemplatePages.
      */
     data: TemplatePagesCreateManyInput | TemplatePagesCreateManyInput[]
@@ -11215,6 +15011,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplatePages
      */
     select?: TemplatePagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -11241,6 +15041,40 @@ export namespace Prisma {
      * Filter which TemplatePages to update
      */
     where?: TemplatePagesWhereInput
+    /**
+     * Limit how many TemplatePages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TemplatePages updateManyAndReturn
+   */
+  export type TemplatePagesUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemplatePages
+     */
+    select?: TemplatePagesSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
+     * The data used to update TemplatePages.
+     */
+    data: XOR<TemplatePagesUpdateManyMutationInput, TemplatePagesUncheckedUpdateManyInput>
+    /**
+     * Filter which TemplatePages to update
+     */
+    where?: TemplatePagesWhereInput
+    /**
+     * Limit how many TemplatePages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemplatePagesIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -11251,6 +15085,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplatePages
      */
     select?: TemplatePagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -11278,6 +15116,10 @@ export namespace Prisma {
      */
     select?: TemplatePagesSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
+    /**
      * Choose, which related nodes to fetch as well
      */
     include?: TemplatePagesInclude<ExtArgs> | null
@@ -11295,6 +15137,10 @@ export namespace Prisma {
      * Filter which TemplatePages to delete
      */
     where?: TemplatePagesWhereInput
+    /**
+     * Limit how many TemplatePages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -11305,6 +15151,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the TemplatePages
      */
     select?: TemplatePagesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemplatePages
+     */
+    omit?: TemplatePagesOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -11335,7 +15185,8 @@ export namespace Prisma {
     passwordResetExpiresAt: 'passwordResetExpiresAt',
     isAdmin: 'isAdmin',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    maximumFunnels: 'maximumFunnels'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -11348,7 +15199,8 @@ export namespace Prisma {
     userId: 'userId',
     templateId: 'templateId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    themeId: 'themeId'
   };
 
   export type FunnelScalarFieldEnum = (typeof FunnelScalarFieldEnum)[keyof typeof FunnelScalarFieldEnum]
@@ -11397,12 +15249,47 @@ export namespace Prisma {
     content: 'content',
     order: 'order',
     linkingId: 'linkingId',
+    seoTitle: 'seoTitle',
+    seoDescription: 'seoDescription',
+    seoKeywords: 'seoKeywords',
+    visits: 'visits',
     funnelId: 'funnelId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type PageScalarFieldEnum = (typeof PageScalarFieldEnum)[keyof typeof PageScalarFieldEnum]
+
+
+  export const SessionScalarFieldEnum: {
+    id: 'id',
+    sessionId: 'sessionId',
+    funnelId: 'funnelId',
+    visitedPages: 'visitedPages',
+    interactions: 'interactions',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+  export const ThemeScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    backgroundColor: 'backgroundColor',
+    textColor: 'textColor',
+    buttonColor: 'buttonColor',
+    buttonTextColor: 'buttonTextColor',
+    borderColor: 'borderColor',
+    optionColor: 'optionColor',
+    fontFamily: 'fontFamily',
+    borderRadius: 'borderRadius',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ThemeScalarFieldEnum = (typeof ThemeScalarFieldEnum)[keyof typeof ThemeScalarFieldEnum]
 
 
   export const TemplateCategoryScalarFieldEnum: {
@@ -11486,6 +15373,13 @@ export namespace Prisma {
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
@@ -11512,7 +15406,7 @@ export namespace Prisma {
 
 
   /**
-   * Field references 
+   * Field references
    */
 
 
@@ -11566,6 +15460,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'FunnelStatus'
+   */
+  export type EnumFunnelStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FunnelStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'FunnelStatus[]'
+   */
+  export type ListEnumFunnelStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FunnelStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DomainType'
    */
   export type EnumDomainTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DomainType'>
@@ -11615,6 +15523,27 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'BorderRadius'
+   */
+  export type EnumBorderRadiusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BorderRadius'>
+    
+
+
+  /**
+   * Reference to a field of type 'BorderRadius[]'
+   */
+  export type ListEnumBorderRadiusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BorderRadius[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -11644,6 +15573,7 @@ export namespace Prisma {
     isAdmin?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    maximumFunnels?: IntNullableFilter<"User"> | number | null
     funnels?: FunnelListRelationFilter
     domains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
@@ -11659,6 +15589,7 @@ export namespace Prisma {
     isAdmin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    maximumFunnels?: SortOrderInput | SortOrder
     funnels?: FunnelOrderByRelationAggregateInput
     domains?: DomainOrderByRelationAggregateInput
     templates?: TemplateOrderByRelationAggregateInput
@@ -11677,6 +15608,7 @@ export namespace Prisma {
     isAdmin?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    maximumFunnels?: IntNullableFilter<"User"> | number | null
     funnels?: FunnelListRelationFilter
     domains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
@@ -11692,6 +15624,7 @@ export namespace Prisma {
     isAdmin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    maximumFunnels?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -11712,6 +15645,7 @@ export namespace Prisma {
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    maximumFunnels?: IntNullableWithAggregatesFilter<"User"> | number | null
   }
 
   export type FunnelWhereInput = {
@@ -11720,15 +15654,17 @@ export namespace Prisma {
     NOT?: FunnelWhereInput | FunnelWhereInput[]
     id?: IntFilter<"Funnel"> | number
     name?: StringFilter<"Funnel"> | string
-    status?: StringFilter<"Funnel"> | string
+    status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
     templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
-    pages?: PageListRelationFilter
+    themeId?: IntNullableFilter<"Funnel"> | number | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    template?: XOR<TemplateNullableScalarRelationFilter, TemplateWhereInput> | null
     domainConnections?: FunnelDomainListRelationFilter
-    template?: XOR<TemplateNullableRelationFilter, TemplateWhereInput> | null
+    theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
+    pages?: PageListRelationFilter
   }
 
   export type FunnelOrderByWithRelationInput = {
@@ -11739,28 +15675,32 @@ export namespace Prisma {
     templateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    themeId?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
-    pages?: PageOrderByRelationAggregateInput
-    domainConnections?: FunnelDomainOrderByRelationAggregateInput
     template?: TemplateOrderByWithRelationInput
+    domainConnections?: FunnelDomainOrderByRelationAggregateInput
+    theme?: ThemeOrderByWithRelationInput
+    pages?: PageOrderByRelationAggregateInput
   }
 
   export type FunnelWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    themeId?: number
     AND?: FunnelWhereInput | FunnelWhereInput[]
     OR?: FunnelWhereInput[]
     NOT?: FunnelWhereInput | FunnelWhereInput[]
     name?: StringFilter<"Funnel"> | string
-    status?: StringFilter<"Funnel"> | string
+    status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
     templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
-    pages?: PageListRelationFilter
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    template?: XOR<TemplateNullableScalarRelationFilter, TemplateWhereInput> | null
     domainConnections?: FunnelDomainListRelationFilter
-    template?: XOR<TemplateNullableRelationFilter, TemplateWhereInput> | null
-  }, "id">
+    theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
+    pages?: PageListRelationFilter
+  }, "id" | "themeId">
 
   export type FunnelOrderByWithAggregationInput = {
     id?: SortOrder
@@ -11770,6 +15710,7 @@ export namespace Prisma {
     templateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    themeId?: SortOrderInput | SortOrder
     _count?: FunnelCountOrderByAggregateInput
     _avg?: FunnelAvgOrderByAggregateInput
     _max?: FunnelMaxOrderByAggregateInput
@@ -11783,11 +15724,12 @@ export namespace Prisma {
     NOT?: FunnelScalarWhereWithAggregatesInput | FunnelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Funnel"> | number
     name?: StringWithAggregatesFilter<"Funnel"> | string
-    status?: StringWithAggregatesFilter<"Funnel"> | string
+    status?: EnumFunnelStatusWithAggregatesFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntWithAggregatesFilter<"Funnel"> | number
     templateId?: IntNullableWithAggregatesFilter<"Funnel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Funnel"> | Date | string
+    themeId?: IntNullableWithAggregatesFilter<"Funnel"> | number | null
   }
 
   export type DomainWhereInput = {
@@ -11813,7 +15755,7 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Domain"> | string | null
     createdAt?: DateTimeFilter<"Domain"> | Date | string
     updatedAt?: DateTimeFilter<"Domain"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelConnections?: FunnelDomainListRelationFilter
   }
 
@@ -11864,7 +15806,7 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Domain"> | string | null
     createdAt?: DateTimeFilter<"Domain"> | Date | string
     updatedAt?: DateTimeFilter<"Domain"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelConnections?: FunnelDomainListRelationFilter
   }, "id" | "hostname" | "cloudflareHostnameId">
 
@@ -11930,8 +15872,8 @@ export namespace Prisma {
     isActive?: BoolFilter<"FunnelDomain"> | boolean
     createdAt?: DateTimeFilter<"FunnelDomain"> | Date | string
     updatedAt?: DateTimeFilter<"FunnelDomain"> | Date | string
-    funnel?: XOR<FunnelRelationFilter, FunnelWhereInput>
-    domain?: XOR<DomainRelationFilter, DomainWhereInput>
+    domain?: XOR<DomainScalarRelationFilter, DomainWhereInput>
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
   }
 
   export type FunnelDomainOrderByWithRelationInput = {
@@ -11941,8 +15883,8 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    funnel?: FunnelOrderByWithRelationInput
     domain?: DomainOrderByWithRelationInput
+    funnel?: FunnelOrderByWithRelationInput
   }
 
   export type FunnelDomainWhereUniqueInput = Prisma.AtLeast<{
@@ -11956,8 +15898,8 @@ export namespace Prisma {
     isActive?: BoolFilter<"FunnelDomain"> | boolean
     createdAt?: DateTimeFilter<"FunnelDomain"> | Date | string
     updatedAt?: DateTimeFilter<"FunnelDomain"> | Date | string
-    funnel?: XOR<FunnelRelationFilter, FunnelWhereInput>
-    domain?: XOR<DomainRelationFilter, DomainWhereInput>
+    domain?: XOR<DomainScalarRelationFilter, DomainWhereInput>
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
   }, "id" | "funnelId_domainId">
 
   export type FunnelDomainOrderByWithAggregationInput = {
@@ -11995,10 +15937,14 @@ export namespace Prisma {
     content?: StringNullableFilter<"Page"> | string | null
     order?: IntFilter<"Page"> | number
     linkingId?: StringNullableFilter<"Page"> | string | null
+    seoTitle?: StringNullableFilter<"Page"> | string | null
+    seoDescription?: StringNullableFilter<"Page"> | string | null
+    seoKeywords?: StringNullableFilter<"Page"> | string | null
+    visits?: IntFilter<"Page"> | number
     funnelId?: IntFilter<"Page"> | number
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
-    funnel?: XOR<FunnelRelationFilter, FunnelWhereInput>
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
   }
 
   export type PageOrderByWithRelationInput = {
@@ -12007,6 +15953,10 @@ export namespace Prisma {
     content?: SortOrderInput | SortOrder
     order?: SortOrder
     linkingId?: SortOrderInput | SortOrder
+    seoTitle?: SortOrderInput | SortOrder
+    seoDescription?: SortOrderInput | SortOrder
+    seoKeywords?: SortOrderInput | SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12015,18 +15965,23 @@ export namespace Prisma {
 
   export type PageWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    linkingId?: string
+    funnelId_linkingId?: PageFunnelIdLinkingIdCompoundUniqueInput
     AND?: PageWhereInput | PageWhereInput[]
     OR?: PageWhereInput[]
     NOT?: PageWhereInput | PageWhereInput[]
     name?: StringFilter<"Page"> | string
     content?: StringNullableFilter<"Page"> | string | null
     order?: IntFilter<"Page"> | number
+    linkingId?: StringNullableFilter<"Page"> | string | null
+    seoTitle?: StringNullableFilter<"Page"> | string | null
+    seoDescription?: StringNullableFilter<"Page"> | string | null
+    seoKeywords?: StringNullableFilter<"Page"> | string | null
+    visits?: IntFilter<"Page"> | number
     funnelId?: IntFilter<"Page"> | number
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
-    funnel?: XOR<FunnelRelationFilter, FunnelWhereInput>
-  }, "id" | "linkingId">
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+  }, "id" | "funnelId_linkingId">
 
   export type PageOrderByWithAggregationInput = {
     id?: SortOrder
@@ -12034,6 +15989,10 @@ export namespace Prisma {
     content?: SortOrderInput | SortOrder
     order?: SortOrder
     linkingId?: SortOrderInput | SortOrder
+    seoTitle?: SortOrderInput | SortOrder
+    seoDescription?: SortOrderInput | SortOrder
+    seoKeywords?: SortOrderInput | SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12053,9 +16012,169 @@ export namespace Prisma {
     content?: StringNullableWithAggregatesFilter<"Page"> | string | null
     order?: IntWithAggregatesFilter<"Page"> | number
     linkingId?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    seoTitle?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    seoDescription?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    seoKeywords?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    visits?: IntWithAggregatesFilter<"Page"> | number
     funnelId?: IntWithAggregatesFilter<"Page"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
+  }
+
+  export type SessionWhereInput = {
+    AND?: SessionWhereInput | SessionWhereInput[]
+    OR?: SessionWhereInput[]
+    NOT?: SessionWhereInput | SessionWhereInput[]
+    id?: StringFilter<"Session"> | string
+    sessionId?: StringFilter<"Session"> | string
+    funnelId?: IntFilter<"Session"> | number
+    visitedPages?: IntNullableListFilter<"Session">
+    interactions?: JsonFilter<"Session">
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeFilter<"Session"> | Date | string
+  }
+
+  export type SessionOrderByWithRelationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    funnelId?: SortOrder
+    visitedPages?: SortOrder
+    interactions?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    sessionId?: string
+    AND?: SessionWhereInput | SessionWhereInput[]
+    OR?: SessionWhereInput[]
+    NOT?: SessionWhereInput | SessionWhereInput[]
+    funnelId?: IntFilter<"Session"> | number
+    visitedPages?: IntNullableListFilter<"Session">
+    interactions?: JsonFilter<"Session">
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeFilter<"Session"> | Date | string
+  }, "id" | "sessionId">
+
+  export type SessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    funnelId?: SortOrder
+    visitedPages?: SortOrder
+    interactions?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SessionCountOrderByAggregateInput
+    _avg?: SessionAvgOrderByAggregateInput
+    _max?: SessionMaxOrderByAggregateInput
+    _min?: SessionMinOrderByAggregateInput
+    _sum?: SessionSumOrderByAggregateInput
+  }
+
+  export type SessionScalarWhereWithAggregatesInput = {
+    AND?: SessionScalarWhereWithAggregatesInput | SessionScalarWhereWithAggregatesInput[]
+    OR?: SessionScalarWhereWithAggregatesInput[]
+    NOT?: SessionScalarWhereWithAggregatesInput | SessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Session"> | string
+    sessionId?: StringWithAggregatesFilter<"Session"> | string
+    funnelId?: IntWithAggregatesFilter<"Session"> | number
+    visitedPages?: IntNullableListFilter<"Session">
+    interactions?: JsonWithAggregatesFilter<"Session">
+    createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+  }
+
+  export type ThemeWhereInput = {
+    AND?: ThemeWhereInput | ThemeWhereInput[]
+    OR?: ThemeWhereInput[]
+    NOT?: ThemeWhereInput | ThemeWhereInput[]
+    id?: IntFilter<"Theme"> | number
+    name?: StringFilter<"Theme"> | string
+    backgroundColor?: StringFilter<"Theme"> | string
+    textColor?: StringFilter<"Theme"> | string
+    buttonColor?: StringFilter<"Theme"> | string
+    buttonTextColor?: StringFilter<"Theme"> | string
+    borderColor?: StringFilter<"Theme"> | string
+    optionColor?: StringFilter<"Theme"> | string
+    fontFamily?: StringFilter<"Theme"> | string
+    borderRadius?: EnumBorderRadiusFilter<"Theme"> | $Enums.BorderRadius
+    createdAt?: DateTimeFilter<"Theme"> | Date | string
+    updatedAt?: DateTimeFilter<"Theme"> | Date | string
+    funnel?: XOR<FunnelNullableScalarRelationFilter, FunnelWhereInput> | null
+  }
+
+  export type ThemeOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    backgroundColor?: SortOrder
+    textColor?: SortOrder
+    buttonColor?: SortOrder
+    buttonTextColor?: SortOrder
+    borderColor?: SortOrder
+    optionColor?: SortOrder
+    fontFamily?: SortOrder
+    borderRadius?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    funnel?: FunnelOrderByWithRelationInput
+  }
+
+  export type ThemeWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ThemeWhereInput | ThemeWhereInput[]
+    OR?: ThemeWhereInput[]
+    NOT?: ThemeWhereInput | ThemeWhereInput[]
+    name?: StringFilter<"Theme"> | string
+    backgroundColor?: StringFilter<"Theme"> | string
+    textColor?: StringFilter<"Theme"> | string
+    buttonColor?: StringFilter<"Theme"> | string
+    buttonTextColor?: StringFilter<"Theme"> | string
+    borderColor?: StringFilter<"Theme"> | string
+    optionColor?: StringFilter<"Theme"> | string
+    fontFamily?: StringFilter<"Theme"> | string
+    borderRadius?: EnumBorderRadiusFilter<"Theme"> | $Enums.BorderRadius
+    createdAt?: DateTimeFilter<"Theme"> | Date | string
+    updatedAt?: DateTimeFilter<"Theme"> | Date | string
+    funnel?: XOR<FunnelNullableScalarRelationFilter, FunnelWhereInput> | null
+  }, "id">
+
+  export type ThemeOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    backgroundColor?: SortOrder
+    textColor?: SortOrder
+    buttonColor?: SortOrder
+    buttonTextColor?: SortOrder
+    borderColor?: SortOrder
+    optionColor?: SortOrder
+    fontFamily?: SortOrder
+    borderRadius?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ThemeCountOrderByAggregateInput
+    _avg?: ThemeAvgOrderByAggregateInput
+    _max?: ThemeMaxOrderByAggregateInput
+    _min?: ThemeMinOrderByAggregateInput
+    _sum?: ThemeSumOrderByAggregateInput
+  }
+
+  export type ThemeScalarWhereWithAggregatesInput = {
+    AND?: ThemeScalarWhereWithAggregatesInput | ThemeScalarWhereWithAggregatesInput[]
+    OR?: ThemeScalarWhereWithAggregatesInput[]
+    NOT?: ThemeScalarWhereWithAggregatesInput | ThemeScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Theme"> | number
+    name?: StringWithAggregatesFilter<"Theme"> | string
+    backgroundColor?: StringWithAggregatesFilter<"Theme"> | string
+    textColor?: StringWithAggregatesFilter<"Theme"> | string
+    buttonColor?: StringWithAggregatesFilter<"Theme"> | string
+    buttonTextColor?: StringWithAggregatesFilter<"Theme"> | string
+    borderColor?: StringWithAggregatesFilter<"Theme"> | string
+    optionColor?: StringWithAggregatesFilter<"Theme"> | string
+    fontFamily?: StringWithAggregatesFilter<"Theme"> | string
+    borderRadius?: EnumBorderRadiusWithAggregatesFilter<"Theme"> | $Enums.BorderRadius
+    createdAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
   }
 
   export type TemplateCategoryWhereInput = {
@@ -12153,10 +16272,10 @@ export namespace Prisma {
     metadata?: JsonNullableFilter<"Template">
     createdAt?: DateTimeFilter<"Template"> | Date | string
     updatedAt?: DateTimeFilter<"Template"> | Date | string
-    category?: XOR<TemplateCategoryRelationFilter, TemplateCategoryWhereInput>
+    category?: XOR<TemplateCategoryScalarRelationFilter, TemplateCategoryWhereInput>
     previewImages?: TemplateImageListRelationFilter
     pages?: TemplatePagesListRelationFilter
-    createdBy?: XOR<UserRelationFilter, UserWhereInput>
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelsCreated?: FunnelListRelationFilter
   }
 
@@ -12200,10 +16319,10 @@ export namespace Prisma {
     metadata?: JsonNullableFilter<"Template">
     createdAt?: DateTimeFilter<"Template"> | Date | string
     updatedAt?: DateTimeFilter<"Template"> | Date | string
-    category?: XOR<TemplateCategoryRelationFilter, TemplateCategoryWhereInput>
+    category?: XOR<TemplateCategoryScalarRelationFilter, TemplateCategoryWhereInput>
     previewImages?: TemplateImageListRelationFilter
     pages?: TemplatePagesListRelationFilter
-    createdBy?: XOR<UserRelationFilter, UserWhereInput>
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelsCreated?: FunnelListRelationFilter
   }, "id" | "slug">
 
@@ -12261,7 +16380,7 @@ export namespace Prisma {
     caption?: StringNullableFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeFilter<"TemplateImage"> | Date | string
     updatedAt?: DateTimeFilter<"TemplateImage"> | Date | string
-    template?: XOR<TemplateRelationFilter, TemplateWhereInput>
+    template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
   }
 
   export type TemplateImageOrderByWithRelationInput = {
@@ -12288,7 +16407,7 @@ export namespace Prisma {
     caption?: StringNullableFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeFilter<"TemplateImage"> | Date | string
     updatedAt?: DateTimeFilter<"TemplateImage"> | Date | string
-    template?: XOR<TemplateRelationFilter, TemplateWhereInput>
+    template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
   }, "id">
 
   export type TemplateImageOrderByWithAggregationInput = {
@@ -12335,7 +16454,7 @@ export namespace Prisma {
     metadata?: JsonNullableFilter<"TemplatePages">
     createdAt?: DateTimeFilter<"TemplatePages"> | Date | string
     updatedAt?: DateTimeFilter<"TemplatePages"> | Date | string
-    template?: XOR<TemplateRelationFilter, TemplateWhereInput>
+    template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
   }
 
   export type TemplatePagesOrderByWithRelationInput = {
@@ -12366,7 +16485,7 @@ export namespace Prisma {
     metadata?: JsonNullableFilter<"TemplatePages">
     createdAt?: DateTimeFilter<"TemplatePages"> | Date | string
     updatedAt?: DateTimeFilter<"TemplatePages"> | Date | string
-    template?: XOR<TemplateRelationFilter, TemplateWhereInput>
+    template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
   }, "id">
 
   export type TemplatePagesOrderByWithAggregationInput = {
@@ -12412,6 +16531,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelCreateNestedManyWithoutUserInput
     domains?: DomainCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
@@ -12427,6 +16547,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
@@ -12441,6 +16562,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     domains?: DomainUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
@@ -12456,6 +16578,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -12471,6 +16594,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -12482,6 +16606,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -12494,67 +16619,73 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type FunnelCreateInput = {
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    pages?: PageCreateNestedManyWithoutFunnelInput
-    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     userId: number
     templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    pages?: PageUpdateManyWithoutFunnelNestedInput
-    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
     templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelCreateManyInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     userId: number
     templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
   }
 
   export type FunnelUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12562,11 +16693,12 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
     templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type DomainCreateInput = {
@@ -12727,8 +16859,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    funnel: FunnelCreateNestedOneWithoutDomainConnectionsInput
     domain: DomainCreateNestedOneWithoutFunnelConnectionsInput
+    funnel: FunnelCreateNestedOneWithoutDomainConnectionsInput
   }
 
   export type FunnelDomainUncheckedCreateInput = {
@@ -12744,8 +16876,8 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    funnel?: FunnelUpdateOneRequiredWithoutDomainConnectionsNestedInput
     domain?: DomainUpdateOneRequiredWithoutFunnelConnectionsNestedInput
+    funnel?: FunnelUpdateOneRequiredWithoutDomainConnectionsNestedInput
   }
 
   export type FunnelDomainUncheckedUpdateInput = {
@@ -12786,6 +16918,10 @@ export namespace Prisma {
     content?: string | null
     order: number
     linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     funnel: FunnelCreateNestedOneWithoutPagesInput
@@ -12797,6 +16933,10 @@ export namespace Prisma {
     content?: string | null
     order: number
     linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
     funnelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12807,6 +16947,10 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     funnel?: FunnelUpdateOneRequiredWithoutPagesNestedInput
@@ -12818,6 +16962,10 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
     funnelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12829,6 +16977,10 @@ export namespace Prisma {
     content?: string | null
     order: number
     linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
     funnelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12839,6 +16991,10 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12849,7 +17005,187 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
     funnelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionCreateInput = {
+    id?: string
+    sessionId: string
+    funnelId: number
+    visitedPages?: SessionCreatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUncheckedCreateInput = {
+    id?: string
+    sessionId: string
+    funnelId: number
+    visitedPages?: SessionCreatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionCreateManyInput = {
+    id?: string
+    sessionId: string
+    funnelId: number
+    visitedPages?: SessionCreatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeCreateInput = {
+    name?: string
+    backgroundColor?: string
+    textColor?: string
+    buttonColor?: string
+    buttonTextColor?: string
+    borderColor?: string
+    optionColor?: string
+    fontFamily?: string
+    borderRadius?: $Enums.BorderRadius
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnel?: FunnelCreateNestedOneWithoutThemeInput
+  }
+
+  export type ThemeUncheckedCreateInput = {
+    id?: number
+    name?: string
+    backgroundColor?: string
+    textColor?: string
+    buttonColor?: string
+    buttonTextColor?: string
+    borderColor?: string
+    optionColor?: string
+    fontFamily?: string
+    borderRadius?: $Enums.BorderRadius
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnel?: FunnelUncheckedCreateNestedOneWithoutThemeInput
+  }
+
+  export type ThemeUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnel?: FunnelUpdateOneWithoutThemeNestedInput
+  }
+
+  export type ThemeUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnel?: FunnelUncheckedUpdateOneWithoutThemeNestedInput
+  }
+
+  export type ThemeCreateManyInput = {
+    id?: number
+    name?: string
+    backgroundColor?: string
+    textColor?: string
+    buttonColor?: string
+    buttonTextColor?: string
+    borderColor?: string
+    optionColor?: string
+    fontFamily?: string
+    borderRadius?: $Enums.BorderRadius
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13293,6 +17629,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type FunnelListRelationFilter = {
     every?: FunnelWhereInput
     some?: FunnelWhereInput
@@ -13338,10 +17685,12 @@ export namespace Prisma {
     isAdmin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    maximumFunnels?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
+    maximumFunnels?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -13354,6 +17703,7 @@ export namespace Prisma {
     isAdmin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    maximumFunnels?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -13366,10 +17716,12 @@ export namespace Prisma {
     isAdmin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    maximumFunnels?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
+    maximumFunnels?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -13460,89 +17812,6 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type UserRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
-  export type PageListRelationFilter = {
-    every?: PageWhereInput
-    some?: PageWhereInput
-    none?: PageWhereInput
-  }
-
-  export type FunnelDomainListRelationFilter = {
-    every?: FunnelDomainWhereInput
-    some?: FunnelDomainWhereInput
-    none?: FunnelDomainWhereInput
-  }
-
-  export type TemplateNullableRelationFilter = {
-    is?: TemplateWhereInput | null
-    isNot?: TemplateWhereInput | null
-  }
-
-  export type PageOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type FunnelDomainOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type FunnelCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    status?: SortOrder
-    userId?: SortOrder
-    templateId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type FunnelAvgOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    templateId?: SortOrder
-  }
-
-  export type FunnelMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    status?: SortOrder
-    userId?: SortOrder
-    templateId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type FunnelMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    status?: SortOrder
-    userId?: SortOrder
-    templateId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type FunnelSumOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    templateId?: SortOrder
-  }
-
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -13557,6 +17826,105 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumFunnelStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.FunnelStatus | EnumFunnelStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFunnelStatusFilter<$PrismaModel> | $Enums.FunnelStatus
+  }
+
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type TemplateNullableScalarRelationFilter = {
+    is?: TemplateWhereInput | null
+    isNot?: TemplateWhereInput | null
+  }
+
+  export type FunnelDomainListRelationFilter = {
+    every?: FunnelDomainWhereInput
+    some?: FunnelDomainWhereInput
+    none?: FunnelDomainWhereInput
+  }
+
+  export type ThemeNullableScalarRelationFilter = {
+    is?: ThemeWhereInput | null
+    isNot?: ThemeWhereInput | null
+  }
+
+  export type PageListRelationFilter = {
+    every?: PageWhereInput
+    some?: PageWhereInput
+    none?: PageWhereInput
+  }
+
+  export type FunnelDomainOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FunnelCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    status?: SortOrder
+    userId?: SortOrder
+    templateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    themeId?: SortOrder
+  }
+
+  export type FunnelAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    templateId?: SortOrder
+    themeId?: SortOrder
+  }
+
+  export type FunnelMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    status?: SortOrder
+    userId?: SortOrder
+    templateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    themeId?: SortOrder
+  }
+
+  export type FunnelMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    status?: SortOrder
+    userId?: SortOrder
+    templateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    themeId?: SortOrder
+  }
+
+  export type FunnelSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    templateId?: SortOrder
+    themeId?: SortOrder
+  }
+
+  export type EnumFunnelStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FunnelStatus | EnumFunnelStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFunnelStatusWithAggregatesFilter<$PrismaModel> | $Enums.FunnelStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
+    _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
   }
 
   export type EnumDomainTypeFilter<$PrismaModel = never> = {
@@ -13579,7 +17947,7 @@ export namespace Prisma {
     notIn?: $Enums.SslStatus[] | ListEnumSslStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumSslStatusFilter<$PrismaModel> | $Enums.SslStatus
   }
-  export type JsonNullableFilter<$PrismaModel = never> = 
+  export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonNullableFilterBase<$PrismaModel>>
@@ -13589,12 +17957,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -13701,7 +18070,7 @@ export namespace Prisma {
     _min?: NestedEnumSslStatusFilter<$PrismaModel>
     _max?: NestedEnumSslStatusFilter<$PrismaModel>
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
@@ -13711,12 +18080,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -13727,14 +18097,14 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
-  export type FunnelRelationFilter = {
-    is?: FunnelWhereInput
-    isNot?: FunnelWhereInput
-  }
-
-  export type DomainRelationFilter = {
+  export type DomainScalarRelationFilter = {
     is?: DomainWhereInput
     isNot?: DomainWhereInput
+  }
+
+  export type FunnelScalarRelationFilter = {
+    is?: FunnelWhereInput
+    isNot?: FunnelWhereInput
   }
 
   export type FunnelDomainFunnelIdDomainIdCompoundUniqueInput = {
@@ -13781,12 +18151,21 @@ export namespace Prisma {
     domainId?: SortOrder
   }
 
+  export type PageFunnelIdLinkingIdCompoundUniqueInput = {
+    funnelId: number
+    linkingId: string
+  }
+
   export type PageCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
     linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13795,6 +18174,7 @@ export namespace Prisma {
   export type PageAvgOrderByAggregateInput = {
     id?: SortOrder
     order?: SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
   }
 
@@ -13804,6 +18184,10 @@ export namespace Prisma {
     content?: SortOrder
     order?: SortOrder
     linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13815,6 +18199,10 @@ export namespace Prisma {
     content?: SortOrder
     order?: SortOrder
     linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13823,7 +18211,176 @@ export namespace Prisma {
   export type PageSumOrderByAggregateInput = {
     id?: SortOrder
     order?: SortOrder
+    visits?: SortOrder
     funnelId?: SortOrder
+  }
+
+  export type IntNullableListFilter<$PrismaModel = never> = {
+    equals?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    has?: number | IntFieldRefInput<$PrismaModel> | null
+    hasEvery?: number[] | ListIntFieldRefInput<$PrismaModel>
+    hasSome?: number[] | ListIntFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type SessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    funnelId?: SortOrder
+    visitedPages?: SortOrder
+    interactions?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionAvgOrderByAggregateInput = {
+    funnelId?: SortOrder
+    visitedPages?: SortOrder
+  }
+
+  export type SessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionSumOrderByAggregateInput = {
+    funnelId?: SortOrder
+    visitedPages?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type EnumBorderRadiusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BorderRadius | EnumBorderRadiusFieldRefInput<$PrismaModel>
+    in?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBorderRadiusFilter<$PrismaModel> | $Enums.BorderRadius
+  }
+
+  export type FunnelNullableScalarRelationFilter = {
+    is?: FunnelWhereInput | null
+    isNot?: FunnelWhereInput | null
+  }
+
+  export type ThemeCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    backgroundColor?: SortOrder
+    textColor?: SortOrder
+    buttonColor?: SortOrder
+    buttonTextColor?: SortOrder
+    borderColor?: SortOrder
+    optionColor?: SortOrder
+    fontFamily?: SortOrder
+    borderRadius?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type ThemeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    backgroundColor?: SortOrder
+    textColor?: SortOrder
+    buttonColor?: SortOrder
+    buttonTextColor?: SortOrder
+    borderColor?: SortOrder
+    optionColor?: SortOrder
+    fontFamily?: SortOrder
+    borderRadius?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    backgroundColor?: SortOrder
+    textColor?: SortOrder
+    buttonColor?: SortOrder
+    buttonTextColor?: SortOrder
+    borderColor?: SortOrder
+    optionColor?: SortOrder
+    fontFamily?: SortOrder
+    borderRadius?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type EnumBorderRadiusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BorderRadius | EnumBorderRadiusFieldRefInput<$PrismaModel>
+    in?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBorderRadiusWithAggregatesFilter<$PrismaModel> | $Enums.BorderRadius
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBorderRadiusFilter<$PrismaModel>
+    _max?: NestedEnumBorderRadiusFilter<$PrismaModel>
   }
 
   export type TemplateCategoryCountOrderByAggregateInput = {
@@ -13880,7 +18437,7 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
-  export type TemplateCategoryRelationFilter = {
+  export type TemplateCategoryScalarRelationFilter = {
     is?: TemplateCategoryWhereInput
     isNot?: TemplateCategoryWhereInput
   }
@@ -13966,7 +18523,7 @@ export namespace Prisma {
     createdByUserId?: SortOrder
   }
 
-  export type TemplateRelationFilter = {
+  export type TemplateScalarRelationFilter = {
     is?: TemplateWhereInput
     isNot?: TemplateWhereInput
   }
@@ -14125,6 +18682,14 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type FunnelUpdateManyWithoutUserNestedInput = {
     create?: XOR<FunnelCreateWithoutUserInput, FunnelUncheckedCreateWithoutUserInput> | FunnelCreateWithoutUserInput[] | FunnelUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FunnelCreateOrConnectWithoutUserInput | FunnelCreateOrConnectWithoutUserInput[]
@@ -14223,11 +18788,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type PageCreateNestedManyWithoutFunnelInput = {
-    create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
-    connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
-    createMany?: PageCreateManyFunnelInputEnvelope
-    connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+  export type TemplateCreateNestedOneWithoutFunnelsCreatedInput = {
+    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
+    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
+    connect?: TemplateWhereUniqueInput
   }
 
   export type FunnelDomainCreateNestedManyWithoutFunnelInput = {
@@ -14237,13 +18801,13 @@ export namespace Prisma {
     connect?: FunnelDomainWhereUniqueInput | FunnelDomainWhereUniqueInput[]
   }
 
-  export type TemplateCreateNestedOneWithoutFunnelsCreatedInput = {
-    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
-    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
-    connect?: TemplateWhereUniqueInput
+  export type ThemeCreateNestedOneWithoutFunnelInput = {
+    create?: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutFunnelInput
+    connect?: ThemeWhereUniqueInput
   }
 
-  export type PageUncheckedCreateNestedManyWithoutFunnelInput = {
+  export type PageCreateNestedManyWithoutFunnelInput = {
     create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
     createMany?: PageCreateManyFunnelInputEnvelope
@@ -14257,6 +18821,17 @@ export namespace Prisma {
     connect?: FunnelDomainWhereUniqueInput | FunnelDomainWhereUniqueInput[]
   }
 
+  export type PageUncheckedCreateNestedManyWithoutFunnelInput = {
+    create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
+    createMany?: PageCreateManyFunnelInputEnvelope
+    connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+  }
+
+  export type EnumFunnelStatusFieldUpdateOperationsInput = {
+    set?: $Enums.FunnelStatus
+  }
+
   export type UserUpdateOneRequiredWithoutFunnelsNestedInput = {
     create?: XOR<UserCreateWithoutFunnelsInput, UserUncheckedCreateWithoutFunnelsInput>
     connectOrCreate?: UserCreateOrConnectWithoutFunnelsInput
@@ -14265,18 +18840,14 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFunnelsInput, UserUpdateWithoutFunnelsInput>, UserUncheckedUpdateWithoutFunnelsInput>
   }
 
-  export type PageUpdateManyWithoutFunnelNestedInput = {
-    create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
-    connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
-    upsert?: PageUpsertWithWhereUniqueWithoutFunnelInput | PageUpsertWithWhereUniqueWithoutFunnelInput[]
-    createMany?: PageCreateManyFunnelInputEnvelope
-    set?: PageWhereUniqueInput | PageWhereUniqueInput[]
-    disconnect?: PageWhereUniqueInput | PageWhereUniqueInput[]
-    delete?: PageWhereUniqueInput | PageWhereUniqueInput[]
-    connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
-    update?: PageUpdateWithWhereUniqueWithoutFunnelInput | PageUpdateWithWhereUniqueWithoutFunnelInput[]
-    updateMany?: PageUpdateManyWithWhereWithoutFunnelInput | PageUpdateManyWithWhereWithoutFunnelInput[]
-    deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
+  export type TemplateUpdateOneWithoutFunnelsCreatedNestedInput = {
+    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
+    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
+    upsert?: TemplateUpsertWithoutFunnelsCreatedInput
+    disconnect?: TemplateWhereInput | boolean
+    delete?: TemplateWhereInput | boolean
+    connect?: TemplateWhereUniqueInput
+    update?: XOR<XOR<TemplateUpdateToOneWithWhereWithoutFunnelsCreatedInput, TemplateUpdateWithoutFunnelsCreatedInput>, TemplateUncheckedUpdateWithoutFunnelsCreatedInput>
   }
 
   export type FunnelDomainUpdateManyWithoutFunnelNestedInput = {
@@ -14293,25 +18864,17 @@ export namespace Prisma {
     deleteMany?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
   }
 
-  export type TemplateUpdateOneWithoutFunnelsCreatedNestedInput = {
-    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
-    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
-    upsert?: TemplateUpsertWithoutFunnelsCreatedInput
-    disconnect?: TemplateWhereInput | boolean
-    delete?: TemplateWhereInput | boolean
-    connect?: TemplateWhereUniqueInput
-    update?: XOR<XOR<TemplateUpdateToOneWithWhereWithoutFunnelsCreatedInput, TemplateUpdateWithoutFunnelsCreatedInput>, TemplateUncheckedUpdateWithoutFunnelsCreatedInput>
+  export type ThemeUpdateOneWithoutFunnelNestedInput = {
+    create?: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutFunnelInput
+    upsert?: ThemeUpsertWithoutFunnelInput
+    disconnect?: ThemeWhereInput | boolean
+    delete?: ThemeWhereInput | boolean
+    connect?: ThemeWhereUniqueInput
+    update?: XOR<XOR<ThemeUpdateToOneWithWhereWithoutFunnelInput, ThemeUpdateWithoutFunnelInput>, ThemeUncheckedUpdateWithoutFunnelInput>
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type PageUncheckedUpdateManyWithoutFunnelNestedInput = {
+  export type PageUpdateManyWithoutFunnelNestedInput = {
     create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
     upsert?: PageUpsertWithWhereUniqueWithoutFunnelInput | PageUpsertWithWhereUniqueWithoutFunnelInput[]
@@ -14337,6 +18900,20 @@ export namespace Prisma {
     update?: FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput | FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput[]
     updateMany?: FunnelDomainUpdateManyWithWhereWithoutFunnelInput | FunnelDomainUpdateManyWithWhereWithoutFunnelInput[]
     deleteMany?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
+  }
+
+  export type PageUncheckedUpdateManyWithoutFunnelNestedInput = {
+    create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
+    upsert?: PageUpsertWithWhereUniqueWithoutFunnelInput | PageUpsertWithWhereUniqueWithoutFunnelInput[]
+    createMany?: PageCreateManyFunnelInputEnvelope
+    set?: PageWhereUniqueInput | PageWhereUniqueInput[]
+    disconnect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+    delete?: PageWhereUniqueInput | PageWhereUniqueInput[]
+    connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+    update?: PageUpdateWithWhereUniqueWithoutFunnelInput | PageUpdateWithWhereUniqueWithoutFunnelInput[]
+    updateMany?: PageUpdateManyWithWhereWithoutFunnelInput | PageUpdateManyWithWhereWithoutFunnelInput[]
+    deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutDomainsInput = {
@@ -14407,24 +18984,16 @@ export namespace Prisma {
     deleteMany?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
   }
 
-  export type FunnelCreateNestedOneWithoutDomainConnectionsInput = {
-    create?: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
-    connectOrCreate?: FunnelCreateOrConnectWithoutDomainConnectionsInput
-    connect?: FunnelWhereUniqueInput
-  }
-
   export type DomainCreateNestedOneWithoutFunnelConnectionsInput = {
     create?: XOR<DomainCreateWithoutFunnelConnectionsInput, DomainUncheckedCreateWithoutFunnelConnectionsInput>
     connectOrCreate?: DomainCreateOrConnectWithoutFunnelConnectionsInput
     connect?: DomainWhereUniqueInput
   }
 
-  export type FunnelUpdateOneRequiredWithoutDomainConnectionsNestedInput = {
+  export type FunnelCreateNestedOneWithoutDomainConnectionsInput = {
     create?: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
     connectOrCreate?: FunnelCreateOrConnectWithoutDomainConnectionsInput
-    upsert?: FunnelUpsertWithoutDomainConnectionsInput
     connect?: FunnelWhereUniqueInput
-    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutDomainConnectionsInput, FunnelUpdateWithoutDomainConnectionsInput>, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
   }
 
   export type DomainUpdateOneRequiredWithoutFunnelConnectionsNestedInput = {
@@ -14433,6 +19002,14 @@ export namespace Prisma {
     upsert?: DomainUpsertWithoutFunnelConnectionsInput
     connect?: DomainWhereUniqueInput
     update?: XOR<XOR<DomainUpdateToOneWithWhereWithoutFunnelConnectionsInput, DomainUpdateWithoutFunnelConnectionsInput>, DomainUncheckedUpdateWithoutFunnelConnectionsInput>
+  }
+
+  export type FunnelUpdateOneRequiredWithoutDomainConnectionsNestedInput = {
+    create?: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutDomainConnectionsInput
+    upsert?: FunnelUpsertWithoutDomainConnectionsInput
+    connect?: FunnelWhereUniqueInput
+    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutDomainConnectionsInput, FunnelUpdateWithoutDomainConnectionsInput>, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
   }
 
   export type FunnelCreateNestedOneWithoutPagesInput = {
@@ -14447,6 +19024,51 @@ export namespace Prisma {
     upsert?: FunnelUpsertWithoutPagesInput
     connect?: FunnelWhereUniqueInput
     update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutPagesInput, FunnelUpdateWithoutPagesInput>, FunnelUncheckedUpdateWithoutPagesInput>
+  }
+
+  export type SessionCreatevisitedPagesInput = {
+    set: number[]
+  }
+
+  export type SessionUpdatevisitedPagesInput = {
+    set?: number[]
+    push?: number | number[]
+  }
+
+  export type FunnelCreateNestedOneWithoutThemeInput = {
+    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
+    connect?: FunnelWhereUniqueInput
+  }
+
+  export type FunnelUncheckedCreateNestedOneWithoutThemeInput = {
+    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
+    connect?: FunnelWhereUniqueInput
+  }
+
+  export type EnumBorderRadiusFieldUpdateOperationsInput = {
+    set?: $Enums.BorderRadius
+  }
+
+  export type FunnelUpdateOneWithoutThemeNestedInput = {
+    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
+    upsert?: FunnelUpsertWithoutThemeInput
+    disconnect?: FunnelWhereInput | boolean
+    delete?: FunnelWhereInput | boolean
+    connect?: FunnelWhereUniqueInput
+    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutThemeInput, FunnelUpdateWithoutThemeInput>, FunnelUncheckedUpdateWithoutThemeInput>
+  }
+
+  export type FunnelUncheckedUpdateOneWithoutThemeNestedInput = {
+    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
+    upsert?: FunnelUpsertWithoutThemeInput
+    disconnect?: FunnelWhereInput | boolean
+    delete?: FunnelWhereInput | boolean
+    connect?: FunnelWhereUniqueInput
+    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutThemeInput, FunnelUpdateWithoutThemeInput>, FunnelUncheckedUpdateWithoutThemeInput>
   }
 
   export type TemplateCreateNestedManyWithoutCategoryInput = {
@@ -14748,6 +19370,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -14807,17 +19440,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -14883,6 +19505,23 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumFunnelStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.FunnelStatus | EnumFunnelStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFunnelStatusFilter<$PrismaModel> | $Enums.FunnelStatus
+  }
+
+  export type NestedEnumFunnelStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FunnelStatus | EnumFunnelStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFunnelStatusWithAggregatesFilter<$PrismaModel> | $Enums.FunnelStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
+    _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumDomainTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DomainType | EnumDomainTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DomainType[] | ListEnumDomainTypeFieldRefInput<$PrismaModel>
@@ -14933,7 +19572,7 @@ export namespace Prisma {
     _min?: NestedEnumSslStatusFilter<$PrismaModel>
     _max?: NestedEnumSslStatusFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> = 
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
         Required<NestedJsonNullableFilterBase<$PrismaModel>>
@@ -14943,12 +19582,36 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -14956,25 +19619,44 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedEnumBorderRadiusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BorderRadius | EnumBorderRadiusFieldRefInput<$PrismaModel>
+    in?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBorderRadiusFilter<$PrismaModel> | $Enums.BorderRadius
+  }
+
+  export type NestedEnumBorderRadiusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BorderRadius | EnumBorderRadiusFieldRefInput<$PrismaModel>
+    in?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BorderRadius[] | ListEnumBorderRadiusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBorderRadiusWithAggregatesFilter<$PrismaModel> | $Enums.BorderRadius
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBorderRadiusFilter<$PrismaModel>
+    _max?: NestedEnumBorderRadiusFilter<$PrismaModel>
+  }
+
   export type FunnelCreateWithoutUserInput = {
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
-    pages?: PageCreateNestedManyWithoutFunnelInput
-    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutUserInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutUserInput = {
@@ -15109,11 +19791,12 @@ export namespace Prisma {
     NOT?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
     id?: IntFilter<"Funnel"> | number
     name?: StringFilter<"Funnel"> | string
-    status?: StringFilter<"Funnel"> | string
+    status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
     templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
+    themeId?: IntNullableFilter<"Funnel"> | number | null
   }
 
   export type DomainUpsertWithWhereUniqueWithoutUserInput = {
@@ -15202,6 +19885,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     domains?: DomainCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
   }
@@ -15216,6 +19900,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -15223,60 +19908,6 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutFunnelsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutFunnelsInput, UserUncheckedCreateWithoutFunnelsInput>
-  }
-
-  export type PageCreateWithoutFunnelInput = {
-    name: string
-    content?: string | null
-    order: number
-    linkingId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type PageUncheckedCreateWithoutFunnelInput = {
-    id?: number
-    name: string
-    content?: string | null
-    order: number
-    linkingId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type PageCreateOrConnectWithoutFunnelInput = {
-    where: PageWhereUniqueInput
-    create: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput>
-  }
-
-  export type PageCreateManyFunnelInputEnvelope = {
-    data: PageCreateManyFunnelInput | PageCreateManyFunnelInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type FunnelDomainCreateWithoutFunnelInput = {
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    domain: DomainCreateNestedOneWithoutFunnelConnectionsInput
-  }
-
-  export type FunnelDomainUncheckedCreateWithoutFunnelInput = {
-    id?: number
-    domainId: number
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type FunnelDomainCreateOrConnectWithoutFunnelInput = {
-    where: FunnelDomainWhereUniqueInput
-    create: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput>
-  }
-
-  export type FunnelDomainCreateManyFunnelInputEnvelope = {
-    data: FunnelDomainCreateManyFunnelInput | FunnelDomainCreateManyFunnelInput[]
-    skipDuplicates?: boolean
   }
 
   export type TemplateCreateWithoutFunnelsCreatedInput = {
@@ -15321,6 +19952,102 @@ export namespace Prisma {
     create: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
   }
 
+  export type FunnelDomainCreateWithoutFunnelInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    domain: DomainCreateNestedOneWithoutFunnelConnectionsInput
+  }
+
+  export type FunnelDomainUncheckedCreateWithoutFunnelInput = {
+    id?: number
+    domainId: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FunnelDomainCreateOrConnectWithoutFunnelInput = {
+    where: FunnelDomainWhereUniqueInput
+    create: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type FunnelDomainCreateManyFunnelInputEnvelope = {
+    data: FunnelDomainCreateManyFunnelInput | FunnelDomainCreateManyFunnelInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ThemeCreateWithoutFunnelInput = {
+    name?: string
+    backgroundColor?: string
+    textColor?: string
+    buttonColor?: string
+    buttonTextColor?: string
+    borderColor?: string
+    optionColor?: string
+    fontFamily?: string
+    borderRadius?: $Enums.BorderRadius
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeUncheckedCreateWithoutFunnelInput = {
+    id?: number
+    name?: string
+    backgroundColor?: string
+    textColor?: string
+    buttonColor?: string
+    buttonTextColor?: string
+    borderColor?: string
+    optionColor?: string
+    fontFamily?: string
+    borderRadius?: $Enums.BorderRadius
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeCreateOrConnectWithoutFunnelInput = {
+    where: ThemeWhereUniqueInput
+    create: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type PageCreateWithoutFunnelInput = {
+    name: string
+    content?: string | null
+    order: number
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageUncheckedCreateWithoutFunnelInput = {
+    id?: number
+    name: string
+    content?: string | null
+    order: number
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageCreateOrConnectWithoutFunnelInput = {
+    where: PageWhereUniqueInput
+    create: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type PageCreateManyFunnelInputEnvelope = {
+    data: PageCreateManyFunnelInput | PageCreateManyFunnelInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutFunnelsInput = {
     update: XOR<UserUpdateWithoutFunnelsInput, UserUncheckedUpdateWithoutFunnelsInput>
     create: XOR<UserCreateWithoutFunnelsInput, UserUncheckedCreateWithoutFunnelsInput>
@@ -15341,6 +20068,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     domains?: DomainUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
   }
@@ -15355,66 +20083,9 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
-  }
-
-  export type PageUpsertWithWhereUniqueWithoutFunnelInput = {
-    where: PageWhereUniqueInput
-    update: XOR<PageUpdateWithoutFunnelInput, PageUncheckedUpdateWithoutFunnelInput>
-    create: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput>
-  }
-
-  export type PageUpdateWithWhereUniqueWithoutFunnelInput = {
-    where: PageWhereUniqueInput
-    data: XOR<PageUpdateWithoutFunnelInput, PageUncheckedUpdateWithoutFunnelInput>
-  }
-
-  export type PageUpdateManyWithWhereWithoutFunnelInput = {
-    where: PageScalarWhereInput
-    data: XOR<PageUpdateManyMutationInput, PageUncheckedUpdateManyWithoutFunnelInput>
-  }
-
-  export type PageScalarWhereInput = {
-    AND?: PageScalarWhereInput | PageScalarWhereInput[]
-    OR?: PageScalarWhereInput[]
-    NOT?: PageScalarWhereInput | PageScalarWhereInput[]
-    id?: IntFilter<"Page"> | number
-    name?: StringFilter<"Page"> | string
-    content?: StringNullableFilter<"Page"> | string | null
-    order?: IntFilter<"Page"> | number
-    linkingId?: StringNullableFilter<"Page"> | string | null
-    funnelId?: IntFilter<"Page"> | number
-    createdAt?: DateTimeFilter<"Page"> | Date | string
-    updatedAt?: DateTimeFilter<"Page"> | Date | string
-  }
-
-  export type FunnelDomainUpsertWithWhereUniqueWithoutFunnelInput = {
-    where: FunnelDomainWhereUniqueInput
-    update: XOR<FunnelDomainUpdateWithoutFunnelInput, FunnelDomainUncheckedUpdateWithoutFunnelInput>
-    create: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput>
-  }
-
-  export type FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput = {
-    where: FunnelDomainWhereUniqueInput
-    data: XOR<FunnelDomainUpdateWithoutFunnelInput, FunnelDomainUncheckedUpdateWithoutFunnelInput>
-  }
-
-  export type FunnelDomainUpdateManyWithWhereWithoutFunnelInput = {
-    where: FunnelDomainScalarWhereInput
-    data: XOR<FunnelDomainUpdateManyMutationInput, FunnelDomainUncheckedUpdateManyWithoutFunnelInput>
-  }
-
-  export type FunnelDomainScalarWhereInput = {
-    AND?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
-    OR?: FunnelDomainScalarWhereInput[]
-    NOT?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
-    id?: IntFilter<"FunnelDomain"> | number
-    funnelId?: IntFilter<"FunnelDomain"> | number
-    domainId?: IntFilter<"FunnelDomain"> | number
-    isActive?: BoolFilter<"FunnelDomain"> | boolean
-    createdAt?: DateTimeFilter<"FunnelDomain"> | Date | string
-    updatedAt?: DateTimeFilter<"FunnelDomain"> | Date | string
   }
 
   export type TemplateUpsertWithoutFunnelsCreatedInput = {
@@ -15465,6 +20136,108 @@ export namespace Prisma {
     pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
+  export type FunnelDomainUpsertWithWhereUniqueWithoutFunnelInput = {
+    where: FunnelDomainWhereUniqueInput
+    update: XOR<FunnelDomainUpdateWithoutFunnelInput, FunnelDomainUncheckedUpdateWithoutFunnelInput>
+    create: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput = {
+    where: FunnelDomainWhereUniqueInput
+    data: XOR<FunnelDomainUpdateWithoutFunnelInput, FunnelDomainUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type FunnelDomainUpdateManyWithWhereWithoutFunnelInput = {
+    where: FunnelDomainScalarWhereInput
+    data: XOR<FunnelDomainUpdateManyMutationInput, FunnelDomainUncheckedUpdateManyWithoutFunnelInput>
+  }
+
+  export type FunnelDomainScalarWhereInput = {
+    AND?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
+    OR?: FunnelDomainScalarWhereInput[]
+    NOT?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
+    id?: IntFilter<"FunnelDomain"> | number
+    funnelId?: IntFilter<"FunnelDomain"> | number
+    domainId?: IntFilter<"FunnelDomain"> | number
+    isActive?: BoolFilter<"FunnelDomain"> | boolean
+    createdAt?: DateTimeFilter<"FunnelDomain"> | Date | string
+    updatedAt?: DateTimeFilter<"FunnelDomain"> | Date | string
+  }
+
+  export type ThemeUpsertWithoutFunnelInput = {
+    update: XOR<ThemeUpdateWithoutFunnelInput, ThemeUncheckedUpdateWithoutFunnelInput>
+    create: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+    where?: ThemeWhereInput
+  }
+
+  export type ThemeUpdateToOneWithWhereWithoutFunnelInput = {
+    where?: ThemeWhereInput
+    data: XOR<ThemeUpdateWithoutFunnelInput, ThemeUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type ThemeUpdateWithoutFunnelInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeUncheckedUpdateWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    backgroundColor?: StringFieldUpdateOperationsInput | string
+    textColor?: StringFieldUpdateOperationsInput | string
+    buttonColor?: StringFieldUpdateOperationsInput | string
+    buttonTextColor?: StringFieldUpdateOperationsInput | string
+    borderColor?: StringFieldUpdateOperationsInput | string
+    optionColor?: StringFieldUpdateOperationsInput | string
+    fontFamily?: StringFieldUpdateOperationsInput | string
+    borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageUpsertWithWhereUniqueWithoutFunnelInput = {
+    where: PageWhereUniqueInput
+    update: XOR<PageUpdateWithoutFunnelInput, PageUncheckedUpdateWithoutFunnelInput>
+    create: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type PageUpdateWithWhereUniqueWithoutFunnelInput = {
+    where: PageWhereUniqueInput
+    data: XOR<PageUpdateWithoutFunnelInput, PageUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type PageUpdateManyWithWhereWithoutFunnelInput = {
+    where: PageScalarWhereInput
+    data: XOR<PageUpdateManyMutationInput, PageUncheckedUpdateManyWithoutFunnelInput>
+  }
+
+  export type PageScalarWhereInput = {
+    AND?: PageScalarWhereInput | PageScalarWhereInput[]
+    OR?: PageScalarWhereInput[]
+    NOT?: PageScalarWhereInput | PageScalarWhereInput[]
+    id?: IntFilter<"Page"> | number
+    name?: StringFilter<"Page"> | string
+    content?: StringNullableFilter<"Page"> | string | null
+    order?: IntFilter<"Page"> | number
+    linkingId?: StringNullableFilter<"Page"> | string | null
+    seoTitle?: StringNullableFilter<"Page"> | string | null
+    seoDescription?: StringNullableFilter<"Page"> | string | null
+    seoKeywords?: StringNullableFilter<"Page"> | string | null
+    visits?: IntFilter<"Page"> | number
+    funnelId?: IntFilter<"Page"> | number
+    createdAt?: DateTimeFilter<"Page"> | Date | string
+    updatedAt?: DateTimeFilter<"Page"> | Date | string
+  }
+
   export type UserCreateWithoutDomainsInput = {
     email: string
     name?: string | null
@@ -15474,6 +20247,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
   }
@@ -15488,6 +20262,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
   }
@@ -15542,6 +20317,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
   }
@@ -15556,6 +20332,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   }
@@ -15574,32 +20351,6 @@ export namespace Prisma {
   export type FunnelDomainUpdateManyWithWhereWithoutDomainInput = {
     where: FunnelDomainScalarWhereInput
     data: XOR<FunnelDomainUpdateManyMutationInput, FunnelDomainUncheckedUpdateManyWithoutDomainInput>
-  }
-
-  export type FunnelCreateWithoutDomainConnectionsInput = {
-    name: string
-    status?: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutFunnelsInput
-    pages?: PageCreateNestedManyWithoutFunnelInput
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
-  }
-
-  export type FunnelUncheckedCreateWithoutDomainConnectionsInput = {
-    id?: number
-    name: string
-    status?: string
-    userId: number
-    templateId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
-  }
-
-  export type FunnelCreateOrConnectWithoutDomainConnectionsInput = {
-    where: FunnelWhereUniqueInput
-    create: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
   }
 
   export type DomainCreateWithoutFunnelConnectionsInput = {
@@ -15650,36 +20401,32 @@ export namespace Prisma {
     create: XOR<DomainCreateWithoutFunnelConnectionsInput, DomainUncheckedCreateWithoutFunnelConnectionsInput>
   }
 
-  export type FunnelUpsertWithoutDomainConnectionsInput = {
-    update: XOR<FunnelUpdateWithoutDomainConnectionsInput, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
+  export type FunnelCreateWithoutDomainConnectionsInput = {
+    name: string
+    status?: $Enums.FunnelStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFunnelsInput
+    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelUncheckedCreateWithoutDomainConnectionsInput = {
+    id?: number
+    name: string
+    status?: $Enums.FunnelStatus
+    userId: number
+    templateId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    themeId?: number | null
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelCreateOrConnectWithoutDomainConnectionsInput = {
+    where: FunnelWhereUniqueInput
     create: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
-    where?: FunnelWhereInput
-  }
-
-  export type FunnelUpdateToOneWithWhereWithoutDomainConnectionsInput = {
-    where?: FunnelWhereInput
-    data: XOR<FunnelUpdateWithoutDomainConnectionsInput, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
-  }
-
-  export type FunnelUpdateWithoutDomainConnectionsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    pages?: PageUpdateManyWithoutFunnelNestedInput
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
-  }
-
-  export type FunnelUncheckedUpdateWithoutDomainConnectionsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type DomainUpsertWithoutFunnelConnectionsInput = {
@@ -15736,24 +20483,60 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FunnelUpsertWithoutDomainConnectionsInput = {
+    update: XOR<FunnelUpdateWithoutDomainConnectionsInput, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
+    create: XOR<FunnelCreateWithoutDomainConnectionsInput, FunnelUncheckedCreateWithoutDomainConnectionsInput>
+    where?: FunnelWhereInput
+  }
+
+  export type FunnelUpdateToOneWithWhereWithoutDomainConnectionsInput = {
+    where?: FunnelWhereInput
+    data: XOR<FunnelUpdateWithoutDomainConnectionsInput, FunnelUncheckedUpdateWithoutDomainConnectionsInput>
+  }
+
+  export type FunnelUpdateWithoutDomainConnectionsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
+    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
+  }
+
+  export type FunnelUncheckedUpdateWithoutDomainConnectionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    userId?: IntFieldUpdateOperationsInput | number
+    templateId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+  }
+
   export type FunnelCreateWithoutPagesInput = {
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutPagesInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     userId: number
     templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
   }
 
@@ -15775,23 +20558,87 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutPagesInput = {
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutPagesInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    userId?: IntFieldUpdateOperationsInput | number
+    templateId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
+    domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+  }
+
+  export type FunnelCreateWithoutThemeInput = {
+    name: string
+    status?: $Enums.FunnelStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFunnelsInput
+    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelUncheckedCreateWithoutThemeInput = {
+    id?: number
+    name: string
+    status?: $Enums.FunnelStatus
+    userId: number
+    templateId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelCreateOrConnectWithoutThemeInput = {
+    where: FunnelWhereUniqueInput
+    create: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+  }
+
+  export type FunnelUpsertWithoutThemeInput = {
+    update: XOR<FunnelUpdateWithoutThemeInput, FunnelUncheckedUpdateWithoutThemeInput>
+    create: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
+    where?: FunnelWhereInput
+  }
+
+  export type FunnelUpdateToOneWithWhereWithoutThemeInput = {
+    where?: FunnelWhereInput
+    data: XOR<FunnelUpdateWithoutThemeInput, FunnelUncheckedUpdateWithoutThemeInput>
+  }
+
+  export type FunnelUpdateWithoutThemeInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
+    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
+  }
+
+  export type FunnelUncheckedUpdateWithoutThemeInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
     templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type TemplateCreateWithoutCategoryInput = {
@@ -15956,6 +20803,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelCreateNestedManyWithoutUserInput
     domains?: DomainCreateNestedManyWithoutUserInput
   }
@@ -15970,6 +20818,7 @@ export namespace Prisma {
     isAdmin?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    maximumFunnels?: number | null
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
   }
@@ -15981,23 +20830,25 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutTemplateInput = {
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    pages?: PageCreateNestedManyWithoutFunnelInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutTemplateInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutTemplateInput = {
@@ -16126,6 +20977,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     domains?: DomainUpdateManyWithoutUserNestedInput
   }
@@ -16140,6 +20992,7 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -16343,10 +21196,11 @@ export namespace Prisma {
   export type FunnelCreateManyUserInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
   }
 
   export type DomainCreateManyUserInput = {
@@ -16388,32 +21242,35 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutUserInput = {
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: PageUpdateManyWithoutFunnelNestedInput
-    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type DomainUpdateWithoutUserInput = {
@@ -16533,16 +21390,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type PageCreateManyFunnelInput = {
-    id?: number
-    name: string
-    content?: string | null
-    order: number
-    linkingId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
   export type FunnelDomainCreateManyFunnelInput = {
     id?: number
     domainId: number
@@ -16551,33 +21398,18 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type PageUpdateWithoutFunnelInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PageUncheckedUpdateWithoutFunnelInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PageUncheckedUpdateManyWithoutFunnelInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type PageCreateManyFunnelInput = {
+    id?: number
+    name: string
+    content?: string | null
+    order: number
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
+    visits?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type FunnelDomainUpdateWithoutFunnelInput = {
@@ -16599,6 +21431,47 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     domainId?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageUpdateWithoutFunnelInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageUncheckedUpdateWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageUncheckedUpdateManyWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    visits?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16728,10 +21601,11 @@ export namespace Prisma {
   export type FunnelCreateManyTemplateInput = {
     id?: number
     name: string
-    status?: string
+    status?: $Enums.FunnelStatus
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
   }
 
   export type TemplateImageUpdateWithoutTemplateInput = {
@@ -16800,95 +21674,38 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutTemplateInput = {
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    pages?: PageUpdateManyWithoutFunnelNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateManyWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
 
-
-  /**
-   * Aliases for legacy arg types
-   */
-    /**
-     * @deprecated Use UserCountOutputTypeDefaultArgs instead
-     */
-    export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use FunnelCountOutputTypeDefaultArgs instead
-     */
-    export type FunnelCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FunnelCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use DomainCountOutputTypeDefaultArgs instead
-     */
-    export type DomainCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DomainCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplateCategoryCountOutputTypeDefaultArgs instead
-     */
-    export type TemplateCategoryCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplateCategoryCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplateCountOutputTypeDefaultArgs instead
-     */
-    export type TemplateCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplateCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserDefaultArgs instead
-     */
-    export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use FunnelDefaultArgs instead
-     */
-    export type FunnelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FunnelDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use DomainDefaultArgs instead
-     */
-    export type DomainArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DomainDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use FunnelDomainDefaultArgs instead
-     */
-    export type FunnelDomainArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FunnelDomainDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use PageDefaultArgs instead
-     */
-    export type PageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PageDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplateCategoryDefaultArgs instead
-     */
-    export type TemplateCategoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplateCategoryDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplateDefaultArgs instead
-     */
-    export type TemplateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplateDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplateImageDefaultArgs instead
-     */
-    export type TemplateImageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplateImageDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use TemplatePagesDefaultArgs instead
-     */
-    export type TemplatePagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TemplatePagesDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany
