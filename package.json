@@ -10,7 +10,7 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "test": "prisma generate && vitest run",
+    "test": "prisma generate && vitest",
     "test:watch": "prisma generate && vitest --watch",
     "test:coverage": "prisma generate && vitest --coverage",
     "test:ui": "prisma generate && vitest --ui",
