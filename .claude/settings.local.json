@@ -7,7 +7,9 @@
       "Bash(gh:*)",
       "Bash(git init:*)",
       "Bash(npm run build:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }

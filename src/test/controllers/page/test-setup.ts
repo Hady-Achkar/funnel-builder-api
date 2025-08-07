@@ -19,11 +19,6 @@ export const setupPageControllerTest = () => {
     // Set test Prisma client for page service
     setPrismaClient(testPrisma);
 
-    // Clean up database
-    await testPrisma.page.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.user.deleteMany();
-
     // Create test user and funnel
     user = await TestHelpers.createTestUser();
     funnel = await TestHelpers.createTestFunnel(user.id, {

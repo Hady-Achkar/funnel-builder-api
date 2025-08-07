@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { createPageVisit } from "../../../services/page/createPageVisit";
-import { testPrisma } from "../../helpers";
+import { TestHelpers, testPrisma } from "../../helpers";
+import { setPrismaClient } from "../../../services/page";
 
 describe("createPageVisit Service", () => {
   let user: any;
@@ -8,27 +9,15 @@ describe("createPageVisit Service", () => {
   let page: any;
 
   beforeEach(async () => {
-    // Clean up test data
-    await testPrisma.session.deleteMany();
-    await testPrisma.page.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.user.deleteMany();
-
+    // Set test Prisma client for page service
+    setPrismaClient(testPrisma);
+    
     // Create test user
-    user = await testPrisma.user.create({
-      data: {
-        email: "test@example.com",
-        name: "Test User",
-        password: "hashedPassword",
-      },
-    });
+    user = await TestHelpers.createTestUser();
 
     // Create test funnel
-    funnel = await testPrisma.funnel.create({
-      data: {
-        name: "Test Funnel",
-        userId: user.id,
-      },
+    funnel = await TestHelpers.createTestFunnel(user.id, {
+      name: "Test Funnel",
     });
 
     // Create test page
@@ -47,6 +36,13 @@ describe("createPageVisit Service", () => {
   it("should create a new session and record page visit for first-time visitor", async () => {
     const sessionId = "new-session-123";
     
+    // Verify page exists before test
+    const pageBeforeVisit = await testPrisma.page.findUnique({
+      where: { id: page.id }
+    });
+    expect(pageBeforeVisit).toBeDefined();
+    expect(pageBeforeVisit?.visits).toBe(0);
+    
     const result = await createPageVisit(page.id, sessionId);
 
     expect(result.success).toBe(true);
@@ -64,6 +60,7 @@ describe("createPageVisit Service", () => {
     const updatedPage = await testPrisma.page.findUnique({
       where: { id: page.id }
     });
+    expect(updatedPage).toBeDefined();
     expect(updatedPage?.visits).toBe(1);
   });
 

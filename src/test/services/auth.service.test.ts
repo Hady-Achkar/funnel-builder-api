@@ -1,22 +1,18 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { AuthService, setPrismaClient } from "../../services/auth.service";
-import { testPrisma } from "../helpers";
+import { AuthService } from "../../services/auth.service";
+import { testPrisma, testFactory } from "../setup";
+import { TestHelpers } from "../helpers";
 import bcrypt from "bcryptjs";
 
 describe("AuthService", () => {
-  beforeEach(async () => {
-    // Set test Prisma client for auth service
-    setPrismaClient(testPrisma);
-
-    // Clean up before each test
-    await testPrisma.user.deleteMany();
-  });
+  // Prisma client is already injected in setup.ts
 
   describe("register", () => {
     it("should register a new user successfully", async () => {
+      const timestamp = Date.now();
       const userData = {
-        email: "test@example.com",
-        name: "Test User",
+        email: `auth-test-${timestamp}@example.com`,
+        name: "Auth Test User",
         password: "password123",
       };
 
@@ -45,16 +41,18 @@ describe("AuthService", () => {
     });
 
     it("should throw error if user already exists", async () => {
+      // Use test factory to create existing user
+      const existingUser = await testFactory.createUser({
+        email: "existing@example.com"
+      });
+      
       const userData = {
-        email: "test@example.com",
-        name: "Test User",
+        email: existingUser.email,
+        name: "Duplicate User",
         password: "password123",
       };
 
-      // Create user first
-      await AuthService.register(userData);
-
-      // Try to register again
+      // Try to register with an already existing email
       await expect(AuthService.register(userData)).rejects.toThrow(
         "User already exists"
       );
@@ -106,8 +104,9 @@ describe("AuthService", () => {
     });
 
     it("should throw error for incorrect password", async () => {
+      const timestamp = Date.now();
       const userData = {
-        email: "test@example.com",
+        email: `test${timestamp}@example.com`,
         name: "Test User",
         password: "password123",
       };
@@ -130,8 +129,9 @@ describe("AuthService", () => {
       const originalSecret = process.env.JWT_SECRET;
       delete process.env.JWT_SECRET;
 
+      const timestamp = Date.now();
       const userData = {
-        email: "test@example.com",
+        email: `test${timestamp}@example.com`,
         password: "password123",
       };
 

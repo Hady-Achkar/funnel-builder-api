@@ -55,6 +55,9 @@ describe("getFunnelPages Controller", () => {
       const user = getUser();
       const funnel = getFunnel();
 
+      // Clean up any existing pages for this funnel first
+      await testPrisma.page.deleteMany({ where: { funnelId: funnel.id } });
+
       // Create a single test page
       await testPrisma.page.create({
         data: { name: "Single Page", order: 1, linkingId: "single", content: "", funnelId: funnel.id }

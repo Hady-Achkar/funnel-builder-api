@@ -8,10 +8,24 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
   const userId = 1;
   const funnelId = 1;
 
+  beforeEach(async () => {
+    // Clean up test caches before each test
+    try {
+      await cacheService.del(`user:${userId}:funnel:${funnelId}:pages`);
+      await cacheService.del(`user:${userId}:funnel:${funnelId}:full`);
+    } catch (error) {
+      // Ignore cache errors in test setup
+    }
+  });
+
   afterEach(async () => {
-    // Clean up test caches
-    await cacheService.del(`user:${userId}:funnel:${funnelId}:pages`);
-    await cacheService.del(`user:${userId}:funnel:${funnelId}:full`);
+    // Clean up test caches after each test
+    try {
+      await cacheService.del(`user:${userId}:funnel:${funnelId}:pages`);
+      await cacheService.del(`user:${userId}:funnel:${funnelId}:full`);
+    } catch (error) {
+      // Ignore cache errors in test cleanup
+    }
   });
 
   it("should update :full cache with new page when cache exists", async () => {

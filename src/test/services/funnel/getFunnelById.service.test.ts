@@ -64,6 +64,16 @@ describe("FunnelService.getFunnelById", () => {
 
   it("should throw access denied error for unauthorized access (different user)", async () => {
     const otherUser = await TestHelpers.createTestUser();
+    
+    // Verify the funnel exists and is owned by testUser
+    const funnel = await testPrisma.funnel.findUnique({
+      where: { id: testFunnel.id }
+    });
+    expect(funnel).toBeDefined();
+    expect(funnel?.userId).toBe(testUser.id);
+    expect(funnel?.userId).not.toBe(otherUser.id);
+
+    // Should throw access denied when different user tries to access
     await expect(FunnelService.getFunnelById(testFunnel.id, otherUser.id)).rejects.toThrow("Access denied");
   });
 
@@ -72,6 +82,15 @@ describe("FunnelService.getFunnelById", () => {
     const cacheKey = `user:${testUser.id}:funnel:${testFunnel.id}:full`;
     const cachedData = await cacheService.get(cacheKey);
     expect(cachedData).toBeNull();
+
+    // Verify funnel exists in DB with pages
+    const dbFunnel = await testPrisma.funnel.findUnique({
+      where: { id: testFunnel.id },
+      include: { pages: true, theme: true }
+    });
+    expect(dbFunnel).toBeDefined();
+    expect(dbFunnel?.userId).toBe(testUser.id);
+    expect(dbFunnel?.pages).toHaveLength(2);
 
     // Fetch funnel
     const result = await FunnelService.getFunnelById(testFunnel.id, testUser.id);

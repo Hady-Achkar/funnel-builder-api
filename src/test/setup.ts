@@ -1,5 +1,6 @@
 import { beforeAll, afterAll, beforeEach, afterEach } from "vitest";
-import { PrismaClient } from "../generated/prisma-client";
+import { getTestDatabase, TestDatabase } from "./test-database";
+import { TestFactory } from "./test-factories";
 import { redisService } from "../services/cache/redis.service";
 
 // Import all services that need Prisma client injection
@@ -10,30 +11,29 @@ import { setPrismaClient as setPagePrismaClient } from "../services/page";
 import { setPrismaClient as setDomainPrismaClient } from "../services/domain.service";
 import { setPrismaClient as setThemePrismaClient } from "../services/theme.service";
 
-export const testPrisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+// Test database and factory instances
+let testDatabase: TestDatabase;
+let testFactory: TestFactory;
 
-async function clearDatabase() {
-  await testPrisma.funnelDomain.deleteMany();
-  await testPrisma.page.deleteMany();
-  await testPrisma.domain.deleteMany();
-  await testPrisma.funnel.deleteMany();
-  await testPrisma.user.deleteMany();
-}
+// Export for use in tests
+export let testPrisma: ReturnType<TestDatabase["getPrismaClient"]>;
+export { testFactory };
 
 beforeAll(async () => {
-  console.log(
-    "Test Setup: Using database",
-    process.env.DATABASE_URL?.split("@")[1] || "Not set"
-  );
   console.log("Test Setup: NODE_ENV =", process.env.NODE_ENV);
+  console.log("Test Setup: CI =", process.env.CI || "false");
 
   try {
+    // Initialize test database
+    testDatabase = getTestDatabase();
+    await testDatabase.setup();
+    
+    // Get Prisma client from test database
+    testPrisma = testDatabase.getPrismaClient();
+    
+    // Initialize test factory
+    testFactory = new TestFactory(testPrisma);
+    
     // Inject test Prisma client into all services
     setAuthPrismaClient(testPrisma);
     setUserPrismaClient(testPrisma);
@@ -42,19 +42,20 @@ beforeAll(async () => {
     setDomainPrismaClient(testPrisma);
     setThemePrismaClient(testPrisma);
 
-    await clearDatabase();
+    // Connect to Redis
     await redisService.connect();
   } catch (error) {
-    console.warn("Setup error:", error);
+    console.error("Test setup failed:", error);
+    throw error;
   }
 });
 
 afterAll(async () => {
-  await testPrisma.$disconnect();
   try {
+    await testDatabase.teardown();
     await redisService.disconnect();
   } catch (error) {
-    console.warn("Redis cleanup error:", error);
+    console.error("Test teardown failed:", error);
   }
 });
 
@@ -68,7 +69,8 @@ beforeEach(async () => {
 
 afterEach(async () => {
   try {
-    await clearDatabase();
+    // Clean database after each test
+    await testDatabase.clean();
   } catch (error) {
     console.warn("Database cleanup error:", error);
   }

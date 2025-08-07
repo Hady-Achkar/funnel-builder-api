@@ -34,13 +34,6 @@ export const setupFunnelTest = () => {
     setPrismaClient(testPrisma);
     setThemePrismaClient(testPrisma);
 
-    // Clean up database
-    await testPrisma.funnelDomain.deleteMany();
-    await testPrisma.page.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.theme.deleteMany();
-    await testPrisma.user.deleteMany();
-
     // Create test user
     user = await TestHelpers.createTestUser();
 

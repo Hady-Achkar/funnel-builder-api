@@ -1,107 +1,71 @@
 import {
-  PrismaClient,
   User,
   Funnel,
   Domain,
   DomainType,
   DomainStatus,
-  $Enums,
+  FunnelStatus,
+  Theme,
+  Page,
 } from "../generated/prisma-client";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { testPrisma } from "./setup";
+import { testPrisma, testFactory } from "./setup";
 
-export interface TestUser {
-  id: number;
-  email: string;
-  name: string | null;
-  password: string;
-}
-
-export interface TestFunnel {
-  id: number;
-  name: string;
-  status: $Enums.FunnelStatus;
-  userId: number;
-  themeId?: number;
-}
-
-export interface TestDomain {
-  id: number;
-  hostname: string;
-  type: DomainType;
-  status: DomainStatus;
-  userId: number;
-  cloudflareHostnameId?: string | null;
-  cloudflareZoneId?: string | null;
-  cloudflareRecordId?: string | null;
-}
+// Re-export test factory for backward compatibility
+export { testFactory } from "./setup";
 
 export class TestHelpers {
+  // Delegate to test factory for consistency
   static async createTestUser(
-    overrides: Partial<TestUser> = {}
+    overrides: Partial<{
+      email?: string;
+      name?: string;
+      password?: string;
+      isAdmin?: boolean;
+      maximumFunnels?: number;
+    }> = {}
   ): Promise<User> {
-    const hashedPassword = await bcrypt.hash("password123", 10);
-    const randomId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
-
-    return await testPrisma.user.create({
-      data: {
-        email: `test${randomId}@example.com`,
-        name: "Test User",
-        password: hashedPassword,
-        ...overrides,
-      },
-    });
+    return testFactory.createUser(overrides);
   }
 
   static async createTestFunnel(
     userId: number,
-    overrides: Partial<TestFunnel> = {}
+    overrides: Partial<{
+      name?: string;
+      status?: FunnelStatus;
+      themeId?: number;
+      templateId?: number;
+    }> = {}
   ): Promise<Funnel> {
-    const randomId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
-
-    // Create a test theme first if themeId is not provided
-    let themeId = overrides.themeId;
-    if (!themeId) {
-      const theme = await testPrisma.theme.create({
-        data: {
-          name: `Test Theme ${randomId}`,
-        },
-      });
-      themeId = theme.id;
-    }
-
-    return await testPrisma.funnel.create({
-      data: {
-        name: `Test Funnel ${randomId}`,
-        status: overrides.status || $Enums.FunnelStatus.DRAFT,
-        userId: userId,
-        themeId: themeId,
-        ...overrides,
-      },
-    });
+    return testFactory.createFunnel(userId, overrides);
   }
 
   static async createTestDomain(
     userId: number,
-    overrides: Partial<TestDomain> = {}
+    overrides: Partial<{
+      hostname?: string;
+      type?: DomainType;
+      status?: DomainStatus;
+      cloudflareHostnameId?: string;
+      cloudflareZoneId?: string;
+      cloudflareRecordId?: string;
+    }> = {}
   ): Promise<Domain> {
-    const randomId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
-    return await testPrisma.domain.create({
-      data: {
-        hostname: `test${randomId}.example.com`,
-        type: DomainType.CUSTOM_DOMAIN,
-        status: DomainStatus.PENDING,
-        userId,
-        ...overrides,
-      },
-    });
+    return testFactory.createDomain(userId, overrides);
+  }
+  
+  // New helper methods using test factory
+  static async createTestTheme(
+    overrides: Parameters<typeof testFactory.createTheme>[0] = {}
+  ): Promise<Theme> {
+    return testFactory.createTheme(overrides);
+  }
+  
+  static async createTestPage(
+    funnelId: number,
+    overrides: Parameters<typeof testFactory.createPage>[1] = {}
+  ): Promise<Page> {
+    return testFactory.createPage(funnelId, overrides);
   }
 
   static generateJWTToken(userId: number): string {
@@ -111,28 +75,27 @@ export class TestHelpers {
   }
 
   static async cleanupUser(userId: number): Promise<void> {
-    // Delete in correct order due to foreign key constraints
-    await testPrisma.funnelDomain.deleteMany({ where: { funnel: { userId } } });
-    await testPrisma.page.deleteMany({ where: { funnel: { userId } } });
-    await testPrisma.domain.deleteMany({ where: { userId } });
-
-    // Get funnel IDs to clean up associated themes
-    const funnels = await testPrisma.funnel.findMany({
-      where: { userId },
-      select: { id: true, themeId: true },
-    });
-
-    await testPrisma.funnel.deleteMany({ where: { userId } });
-
-    // Clean up themes that were created for these funnels
-    const themeIds = funnels
-      .map((f) => f.themeId)
-      .filter((id): id is number => id !== null);
-    if (themeIds.length > 0) {
-      await testPrisma.theme.deleteMany({ where: { id: { in: themeIds } } });
+    return testFactory.cleanupUser(userId);
+  }
+  
+  // New transaction helper for isolated test execution
+  static async runInTransaction<T>(
+    fn: (prisma: typeof testPrisma) => Promise<T>
+  ): Promise<T> {
+    try {
+      return await testPrisma.$transaction(async (tx) => {
+        await fn(tx as typeof testPrisma);
+        // Force rollback by throwing an error
+        throw new Error("ROLLBACK_TEST_TRANSACTION");
+      });
+    } catch (error: any) {
+      // If the error is our rollback marker, suppress it
+      if (error.message === "ROLLBACK_TEST_TRANSACTION") {
+        return undefined as any;
+      }
+      // Otherwise, re-throw the actual error
+      throw error;
     }
-
-    await testPrisma.user.delete({ where: { id: userId } });
   }
 
   static mockCloudFlareResponse(success = true, result: any = {}) {

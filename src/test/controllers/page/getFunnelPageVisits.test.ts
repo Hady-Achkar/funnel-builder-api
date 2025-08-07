@@ -156,11 +156,12 @@ describe("getFunnelPageVisits Controller", () => {
 
     it("should deny access to funnel owned by different user", async () => {
       const user = getUser();
+      const timestamp = Date.now();
 
       // Create another user and their funnel
       const otherUser = await testPrisma.user.create({
         data: {
-          email: "other@example.com",
+          email: `other${timestamp}@example.com`,
           name: "Other User",
           password: "hashedPassword",
         },

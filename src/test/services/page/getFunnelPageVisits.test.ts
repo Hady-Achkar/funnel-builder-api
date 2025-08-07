@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { getFunnelPageVisits } from "../../../services/page/getFunnelPageVisits";
-import { testPrisma } from "../../helpers";
+import { TestHelpers, testPrisma } from "../../helpers";
+import { setPrismaClient } from "../../../services/page";
 
 describe("getFunnelPageVisits Service", () => {
   let user: any;
@@ -9,34 +10,16 @@ describe("getFunnelPageVisits Service", () => {
   let pages: any[];
 
   beforeEach(async () => {
-    // Clean up test data
-    await testPrisma.page.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.user.deleteMany();
-
+    // Set test Prisma client for page service
+    setPrismaClient(testPrisma);
+    
     // Create test users
-    user = await testPrisma.user.create({
-      data: {
-        email: "test@example.com",
-        name: "Test User",
-        password: "hashedPassword",
-      },
-    });
-
-    otherUser = await testPrisma.user.create({
-      data: {
-        email: "other@example.com",
-        name: "Other User",
-        password: "hashedPassword",
-      },
-    });
+    user = await TestHelpers.createTestUser();
+    otherUser = await TestHelpers.createTestUser();
 
     // Create test funnel
-    funnel = await testPrisma.funnel.create({
-      data: {
-        name: "Test Funnel",
-        userId: user.id,
-      },
+    funnel = await TestHelpers.createTestFunnel(user.id, {
+      name: "Test Funnel",
     });
 
     // Create test pages with different visit counts
@@ -75,6 +58,10 @@ describe("getFunnelPageVisits Service", () => {
   });
 
   it("should get page visits for all pages in funnel", async () => {
+    // Verify funnel exists before test
+    expect(funnel).toBeDefined();
+    expect(user).toBeDefined();
+    
     const result = await getFunnelPageVisits(funnel.id, user.id);
 
     expect(result.success).toBe(true);
