@@ -134,10 +134,11 @@ export class TestDatabase {
       // Reset database and apply migrations
       if (this.isCI) {
         // In CI, just deploy migrations
-        execSync(`${prismaBinary} migrate deploy --skip-seed`, {
+        execSync(`${prismaBinary} migrate deploy`, {
           env: {
             ...process.env,
             DATABASE_URL: this.databaseUrl,
+            PRISMA_SKIP_SEED: "true",
           },
           stdio: "pipe",
         });
