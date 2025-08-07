@@ -10,6 +10,7 @@ import {
   DomainType,
   PrismaClient,
   SslStatus,
+  $Enums,
 } from "../generated/prisma-client";
 
 // Allow prisma client to be injected for testing
@@ -24,6 +25,21 @@ export function getCloudFlareService(): CloudFlareAPIService {
   }
   return cloudflare;
 }
+
+// Function to get Prisma client (lazy initialization)
+const getPrisma = (): PrismaClient => {
+  if (!prisma) {
+    // Only create default client if we're not in test environment
+    if (process.env.NODE_ENV !== "test") {
+      prisma = new PrismaClient();
+    } else {
+      throw new Error(
+        "PrismaClient not set for test environment. Call setPrismaClient() first."
+      );
+    }
+  }
+  return prisma;
+};
 
 // Function to set Prisma client for testing
 export const setPrismaClient = (client: PrismaClient) => {
@@ -97,7 +113,7 @@ export class DomainService {
     }
 
     // Check if domain already exists
-    const existingDomain = await prisma.domain.findUnique({
+    const existingDomain = await getPrisma().domain.findUnique({
       where: { hostname },
     });
 
@@ -110,21 +126,21 @@ export class DomainService {
       console.log(`[Domain Create] Creating custom hostname for: ${hostname}`);
       const cf = getCloudFlareService();
       if (!cf.isConfigured()) {
-        throw new Error('CloudFlare is not configured for custom domain creation');
+        throw new Error(
+          "CloudFlare is not configured for custom domain creation"
+        );
       }
       const cfHostname = await cf.createCustomHostname(hostname);
 
       // Get detailed hostname info for SSL validation records
-      const detailedHostname = await cf.getCustomHostname(
-        cfHostname.id
-      );
+      const detailedHostname = await cf.getCustomHostname(cfHostname.id);
 
       const config = cf.getConfig();
       const ownershipVerification = cfHostname.ownership_verification;
       const ownershipNameParts = ownershipVerification.name.split(".");
 
       // Create domain record with CloudFlare data
-      const domain = await prisma.domain.create({
+      const domain = await getPrisma().domain.create({
         data: {
           hostname,
           type: DomainType.CUSTOM_DOMAIN,
@@ -191,13 +207,13 @@ export class DomainService {
     const subdomain = validateSubdomain(data.subdomain);
     const cf = getCloudFlareService();
     if (!cf.isConfigured()) {
-      throw new Error('CloudFlare is not configured for subdomain creation');
+      throw new Error("CloudFlare is not configured for subdomain creation");
     }
     const config = cf.getConfig();
     const hostname = `${subdomain}.${config.platformMainDomain}`;
 
     // Check if subdomain already exists
-    const existingDomain = await prisma.domain.findUnique({
+    const existingDomain = await getPrisma().domain.findUnique({
       where: { hostname },
     });
 
@@ -212,7 +228,7 @@ export class DomainService {
       const dnsRecord = await cf.createSubdomainRecord(subdomain);
 
       // Create subdomain record (immediately active)
-      const domain = await prisma.domain.create({
+      const domain = await getPrisma().domain.create({
         data: {
           hostname,
           type: DomainType.SUBDOMAIN,
@@ -256,7 +272,7 @@ export class DomainService {
     return cacheService.memoize(
       "domains",
       async () => {
-        const domains = await prisma.domain.findMany({
+        const domains = await getPrisma().domain.findMany({
           where: { userId },
           include: {
             funnelConnections: {
@@ -284,7 +300,7 @@ export class DomainService {
     domainId: number,
     userId: number
   ): Promise<DomainWithConnections | null> {
-    const domain = await prisma.domain.findFirst({
+    const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
         userId,
@@ -310,7 +326,7 @@ export class DomainService {
   static async getDomainByHostname(
     hostname: string
   ): Promise<DomainWithConnections | null> {
-    const domain = await prisma.domain.findUnique({
+    const domain = await getPrisma().domain.findUnique({
       where: { hostname },
       include: {
         funnelConnections: {
@@ -335,7 +351,7 @@ export class DomainService {
     domainId: number,
     userId: number
   ): Promise<DomainWithConnections> {
-    const domain = await prisma.domain.findFirst({
+    const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
         userId,
@@ -417,7 +433,7 @@ export class DomainService {
         );
       }
 
-      const updatedDomain = await prisma.domain.update({
+      const updatedDomain = await getPrisma().domain.update({
         where: { id: domainId },
         data: updateData,
         include: {
@@ -444,7 +460,7 @@ export class DomainService {
   }
 
   static async deleteDomain(domainId: number, userId: number): Promise<void> {
-    const domain = await prisma.domain.findFirst({
+    const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
         userId,
@@ -518,7 +534,7 @@ export class DomainService {
       }
 
       // Delete from database
-      await prisma.domain.delete({
+      await getPrisma().domain.delete({
         where: { id: domainId },
       });
 
@@ -537,7 +553,7 @@ export class DomainService {
     userId: number
   ): Promise<void> {
     // Verify funnel belongs to user
-    const funnel = await prisma.funnel.findFirst({
+    const funnel = await getPrisma().funnel.findFirst({
       where: {
         id: funnelId,
         userId,
@@ -549,7 +565,7 @@ export class DomainService {
     }
 
     // Verify domain belongs to user
-    const domain = await prisma.domain.findFirst({
+    const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
         userId,
@@ -561,7 +577,7 @@ export class DomainService {
     }
 
     // Check if connection already exists
-    const existingConnection = await prisma.funnelDomain.findUnique({
+    const existingConnection = await getPrisma().funnelDomain.findUnique({
       where: {
         funnelId_domainId: {
           funnelId,
@@ -575,7 +591,7 @@ export class DomainService {
     }
 
     // Create connection
-    await prisma.funnelDomain.create({
+    await getPrisma().funnelDomain.create({
       data: {
         funnelId,
         domainId,
@@ -590,7 +606,7 @@ export class DomainService {
     userId: number
   ): Promise<void> {
     // Verify ownership through funnel
-    const funnel = await prisma.funnel.findFirst({
+    const funnel = await getPrisma().funnel.findFirst({
       where: {
         id: funnelId,
         userId,
@@ -602,7 +618,7 @@ export class DomainService {
     }
 
     // Delete connection
-    const deleted = await prisma.funnelDomain.deleteMany({
+    const deleted = await getPrisma().funnelDomain.deleteMany({
       where: {
         funnelId,
         domainId,
@@ -618,7 +634,7 @@ export class DomainService {
     domainId: number,
     userId: number
   ): Promise<VerificationInstructions> {
-    const domain = await prisma.domain.findFirst({
+    const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
         userId,
@@ -643,7 +659,7 @@ export class DomainService {
     hostname: string,
     funnelId: number
   ): Promise<any> {
-    const domain = await prisma.domain.findUnique({
+    const domain = await getPrisma().domain.findUnique({
       where: {
         hostname,
         status: DomainStatus.ACTIVE,
@@ -676,7 +692,7 @@ export class DomainService {
       throw new Error("Funnel not linked to this domain");
     }
 
-    if (connection.funnel.status !== "live") {
+    if (connection.funnel.status !== $Enums.FunnelStatus.LIVE) {
       throw new Error("Funnel is not live");
     }
 

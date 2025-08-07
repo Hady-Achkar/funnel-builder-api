@@ -1,10 +1,24 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import { PrismaClient } from '../generated/prisma-client';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { PrismaClient } from "../generated/prisma-client";
 
 // Allow prisma client to be injected for testing
-let prisma = new PrismaClient();
+let prisma: PrismaClient | null = null;
+
+// Function to get Prisma client (lazy initialization)
+const getPrisma = (): PrismaClient => {
+  if (!prisma) {
+    // Only create default client if we're not in test environment
+    if (process.env.NODE_ENV !== "test") {
+      prisma = new PrismaClient();
+    } else {
+      throw new Error(
+        "PrismaClient not set for test environment. Call setPrismaClient() first."
+      );
+    }
+  }
+  return prisma;
+};
 
 // Function to set Prisma client for testing
 export const setPrismaClient = (client: PrismaClient) => {
@@ -45,87 +59,94 @@ export class AuthService {
   static async register(userData: RegisterUserData): Promise<AuthResponse> {
     const { email, name, password } = userData;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
+    // Check if user already exists
+    const existingUser = await getPrisma().user.findUnique({
+      where: { email },
     });
 
     if (existingUser) {
-      throw new Error('User already exists');
+      throw new Error("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    // Create new user
+    const user = await getPrisma().user.create({
       data: {
         email,
         name,
-        password: hashedPassword
-      }
+        password: hashedPassword,
+      },
     });
 
     const token = this.generateToken(user.id);
 
     return {
-      message: 'User created successfully',
+      message: "User created successfully",
       token,
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+      },
     };
   }
 
   static async login(userData: LoginUserData): Promise<AuthResponse> {
     const { email, password } = userData;
 
-    const user = await prisma.user.findUnique({
+    const user = await getPrisma().user.findUnique({
       where: { email },
       select: {
         id: true,
         email: true,
         name: true,
-        password: true
-      }
+        password: true,
+      },
     });
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const token = this.generateToken(user.id);
 
     return {
-      message: 'Login successful',
+      message: "Login successful",
       token,
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+      },
     };
   }
 
-  static async forgotPassword(data: ForgotPasswordData): Promise<{ message: string }> {
+  static async forgotPassword(
+    data: ForgotPasswordData
+  ): Promise<{ message: string }> {
     const { email } = data;
 
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
       // Return success even if user doesn't exist for security
-      return { message: 'If an account with that email exists, a password reset link has been sent.' };
+      return {
+        message:
+          "If an account with that email exists, a password reset link has been sent.",
+      };
     }
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
     // Save token to database
@@ -133,31 +154,36 @@ export class AuthService {
       where: { email },
       data: {
         passwordResetToken: resetToken,
-        passwordResetExpiresAt: resetTokenExpiry
-      }
+        passwordResetExpiresAt: resetTokenExpiry,
+      },
     });
 
     // TODO: Send email with reset link
     // In a real application, you would send an email here
     console.log(`Password reset token for ${email}: ${resetToken}`);
 
-    return { message: 'If an account with that email exists, a password reset link has been sent.' };
+    return {
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+    };
   }
 
-  static async resetPassword(data: ResetPasswordData): Promise<{ message: string }> {
+  static async resetPassword(
+    data: ResetPasswordData
+  ): Promise<{ message: string }> {
     const { token, newPassword } = data;
 
     const user = await prisma.user.findUnique({
-      where: { 
+      where: {
         passwordResetToken: token,
         passwordResetExpiresAt: {
-          gt: new Date()
-        }
-      }
+          gt: new Date(),
+        },
+      },
     });
 
     if (!user) {
-      throw new Error('Invalid or expired reset token');
+      throw new Error("Invalid or expired reset token");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -167,23 +193,19 @@ export class AuthService {
       data: {
         password: hashedPassword,
         passwordResetToken: null,
-        passwordResetExpiresAt: null
-      }
+        passwordResetExpiresAt: null,
+      },
     });
 
-    return { message: 'Password has been reset successfully' };
+    return { message: "Password has been reset successfully" };
   }
 
   private static generateToken(userId: number): string {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
-      throw new Error('JWT secret not configured');
+      throw new Error("JWT secret not configured");
     }
 
-    return jwt.sign(
-      { userId },
-      jwtSecret,
-      { expiresIn: '24h' }
-    );
+    return jwt.sign({ userId }, jwtSecret, { expiresIn: "24h" });
   }
 }

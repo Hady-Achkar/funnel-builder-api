@@ -6,12 +6,15 @@ import { redisService } from "./services/cache/redis.service";
 dotenv.config();
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4444;
 
 const startServer = async () => {
   try {
     await prisma.$connect();
-    console.log("Connected to database...");
+    console.log("Connected to database");
+    console.log(
+      `Database URL: ${process.env.DATABASE_URL?.split("@")[1] || "Not set"}`
+    );
 
     // Connect to Redis
     try {
@@ -58,11 +61,11 @@ const gracefulShutdown = async () => {
 
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
-process.on("uncaughtException", (error: Error) => {
+process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
   gracefulShutdown();
 });
-process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
+process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
   gracefulShutdown();
 });

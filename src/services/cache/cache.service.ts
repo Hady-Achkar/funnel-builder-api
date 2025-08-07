@@ -27,7 +27,7 @@ export class CacheService {
 
   async set(key: string, value: any, options?: CacheOptions): Promise<void> {
     const formattedKey = this.formatKey(key, options?.prefix);
-    const ttl = options?.ttl || this.defaultTTL;
+    const ttl = options?.ttl !== undefined ? options.ttl : this.defaultTTL;
     await redisService.set(formattedKey, value, ttl);
   }
 
@@ -97,6 +97,18 @@ export class CacheService {
 
   async invalidateFunnelCache(funnelId: number): Promise<void> {
     await this.invalidatePattern('*', `funnel:${funnelId}`);
+  }
+
+  async getUserFunnelCache<T>(userId: number, funnelId: number, key: string, options?: CacheOptions): Promise<T | null> {
+    return await this.get<T>(key, { ...options, prefix: `user:${userId}:funnel:${funnelId}` });
+  }
+
+  async setUserFunnelCache(userId: number, funnelId: number, key: string, value: any, options?: CacheOptions): Promise<void> {
+    await this.set(key, value, { ...options, prefix: `user:${userId}:funnel:${funnelId}` });
+  }
+
+  async invalidateUserFunnelCache(userId: number, funnelId: number): Promise<void> {
+    await this.invalidatePattern('*', `user:${userId}:funnel:${funnelId}`);
   }
 
   // CloudFlare zone cache

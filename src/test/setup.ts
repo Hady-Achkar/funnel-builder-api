@@ -1,91 +1,75 @@
-import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
-import { PrismaClient } from '../generated/prisma-client';
-import { redisService } from '../services/cache/redis.service';
-import dotenv from 'dotenv';
+import { beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import { PrismaClient } from "../generated/prisma-client";
+import { redisService } from "../services/cache/redis.service";
 
-// Load test environment variables
-dotenv.config({ path: '.env.test' });
+// Import all services that need Prisma client injection
+import { setPrismaClient as setAuthPrismaClient } from "../services/auth.service";
+import { setPrismaClient as setUserPrismaClient } from "../services/user.service";
+import { setPrismaClient as setFunnelPrismaClient } from "../services/funnel";
+import { setPrismaClient as setPagePrismaClient } from "../services/page";
+import { setPrismaClient as setDomainPrismaClient } from "../services/domain.service";
+import { setPrismaClient as setThemePrismaClient } from "../services/theme.service";
 
-// Test database instance
 export const testPrisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://localhost:5432/funnel_builder_test'
-    }
-  }
+      url: process.env.DATABASE_URL,
+    },
+  },
 });
 
-// Setup before all tests
+async function clearDatabase() {
+  await testPrisma.funnelDomain.deleteMany();
+  await testPrisma.page.deleteMany();
+  await testPrisma.domain.deleteMany();
+  await testPrisma.funnel.deleteMany();
+  await testPrisma.user.deleteMany();
+}
+
 beforeAll(async () => {
-  // Run migrations to ensure database schema is up to date
-  try {
-    await testPrisma.$executeRawUnsafe(`
-      DO $$ 
-      BEGIN 
-        IF NOT EXISTS (SELECT FROM information_schema.columns 
-                       WHERE table_name = 'users' 
-                       AND column_name = 'passwordResetToken') THEN
-          ALTER TABLE users ADD COLUMN "passwordResetToken" TEXT UNIQUE;
-          ALTER TABLE users ADD COLUMN "passwordResetExpiresAt" TIMESTAMP(3);
-        END IF;
-      END $$;
-    `);
-  } catch (error) {
-    console.warn('Migration error:', error);
-  }
+  console.log(
+    "Test Setup: Using database",
+    process.env.DATABASE_URL?.split("@")[1] || "Not set"
+  );
+  console.log("Test Setup: NODE_ENV =", process.env.NODE_ENV);
 
-  // Reset test database
   try {
-    // Drop all data from test database
-    await testPrisma.funnelDomain.deleteMany();
-    await testPrisma.page.deleteMany();
-    await testPrisma.domain.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.user.deleteMany();
-    console.log('Test database cleared');
-  } catch (error) {
-    console.warn('Database reset error:', error);
-  }
+    // Inject test Prisma client into all services
+    setAuthPrismaClient(testPrisma);
+    setUserPrismaClient(testPrisma);
+    setFunnelPrismaClient(testPrisma);
+    setPagePrismaClient(testPrisma);
+    setDomainPrismaClient(testPrisma);
+    setThemePrismaClient(testPrisma);
 
-  // Connect to Redis for testing
-  try {
+    await clearDatabase();
     await redisService.connect();
   } catch (error) {
-    console.warn('Redis not available for testing:', error);
+    console.warn("Setup error:", error);
   }
 });
 
-// Cleanup after all tests
 afterAll(async () => {
   await testPrisma.$disconnect();
-  
   try {
     await redisService.disconnect();
   } catch (error) {
-    console.warn('Redis cleanup error:', error);
+    console.warn("Redis cleanup error:", error);
   }
 });
 
-// Clean up before each test
 beforeEach(async () => {
-  // Clear Redis test data
   try {
     await redisService.flush();
   } catch (error) {
-    console.warn('Redis flush error:', error);
+    console.warn("Redis flush error:", error);
   }
 });
 
-// Clean up after each test
 afterEach(async () => {
-  // Clean up database in proper order due to foreign key constraints
   try {
-    await testPrisma.funnelDomain.deleteMany();
-    await testPrisma.page.deleteMany();
-    await testPrisma.domain.deleteMany();
-    await testPrisma.funnel.deleteMany();
-    await testPrisma.user.deleteMany();
+    await clearDatabase();
   } catch (error) {
-    console.warn('Database cleanup error:', error);
+    console.warn("Database cleanup error:", error);
   }
 });

@@ -40,6 +40,7 @@ export class RedisService {
 
     (this.client as any).on("connect", () => {
       console.log("Redis Client Connected");
+      console.log(`Redis: Using database ${this.config.database} on ${this.config.url}`);
       this.isConnected = true;
     });
 
@@ -74,9 +75,14 @@ export class RedisService {
     }
 
     const serializedValue = JSON.stringify(value);
-    const expiry = ttl || this.config.ttl;
-
-    await this.client.setEx(key, expiry, serializedValue);
+    
+    // If ttl is 0 or explicitly false, set without expiry (cache forever)
+    if (ttl === 0) {
+      await this.client.set(key, serializedValue);
+    } else {
+      const expiry = ttl || this.config.ttl;
+      await this.client.setEx(key, expiry, serializedValue);
+    }
   }
 
   async get<T = any>(key: string): Promise<T | null> {
@@ -203,6 +209,15 @@ export class RedisService {
   // Get connection status
   getConnectionStatus(): boolean {
     return this.isConnected;
+  }
+
+  // Get current database info
+  getDatabaseInfo(): { url: string; database: number; isConnected: boolean } {
+    return {
+      url: this.config.url,
+      database: this.config.database || 0,
+      isConnected: this.isConnected
+    };
   }
 }
 

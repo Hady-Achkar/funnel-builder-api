@@ -1,7 +1,22 @@
-import { PrismaClient } from '../generated/prisma-client';
+import { PrismaClient, User } from "../generated/prisma-client";
 
 // Allow prisma client to be injected for testing
-let prisma = new PrismaClient();
+let prisma: PrismaClient | null = null;
+
+// Function to get Prisma client (lazy initialization)
+const getPrisma = (): PrismaClient => {
+  if (!prisma) {
+    // Only create default client if we're not in test environment
+    if (process.env.NODE_ENV !== "test") {
+      prisma = new PrismaClient();
+    } else {
+      throw new Error(
+        "PrismaClient not set for test environment. Call setPrismaClient() first."
+      );
+    }
+  }
+  return prisma;
+};
 
 // Function to set Prisma client for testing
 export const setPrismaClient = (client: PrismaClient) => {
@@ -18,22 +33,25 @@ export interface UserProfile {
 
 export class UserService {
   static async getUserProfile(userId: number): Promise<UserProfile | null> {
-    const user = await prisma.user.findUnique({
+    const user = await getPrisma().user.findUnique({
       where: { id: userId },
       select: {
         id: true,
         email: true,
         name: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     return user;
   }
 
-  static async updateUserProfile(userId: number, data: { name?: string; email?: string }): Promise<UserProfile> {
-    const user = await prisma.user.update({
+  static async updateUserProfile(
+    userId: number,
+    data: { name?: string; email?: string }
+  ): Promise<UserProfile> {
+    const user = await getPrisma().user.update({
       where: { id: userId },
       data,
       select: {
@@ -41,16 +59,16 @@ export class UserService {
         email: true,
         name: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     return user;
   }
 
   static async deleteUser(userId: number): Promise<void> {
-    await prisma.user.delete({
-      where: { id: userId }
+    await getPrisma().user.delete({
+      where: { id: userId },
     });
   }
 }

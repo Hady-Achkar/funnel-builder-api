@@ -1,0 +1,10 @@
+export { createPage } from "./create";
+export { getFunnelPages } from "./getFunnelPages";
+export { getPageById } from "./getPageById";
+export { getPageByLinkingId } from "./getPageByLinkingId";
+export { updatePage } from "./update";
+export { deletePage } from "./delete";
+export { reorderPages } from "./reorderPages";
+export { duplicatePage } from "./duplicatePage";
+export { createPageVisit } from "./createPageVisit";
+export { getFunnelPageVisits } from "./getFunnelPageVisits";
