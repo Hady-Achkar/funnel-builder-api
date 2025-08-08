@@ -66,7 +66,7 @@ describe("PageService.updatePage", () => {
     const result = await PageService.updatePage(1, 1, updateData);
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("No changes were made to the page");
+    expect(result.message).toBe("No changes detected. Page is already up to date.");
     expect(mockPrisma.page.update).not.toHaveBeenCalled();
   });
 
@@ -111,7 +111,7 @@ describe("PageService.updatePage", () => {
     expect(result.data.order).toBe(2);
     expect(result.data.linkingId).toBe("updated-id");
     expect(result.data.seoTitle).toBe("New SEO Title");
-    expect(result.message).toContain("were updated successfully");
+    expect(result.message).toContain("updated successfully");
   });
 
   it("should throw error for non-existent page", async () => {

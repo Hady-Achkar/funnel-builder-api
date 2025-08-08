@@ -1,33 +1,36 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { PageService } from "../../services/page";
-import { validatePageId, sendSuccessResponse, sendErrorResponse } from "./helper";
 
-export const getPageById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPageById = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const pageId = validatePageId(req.params.id);
+    const pageId = parseInt(req.params.id);
 
-    if (!pageId) {
-      res.status(400).json({
+    if (!pageId || isNaN(pageId)) {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid page ID",
+        error: "Invalid page ID"
       });
-      return;
     }
 
     const page = await PageService.getPageById(pageId, userId);
 
     if (!page) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
-        error: "The specified page could not be found or you don't have access to it",
+        error: "Page not found or you don't have access"
       });
-      return;
     }
 
-    sendSuccessResponse(res, page, `Retrieved page "${page.name}" successfully`);
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+    res.json({
+      success: true,
+      data: page
+    });
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to get page"
+    });
   }
 };

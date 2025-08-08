@@ -1,220 +1,126 @@
 import { getPrisma } from "../../lib/prisma";
 import { UpdatePageData, UpdatePageResponse } from "../../types/page.types";
 import { cacheService } from "../cache/cache.service";
-import { updateFunnelCachesWithUpdatedPage } from "./cache-helpers";
+import { CachedFunnelWithPages } from "../../types/funnel.types";
 
 export const updatePage = async (
   pageId: number,
   userId: number,
   data: UpdatePageData
 ): Promise<UpdatePageResponse> => {
-  const existingPage = await getPrisma().page.findFirst({
-    where: {
-      id: pageId,
-      funnel: {
-        userId,
-      },
-    },
-    include: {
-      funnel: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  });
+  try {
+    if (!pageId || !userId)
+      throw new Error("Please provide pageId and userId.");
 
-  if (!existingPage) {
-    throw new Error("Page not found");
-  }
+    const prisma = getPrisma();
 
-  // Track what fields are being updated
-  const updatedFields: string[] = [];
-  const updateData: UpdatePageData = {};
+    const existing = await prisma.page.findFirst({
+      where: { id: pageId, funnel: { userId } },
+    });
 
-  // Check and validate each field
-  if (data.name !== undefined && data.name !== existingPage.name) {
-    updateData.name = data.name;
-    updatedFields.push(`name "${data.name}"`);
-  }
+    if (!existing) throw new Error("Page not found or you don't have access.");
 
-  if (data.content !== undefined && data.content !== existingPage.content) {
-    updateData.content = data.content;
-    updatedFields.push("content");
-  }
+    const updates: UpdatePageData = {};
+    const changed: string[] = [];
 
-  if (data.order !== undefined && data.order !== existingPage.order) {
-    updateData.order = data.order;
-    updatedFields.push(`order ${data.order}`);
-  }
+    if (data.name !== undefined && data.name !== existing.name) {
+      updates.name = data.name;
+      changed.push(`name "${data.name}"`);
+    }
+    if (data.content !== undefined && data.content !== existing.content) {
+      updates.content = data.content;
+      changed.push("content");
+    }
+    if (data.order !== undefined && data.order !== existing.order) {
+      updates.order = data.order;
+      changed.push(`order ${data.order}`);
+    }
+    if (data.linkingId !== undefined && data.linkingId !== existing.linkingId) {
+      updates.linkingId = data.linkingId;
+      changed.push(`linking ID "${data.linkingId}"`);
+    }
+    if (data.seoTitle !== undefined && data.seoTitle !== existing.seoTitle) {
+      updates.seoTitle = data.seoTitle;
+      changed.push("SEO title");
+    }
+    if (
+      data.seoDescription !== undefined &&
+      data.seoDescription !== existing.seoDescription
+    ) {
+      updates.seoDescription = data.seoDescription;
+      changed.push("SEO description");
+    }
+    if (
+      data.seoKeywords !== undefined &&
+      data.seoKeywords !== existing.seoKeywords
+    ) {
+      updates.seoKeywords = data.seoKeywords;
+      changed.push("SEO keywords");
+    }
 
-  if (data.linkingId !== undefined && data.linkingId !== existingPage.linkingId) {
-    updateData.linkingId = data.linkingId;
-    updatedFields.push(`linking ID "${data.linkingId}"`);
-  }
+    if (changed.length === 0) {
+      return {
+        success: true,
+        data: existing,
+        message: "No changes detected. Page is already up to date.",
+      };
+    }
 
-  if (data.seoTitle !== undefined && data.seoTitle !== existingPage.seoTitle) {
-    updateData.seoTitle = data.seoTitle;
-    updatedFields.push("SEO title");
-  }
+    const updated = await prisma.page.update({
+      where: { id: pageId },
+      data: updates,
+    });
 
-  if (data.seoDescription !== undefined && data.seoDescription !== existingPage.seoDescription) {
-    updateData.seoDescription = data.seoDescription;
-    updatedFields.push("SEO description");
-  }
+    const funnelId = existing.funnelId;
 
-  if (data.seoKeywords !== undefined && data.seoKeywords !== existingPage.seoKeywords) {
-    updateData.seoKeywords = data.seoKeywords;
-    updatedFields.push("SEO keywords");
-  }
+    try {
+      await cacheService.set(`user:${userId}:page:${pageId}:full`, updated, { ttl: 0 });
 
-  // If no fields to update, return current data
-  if (updatedFields.length === 0) {
+      const funnelFullKey = `user:${userId}:funnel:${funnelId}:full`;
+      const cachedFunnel = await cacheService.get<CachedFunnelWithPages>(funnelFullKey);
+      
+      if (cachedFunnel?.pages) {
+        const funnelDataCopy = { ...cachedFunnel };
+        await cacheService.del(funnelFullKey);
+        
+        const pageIndex = funnelDataCopy.pages.findIndex(p => p.id === updated.id);
+        if (pageIndex !== -1) {
+          funnelDataCopy.pages[pageIndex] = {
+            id: updated.id, name: updated.name, order: updated.order,
+            linkingId: updated.linkingId, seoTitle: updated.seoTitle,
+            seoDescription: updated.seoDescription, seoKeywords: updated.seoKeywords,
+            createdAt: updated.createdAt, updatedAt: updated.updatedAt,
+          };
+          funnelDataCopy.pages.sort((a, b) => a.order - b.order);
+          funnelDataCopy.updatedAt = new Date();
+        }
+        
+        await cacheService.set(funnelFullKey, funnelDataCopy, { ttl: 0 });
+      }
+    } catch (cacheError) {
+      console.warn("Page updated, but cache couldn't be updated:", cacheError);
+    }
+
+    let message: string;
+    if (changed.length === 1) {
+      message = `Page ${changed[0]} updated successfully`;
+    } else if (changed.length === 2) {
+      message = `Page ${changed.join(" and ")} updated successfully`;
+    } else {
+      const last = changed.pop();
+      message = `Page ${changed.join(
+        ", "
+      )}, and ${last} updated successfully`;
+    }
+
     return {
       success: true,
-      data: {
-        id: existingPage.id,
-        name: existingPage.name,
-        content: existingPage.content,
-        order: existingPage.order,
-        linkingId: existingPage.linkingId,
-        seoTitle: existingPage.seoTitle,
-        seoDescription: existingPage.seoDescription,
-        seoKeywords: existingPage.seoKeywords,
-        funnelId: existingPage.funnelId,
-        createdAt: existingPage.createdAt,
-        updatedAt: existingPage.updatedAt,
-      },
-      message: "No changes were made to the page",
+      data: updated,
+      message,
     };
+  } catch (e) {
+    console.error("Failed to update page:", e);
+    if (e instanceof Error) throw new Error(e.message);
+    throw new Error("Couldn't update the page. Please try again.");
   }
-
-  // Update the page
-  const updatedPage = await getPrisma().page.update({
-    where: { id: pageId },
-    data: updateData,
-    select: {
-      id: true,
-      name: true,
-      content: true,
-      order: true,
-      linkingId: true,
-      seoTitle: true,
-      seoDescription: true,
-      seoKeywords: true,
-      funnelId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-
-  // Update cached data
-  const funnelId = existingPage.funnelId;
-  const updatedPageData = {
-    id: updatedPage.id,
-    name: updatedPage.name,
-    content: updatedPage.content,
-    order: updatedPage.order,
-    linkingId: updatedPage.linkingId,
-    seoTitle: updatedPage.seoTitle,
-    seoDescription: updatedPage.seoDescription,
-    seoKeywords: updatedPage.seoKeywords,
-    funnelId: updatedPage.funnelId,
-    createdAt: updatedPage.createdAt,
-    updatedAt: updatedPage.updatedAt,
-  };
-
-  // Update all relevant cache entries with the new data
-  const cacheUpdates = [
-    cacheService.set(`user:${userId}:page:${pageId}`, updatedPageData, { ttl: 0 }),
-  ];
-
-  // Handle linking ID cache updates
-  if (existingPage.linkingId && updatedPage.linkingId !== existingPage.linkingId) {
-    cacheUpdates.push(
-      cacheService.del(`user:${userId}:funnel:${funnelId}:page:${existingPage.linkingId}`),
-      cacheService.set(`user:${userId}:funnel:${funnelId}:page:${updatedPage.linkingId}`, updatedPageData, { ttl: 0 })
-    );
-  } else if (updatedPage.linkingId) {
-    cacheUpdates.push(
-      cacheService.set(`user:${userId}:funnel:${funnelId}:page:${updatedPage.linkingId}`, updatedPageData, { ttl: 0 })
-    );
-  }
-
-  // Update page summary cache
-  const pageSummaryData = {
-    id: updatedPage.id,
-    name: updatedPage.name,
-    order: updatedPage.order,
-    linkingId: updatedPage.linkingId,
-    seoTitle: updatedPage.seoTitle,
-    seoDescription: updatedPage.seoDescription,
-    seoKeywords: updatedPage.seoKeywords,
-    createdAt: updatedPage.createdAt,
-    updatedAt: updatedPage.updatedAt,
-  };
-  cacheUpdates.push(
-    cacheService.set(`user:${userId}:page:${pageId}:summary`, pageSummaryData, { ttl: 0 })
-  );
-
-  // Update all funnel caches (:pages, :full) with the updated page
-  await updateFunnelCachesWithUpdatedPage(userId, funnelId, {
-    id: updatedPage.id,
-    name: updatedPage.name,
-    order: updatedPage.order,
-    linkingId: updatedPage.linkingId,
-    seoTitle: updatedPage.seoTitle,
-    seoDescription: updatedPage.seoDescription,
-    seoKeywords: updatedPage.seoKeywords,
-    createdAt: updatedPage.createdAt,
-    updatedAt: updatedPage.updatedAt,
-  });
-
-  // Update public cache if the funnel is LIVE
-  const funnel = await getPrisma().funnel.findUnique({
-    where: { id: funnelId },
-    select: { status: true, name: true },
-  });
-
-  if (funnel && funnel.status === "LIVE") {
-    const publicPageData = {
-      id: updatedPage.id,
-      name: updatedPage.name,
-      content: updatedPage.content,
-      linkingId: updatedPage.linkingId,
-      seoTitle: updatedPage.seoTitle,
-      seoDescription: updatedPage.seoDescription,
-      seoKeywords: updatedPage.seoKeywords,
-      funnelName: funnel.name,
-    };
-    
-    cacheUpdates.push(
-      cacheService.set(`public:page:${pageId}`, publicPageData, { ttl: 0 })
-    );
-  } else {
-    cacheUpdates.push(
-      cacheService.del(`public:page:${pageId}`)
-    );
-  }
-
-  // Execute all cache updates
-  await Promise.all(cacheUpdates);
-
-  // Generate user-friendly message
-  let message: string;
-  if (updatedFields.length === 1) {
-    message = `Page ${updatedFields[0]} was updated successfully`;
-  } else if (updatedFields.length === 2) {
-    message = `Page ${updatedFields.join(" and ")} were updated successfully`;
-  } else {
-    const lastField = updatedFields.pop();
-    message = `Page ${updatedFields.join(", ")}, and ${lastField} were updated successfully`;
-  }
-
-  return {
-    success: true,
-    data: updatedPage,
-    message,
-  };
 };

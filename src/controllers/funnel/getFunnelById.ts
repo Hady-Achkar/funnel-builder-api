@@ -1,43 +1,49 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { FunnelService } from "../../services/funnel";
-import { validateFunnelId, sendErrorResponse } from "./helper";
 
-export const getFunnelById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFunnelById = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.id);
-
-    if (!funnelId) {
-      res.status(400).json({
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        error: "Invalid funnel ID",
+        error: "Authentication required"
       });
-      return;
+    }
+    const funnelId = parseInt(req.params.id);
+
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid funnel ID"
+      });
     }
 
     const funnel = await FunnelService.getFunnelById(funnelId, userId);
 
     if (!funnel) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
-        error: "Funnel not found",
+        error: "Funnel not found"
       });
-      return;
     }
 
     res.json({
       success: true,
-      ...funnel,
+      data: funnel
     });
-  } catch (error: any) {
-    if (error.message === "Access denied") {
-      res.status(403).json({
+  } catch (e: any) {
+    if (e.message && e.message.includes("access")) {
+      return res.status(403).json({
         success: false,
-        error: "Access denied",
+        error: e.message
       });
-      return;
     }
-    sendErrorResponse(res, error);
+    
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to get funnel"
+    });
   }
 };

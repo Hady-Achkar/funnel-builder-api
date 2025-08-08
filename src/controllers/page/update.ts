@@ -1,28 +1,18 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { PageService } from "../../services/page";
-import { validatePageId, sendErrorResponse } from "./helper";
 
-export const updatePage = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updatePage = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const pageId = validatePageId(req.params.id);
-    const {
-      name,
-      content,
-      order,
-      linkingId,
-      seoTitle,
-      seoDescription,
-      seoKeywords,
-    } = req.body;
+    const pageId = parseInt(req.params.id);
+    const { name, content, order, linkingId, seoTitle, seoDescription, seoKeywords } = req.body;
 
-    if (!pageId) {
-      res.status(400).json({
+    if (!pageId || isNaN(pageId)) {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid page ID",
+        error: "Invalid page ID"
       });
-      return;
     }
 
     const result = await PageService.updatePage(pageId, userId, {
@@ -32,11 +22,14 @@ export const updatePage = async (req: AuthRequest, res: Response): Promise<void>
       linkingId,
       seoTitle,
       seoDescription,
-      seoKeywords,
+      seoKeywords
     });
 
-    res.status(200).json(result);
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to update page"
+    });
   }
 };

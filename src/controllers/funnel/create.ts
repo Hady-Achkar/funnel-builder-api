@@ -1,36 +1,39 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { FunnelService } from "../../services/funnel";
-import { sendErrorResponse } from "./helper";
 
-export const createFunnel = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createFunnel = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const { name, status } = req.body;
-
+    const userId = req.userId;
     if (!userId) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
-        error: "Unauthorized - Please login to create a funnel",
+        error: "Authentication required"
       });
-      return;
     }
-
-    if (!name) {
-      res.status(400).json({
-        success: false,
-        error: "Funnel name is required",
-      });
-      return;
-    }
+    const { status } = req.body;
+    
+    // Default name: "08.01.2025 14:30" format if not provided
+    const name = req.body.name || new Date().toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).replace(',', '');
 
     const funnel = await FunnelService.createFunnel(userId, { name, status });
-
+    
     res.status(201).json({
       success: true,
-      ...funnel,
+      id: funnel.id,
+      message: funnel.message
     });
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to create funnel"
+    });
   }
 };

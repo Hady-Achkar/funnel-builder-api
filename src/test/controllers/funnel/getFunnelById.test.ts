@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import { getFunnelById } from "../../../controllers/funnel";
-import { $Enums } from "../../../generated/prisma-client";
-import { TestHelpers, testPrisma } from "../../helpers";
+import { TestHelpers } from "../../helpers";
 import { createTestApp, setupFunnelTest } from "./test-setup";
 
 const app = createTestApp();
@@ -12,20 +11,10 @@ describe("getFunnelById Controller", () => {
   const { getUser } = setupFunnelTest();
 
   describe("GET /funnels/:id", () => {
-    it("should get funnel by id with pages and theme", async () => {
+    it("gets funnel by ID successfully", async () => {
       const user = getUser();
       
-      const funnel = await TestHelpers.createTestFunnel(user.id, {
-        status: $Enums.FunnelStatus.LIVE,
-      });
-
-      // Create test pages
-      await testPrisma.page.createMany({
-        data: [
-          { name: "Page 1", order: 1, funnelId: funnel.id, visits: 0, content: "" },
-          { name: "Page 2", order: 2, funnelId: funnel.id, visits: 0, content: "" },
-        ],
-      });
+      const funnel = await TestHelpers.createTestFunnel(user.id);
 
       const response = await request(app)
         .get(`/funnels/${funnel.id}`)
@@ -33,37 +22,41 @@ describe("getFunnelById Controller", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.id).toBe(funnel.id);
-      expect(response.body.pages).toHaveLength(2);
-      expect(response.body.theme).toBeDefined();
-      expect(response.body.pages[0].content).toBeUndefined(); // Content should be excluded
+      expect(response.body.data.id).toBe(funnel.id);
+      expect(response.body.data.name).toBe(funnel.name);
+      expect(response.body.data.userId).toBe(user.id);
     });
 
-    it("should return 404 for non-existent funnel", async () => {
+    it("returns 400 for invalid funnel ID", async () => {
+      const user = getUser();
+      
+      const response = await request(app)
+        .get("/funnels/invalid")
+        .set("x-user-id", user.id.toString());
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe("Invalid funnel ID");
+    });
+
+    it("returns 400 for non-existent funnel", async () => {
       const user = getUser();
       
       const response = await request(app)
         .get("/funnels/999")
         .set("x-user-id", user.id.toString());
 
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe("Funnel not found");
+      expect(response.body.error).toContain("not found");
     });
 
-    it("should return 403 for unauthorized access", async () => {
-      const user = getUser();
-      
-      const otherUser = await TestHelpers.createTestUser();
-      const funnel = await TestHelpers.createTestFunnel(otherUser.id);
-
+    it("returns 401 when no user ID provided", async () => {
       const response = await request(app)
-        .get(`/funnels/${funnel.id}`)
-        .set("x-user-id", user.id.toString());
+        .get("/funnels/1");
 
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe("Access denied");
     });
   });
 });

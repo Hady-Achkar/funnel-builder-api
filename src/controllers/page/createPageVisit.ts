@@ -1,35 +1,32 @@
 import { Request, Response } from "express";
 import { PageService } from "../../services/page";
-import { validatePageId, sendErrorResponse } from "./helper";
 
-export const createPageVisit = async (req: Request, res: Response): Promise<void> => {
+export const createPageVisit = async (req: Request, res: Response) => {
   try {
-    const pageId = validatePageId(req.params.pageId);
+    const pageId = parseInt(req.params.pageId);
     const { sessionId } = req.body;
 
-    if (!pageId) {
-      res.status(400).json({
+    if (!pageId || isNaN(pageId)) {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid page ID",
+        error: "Invalid page ID"
       });
-      return;
     }
 
-    if (!sessionId || typeof sessionId !== 'string' || sessionId.trim().length === 0) {
-      res.status(400).json({
+    if (!sessionId || typeof sessionId !== 'string') {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid session ID",
+        error: "Session ID is required"
       });
-      return;
     }
 
-    const result = await PageService.createPageVisit(pageId, sessionId.trim());
+    const result = await PageService.createPageVisit(pageId, sessionId);
     
-    res.status(200).json({
-      success: result.success,
-      message: result.message,
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to record visit"
     });
-  } catch (error: any) {
-    sendErrorResponse(res, error);
   }
 };

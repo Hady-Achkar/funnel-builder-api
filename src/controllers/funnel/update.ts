@@ -1,44 +1,41 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { FunnelService } from "../../services/funnel";
-import { validateFunnelId, validateDomainId, sendErrorResponse } from "./helper";
 
-export const updateFunnel = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateFunnel = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.id);
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "Authentication required"
+      });
+    }
+    const funnelId = parseInt(req.params.id);
     const { name, status, domainId } = req.body;
 
-    if (!funnelId) {
-      res.status(400).json({
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
         success: false,
-        error: "Invalid funnel ID",
+        error: "Invalid funnel ID"
       });
-      return;
     }
 
-    const parsedDomainId = validateDomainId(domainId);
-    if (domainId !== undefined && parsedDomainId === null && domainId !== null) {
-      res.status(400).json({
-        success: false,
-        error: "Invalid domain ID",
-      });
-      return;
-    }
-
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (status !== undefined) updateData.status = status;
-    if (domainId !== undefined) updateData.domainId = parsedDomainId;
-
-    const funnel = await FunnelService.updateFunnel(funnelId, userId, updateData);
+    const funnel = await FunnelService.updateFunnel(funnelId, userId, {
+      name,
+      status,
+      domainId
+    });
 
     res.json({
       success: true,
-      ...funnel,
-      message: "Funnel updated successfully",
+      funnel,
+      message: "Funnel updated successfully"
     });
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to update funnel"
+    });
   }
 };

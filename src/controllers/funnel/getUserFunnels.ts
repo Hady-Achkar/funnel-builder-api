@@ -1,33 +1,37 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { FunnelService } from "../../services/funnel";
-import { parseListQuery, validateQueryParams } from "./helper";
 
-export const getUserFunnels = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUserFunnels = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const query = parseListQuery(req.query);
-    
-    const validationErrors = validateQueryParams(req.query);
-    if (validationErrors.length > 0) {
-      res.status(400).json({
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        error: validationErrors[0],
+        error: "Authentication required"
       });
-      return;
     }
+    
+    // Parse query params with defaults
+    const query = {
+      page: parseInt(req.query.page as string) || 1,
+      limit: parseInt(req.query.limit as string) || 10,
+      status: req.query.status as string,
+      sortBy: req.query.sortBy as any || "createdAt",
+      sortOrder: req.query.sortOrder as any || "desc"
+    };
 
     const result = await FunnelService.getUserFunnels(userId, query);
 
     res.json({
       success: true,
-      ...result,
+      data: result.funnels,
+      pagination: result.pagination
     });
-  } catch (error: any) {
-    console.error("Get funnels error:", error);
-    res.status(500).json({
+  } catch (e: any) {
+    res.status(400).json({
       success: false,
-      error: "Failed to fetch funnels. Please try again later.",
+      error: e.message || "Failed to fetch funnels"
     });
   }
 };

@@ -2,7 +2,6 @@ import { describe, beforeEach, vi } from "vitest";
 import request from "supertest";
 import express from "express";
 import { setPrismaClient } from "../../../services/funnel";
-import { setPrismaClient as setThemePrismaClient } from "../../../services/theme.service";
 import { cacheService } from "../../../services/cache/cache.service";
 import { TestHelpers, testPrisma } from "../../helpers";
 
@@ -32,7 +31,6 @@ export const setupFunnelTest = () => {
   beforeEach(async () => {
     // Set test Prisma client for funnel service
     setPrismaClient(testPrisma);
-    setThemePrismaClient(testPrisma);
 
     // Create test user
     user = await TestHelpers.createTestUser();

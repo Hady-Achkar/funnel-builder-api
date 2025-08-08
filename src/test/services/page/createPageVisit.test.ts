@@ -15,9 +15,10 @@ describe("createPageVisit Service", () => {
     // Create test user
     user = await TestHelpers.createTestUser();
 
-    // Create test funnel
+    // Create test funnel (LIVE status needed for visit tracking)
     funnel = await TestHelpers.createTestFunnel(user.id, {
       name: "Test Funnel",
+      status: "LIVE"
     });
 
     // Create test page

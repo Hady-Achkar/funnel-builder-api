@@ -21,13 +21,11 @@ describe("createPage Controller", () => {
       expect(getMockRes().json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
-          data: expect.objectContaining({
-            id: expect.any(Number),
-            name: expect.any(String),
-            linkingId: expect.any(String),
-            order: expect.any(Number),
-          }),
-          message: expect.stringContaining("has been created successfully"),
+          id: expect.any(Number),
+          name: expect.any(String),
+          linkingId: expect.any(String),
+          order: expect.any(Number),
+          message: expect.stringContaining("created successfully"),
         })
       );
     });
@@ -40,7 +38,7 @@ describe("createPage Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(400);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Please provide a valid funnel ID",
+        error: "Invalid funnel ID",
       });
     });
 
@@ -54,10 +52,10 @@ describe("createPage Controller", () => {
 
       await createPage(getMockReq(), getMockRes());
 
-      expect(getMockRes().status).toHaveBeenCalledWith(404);
+      expect(getMockRes().status).toHaveBeenCalledWith(400);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "The specified funnel could not be found or you don't have access to it",
+        error: "Funnel not found or you don't have access.",
       });
     });
   });

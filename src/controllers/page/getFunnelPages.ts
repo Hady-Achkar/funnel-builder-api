@@ -1,29 +1,29 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { PageService } from "../../services/page";
-import { validateFunnelId, sendSuccessResponse, sendErrorResponse } from "./helper";
 
-export const getFunnelPages = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFunnelPages = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.funnelId);
+    const funnelId = parseInt(req.params.funnelId);
 
-    if (!funnelId) {
-      res.status(400).json({
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid funnel ID",
+        error: "Invalid funnel ID"
       });
-      return;
     }
 
     const pages = await PageService.getFunnelPages(funnelId, userId);
-
-    sendSuccessResponse(
-      res,
-      pages,
-      `Retrieved ${pages.length} page${pages.length === 1 ? "" : "s"} from funnel`
-    );
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+    
+    res.json({
+      success: true,
+      data: pages
+    });
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to get pages"
+    });
   }
 };

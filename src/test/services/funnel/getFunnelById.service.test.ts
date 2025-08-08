@@ -53,13 +53,11 @@ describe("FunnelService.getFunnelById", () => {
 
   it("should require user authentication", async () => {
     // Test with invalid user ID (0 or negative)
-    const result = await FunnelService.getFunnelById(testFunnel.id, 0);
-    expect(result).toBeNull();
+    await expect(FunnelService.getFunnelById(testFunnel.id, 0)).rejects.toThrow("Please provide funnelId and userId.");
   });
 
   it("should return null for non-existent funnel", async () => {
-    const result = await FunnelService.getFunnelById(999999, testUser.id);
-    expect(result).toBeNull();
+    await expect(FunnelService.getFunnelById(999999, testUser.id)).rejects.toThrow("Funnel not found.");
   });
 
   it("should throw access denied error for unauthorized access (different user)", async () => {
@@ -74,7 +72,7 @@ describe("FunnelService.getFunnelById", () => {
     expect(funnel?.userId).not.toBe(otherUser.id);
 
     // Should throw access denied when different user tries to access
-    await expect(FunnelService.getFunnelById(testFunnel.id, otherUser.id)).rejects.toThrow("Access denied");
+    await expect(FunnelService.getFunnelById(testFunnel.id, otherUser.id)).rejects.toThrow("You don't have access to this funnel.");
   });
 
   it("should fetch from database and cache when not in cache", async () => {

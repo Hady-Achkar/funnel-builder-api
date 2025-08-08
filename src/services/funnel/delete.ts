@@ -1,4 +1,3 @@
-import { $Enums } from "../../generated/prisma-client";
 import { DeleteFunnelResponse } from "../../types/funnel.types";
 import { cacheService } from "../cache/cache.service";
 import { getPrisma } from "../../lib/prisma";
@@ -7,44 +6,51 @@ export const deleteFunnel = async (
   funnelId: number,
   userId: number
 ): Promise<DeleteFunnelResponse> => {
-  const funnelExists = await getPrisma().funnel.findUnique({
-    where: { id: funnelId },
-    select: { id: true, userId: true, name: true, status: true },
-  });
+  try {
+    if (!funnelId || !userId)
+      throw new Error("Please provide funnelId and userId.");
 
-  if (!funnelExists) {
-    throw new Error("Funnel not found");
-  }
-
-  if (funnelExists.userId !== userId) {
-    throw new Error("Access denied");
-  }
-
-  if (funnelExists.status === $Enums.FunnelStatus.LIVE) {
-    throw new Error("Cannot delete a live funnel. Please change the status first.");
-  }
-
-  await getPrisma().$transaction(async (transactionalPrisma) => {
-    await transactionalPrisma.page.deleteMany({
-      where: { funnelId },
+    const prisma = getPrisma();
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: funnelId },
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        status: true,
+        themeId: true,
+      },
     });
 
-    await transactionalPrisma.funnel.delete({
-      where: { id: funnelId, userId },
+    if (!funnel) throw new Error("Funnel not found.");
+    if (funnel.userId !== userId)
+      throw new Error("You can't delete this funnel.");
+    if (funnel.status === "LIVE")
+      throw new Error(
+        "This funnel is live. Switch it to Draft or Archived first."
+      );
+
+    await prisma.$transaction(async (tx) => {
+      await tx.page.deleteMany({ where: { funnelId } });
+      await tx.theme.delete({ where: { id: funnel.themeId } });
+      await tx.funnel.delete({ where: { id: funnelId, userId } });
     });
 
-    // Invalidate cache after successful database deletion
     try {
+      // Invalidate cache (will clear all keys for this funnel)
       await cacheService.invalidateUserFunnelCache(userId, funnelId);
-      console.log(`Invalidated cache for deleted funnel ID: ${funnelId}`);
-    } catch (cacheError) {
-      console.warn(`Failed to invalidate cache for funnel ${funnelId}:`, cacheError);
+    } catch (e) {
+      console.warn("Deleted funnel, but cache couldn't be cleared:", e);
     }
-  });
 
-  return {
-    id: funnelExists.id,
-    name: funnelExists.name,
-    message: `Funnel "${funnelExists.name}" has been deleted successfully`,
-  };
+    return {
+      id: funnel.id,
+      name: funnel.name,
+      message: `"${funnel.name}" was deleted successfully.`,
+    };
+  } catch (e) {
+    console.error("Failed to delete funnel:", e);
+    if (e instanceof Error) throw new Error(e.message);
+    throw new Error("Couldn't delete the funnel. Please try again.");
+  }
 };

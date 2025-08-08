@@ -10,35 +10,42 @@ import {
 describe("PageService.duplicatePage", () => {
   setupPageServiceTest();
 
+  it("should throw error when pageId is missing", async () => {
+    await expect(
+      PageService.duplicatePage(null as any, 1)
+    ).rejects.toThrow("Please provide pageId and userId.");
+  });
+
+  it("should throw error when userId is missing", async () => {
+    await expect(
+      PageService.duplicatePage(1, null as any)
+    ).rejects.toThrow("Please provide pageId and userId.");
+  });
+
   it("should duplicate page successfully within same funnel", async () => {
-    const funnel = createMockFunnel({ id: 1 });
     const originalPage = createMockPage({ 
       funnelId: 1, 
       name: "Original Page",
+      linkingId: "original-page",
       content: "<h1>Original Content</h1>"
     });
     const duplicatedPage = createMockPage({ 
       id: 2, 
       funnelId: 1, 
       name: "Original Page (Copy)", 
+      linkingId: "original-page-copy",
       content: "<h1>Original Content</h1>",
       order: 2 
     });
 
-    mockPrisma.page.findFirst = vi.fn().mockResolvedValue({ 
-      ...originalPage, 
-      funnel 
-    });
-    mockPrisma.page.findMany = vi.fn()
-      .mockResolvedValueOnce([{ name: "Original Page", linkingId: "original", order: 1 }]) // existing pages check
-      .mockResolvedValueOnce([]); // pushed pages query
+    // Mock for finding the original page
+    mockPrisma.page.findFirst = vi.fn()
+      .mockResolvedValueOnce(originalPage) // Original page lookup
+      .mockResolvedValueOnce(null) // Name check - no duplicate
+      .mockResolvedValueOnce(null) // LinkingId check - no duplicate
+      .mockResolvedValueOnce({ order: 1 }); // Last page for order calculation
+
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
-    mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
-      if (Array.isArray(callback)) {
-        return Promise.all(callback.map(() => Promise.resolve()));
-      }
-      return callback;
-    });
 
     const result = await PageService.duplicatePage(1, 1);
 
@@ -50,21 +57,27 @@ describe("PageService.duplicatePage", () => {
   });
 
   it("should duplicate page to different funnel", async () => {
-    const sourceFunnel = createMockFunnel({ id: 1 });
+    const originalPage = createMockPage({ 
+      funnelId: 1, 
+      name: "Original Page",
+      linkingId: "original-page"
+    });
     const targetFunnel = createMockFunnel({ id: 2 });
-    const originalPage = createMockPage({ funnelId: 1, name: "Original Page" });
     const duplicatedPage = createMockPage({ 
       id: 2, 
       funnelId: 2, 
-      name: "Original Page", 
+      name: "Original Page",
+      linkingId: "original-page", 
       order: 1 
     });
 
     mockPrisma.page.findFirst = vi.fn()
-      .mockResolvedValueOnce({ ...originalPage, funnel: sourceFunnel })
-      .mockResolvedValueOnce(null); // For order calculation
+      .mockResolvedValueOnce(originalPage) // Original page lookup
+      .mockResolvedValueOnce(null) // Name check - no duplicate
+      .mockResolvedValueOnce(null) // LinkingId check - no duplicate
+      .mockResolvedValueOnce(null); // Last page for order - none exists
+    
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(targetFunnel);
-    mockPrisma.page.findMany = vi.fn().mockResolvedValue([]);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
     const result = await PageService.duplicatePage(1, 1, { targetFunnelId: 2 });
@@ -80,50 +93,40 @@ describe("PageService.duplicatePage", () => {
 
     await expect(
       PageService.duplicatePage(999, 1)
-    ).rejects.toThrow("Page not found");
+    ).rejects.toThrow("Page not found or you don't have access.");
   });
 
   it("should throw error for non-existent target funnel", async () => {
     const originalPage = createMockPage({ funnelId: 1 });
-    const funnel = createMockFunnel({ id: 1 });
 
-    mockPrisma.page.findFirst = vi.fn().mockResolvedValue({ 
-      ...originalPage, 
-      funnel 
-    });
+    mockPrisma.page.findFirst = vi.fn().mockResolvedValue(originalPage);
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(null);
 
     await expect(
       PageService.duplicatePage(1, 1, { targetFunnelId: 999 })
-    ).rejects.toThrow("Target funnel not found");
+    ).rejects.toThrow("Target funnel not found or you don't have access.");
   });
 
   it("should handle duplicate names appropriately", async () => {
-    const funnel = createMockFunnel({ id: 1 });
     const originalPage = createMockPage({ 
       funnelId: 1, 
-      name: "Test Page"
+      name: "Test Page",
+      linkingId: "test-page"
     });
     const duplicatedPage = createMockPage({ 
       id: 2, 
       funnelId: 1, 
-      name: "Test Page (Copy)" 
+      name: "Test Page (Copy)",
+      linkingId: "test-page-copy"
     });
 
-    mockPrisma.page.findFirst = vi.fn().mockResolvedValue({ 
-      ...originalPage, 
-      funnel 
-    });
-    mockPrisma.page.findMany = vi.fn()
-      .mockResolvedValueOnce([{ name: "Test Page", linkingId: "test", order: 1 }])
-      .mockResolvedValueOnce([]);
+    mockPrisma.page.findFirst = vi.fn()
+      .mockResolvedValueOnce(originalPage) // Original page lookup
+      .mockResolvedValueOnce(null) // Name check - "Test Page (Copy)" is available
+      .mockResolvedValueOnce(null) // LinkingId check
+      .mockResolvedValueOnce({ order: 1 }); // Last page for order
+    
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
-    mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
-      if (Array.isArray(callback)) {
-        return Promise.all(callback.map(() => Promise.resolve()));
-      }
-      return callback;
-    });
 
     const result = await PageService.duplicatePage(1, 1);
 
@@ -132,7 +135,6 @@ describe("PageService.duplicatePage", () => {
   });
 
   it("should return all required fields on success", async () => {
-    const funnel = createMockFunnel({ id: 1 });
     const originalPage = createMockPage({ 
       funnelId: 1,
       name: "Rich Page",
@@ -146,20 +148,13 @@ describe("PageService.duplicatePage", () => {
       order: 2
     });
 
-    mockPrisma.page.findFirst = vi.fn().mockResolvedValue({ 
-      ...originalPage, 
-      funnel 
-    });
-    mockPrisma.page.findMany = vi.fn()
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
+    mockPrisma.page.findFirst = vi.fn()
+      .mockResolvedValueOnce(originalPage) // Original page lookup
+      .mockResolvedValueOnce(null) // Name check
+      .mockResolvedValueOnce(null) // LinkingId check
+      .mockResolvedValueOnce({ order: 1 }); // Last page for order
+    
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
-    mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
-      if (Array.isArray(callback)) {
-        return Promise.all(callback.map(() => Promise.resolve()));
-      }
-      return callback;
-    });
 
     const result = await PageService.duplicatePage(1, 1);
 

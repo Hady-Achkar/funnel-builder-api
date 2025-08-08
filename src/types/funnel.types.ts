@@ -4,11 +4,6 @@ import { PageSummary } from "./page.types";
 
 export interface CreateFunnelResponse {
   id: number;
-  name: string;
-  status: $Enums.FunnelStatus;
-  userId: number;
-  createdAt: Date;
-  updatedAt: Date;
   message: string;
 }
 
@@ -128,4 +123,3 @@ export interface FunnelWithPagesAndTheme {
   pages: PageData[];
   theme: ThemeData | null;
 }
-

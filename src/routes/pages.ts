@@ -4,13 +4,12 @@ import {
   createPage, 
   getFunnelPages, 
   getPageById, 
-  getPageByLinkingId, 
+  getPublicPage, 
   updatePage, 
   deletePage, 
   reorderPages, 
   duplicatePage,
-  createPageVisit,
-  getFunnelPageVisits 
+  createPageVisit
 } from "../controllers/page";
 
 const router: Router = express.Router();
@@ -18,7 +17,6 @@ const router: Router = express.Router();
 // Routes for pages within funnels (protected)
 router.post("/funnels/:funnelId/pages", authenticateToken, createPage);
 router.get("/funnels/:funnelId/pages", authenticateToken, getFunnelPages);
-router.get("/funnels/:funnelId/visits", authenticateToken, getFunnelPageVisits);
 router.put("/funnels/:funnelId/pages/reorder", authenticateToken, reorderPages);
 
 // Routes for individual pages (protected)
@@ -28,7 +26,7 @@ router.delete("/:id", authenticateToken, deletePage);
 router.post("/:pageId/duplicate", authenticateToken, duplicatePage);
 
 // Public routes
-router.get("/funnel/:funnelId/link/:linkingId", getPageByLinkingId);
+router.get("/funnel/:funnelId/link/:linkingId", getPublicPage);
 router.post("/:pageId/visit", createPageVisit);
 
 export default router;

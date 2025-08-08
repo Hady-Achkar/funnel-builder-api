@@ -1,10 +1,10 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
-import { updateTheme as updateThemeService } from "../../services/theme";
-import { UpdateThemeRequest } from "../../types/theme.types";
+import { ThemeService } from "../../services/theme";
 
-export async function updateTheme(req: AuthRequest, res: Response): Promise<void> {
+export const updateTheme = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = req.userId!;
     const themeId = parseInt(req.params.id);
     const {
       name,
@@ -15,91 +15,35 @@ export async function updateTheme(req: AuthRequest, res: Response): Promise<void
       borderColor,
       optionColor,
       fontFamily,
-      borderRadius,
-    }: UpdateThemeRequest = req.body;
+      borderRadius
+    } = req.body;
 
-    // Guard: Validate theme ID
-    if (isNaN(themeId) || themeId <= 0) {
-      res.status(400).json({
+    if (!themeId || isNaN(themeId)) {
+      return res.status(400).json({
         success: false,
-        error: "Valid theme ID is required",
+        error: "Invalid theme ID"
       });
-      return;
     }
 
-    if (!req.userId) {
-      res.status(401).json({
-        success: false,
-        error: "User authentication required",
-      });
-      return;
-    }
-
-    // Prepare update data (only include defined fields)
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (backgroundColor !== undefined)
-      updateData.backgroundColor = backgroundColor;
-    if (textColor !== undefined) updateData.textColor = textColor;
-    if (buttonColor !== undefined) updateData.buttonColor = buttonColor;
-    if (buttonTextColor !== undefined)
-      updateData.buttonTextColor = buttonTextColor;
-    if (borderColor !== undefined) updateData.borderColor = borderColor;
-    if (optionColor !== undefined) updateData.optionColor = optionColor;
-    if (fontFamily !== undefined) updateData.fontFamily = fontFamily;
-    if (borderRadius !== undefined) updateData.borderRadius = borderRadius;
-
-    // Update theme through service
-    const theme = await updateThemeService(
-      themeId,
-      updateData,
-      req.userId
-    );
-
-    res.status(200).json({
-      success: true,
-      ...theme,
+    const result = await ThemeService.updateTheme(themeId, userId, {
+      name,
+      backgroundColor,
+      textColor,
+      buttonColor,
+      buttonTextColor,
+      borderColor,
+      optionColor,
+      fontFamily,
+      borderRadius
     });
-  } catch (error: any) {
-    console.error("ThemeController.updateTheme error:", error);
 
-    // Handle validation errors with appropriate status codes
-    if (
-      error.message.includes("required") ||
-      error.message.includes("empty") ||
-      error.message.includes("exceed") ||
-      error.message.includes("must be provided")
-    ) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
-      return;
-    }
-
-    if (
-      error.message.includes("not found") ||
-      error.message.includes("permission")
-    ) {
-      res.status(404).json({
-        success: false,
-        error: error.message,
-      });
-      return;
-    }
-
-    if (error.message.includes("already exists")) {
-      res.status(409).json({
-        success: false,
-        error: error.message,
-      });
-      return;
-    }
-
-    // Generic server error for unexpected issues
-    res.status(500).json({
+    res.json(result);
+  } catch (e: any) {
+    const status = e.message?.includes("not found") ? 404 : 
+                  e.message?.includes("permission") ? 403 : 400;
+    res.status(status).json({
       success: false,
-      error: "Failed to update theme. Please try again later.",
+      error: e.message || "Failed to update theme"
     });
   }
-}
+};

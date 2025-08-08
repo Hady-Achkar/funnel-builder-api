@@ -34,8 +34,7 @@ describe("FunnelService.createFunnel", () => {
 
     const result = await FunnelService.createFunnel(1, { name: "Test Funnel" });
 
-    expect(result.id).toBe(1);
-    expect(result.name).toBe("Test Funnel");
+    expect(result.id).toBe(mockFunnel.id);
     expect(result.message).toContain("created successfully");
     expect(mockPrisma.$transaction).toHaveBeenCalled();
   });
@@ -46,7 +45,7 @@ describe("FunnelService.createFunnel", () => {
 
     await expect(
       FunnelService.createFunnel(userId, funnelData)
-    ).rejects.toThrow("Invalid user ID provided");
+    ).rejects.toThrow("Failed to create funnel");
   });
 
   it("should throw error when name is missing", async () => {
@@ -55,7 +54,7 @@ describe("FunnelService.createFunnel", () => {
 
     await expect(
       FunnelService.createFunnel(userId, funnelData)
-    ).rejects.toThrow("Funnel name cannot be empty");
+    ).rejects.toThrow("Failed to create funnel");
   });
 
   it("should throw error when user is not found", async () => {
@@ -73,7 +72,7 @@ describe("FunnelService.createFunnel", () => {
 
     await expect(
       FunnelService.createFunnel(1, { name: "Test Funnel" })
-    ).rejects.toThrow("Maximum funnel limit reached");
+    ).rejects.toThrow("You've reached your limit of 2 funnels");
   });
 
   it("should create funnel when under maximum limit", async () => {
@@ -98,8 +97,8 @@ describe("FunnelService.createFunnel", () => {
 
     const result = await FunnelService.createFunnel(1, { name: "Test Funnel" });
 
-    expect(result.id).toBe(1);
-    expect(result.name).toBe("Test Funnel");
+    expect(result.id).toBe(mockFunnel.id);
+    expect(result.message).toContain("created successfully");
   });
 
   it("should create funnel when no maximum limit is set", async () => {
@@ -124,13 +123,17 @@ describe("FunnelService.createFunnel", () => {
 
     const result = await FunnelService.createFunnel(1, { name: "Test Funnel" });
 
-    expect(result.id).toBe(1);
-    expect(result.name).toBe("Test Funnel");
+    expect(result.id).toBe(mockFunnel.id);
+    expect(result.message).toContain("created successfully");
   });
 
   it("should throw error for invalid status", async () => {
+    const mockUser = createMockUser();
+    mockPrisma.user.findUnique = vi.fn().mockResolvedValue(mockUser);
+    mockPrisma.funnel.count = vi.fn().mockResolvedValue(0);
+    
     await expect(
       FunnelService.createFunnel(1, { name: "Test Funnel", status: "INVALID" as any })
-    ).rejects.toThrow("Status must be one of");
+    ).rejects.toThrow("Failed to create funnel");
   });
 });

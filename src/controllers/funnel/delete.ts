@@ -1,28 +1,37 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { FunnelService } from "../../services/funnel";
-import { validateFunnelId, sendErrorResponse } from "./helper";
 
-export const deleteFunnel = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteFunnel = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.id);
-
-    if (!funnelId) {
-      res.status(400).json({
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        error: "Invalid funnel ID",
+        error: "Authentication required"
       });
-      return;
+    }
+    const funnelId = parseInt(req.params.id);
+
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid funnel ID"
+      });
     }
 
     const result = await FunnelService.deleteFunnel(funnelId, userId);
 
     res.json({
       success: true,
-      ...result,
+      id: result.id,
+      name: result.name,
+      message: result.message
     });
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to delete funnel"
+    });
   }
 };

@@ -1,37 +1,34 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { PageService } from "../../services/page";
-import { validateFunnelId, sendErrorResponse } from "./helper";
 
-export const reorderPages = async (req: AuthRequest, res: Response): Promise<void> => {
+export const reorderPages = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.funnelId);
+    const funnelId = parseInt(req.params.funnelId);
     const { pageOrders } = req.body;
 
-    if (!funnelId) {
-      res.status(400).json({ 
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
         success: false,
-        error: "Invalid funnel ID" 
+        error: "Invalid funnel ID"
       });
-      return;
     }
 
-    if (!Array.isArray(pageOrders)) {
-      res.status(400).json({ 
+    if (!Array.isArray(pageOrders) || pageOrders.length === 0) {
+      return res.status(400).json({
         success: false,
-        error: "Page orders must be an array" 
+        error: "Page orders array is required"
       });
-      return;
     }
 
-    await PageService.reorderPages(funnelId, userId, pageOrders);
+    const result = await PageService.reorderPages(funnelId, userId, pageOrders);
     
-    res.json({ 
-      success: true,
-      message: "Pages reordered successfully" 
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to reorder pages"
     });
-  } catch (error: any) {
-    sendErrorResponse(res, error);
   }
 };

@@ -9,53 +9,78 @@ export const updateFunnelCache = async (
   changedData: UpdateFunnelData
 ): Promise<void> => {
   try {
-    // Handle full cache (consolidated cache for all funnel data)
-    const fullCachedFunnel = await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
+    // Update summary cache (without pages)
+    const summaryCached = await cacheService.getUserFunnelCache<CachedFunnelData>(
       userId,
       funnelId,
-      "full"
+      "summary"
     );
 
-    if (fullCachedFunnel) {
-      // Update only changed fields in full cache
+    if (summaryCached) {
+      // Update only changed fields in summary cache
       if (changedData.name !== undefined) {
-        fullCachedFunnel.name = updatedFunnel.name;
+        summaryCached.name = updatedFunnel.name;
       }
       if (changedData.status !== undefined) {
-        fullCachedFunnel.status = updatedFunnel.status;
+        summaryCached.status = updatedFunnel.status;
       }
-      fullCachedFunnel.updatedAt = updatedFunnel.updatedAt;
+      summaryCached.updatedAt = updatedFunnel.updatedAt;
 
       await cacheService.setUserFunnelCache(
         userId,
         funnelId,
-        "full",
-        fullCachedFunnel,
+        "summary",
+        summaryCached,
         { ttl: 0 }
       );
-      console.log(`Updated full cache for funnel ID: ${funnelId}`);
+      console.log(`Updated summary cache for funnel ID: ${funnelId}`);
     } else {
-      // Cache doesn't exist, create it from updated funnel data with pages
-      const fullFunnelData: CachedFunnelWithPages = {
+      // Create summary cache if it doesn't exist
+      const summaryData: CachedFunnelData = {
         id: updatedFunnel.id,
         name: updatedFunnel.name,
         status: updatedFunnel.status,
         userId: updatedFunnel.userId,
-        themeId: updatedFunnel.themeId,
         createdAt: updatedFunnel.createdAt,
         updatedAt: updatedFunnel.updatedAt,
-        pages: updatedFunnel.pages,
         theme: updatedFunnel.theme,
       };
 
       await cacheService.setUserFunnelCache(
         userId,
         funnelId,
-        "full",
-        fullFunnelData,
+        "summary",
+        summaryData,
         { ttl: 0 }
       );
-      console.log(`Cached full funnel data for funnel ID: ${funnelId}`);
+      console.log(`Created summary cache for funnel ID: ${funnelId}`);
+    }
+
+    // Also update full cache if it exists (getFunnelById uses this)
+    const fullCached = await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
+      userId,
+      funnelId,
+      "full"
+    );
+
+    if (fullCached) {
+      // Update only changed fields in full cache
+      if (changedData.name !== undefined) {
+        fullCached.name = updatedFunnel.name;
+      }
+      if (changedData.status !== undefined) {
+        fullCached.status = updatedFunnel.status;
+      }
+      fullCached.updatedAt = updatedFunnel.updatedAt;
+
+      await cacheService.setUserFunnelCache(
+        userId,
+        funnelId,
+        "full",
+        fullCached,
+        { ttl: 0 }
+      );
+      console.log(`Updated full cache for funnel ID: ${funnelId}`);
     }
   } catch (cacheError) {
     console.warn(`Failed to update cache for funnel ${funnelId}:`, cacheError);
@@ -69,27 +94,17 @@ export const getCachedFunnelsWithFallback = async (
   const cachedFunnels: CachedFunnelData[] = [];
   const missingFunnelIds: number[] = [];
 
-  // Try to get each funnel from cache using :full key
+  // Try to get each funnel from cache using :summary key (without pages)
   for (const funnelId of funnelIds) {
     try {
-      const cachedFunnel = await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
+      const cachedFunnel = await cacheService.getUserFunnelCache<CachedFunnelData>(
         userId,
         funnelId,
-        "full"
+        "summary"
       );
 
       if (cachedFunnel) {
-        // Extract basic funnel data from full cache
-        const basicFunnelData: CachedFunnelData = {
-          id: cachedFunnel.id,
-          name: cachedFunnel.name,
-          status: cachedFunnel.status,
-          userId: cachedFunnel.userId,
-          createdAt: cachedFunnel.createdAt,
-          updatedAt: cachedFunnel.updatedAt,
-          theme: cachedFunnel.theme,
-        };
-        cachedFunnels.push(basicFunnelData);
+        cachedFunnels.push(cachedFunnel);
       } else {
         missingFunnelIds.push(funnelId);
       }
@@ -107,76 +122,37 @@ export const getCachedFunnelsWithFallback = async (
         userId,
       },
       include: {
-        theme: {
-          select: {
-            id: true,
-            name: true,
-            backgroundColor: true,
-            textColor: true,
-            buttonColor: true,
-            buttonTextColor: true,
-            borderColor: true,
-            optionColor: true,
-            fontFamily: true,
-            borderRadius: true,
-          },
-        },
-        pages: {
-          select: {
-            id: true,
-            name: true,
-            order: true,
-            linkingId: true,
-            seoTitle: true,
-            seoDescription: true,
-            seoKeywords: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-          orderBy: { order: "asc" },
-        },
+        theme: true,
       },
     });
 
     // Cache each fetched funnel and add to results
     for (const dbFunnel of dbFunnels) {
-      // Cache the full funnel data using :full key
-      const fullCachedData: CachedFunnelWithPages = {
+      // Cache the summary data (without pages) using :summary key
+      const summaryData: CachedFunnelData = {
         id: dbFunnel.id,
         name: dbFunnel.name,
         status: dbFunnel.status,
         userId: dbFunnel.userId,
-        themeId: dbFunnel.themeId,
         createdAt: dbFunnel.createdAt,
         updatedAt: dbFunnel.updatedAt,
         theme: dbFunnel.theme,
-        pages: dbFunnel.pages,
       };
 
       try {
         await cacheService.setUserFunnelCache(
           userId,
           dbFunnel.id,
-          "full",
-          fullCachedData,
+          "summary",
+          summaryData,
           { ttl: 0 }
         );
-        console.log(`Cached full funnel data for funnel ID: ${dbFunnel.id}`);
+        console.log(`Cached summary data for funnel ID: ${dbFunnel.id}`);
       } catch (cacheError) {
         console.warn(`Failed to cache funnel ${dbFunnel.id}:`, cacheError);
       }
 
-      // Add basic data to results
-      const basicFunnelData: CachedFunnelData = {
-        id: dbFunnel.id,
-        name: dbFunnel.name,
-        status: dbFunnel.status,
-        userId: dbFunnel.userId,
-        createdAt: dbFunnel.createdAt,
-        updatedAt: dbFunnel.updatedAt,
-        theme: dbFunnel.theme,
-      };
-      cachedFunnels.push(basicFunnelData);
+      cachedFunnels.push(summaryData);
     }
   }
 

@@ -1,55 +1,55 @@
-import { $Enums } from "../../generated/prisma-client";
 import {
   FunnelListQuery,
   FunnelListResponse,
   FunnelListItem,
 } from "../../types/funnel.types";
-import { cacheService } from "../cache/cache.service";
 import { getPrisma } from "../../lib/prisma";
-import { validateStatusQuery } from "./helpers";
 import { getCachedFunnelsWithFallback } from "./cache-helpers";
 
 export const getUserFunnels = async (
   userId: number,
   query?: FunnelListQuery
 ): Promise<FunnelListResponse> => {
-  validateStatusQuery(query?.status);
-
   try {
-    const page = Math.max(1, query?.page || 1);
-    const limit = Math.min(100, Math.max(1, query?.limit || 10));
+    if (!userId) throw new Error("Please provide a userId.");
+
+    const page = Math.max(1, query?.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query?.limit ?? 10));
     const skip = (page - 1) * limit;
-    const sortBy = query?.sortBy || "createdAt";
-    const sortOrder = query?.sortOrder || "desc";
+    const sortBy = query?.sortBy ?? "createdAt";
+    const sortOrder = query?.sortOrder ?? "desc";
 
-    const statusFilter = query?.status
-      ? { status: query.status.toUpperCase() as $Enums.FunnelStatus }
-      : {};
+    const status = query?.status?.toUpperCase();
+    const validStatuses = ["DRAFT", "LIVE", "ARCHIVED", "SHARED"];
+    if (status && !validStatuses.includes(status)) {
+      throw new Error("Invalid status. Use DRAFT, LIVE, ARCHIVED, or SHARED.");
+    }
 
-    const where = { userId, ...statusFilter };
+    const filter: Record<string, any> = { userId };
+    if (status) filter.status = status;
 
-    const funnelIds = await getPrisma().funnel.findMany({
-      where,
+    const prisma = getPrisma();
+
+    const idRows = await prisma.funnel.findMany({
+      where: filter,
       select: { id: true },
-      orderBy: { [sortBy]: sortOrder },
+      orderBy: { [sortBy]: sortOrder } as any,
       skip,
       take: limit,
     });
 
-    const total = await getPrisma().funnel.count({ where });
+    const total = await prisma.funnel.count({ where: filter });
     const totalPages = Math.ceil(total / limit);
 
-    const cachedFunnels = await getCachedFunnelsWithFallback(
-      userId,
-      funnelIds.map((f) => f.id)
-    );
+    const ids = idRows.map((r) => r.id);
+    const cached = await getCachedFunnelsWithFallback(userId, ids);
 
-    const funnels: FunnelListItem[] = cachedFunnels.map((funnel) => ({
-      id: funnel.id,
-      name: funnel.name,
-      status: funnel.status,
-      createdAt: funnel.createdAt,
-      updatedAt: funnel.updatedAt,
+    const funnels: FunnelListItem[] = cached.map((f) => ({
+      id: f.id,
+      name: f.name,
+      status: f.status,
+      createdAt: f.createdAt,
+      updatedAt: f.updatedAt,
     }));
 
     return {
@@ -63,9 +63,9 @@ export const getUserFunnels = async (
         hasPrev: page > 1,
       },
     };
-  } catch (error: any) {
-    console.error("FunnelService.getUserFunnels error:", error);
-    throw new Error("Failed to fetch funnels. Please try again later.");
+  } catch (e) {
+    console.error("Failed to get user funnels:", e);
+    if (e instanceof Error) throw new Error(e.message);
+    throw new Error("Couldn't load your funnels. Please try again.");
   }
 };
-

@@ -1,34 +1,38 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { PageService } from "../../services/page";
-import { validateFunnelId, sendCreatedResponse, sendErrorResponse } from "./helper";
 
-export const createPage = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createPage = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const funnelId = validateFunnelId(req.params.funnelId);
+    const funnelId = parseInt(req.params.funnelId);
+    const { name, content, linkingId } = req.body;
 
-    if (!funnelId) {
-      res.status(400).json({
+    if (!funnelId || isNaN(funnelId)) {
+      return res.status(400).json({
         success: false,
-        error: "Please provide a valid funnel ID",
+        error: "Invalid funnel ID"
       });
-      return;
     }
 
-    const page = await PageService.createPage(funnelId, userId);
+    const page = await PageService.createPage(funnelId, userId, {
+      name,
+      content,
+      linkingId
+    });
     
-    sendCreatedResponse(
-      res,
-      {
-        id: page.id,
-        name: page.name,
-        linkingId: page.linkingId,
-        order: page.order,
-      },
-      page.message
-    );
-  } catch (error: any) {
-    sendErrorResponse(res, error);
+    res.status(201).json({
+      success: true,
+      id: page.id,
+      name: page.name,
+      linkingId: page.linkingId,
+      order: page.order,
+      message: page.message
+    });
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e.message || "Failed to create page"
+    });
   }
 };

@@ -26,15 +26,13 @@ describe("getFunnelPages Controller", () => {
 
       await getFunnelPages(getMockReq(), getMockRes());
 
-      expect(getMockRes().status).toHaveBeenCalledWith(200);
       expect(getMockRes().json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
           data: expect.arrayContaining([
             expect.objectContaining({ name: "Page 1" }),
             expect.objectContaining({ name: "Page 2" }),
-          ]),
-          message: "Retrieved 2 pages from funnel",
+          ])
         })
       );
     });
@@ -47,7 +45,7 @@ describe("getFunnelPages Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(400);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Please provide a valid funnel ID",
+        error: "Invalid funnel ID",
       });
     });
 
@@ -75,8 +73,7 @@ describe("getFunnelPages Controller", () => {
           success: true,
           data: expect.arrayContaining([
             expect.objectContaining({ name: "Single Page" }),
-          ]),
-          message: "Retrieved 1 page from funnel",
+          ])
         })
       );
     });

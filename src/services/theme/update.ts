@@ -1,142 +1,152 @@
-import {
-  UpdateThemeData,
-  UpdateThemeResponse,
-} from "../../types/theme.types";
-import { getPrisma } from "./helpers";
-import { CacheService } from "../cache/cache.service";
-import { CachedFunnelWithPages } from "../../types/funnel.types";
+import { getPrisma } from "../../lib/prisma";
+import { cacheService } from "../cache/cache.service";
+import { UpdateThemeData, UpdateThemeResponse } from "../../types/theme.types";
 
-export async function updateTheme(
+export const updateTheme = async (
   themeId: number,
-  data: UpdateThemeData,
-  userId: number
-): Promise<UpdateThemeResponse> {
+  userId: number,
+  data: UpdateThemeData
+): Promise<UpdateThemeResponse> => {
   try {
-    // Validate theme ID
-    if (!themeId || themeId <= 0) {
-      throw new Error("Valid theme ID is required");
+    if (!themeId || !userId)
+      throw new Error("Please provide themeId and userId.");
+
+    if (!data || Object.keys(data).length === 0) {
+      throw new Error("No updates provided.");
     }
 
-    // Check if there's any data to update
-    const hasUpdates = Object.keys(data).some(
-      (key) => data[key as keyof UpdateThemeData] !== undefined
-    );
-    if (!hasUpdates) {
-      throw new Error("At least one field must be provided for update");
-    }
+    const prisma = getPrisma();
 
-    // Validate name if provided
-    if (data.name !== undefined) {
-      const trimmedName = data.name.trim();
-      if (trimmedName.length === 0) {
-        throw new Error("Theme name cannot be empty");
-      }
-      if (trimmedName.length > 100) {
-        throw new Error("Theme name cannot exceed 100 characters");
-      }
-      data.name = trimmedName;
-    }
-
-    // Check if theme exists and get associated funnel to verify ownership
-    const existingTheme = await getPrisma().theme.findFirst({
+    // Get theme with funnel to verify ownership
+    const existingTheme = await prisma.theme.findFirst({
       where: { id: themeId },
-      include: { funnel: true },
+      include: { funnel: true }
     });
 
-    if (!existingTheme) {
-      throw new Error("Theme not found");
+    if (!existingTheme) throw new Error("Theme not found.");
+
+    if (!existingTheme.funnel) throw new Error("Theme is not associated with any funnel.");
+
+    if (existingTheme.funnel.userId !== userId) {
+      throw new Error("You don't have permission to update this theme.");
     }
 
-    // Verify user owns the funnel that this theme is associated with
-    if (existingTheme.funnel && existingTheme.funnel.userId !== userId) {
-      throw new Error("You don't have permission to update this theme");
+    // Check for actual changes
+    const updates: UpdateThemeData = {};
+    const changed: string[] = [];
+
+    if (data.name !== undefined && data.name !== existingTheme.name) {
+      updates.name = data.name.trim();
+      if (!updates.name) throw new Error("Theme name cannot be empty.");
+      changed.push("name");
+    }
+
+    if (data.backgroundColor !== undefined && data.backgroundColor !== existingTheme.backgroundColor) {
+      updates.backgroundColor = data.backgroundColor;
+      changed.push("background color");
+    }
+
+    if (data.textColor !== undefined && data.textColor !== existingTheme.textColor) {
+      updates.textColor = data.textColor;
+      changed.push("text color");
+    }
+
+    if (data.buttonColor !== undefined && data.buttonColor !== existingTheme.buttonColor) {
+      updates.buttonColor = data.buttonColor;
+      changed.push("button color");
+    }
+
+    if (data.buttonTextColor !== undefined && data.buttonTextColor !== existingTheme.buttonTextColor) {
+      updates.buttonTextColor = data.buttonTextColor;
+      changed.push("button text color");
+    }
+
+    if (data.borderColor !== undefined && data.borderColor !== existingTheme.borderColor) {
+      updates.borderColor = data.borderColor;
+      changed.push("border color");
+    }
+
+    if (data.optionColor !== undefined && data.optionColor !== existingTheme.optionColor) {
+      updates.optionColor = data.optionColor;
+      changed.push("option color");
+    }
+
+    if (data.fontFamily !== undefined && data.fontFamily !== existingTheme.fontFamily) {
+      updates.fontFamily = data.fontFamily;
+      changed.push("font family");
+    }
+
+    if (data.borderRadius !== undefined && data.borderRadius !== existingTheme.borderRadius) {
+      updates.borderRadius = data.borderRadius;
+      changed.push("border radius");
+    }
+
+    if (changed.length === 0) {
+      return {
+        success: true,
+        message: "No changes detected. Theme is already up to date."
+      };
     }
 
     // Update the theme
-    const updatedTheme = await getPrisma().theme.update({
+    const updatedTheme = await prisma.theme.update({
       where: { id: themeId },
-      data,
-      include: {
-        funnel: {
-          include: {
-            pages: true,
-          }
-        }
-      }
+      data: updates
     });
 
-    // Update cache if theme has associated funnel
-    if (updatedTheme.funnel) {
-      try {
-        const cacheService = CacheService.getInstance();
-        const funnel = updatedTheme.funnel;
+    const funnelId = existingTheme.funnel.id;
+
+    try {
+      const themeData = { ...updatedTheme };
+
+      // Update funnel:summary cache using copy->delete->update->save pattern
+      const summaryKey = `user:${userId}:funnel:${funnelId}:summary`;
+      const cachedSummary = await cacheService.get<any>(summaryKey);
+      
+      if (cachedSummary) {
+        const summaryDataCopy = { ...cachedSummary };
+        await cacheService.del(summaryKey);
         
-        // Prepare the theme data for cache
-        const themeData = {
-          id: updatedTheme.id,
-          name: updatedTheme.name,
-          backgroundColor: updatedTheme.backgroundColor,
-          textColor: updatedTheme.textColor,
-          buttonColor: updatedTheme.buttonColor,
-          buttonTextColor: updatedTheme.buttonTextColor,
-          borderColor: updatedTheme.borderColor,
-          optionColor: updatedTheme.optionColor,
-          fontFamily: updatedTheme.fontFamily,
-          borderRadius: updatedTheme.borderRadius,
-        };
+        summaryDataCopy.theme = themeData;
+        summaryDataCopy.updatedAt = new Date();
         
-        // Update the full cache with updated theme data
-        const cachedFunnel = await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
-          funnel.userId,
-          funnel.id,
-          "full"
-        );
-        
-        if (cachedFunnel) {
-          cachedFunnel.theme = themeData;
-          cachedFunnel.updatedAt = new Date();
-          
-          await cacheService.setUserFunnelCache(
-            funnel.userId,
-            funnel.id,
-            "full",
-            cachedFunnel,
-            { ttl: 0 }
-          );
-        }
-        
-      } catch (cacheError) {
-        console.warn(`Failed to update cache for theme ${updatedTheme.id}:`, cacheError);
+        await cacheService.set(summaryKey, summaryDataCopy, { ttl: 0 });
       }
+
+      // Update funnel:full cache using copy->delete->update->save pattern
+      const fullKey = `user:${userId}:funnel:${funnelId}:full`;
+      const cachedFull = await cacheService.get<any>(fullKey);
+      
+      if (cachedFull) {
+        const fullDataCopy = { ...cachedFull };
+        await cacheService.del(fullKey);
+        
+        fullDataCopy.theme = themeData;
+        fullDataCopy.updatedAt = new Date();
+        
+        await cacheService.set(fullKey, fullDataCopy, { ttl: 0 });
+      }
+    } catch (cacheError) {
+      console.warn("Theme updated, but cache couldn't be updated:", cacheError);
+    }
+
+    let message: string;
+    if (changed.length === 1) {
+      message = `Theme ${changed[0]} updated successfully`;
+    } else if (changed.length === 2) {
+      message = `Theme ${changed.join(" and ")} updated successfully`;
+    } else {
+      const last = changed.pop();
+      message = `Theme ${changed.join(", ")}, and ${last} updated successfully`;
     }
 
     return {
-      id: updatedTheme.id,
-      name: updatedTheme.name,
-      message: `Theme "${updatedTheme.name}" updated successfully${updatedTheme.funnel ? ' and cache refreshed' : ''}`,
+      success: true,
+      message
     };
-  } catch (error: any) {
-    console.error("ThemeService.updateTheme error:", error);
-
-    if (error.code === "P2002") {
-      throw new Error("A theme with this configuration already exists");
-    }
-
-    if (error.code === "P2025") {
-      throw new Error("Theme not found");
-    }
-
-    if (
-      error.message.includes("required") ||
-      error.message.includes("empty") ||
-      error.message.includes("exceed") ||
-      error.message.includes("not found") ||
-      error.message.includes("permission") ||
-      error.message.includes("must be provided")
-    ) {
-      throw error;
-    }
-
-    throw new Error("Failed to update theme. Please try again later.");
+  } catch (e) {
+    console.error("Failed to update theme:", e);
+    if (e instanceof Error) throw new Error(e.message);
+    throw new Error("Couldn't update the theme. Please try again.");
   }
-}
+};

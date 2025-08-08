@@ -9,7 +9,7 @@ import { setPrismaClient as setUserPrismaClient } from "../services/user.service
 import { setPrismaClient as setFunnelPrismaClient } from "../services/funnel";
 import { setPrismaClient as setPagePrismaClient } from "../services/page";
 import { setPrismaClient as setDomainPrismaClient } from "../services/domain.service";
-import { setPrismaClient as setThemePrismaClient } from "../services/theme.service";
+import { setPrismaClient as setThemePrismaClient } from "../services/theme";
 
 // Test database and factory instances
 let testDatabase: TestDatabase;

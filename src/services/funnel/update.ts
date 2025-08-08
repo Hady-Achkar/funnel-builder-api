@@ -1,12 +1,8 @@
-import { UpdateFunnelData, FunnelWithPagesAndTheme } from "../../types/funnel.types";
-import { getPrisma } from "../../lib/prisma";
 import {
-  validateUpdateInput,
-  verifyFunnelOwnership,
-  verifyDomainOwnership,
-  handleDomainConnection,
-  handleUpdateError,
-} from "./helpers";
+  UpdateFunnelData,
+  FunnelWithPagesAndTheme,
+} from "../../types/funnel.types";
+import { getPrisma } from "../../lib/prisma";
 import { updateFunnelCache } from "./cache-helpers";
 
 export const updateFunnel = async (
@@ -15,72 +11,76 @@ export const updateFunnel = async (
   data: UpdateFunnelData
 ): Promise<FunnelWithPagesAndTheme> => {
   try {
-    validateUpdateInput(data);
-    await verifyFunnelOwnership(funnelId, userId);
+    if (!funnelId || !userId)
+      throw new Error("Please provide funnelId and userId.");
 
-    if (data.domainId !== undefined && data.domainId !== null) {
-      await verifyDomainOwnership(data.domainId, userId);
+    const hasName = data.name !== undefined;
+    const hasStatus = data.status !== undefined;
+    const hasDomain = data.domainId !== undefined;
+    if (!hasName && !hasStatus && !hasDomain)
+      throw new Error("Nothing to update.");
+
+    const prisma = getPrisma();
+
+    const owner = await prisma.funnel.findUnique({
+      where: { id: funnelId },
+      select: { userId: true },
+    });
+
+    if (!owner) throw new Error("Funnel not found.");
+    if (owner.userId !== userId)
+      throw new Error("You can't update this funnel.");
+
+    const updates: any = {};
+
+    if (hasName) {
+      updates.name = (data.name ?? "").trim();
     }
 
-    return await getPrisma().$transaction(async (transactionalPrisma) => {
-      const funnelUpdateData: any = {};
-
-      if (data.name !== undefined) {
-        funnelUpdateData.name = data.name.trim();
+    if (hasStatus) {
+      const status = String(data.status).toUpperCase();
+      const allowed = ["DRAFT", "LIVE", "ARCHIVED", "SHARED"];
+      if (!allowed.includes(status)) {
+        throw new Error("Status must be DRAFT, LIVE, ARCHIVED, or SHARED.");
       }
+      updates.status = status;
+    }
 
-      if (data.status !== undefined) {
-        funnelUpdateData.status = data.status.toUpperCase();
-      }
-
-      // Update database
-      const updatedFunnel = await transactionalPrisma.funnel.update({
-        where: { id: funnelId, userId },
-        data: funnelUpdateData,
-        include: {
-          pages: {
-            select: {
-              id: true,
-              name: true,
-              order: true,
-              linkingId: true,
-              seoTitle: true,
-              seoDescription: true,
-              seoKeywords: true,
-              createdAt: true,
-              updatedAt: true,
-            },
-            orderBy: { order: "asc" },
-          },
-          theme: {
-            select: {
-              id: true,
-              name: true,
-              backgroundColor: true,
-              textColor: true,
-              buttonColor: true,
-              buttonTextColor: true,
-              borderColor: true,
-              optionColor: true,
-              fontFamily: true,
-              borderRadius: true,
-            },
-          },
-        },
+    if (hasDomain && data.domainId !== null) {
+      const domain = await prisma.domain.findUnique({
+        where: { id: data.domainId as number },
+        select: { userId: true },
       });
+      if (!domain) throw new Error("Domain not found.");
+      if (domain.userId !== userId)
+        throw new Error("You don't own this domain.");
+      updates.domainId = data.domainId;
+    } else if (hasDomain && data.domainId === null) {
+      updates.domainId = null;
+    }
 
-      // Handle domain connection if needed
-      if (data.domainId !== undefined) {
-        await handleDomainConnection(transactionalPrisma, funnelId, data.domainId);
-      }
-
-      // Update cache with selective field updates
-      await updateFunnelCache(userId, funnelId, updatedFunnel, data);
-
-      return updatedFunnel as FunnelWithPagesAndTheme;
+    const updated = await prisma.funnel.update({
+      where: { id: funnelId, userId },
+      data: updates,
+      include: {
+        theme: true,
+        pages: {
+          omit: { content: true },
+          orderBy: { order: "asc" },
+        },
+      },
     });
-  } catch (error: any) {
-    console.error("FunnelService.updateFunnel error:", error);
-    throw handleUpdateError(error);
+
+    try {
+      await updateFunnelCache(userId, funnelId, updated, data);
+    } catch (e) {
+      console.warn("Funnel updated, but cache couldn't be refreshed:", e);
+    }
+
+    return updated as FunnelWithPagesAndTheme;
+  } catch (e) {
+    console.error("Failed to update funnel:", e);
+    if (e instanceof Error) throw new Error(e.message);
+    throw new Error("Couldn't update the funnel. Please try again.");
   }
 };

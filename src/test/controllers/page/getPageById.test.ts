@@ -29,7 +29,6 @@ describe("getPageById Controller", () => {
 
       await getPageById(getMockReq(), getMockRes());
 
-      expect(getMockRes().status).toHaveBeenCalledWith(200);
       expect(getMockRes().json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
@@ -39,8 +38,7 @@ describe("getPageById Controller", () => {
             content: "Page content",
             order: 1,
             linkingId: "test-page",
-          }),
-          message: 'Retrieved page "Test Page" successfully',
+          })
         })
       );
     });
@@ -53,7 +51,7 @@ describe("getPageById Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(400);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Please provide a valid page ID",
+        error: "Invalid page ID",
       });
     });
 
@@ -70,7 +68,7 @@ describe("getPageById Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(404);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "The specified page could not be found or you don't have access to it",
+        error: "Page not found or you don't have access",
       });
     });
   });

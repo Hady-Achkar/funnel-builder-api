@@ -37,8 +37,7 @@ export interface CreateThemeResponse {
 }
 
 export interface UpdateThemeResponse {
-  id: number;
-  name: string;
+  success: boolean;
   message: string;
 }
 
