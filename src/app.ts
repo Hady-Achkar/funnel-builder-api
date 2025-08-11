@@ -6,10 +6,10 @@ import slowDown from "express-slow-down";
 import { redisService } from "./services/cache/redis.service";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
-import funnelRoutes from "./routes/funnels";
-import pageRoutes from "./routes/pages";
+import funnelRoutes from "./funnel/routes/funnels";
+import pageRoutes from "./page/routes/pages";
 import domainRoutes from "./routes/domains";
-import themeRoutes from "./routes/themes";
+import themeRoutes from "./theme/routes/themes";
 
 export function createServer(): Express {
   const app = express();
