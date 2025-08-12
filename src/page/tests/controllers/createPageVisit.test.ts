@@ -61,7 +61,7 @@ describe("createPageVisit Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(400);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Invalid page ID",
+        error: "Invalid input: Page ID must be a number",
       });
     });
 
@@ -73,10 +73,10 @@ describe("createPageVisit Controller", () => {
 
       await createPageVisit(getMockReq(), getMockRes());
 
-      expect(getMockRes().status).toHaveBeenCalledWith(400);
+      expect(getMockRes().status).toHaveBeenCalledWith(404);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Page not found.",
+        error: "Page visit creation failed: Page not found.",
       });
     });
   });

@@ -1,6 +1,21 @@
 import { cacheService } from "../../services/cache/cache.service";
-import { PageData, PageSummary } from "../types";
+import { PageSummary } from "../types";
 import { CachedFunnelWithPages } from "../../funnel/types";
+
+// Define PageData interface locally since it's used here
+interface PageData {
+  id: number;
+  name: string;
+  content: string | null;
+  order: number;
+  linkingId: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  seoKeywords: string | null;
+  funnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const cachePageData = async (
   userId: number,

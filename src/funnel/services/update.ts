@@ -35,22 +35,29 @@ export const updateFunnel = async (
     if (existingFunnel.userId !== userId)
       throw new Error("You can't update this funnel.");
 
-    // Check if any values are actually changing
-    const nameChanged = validatedData.name && validatedData.name.trim() !== existingFunnel.name;
-    const statusChanged = validatedData.status && validatedData.status !== existingFunnel.status;
-
-    if (!nameChanged && !statusChanged) {
-      throw new Error("Nothing to update.");
-    }
-
     const updates: any = {};
+    const changed: string[] = [];
 
-    if (nameChanged) {
-      updates.name = validatedData.name!.trim();
-    }
+    const fieldsToCheck = [
+      { key: 'name', displayName: 'name', transform: (v: string) => v.trim() },
+      { key: 'status', displayName: 'status' }
+    ] as const;
 
-    if (statusChanged) {
-      updates.status = validatedData.status!;
+    fieldsToCheck.forEach(({ key, displayName, transform }) => {
+      const value = validatedData[key as keyof typeof validatedData];
+      const existingValue = existingFunnel[key as keyof typeof existingFunnel];
+      
+      if (value !== undefined && value !== null) {
+        const processedValue = transform ? transform(value as any) : value;
+        if (processedValue !== existingValue) {
+          updates[key] = processedValue;
+          changed.push(displayName);
+        }
+      }
+    });
+
+    if (changed.length === 0) {
+      throw new Error("Nothing to update.");
     }
 
     const updated = await prisma.funnel.update({

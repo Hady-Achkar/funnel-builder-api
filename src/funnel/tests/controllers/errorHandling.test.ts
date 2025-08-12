@@ -50,7 +50,7 @@ describe("Funnel Controller Error Handling", () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe("Invalid funnel ID");
+      expect(response.body.error).toBe("Invalid input: Funnel ID must be a number");
     });
   });
 });

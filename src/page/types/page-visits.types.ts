@@ -1,7 +1,4 @@
-export interface CreatePageVisitResponse {
-  success: boolean;
-  message: string;
-}
+// Legacy interface - deprecated, use create-page-visit.types.ts instead
 
 export interface PageVisitSummary {
   id: number;

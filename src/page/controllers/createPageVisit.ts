@@ -3,30 +3,20 @@ import { PageService } from "../services";
 
 export const createPageVisit = async (req: Request, res: Response) => {
   try {
-    const pageId = parseInt(req.params.pageId);
-    const { sessionId } = req.body;
+    const pageId = Number(req.params.pageId);
+    const result = await PageService.createPageVisit({ pageId }, req.body);
 
-    if (!pageId || isNaN(pageId)) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid page ID"
-      });
+    return res.status(200).json({ success: true, ...result });
+  } catch (error: any) {
+    if (error.message.includes("Invalid input")) {
+      return res.status(400).json({ success: false, error: error.message });
     }
-
-    if (!sessionId || typeof sessionId !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: "Session ID is required"
-      });
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ success: false, error: error.message });
     }
-
-    const result = await PageService.createPageVisit(pageId, sessionId);
-    
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({
+    return res.status(500).json({
       success: false,
-      error: e.message || "Failed to record visit"
+      error: error.message || "An unexpected error occurred",
     });
   }
 };

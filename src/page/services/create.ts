@@ -11,7 +11,7 @@ import {
 import { cacheService } from "../../services/cache/cache.service";
 
 export const createPage = async (
-  params: CreatePageParams,
+  params: unknown,
   userId: number,
   body: CreatePageBody
 ): Promise<CreatePageResponse> => {

@@ -4,32 +4,25 @@ import { PageService } from "../services";
 
 export const updatePage = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const pageId = parseInt(req.params.id);
-    const { name, content, order, linkingId, seoTitle, seoDescription, seoKeywords } = req.body;
-
-    if (!pageId || isNaN(pageId)) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid page ID"
-      });
+    if (!req.userId) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Authentication required" });
     }
 
-    const result = await PageService.updatePage(pageId, userId, {
-      name,
-      content,
-      order,
-      linkingId,
-      seoTitle,
-      seoDescription,
-      seoKeywords
-    });
+    const result = await PageService.updatePage(
+      { pageId: Number(req.params.id) },
+      req.userId,
+      req.body
+    );
 
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({
-      success: false,
-      error: e.message || "Failed to update page"
-    });
+    return res.status(200).json({ success: true, ...result });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({
+        success: false,
+        error: error.message || "An unexpected error occurred",
+      });
   }
 };

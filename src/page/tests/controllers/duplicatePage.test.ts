@@ -29,126 +29,98 @@ describe("duplicatePage Controller", () => {
     };
   });
 
-  it("should duplicate page successfully within same funnel", async () => {
-    const mockDuplicatedPage = {
-      id: 2,
-      name: "Test Page (Copy)",
-      linkingId: "test-page-copy",
-      order: 2,
-      funnelId: 1,
-      message: "Page duplicated successfully",
+  it("should duplicate page successfully", async () => {
+    const mockResponse = {
+      message: "Page Test Page (Copy) duplicated successfully",
     };
 
-    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockDuplicatedPage);
+    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockResponse);
 
     await duplicatePage(req as AuthRequest, res as Response);
 
-    expect(PageService.duplicatePage).toHaveBeenCalledWith(1, 1, {
-      targetFunnelId: undefined,
-      newName: undefined,
-      newLinkingId: undefined,
-    });
+    expect(PageService.duplicatePage).toHaveBeenCalledWith(
+      { pageId: 1 },
+      1,
+      {}
+    );
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      id: 2,
-      name: "Test Page (Copy)",
-      linkingId: "test-page-copy",
-      order: 2,
-      funnelId: 1,
-      message: "Page duplicated successfully",
+      message: "Page Test Page (Copy) duplicated successfully",
     });
   });
 
-  it("should duplicate page to different funnel", async () => {
+  it("should duplicate page with custom data", async () => {
     req.body = {
-      targetFunnelId: "2",
-      newName: "Custom Name",
-      newLinkingId: "custom-linking-id",
-    };
-
-    const mockDuplicatedPage = {
-      id: 3,
-      name: "Custom Name",
-      linkingId: "custom-linking-id",
-      order: 1,
-      funnelId: 2,
-      message: "Page duplicated successfully",
-    };
-
-    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockDuplicatedPage);
-
-    await duplicatePage(req as AuthRequest, res as Response);
-
-    expect(PageService.duplicatePage).toHaveBeenCalledWith(1, 1, {
       targetFunnelId: 2,
       newName: "Custom Name",
       newLinkingId: "custom-linking-id",
-    });
+    };
+
+    const mockResponse = {
+      message: "Page Custom Name duplicated successfully",
+    };
+
+    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockResponse);
+
+    await duplicatePage(req as AuthRequest, res as Response);
+
+    expect(PageService.duplicatePage).toHaveBeenCalledWith(
+      { pageId: 1 },
+      1,
+      {
+        targetFunnelId: 2,
+        newName: "Custom Name",
+        newLinkingId: "custom-linking-id",
+      }
+    );
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      id: 3,
-      name: "Custom Name",
-      linkingId: "custom-linking-id",
-      order: 1,
-      funnelId: 2,
-      message: "Page duplicated successfully",
+      message: "Page Custom Name duplicated successfully",
     });
   });
 
-  it("should return 400 for invalid page ID", async () => {
-    req.params = { pageId: "invalid" };
+  it("should return 401 for missing authentication", async () => {
+    req.userId = undefined;
 
     await duplicatePage(req as AuthRequest, res as Response);
 
     expect(PageService.duplicatePage).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: "Invalid page ID",
-    });
-  });
-
-  it("should return 400 for missing page ID", async () => {
-    req.params = {};
-
-    await duplicatePage(req as AuthRequest, res as Response);
-
-    expect(PageService.duplicatePage).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      error: "Invalid page ID",
-    });
-  });
-
-  it("should return 400 for invalid target funnel ID", async () => {
-    req.body = { targetFunnelId: "invalid" };
-
-    await duplicatePage(req as AuthRequest, res as Response);
-
-    expect(PageService.duplicatePage).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      error: "Invalid target funnel ID",
+      error: "Authentication required",
     });
   });
 
   it("should handle service errors", async () => {
     vi.mocked(PageService.duplicatePage).mockRejectedValue(
-      new Error("Page not found")
+      new Error("Page not found or you don't have access")
     );
 
     await duplicatePage(req as AuthRequest, res as Response);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: "Page not found",
+      error: "Page not found or you don't have access",
+    });
+  });
+
+  it("should handle validation errors from Zod", async () => {
+    vi.mocked(PageService.duplicatePage).mockRejectedValue(
+      new Error("Invalid input: Page ID must be positive")
+    );
+
+    await duplicatePage(req as AuthRequest, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: "Invalid input: Page ID must be positive",
     });
   });
 
@@ -157,61 +129,10 @@ describe("duplicatePage Controller", () => {
 
     await duplicatePage(req as AuthRequest, res as Response);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: "Failed to duplicate page",
+      error: "An unexpected error occurred",
     });
-  });
-
-  it("should parse numeric string IDs correctly", async () => {
-    req.params = { pageId: "123" };
-    req.body = { targetFunnelId: "456" };
-
-    const mockDuplicatedPage = {
-      id: 789,
-      name: "Duplicated Page",
-      linkingId: "duplicated-page",
-      order: 3,
-      funnelId: 456,
-      message: "Page duplicated successfully",
-    };
-
-    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockDuplicatedPage);
-
-    await duplicatePage(req as AuthRequest, res as Response);
-
-    expect(PageService.duplicatePage).toHaveBeenCalledWith(123, 1, {
-      targetFunnelId: 456,
-      newName: undefined,
-      newLinkingId: undefined,
-    });
-
-    expect(res.status).toHaveBeenCalledWith(201);
-  });
-
-  it("should handle undefined targetFunnelId correctly", async () => {
-    req.body = { targetFunnelId: undefined };
-
-    const mockDuplicatedPage = {
-      id: 2,
-      name: "Test Page (Copy)",
-      linkingId: "test-page-copy",
-      order: 2,
-      funnelId: 1,
-      message: "Page duplicated successfully",
-    };
-
-    vi.mocked(PageService.duplicatePage).mockResolvedValue(mockDuplicatedPage);
-
-    await duplicatePage(req as AuthRequest, res as Response);
-
-    expect(PageService.duplicatePage).toHaveBeenCalledWith(1, 1, {
-      targetFunnelId: undefined,
-      newName: undefined,
-      newLinkingId: undefined,
-    });
-
-    expect(res.status).toHaveBeenCalledWith(201);
   });
 });

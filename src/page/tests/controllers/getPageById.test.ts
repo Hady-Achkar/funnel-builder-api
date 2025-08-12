@@ -11,7 +11,6 @@ describe("getPageById Controller", () => {
       const user = getUser();
       const funnel = getFunnel();
 
-      // Create a test page
       const page = await testPrisma.page.create({
         data: {
           name: "Test Page",
@@ -29,6 +28,7 @@ describe("getPageById Controller", () => {
 
       await getPageById(getMockReq(), getMockRes());
 
+      expect(getMockRes().status).toHaveBeenCalledWith(200);
       expect(getMockRes().json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
@@ -38,20 +38,24 @@ describe("getPageById Controller", () => {
             content: "Page content",
             order: 1,
             linkingId: "test-page",
-          })
+          }),
+          message: "Page retrieved successfully"
         })
       );
     });
 
-    it("should return 400 for invalid page ID", async () => {
-      setMockReq({ params: { id: "invalid" } });
+    it("should return 401 for missing authentication", async () => {
+      setMockReq({ 
+        userId: undefined,
+        params: { id: "1" } 
+      });
 
       await getPageById(getMockReq(), getMockRes());
 
-      expect(getMockRes().status).toHaveBeenCalledWith(400);
+      expect(getMockRes().status).toHaveBeenCalledWith(401);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Invalid page ID",
+        error: "Authentication required",
       });
     });
 
@@ -60,7 +64,7 @@ describe("getPageById Controller", () => {
       
       setMockReq({ 
         userId: user.id,
-        params: { id: "99999" } // Non-existent page ID
+        params: { id: "99999" }
       });
 
       await getPageById(getMockReq(), getMockRes());
@@ -68,7 +72,24 @@ describe("getPageById Controller", () => {
       expect(getMockRes().status).toHaveBeenCalledWith(404);
       expect(getMockRes().json).toHaveBeenCalledWith({
         success: false,
-        error: "Page not found or you don't have access",
+        error: expect.stringContaining("Page not found"),
+      });
+    });
+
+    it("should handle validation errors", async () => {
+      const user = getUser();
+      
+      setMockReq({ 
+        userId: user.id,
+        params: { id: "invalid" }
+      });
+
+      await getPageById(getMockReq(), getMockRes());
+
+      expect(getMockRes().status).toHaveBeenCalledWith(400);
+      expect(getMockRes().json).toHaveBeenCalledWith({
+        success: false,
+        error: "Invalid page ID",
       });
     });
   });

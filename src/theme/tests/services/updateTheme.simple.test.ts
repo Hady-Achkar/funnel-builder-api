@@ -24,7 +24,7 @@ describe("updateTheme Service", () => {
   });
 
   it("should validate theme exists", async () => {
-    mockPrisma.theme.findFirst.mockResolvedValue(null);
+    (mockPrisma.theme.findFirst as any).mockResolvedValue(null);
     
     await expect(updateTheme({ themeId: 999 }, 1, { name: "Test" })).rejects.toThrow(
       "Theme not found"
@@ -33,7 +33,7 @@ describe("updateTheme Service", () => {
 
   it("should validate theme has funnel association", async () => {
     const mockTheme = createThemeData({ id: 1 });
-    mockPrisma.theme.findFirst.mockResolvedValue({
+    (mockPrisma.theme.findFirst as any).mockResolvedValue({
       ...mockTheme,
       funnel: null
     });
@@ -45,7 +45,7 @@ describe("updateTheme Service", () => {
 
   it("should validate user owns the funnel", async () => {
     const mockTheme = createThemeData({ id: 1 });
-    mockPrisma.theme.findFirst.mockResolvedValue({
+    (mockPrisma.theme.findFirst as any).mockResolvedValue({
       ...mockTheme,
       funnel: { id: 1, userId: 999 }
     });
@@ -59,11 +59,11 @@ describe("updateTheme Service", () => {
     const mockTheme = createThemeData({ id: 1, name: "Old Theme" });
     const updatedTheme = { ...mockTheme, name: "New Theme" };
     
-    mockPrisma.theme.findFirst.mockResolvedValue({
+    (mockPrisma.theme.findFirst as any).mockResolvedValue({
       ...mockTheme,
       funnel: { id: 1, userId: 1 }
     });
-    mockPrisma.theme.update.mockResolvedValue(updatedTheme);
+    (mockPrisma.theme.update as any).mockResolvedValue(updatedTheme);
 
     const result = await updateTheme(
       { themeId: 1 }, 

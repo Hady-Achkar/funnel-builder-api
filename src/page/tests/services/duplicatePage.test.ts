@@ -10,16 +10,14 @@ import {
 describe("PageService.duplicatePage", () => {
   setupPageServiceTest();
 
-  it("should throw error when pageId is missing", async () => {
+  it("should validate input parameters with Zod", async () => {
     await expect(
-      PageService.duplicatePage(null as any, 1)
-    ).rejects.toThrow("Please provide pageId and userId.");
-  });
+      PageService.duplicatePage({ pageId: 0 }, 1, {})
+    ).rejects.toThrow("Page ID must be positive");
 
-  it("should throw error when userId is missing", async () => {
     await expect(
-      PageService.duplicatePage(1, null as any)
-    ).rejects.toThrow("Please provide pageId and userId.");
+      PageService.duplicatePage({ pageId: 1 }, 0, {})
+    ).rejects.toThrow("User ID is required");
   });
 
   it("should duplicate page successfully within same funnel", async () => {
@@ -38,22 +36,25 @@ describe("PageService.duplicatePage", () => {
       order: 2 
     });
 
-    // Mock for finding the original page
     mockPrisma.page.findFirst = vi.fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - no duplicate
-      .mockResolvedValueOnce(null) // LinkingId check - no duplicate
-      .mockResolvedValueOnce({ order: 1 }); // Last page for order calculation
-
+      .mockResolvedValueOnce(null); // LinkingId check - no duplicate
+    
+    mockPrisma.page.count = vi.fn().mockResolvedValue(1);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
-    const result = await PageService.duplicatePage(1, 1);
+    const result = await PageService.duplicatePage({ pageId: 1 }, 1, {});
 
-    expect(result.id).toBe(2);
-    expect(result.name).toBe("Original Page (Copy)");
-    expect(result.funnelId).toBe(1);
-    expect(result.order).toBe(2);
     expect(result.message).toContain("duplicated successfully");
+    expect(mockPrisma.page.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        name: expect.stringContaining("Copy"),
+        content: "<h1>Original Content</h1>",
+        funnelId: 1,
+        order: 2
+      })
+    });
   });
 
   it("should duplicate page to different funnel", async () => {
@@ -74,26 +75,33 @@ describe("PageService.duplicatePage", () => {
     mockPrisma.page.findFirst = vi.fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - no duplicate
-      .mockResolvedValueOnce(null) // LinkingId check - no duplicate
-      .mockResolvedValueOnce(null); // Last page for order - none exists
+      .mockResolvedValueOnce(null); // LinkingId check - no duplicate
     
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(targetFunnel);
+    mockPrisma.page.count = vi.fn().mockResolvedValue(0);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
-    const result = await PageService.duplicatePage(1, 1, { targetFunnelId: 2 });
+    const result = await PageService.duplicatePage(
+      { pageId: 1 }, 
+      1, 
+      { targetFunnelId: 2 }
+    );
 
-    expect(result.id).toBe(2);
-    expect(result.funnelId).toBe(2);
-    expect(result.name).toBe("Original Page");
     expect(result.message).toContain("duplicated successfully");
+    expect(mockPrisma.page.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        funnelId: 2,
+        order: 1
+      })
+    });
   });
 
   it("should throw error for non-existent page", async () => {
     mockPrisma.page.findFirst = vi.fn().mockResolvedValue(null);
 
     await expect(
-      PageService.duplicatePage(999, 1)
-    ).rejects.toThrow("Page not found or you don't have access.");
+      PageService.duplicatePage({ pageId: 999 }, 1, {})
+    ).rejects.toThrow("Page not found or you don't have access");
   });
 
   it("should throw error for non-existent target funnel", async () => {
@@ -103,8 +111,8 @@ describe("PageService.duplicatePage", () => {
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(null);
 
     await expect(
-      PageService.duplicatePage(1, 1, { targetFunnelId: 999 })
-    ).rejects.toThrow("Target funnel not found or you don't have access.");
+      PageService.duplicatePage({ pageId: 1 }, 1, { targetFunnelId: 999 })
+    ).rejects.toThrow("Target funnel not found or you don't have access");
   });
 
   it("should handle duplicate names appropriately", async () => {
@@ -123,48 +131,13 @@ describe("PageService.duplicatePage", () => {
     mockPrisma.page.findFirst = vi.fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - "Test Page (Copy)" is available
-      .mockResolvedValueOnce(null) // LinkingId check
-      .mockResolvedValueOnce({ order: 1 }); // Last page for order
+      .mockResolvedValueOnce(null); // LinkingId check
     
+    mockPrisma.page.count = vi.fn().mockResolvedValue(1);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
-    const result = await PageService.duplicatePage(1, 1);
+    const result = await PageService.duplicatePage({ pageId: 1 }, 1, {});
 
-    expect(result.name).toBe("Test Page (Copy)");
     expect(result.message).toContain("duplicated successfully");
-  });
-
-  it("should return all required fields on success", async () => {
-    const originalPage = createMockPage({ 
-      funnelId: 1,
-      name: "Rich Page",
-      linkingId: "rich-page"
-    });
-    const duplicatedPage = createMockPage({ 
-      id: 2,
-      funnelId: 1,
-      name: "Rich Page (Copy)",
-      linkingId: "rich-page-copy",
-      order: 2
-    });
-
-    mockPrisma.page.findFirst = vi.fn()
-      .mockResolvedValueOnce(originalPage) // Original page lookup
-      .mockResolvedValueOnce(null) // Name check
-      .mockResolvedValueOnce(null) // LinkingId check
-      .mockResolvedValueOnce({ order: 1 }); // Last page for order
-    
-    mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
-
-    const result = await PageService.duplicatePage(1, 1);
-
-    expect(result).toMatchObject({
-      id: 2,
-      name: "Rich Page (Copy)",
-      linkingId: "rich-page-copy",
-      order: 2,
-      funnelId: 1,
-      message: expect.stringContaining("duplicated successfully")
-    });
   });
 });

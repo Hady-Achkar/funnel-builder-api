@@ -4,47 +4,25 @@ import { PageService } from "../services";
 
 export const duplicatePage = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const pageId = parseInt(req.params.pageId);
-    const { targetFunnelId, newName, newLinkingId } = req.body;
+    if (!req.userId) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Authentication required" });
+    }
 
-    if (!pageId || isNaN(pageId)) {
-      return res.status(400).json({ 
+    const result = await PageService.duplicatePage(
+      { pageId: Number(req.params.pageId) },
+      req.userId,
+      req.body
+    );
+
+    return res.status(201).json({ success: true, ...result });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({
         success: false,
-        error: "Invalid page ID" 
+        error: error.message || "An unexpected error occurred",
       });
-    }
-
-    let parsedTargetFunnelId: number | undefined;
-    if (targetFunnelId !== undefined) {
-      parsedTargetFunnelId = parseInt(targetFunnelId);
-      if (isNaN(parsedTargetFunnelId)) {
-        return res.status(400).json({ 
-          success: false,
-          error: "Invalid target funnel ID" 
-        });
-      }
-    }
-
-    const duplicatedPage = await PageService.duplicatePage(pageId, userId, {
-      targetFunnelId: parsedTargetFunnelId,
-      newName,
-      newLinkingId
-    });
-
-    res.status(201).json({
-      success: true,
-      id: duplicatedPage.id,
-      name: duplicatedPage.name,
-      linkingId: duplicatedPage.linkingId,
-      order: duplicatedPage.order,
-      funnelId: duplicatedPage.funnelId,
-      message: duplicatedPage.message
-    });
-  } catch (e: any) {
-    res.status(400).json({
-      success: false,
-      error: e.message || "Failed to duplicate page"
-    });
   }
 };

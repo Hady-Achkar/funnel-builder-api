@@ -3,34 +3,26 @@ import { PageService } from "../services";
 
 export const getPublicPage = async (req: Request, res: Response) => {
   try {
-    const funnelId = parseInt(req.params.funnelId);
-    const { linkingId } = req.params;
-
-    if (!funnelId || isNaN(funnelId)) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid funnel ID"
-      });
-    }
-
-    if (!linkingId) {
-      return res.status(400).json({
-        success: false,
-        error: "Linking ID is required"
-      });
-    }
-
-    const page = await PageService.getPublicPage(funnelId, linkingId);
-
-    res.json({
-      success: true,
-      data: page
+    const { linkingId, funnelId } = req.params as {
+      linkingId: string;
+      funnelId: string;
+    };
+    const result = await PageService.getPublicPage({
+      linkingId,
+      funnelId: Number(funnelId),
     });
-  } catch (e: any) {
-    const status = e.message?.includes("not found") ? 404 : 400;
-    res.status(status).json({
+
+    return res.status(200).json({ success: true, ...result });
+  } catch (error: any) {
+    if (error?.message?.includes?.("not found")) {
+      return res.status(404).json({ success: false, error: error.message });
+    }
+    if (error?.message?.includes?.("not publicly accessible")) {
+      return res.status(403).json({ success: false, error: error.message });
+    }
+    return res.status(500).json({
       success: false,
-      error: e.message || "Failed to get page"
+      error: error?.message || "An unexpected error occurred",
     });
   }
 };

@@ -44,9 +44,9 @@ describe("createPageVisit Service", () => {
     expect(pageBeforeVisit).toBeDefined();
     expect(pageBeforeVisit?.visits).toBe(0);
     
-    const result = await createPageVisit(page.id, sessionId);
+    const result = await createPageVisit({ pageId: page.id }, { sessionId });
 
-    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
     expect(result.message).toBe("New page visit recorded successfully");
 
     // Verify session was created
@@ -78,9 +78,9 @@ describe("createPageVisit Service", () => {
       }
     });
 
-    const result = await createPageVisit(page.id, sessionId);
+    const result = await createPageVisit({ pageId: page.id }, { sessionId });
 
-    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
     expect(result.message).toBe("New page visit recorded successfully");
 
     // Verify page was added to visitedPages array
@@ -109,9 +109,9 @@ describe("createPageVisit Service", () => {
       }
     });
 
-    const result = await createPageVisit(page.id, sessionId);
+    const result = await createPageVisit({ pageId: page.id }, { sessionId });
 
-    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
     expect(result.message).toBe("Page visit already recorded for this session");
 
     // Verify page visit count not incremented
@@ -125,7 +125,7 @@ describe("createPageVisit Service", () => {
     const sessionId = "test-session-999";
     const nonExistentPageId = 99999;
 
-    await expect(createPageVisit(nonExistentPageId, sessionId))
+    await expect(createPageVisit({ pageId: nonExistentPageId }, { sessionId }))
       .rejects.toThrow("Page not found");
   });
 
@@ -135,12 +135,12 @@ describe("createPageVisit Service", () => {
 
     // Simulate concurrent visits
     const [result1, result2] = await Promise.all([
-      createPageVisit(page.id, sessionId1),
-      createPageVisit(page.id, sessionId2)
+      createPageVisit({ pageId: page.id }, { sessionId: sessionId1 }),
+      createPageVisit({ pageId: page.id }, { sessionId: sessionId2 })
     ]);
 
-    expect(result1.success).toBe(true);
-    expect(result2.success).toBe(true);
+    expect(result1.message).toBeDefined();
+    expect(result2.message).toBeDefined();
 
     // Verify both sessions were created
     const session1 = await testPrisma.session.findUnique({

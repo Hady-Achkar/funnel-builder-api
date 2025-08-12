@@ -10,7 +10,8 @@ vi.mock("../../services", () => ({
 }));
 
 // Get the mocked service for access in tests
-const { ThemeService: mockThemeService } = await import("../../services");
+import { ThemeService } from "../../services";
+const mockThemeService = ThemeService as any;
 
 describe("updateTheme Controller", () => {
   let mockReq: any;
@@ -45,7 +46,7 @@ describe("updateTheme Controller", () => {
   });
 
   it("should return 400 for invalid theme ID", async () => {
-    mockThemeService.updateTheme.mockRejectedValue(new Error("Theme ID must be positive"));
+    vi.mocked(mockThemeService.updateTheme).mockRejectedValue(new Error("Theme ID must be positive"));
     
     setMockReq({ 
       userId: 1,
@@ -63,7 +64,7 @@ describe("updateTheme Controller", () => {
   });
 
   it("should return 404 for non-existent theme", async () => {
-    mockThemeService.updateTheme.mockRejectedValue(new Error("Theme not found"));
+    vi.mocked(mockThemeService.updateTheme).mockRejectedValue(new Error("Theme not found"));
     
     setMockReq({ 
       userId: 1,
@@ -81,7 +82,7 @@ describe("updateTheme Controller", () => {
   });
 
   it("should return 403 for permission errors", async () => {
-    mockThemeService.updateTheme.mockRejectedValue(new Error("You don't have permission to update this theme"));
+    vi.mocked(mockThemeService.updateTheme).mockRejectedValue(new Error("You don't have permission to update this theme"));
     
     setMockReq({ 
       userId: 1,
@@ -99,7 +100,7 @@ describe("updateTheme Controller", () => {
   });
 
   it("should successfully update theme", async () => {
-    mockThemeService.updateTheme.mockResolvedValue({
+    vi.mocked(mockThemeService.updateTheme).mockResolvedValue({
       message: "Theme updated successfully"
     });
     

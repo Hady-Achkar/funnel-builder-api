@@ -4,31 +4,32 @@ import { PageService } from "../services";
 
 export const reorderPages = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
-    const funnelId = parseInt(req.params.funnelId);
-    const { pageOrders } = req.body;
-
-    if (!funnelId || isNaN(funnelId)) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid funnel ID"
-      });
+    if (!req.userId) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Authentication required" });
     }
 
-    if (!Array.isArray(pageOrders) || pageOrders.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "Page orders array is required"
-      });
-    }
+    const result = await PageService.reorderPages(
+      { funnelId: Number(req.params.funnelId) },
+      req.userId,
+      req.body
+    );
 
-    const result = await PageService.reorderPages(funnelId, userId, pageOrders);
-    
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({
+    return res.status(200).json({ success: true, ...result });
+  } catch (error: any) {
+    if (error?.message?.includes?.("Invalid input")) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
+    if (
+      error?.message?.includes?.("not found") ||
+      error?.message?.includes?.("access")
+    ) {
+      return res.status(404).json({ success: false, error: error.message });
+    }
+    return res.status(500).json({
       success: false,
-      error: e.message || "Failed to reorder pages"
+      error: error?.message || "An unexpected error occurred",
     });
   }
 };

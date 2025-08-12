@@ -47,7 +47,6 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
       name: "Test Funnel",
       status: $Enums.FunnelStatus.DRAFT,
       userId,
-      themeId: 1,
       createdAt: new Date("2023-01-01"),
       updatedAt: new Date("2023-01-01"),
       theme: {
@@ -138,7 +137,6 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
       name: "Test Funnel",
       status: $Enums.FunnelStatus.DRAFT,
       userId,
-      themeId: null,
       createdAt: new Date("2023-01-01"),
       updatedAt: new Date("2023-01-01"),
       theme: null,
@@ -222,7 +220,6 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
       name: "Test Funnel",
       status: $Enums.FunnelStatus.DRAFT,
       userId,
-      themeId: 1,
       createdAt: new Date("2023-01-01"),
       updatedAt: new Date("2023-01-01"),
       theme: {
