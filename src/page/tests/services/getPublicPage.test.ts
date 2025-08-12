@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { PageService } from "../../services";
-import { 
-  mockPrisma, 
+import {
+  mockPrisma,
   setupPageServiceTest,
-  mockCacheService
+  mockCacheService,
 } from "./test-setup";
 
 describe("PageService.getPublicPage", () => {
@@ -162,7 +162,9 @@ describe("PageService.getPublicPage", () => {
         funnelId: 1,
         linkingId: "test-page",
       })
-    ).rejects.toThrow("Public page retrieval failed: This page is not publicly accessible");
+    ).rejects.toThrow(
+      "Public page retrieval failed: This page is not publicly accessible"
+    );
   });
 
   it("should handle invalid input", async () => {

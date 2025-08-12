@@ -2,7 +2,10 @@ import { $Enums } from "../../generated/prisma-client";
 import { CreateFunnelData, UpdateFunnelData } from "../types";
 import { getPrisma } from "../../lib/prisma";
 
-export const validateCreateInput = (userId: number, data: CreateFunnelData): void => {
+export const validateCreateInput = (
+  userId: number,
+  data: CreateFunnelData
+): void => {
   if (!userId) {
     throw new Error("Invalid user ID provided");
   }
@@ -18,7 +21,9 @@ export const validateCreateInput = (userId: number, data: CreateFunnelData): voi
 
   if (
     data.status &&
-    !Object.values($Enums.FunnelStatus).includes(data.status as $Enums.FunnelStatus)
+    !Object.values($Enums.FunnelStatus).includes(
+      data.status as $Enums.FunnelStatus
+    )
   ) {
     const allowedStatuses = Object.values($Enums.FunnelStatus);
     throw new Error(`Status must be one of: ${allowedStatuses.join(", ")}`);
@@ -28,7 +33,11 @@ export const validateCreateInput = (userId: number, data: CreateFunnelData): voi
 export const validateStatusQuery = (status?: string): void => {
   if (status) {
     const statusUpper = status.toUpperCase();
-    if (!Object.values($Enums.FunnelStatus).includes(statusUpper as $Enums.FunnelStatus)) {
+    if (
+      !Object.values($Enums.FunnelStatus).includes(
+        statusUpper as $Enums.FunnelStatus
+      )
+    ) {
       throw new Error(
         `Invalid status. Must be one of: ${Object.values($Enums.FunnelStatus).join(", ")}`
       );
@@ -51,7 +60,10 @@ export const validateUpdateInput = (data: UpdateFunnelData): void => {
   }
 };
 
-export const verifyFunnelAccess = async (funnelId: number, userId: number): Promise<boolean> => {
+export const verifyFunnelAccess = async (
+  funnelId: number,
+  userId: number
+): Promise<boolean> => {
   const funnelExists = await getPrisma().funnel.findUnique({
     where: { id: funnelId },
     select: { id: true, userId: true },
@@ -68,7 +80,10 @@ export const verifyFunnelAccess = async (funnelId: number, userId: number): Prom
   return true;
 };
 
-export const verifyFunnelOwnership = async (funnelId: number, userId: number): Promise<void> => {
+export const verifyFunnelOwnership = async (
+  funnelId: number,
+  userId: number
+): Promise<void> => {
   const funnelExists = await getPrisma().funnel.findUnique({
     where: { id: funnelId },
     select: { id: true, userId: true },
@@ -83,7 +98,10 @@ export const verifyFunnelOwnership = async (funnelId: number, userId: number): P
   }
 };
 
-export const verifyDomainOwnership = async (domainId: number, userId: number): Promise<void> => {
+export const verifyDomainOwnership = async (
+  domainId: number,
+  userId: number
+): Promise<void> => {
   const domain = await getPrisma().domain.findFirst({
     where: { id: domainId, userId },
   });
@@ -108,9 +126,11 @@ export const handleDomainConnection = async (
       data: { isActive: false },
     });
 
-    const existingConnection = await transactionalPrisma.funnelDomain.findFirst({
-      where: { funnelId, domainId },
-    });
+    const existingConnection = await transactionalPrisma.funnelDomain.findFirst(
+      {
+        where: { funnelId, domainId },
+      }
+    );
 
     if (existingConnection) {
       await transactionalPrisma.funnelDomain.update({

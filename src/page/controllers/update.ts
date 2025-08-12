@@ -18,11 +18,9 @@ export const updatePage = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ success: true, ...result });
   } catch (error: any) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        error: error.message || "An unexpected error occurred",
-      });
+    return res.status(500).json({
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    });
   }
 };

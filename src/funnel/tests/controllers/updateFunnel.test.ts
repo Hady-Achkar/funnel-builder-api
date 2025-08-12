@@ -13,7 +13,7 @@ describe("updateFunnel Controller", () => {
   describe("PUT /funnels/:id", () => {
     it("updates funnel successfully", async () => {
       const user = getUser();
-      
+
       const funnel = await TestHelpers.createTestFunnel(user.id, {
         name: "Original Funnel",
         status: "DRAFT",
@@ -28,12 +28,14 @@ describe("updateFunnel Controller", () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.id).toBe(funnel.id);
       expect(response.body.data.name).toBe("Updated Funnel");
-      expect(response.body.message).toBe("Funnel Updated Funnel was updated successfully");
+      expect(response.body.message).toBe(
+        "Funnel Updated Funnel was updated successfully"
+      );
     });
 
     it("returns 400 for invalid funnel ID", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .put("/funnels/invalid")
         .send({ name: "Updated Name" })
@@ -46,7 +48,7 @@ describe("updateFunnel Controller", () => {
 
     it("returns 404 for non-existent funnel", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .put("/funnels/999999")
         .send({ name: "Updated Name" })
@@ -59,7 +61,7 @@ describe("updateFunnel Controller", () => {
 
     it("returns 400 for no changes", async () => {
       const user = getUser();
-      
+
       const funnel = await TestHelpers.createTestFunnel(user.id, {
         name: "Same Name",
         status: "DRAFT",
@@ -77,7 +79,7 @@ describe("updateFunnel Controller", () => {
 
     it("returns 400 for empty update", async () => {
       const user = getUser();
-      
+
       const funnel = await TestHelpers.createTestFunnel(user.id);
 
       const response = await request(app)

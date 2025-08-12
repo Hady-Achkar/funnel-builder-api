@@ -405,8 +405,8 @@ export class DomainService {
           cfHostname.ssl.status === "active"
             ? SslStatus.ACTIVE
             : cfHostname.ssl.status === "pending_validation"
-            ? SslStatus.PENDING
-            : SslStatus.ERROR,
+              ? SslStatus.PENDING
+              : SslStatus.ERROR,
         lastVerifiedAt: new Date(),
       };
 

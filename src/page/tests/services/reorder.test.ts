@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { PageService } from "../../services";
-import { 
-  mockPrisma, 
-  createMockPage, 
+import {
+  mockPrisma,
+  createMockPage,
   createMockFunnel,
   setupPageServiceTest,
-  mockCacheService
+  mockCacheService,
 } from "./test-setup";
 
 describe("PageService.reorderPages", () => {
@@ -27,16 +27,12 @@ describe("PageService.reorderPages", () => {
     mockPrisma.$transaction = vi.fn().mockResolvedValue([]);
     mockCacheService.get.mockResolvedValue(null);
 
-    const result = await PageService.reorderPages(
-      { funnelId: 1 },
-      1,
-      {
-        pageOrders: [
-          { id: 1, order: 2 },
-          { id: 2, order: 1 },
-        ],
-      }
-    );
+    const result = await PageService.reorderPages({ funnelId: 1 }, 1, {
+      pageOrders: [
+        { id: 1, order: 2 },
+        { id: 2, order: 1 },
+      ],
+    });
 
     expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith({
       where: { id: 1, userId: 1 },
@@ -56,17 +52,15 @@ describe("PageService.reorderPages", () => {
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(null);
 
     await expect(
-      PageService.reorderPages(
-        { funnelId: 1 },
-        1,
-        {
-          pageOrders: [
-            { id: 1, order: 1 },
-            { id: 2, order: 2 },
-          ],
-        }
-      )
-    ).rejects.toThrow("Page reordering failed: Funnel not found or you don't have access.");
+      PageService.reorderPages({ funnelId: 1 }, 1, {
+        pageOrders: [
+          { id: 1, order: 1 },
+          { id: 2, order: 2 },
+        ],
+      })
+    ).rejects.toThrow(
+      "Page reordering failed: Funnel not found or you don't have access."
+    );
   });
 
   it("should throw error if page not found in funnel", async () => {
@@ -84,46 +78,36 @@ describe("PageService.reorderPages", () => {
     mockPrisma.page.findMany = vi.fn().mockResolvedValue(mockPages);
 
     await expect(
-      PageService.reorderPages(
-        { funnelId: 1 },
-        1,
-        {
-          pageOrders: [
-            { id: 999, order: 1 },
-            { id: 2, order: 2 },
-          ],
-        }
-      )
-    ).rejects.toThrow("Page reordering failed: Page with ID 999 not found in funnel.");
+      PageService.reorderPages({ funnelId: 1 }, 1, {
+        pageOrders: [
+          { id: 999, order: 1 },
+          { id: 2, order: 2 },
+        ],
+      })
+    ).rejects.toThrow(
+      "Page reordering failed: Page with ID 999 not found in funnel."
+    );
   });
 
   it("should handle invalid input", async () => {
     await expect(
-      PageService.reorderPages(
-        { funnelId: 0 },
-        1,
-        {
-          pageOrders: [
-            { id: 1, order: 1 },
-            { id: 2, order: 2 },
-          ],
-        }
-      )
+      PageService.reorderPages({ funnelId: 0 }, 1, {
+        pageOrders: [
+          { id: 1, order: 1 },
+          { id: 2, order: 2 },
+        ],
+      })
     ).rejects.toThrow("Invalid input: Funnel ID must be positive");
   });
 
   it("should handle missing user ID", async () => {
     await expect(
-      PageService.reorderPages(
-        { funnelId: 1 },
-        0,
-        {
-          pageOrders: [
-            { id: 1, order: 1 },
-            { id: 2, order: 2 },
-          ],
-        }
-      )
+      PageService.reorderPages({ funnelId: 1 }, 0, {
+        pageOrders: [
+          { id: 1, order: 1 },
+          { id: 2, order: 2 },
+        ],
+      })
     ).rejects.toThrow("User ID is required");
   });
 });

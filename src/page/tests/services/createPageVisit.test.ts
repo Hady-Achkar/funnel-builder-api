@@ -11,14 +11,14 @@ describe("createPageVisit Service", () => {
   beforeEach(async () => {
     // Set test Prisma client for page service
     setPrismaClient(testPrisma);
-    
+
     // Create test user
     user = await TestHelpers.createTestUser();
 
     // Create test funnel (LIVE status needed for visit tracking)
     funnel = await TestHelpers.createTestFunnel(user.id, {
       name: "Test Funnel",
-      status: "LIVE"
+      status: "LIVE",
     });
 
     // Create test page
@@ -36,14 +36,14 @@ describe("createPageVisit Service", () => {
 
   it("should create a new session and record page visit for first-time visitor", async () => {
     const sessionId = "new-session-123";
-    
+
     // Verify page exists before test
     const pageBeforeVisit = await testPrisma.page.findUnique({
-      where: { id: page.id }
+      where: { id: page.id },
     });
     expect(pageBeforeVisit).toBeDefined();
     expect(pageBeforeVisit?.visits).toBe(0);
-    
+
     const result = await createPageVisit({ pageId: page.id }, { sessionId });
 
     expect(result.message).toBeDefined();
@@ -51,7 +51,7 @@ describe("createPageVisit Service", () => {
 
     // Verify session was created
     const session = await testPrisma.session.findUnique({
-      where: { sessionId }
+      where: { sessionId },
     });
     expect(session).toBeTruthy();
     expect(session?.funnelId).toBe(funnel.id);
@@ -59,7 +59,7 @@ describe("createPageVisit Service", () => {
 
     // Verify page visit count incremented
     const updatedPage = await testPrisma.page.findUnique({
-      where: { id: page.id }
+      where: { id: page.id },
     });
     expect(updatedPage).toBeDefined();
     expect(updatedPage?.visits).toBe(1);
@@ -74,8 +74,8 @@ describe("createPageVisit Service", () => {
         sessionId,
         funnelId: funnel.id,
         visitedPages: [999], // Different page ID
-        interactions: {}
-      }
+        interactions: {},
+      },
     });
 
     const result = await createPageVisit({ pageId: page.id }, { sessionId });
@@ -85,13 +85,13 @@ describe("createPageVisit Service", () => {
 
     // Verify page was added to visitedPages array
     const session = await testPrisma.session.findUnique({
-      where: { sessionId }
+      where: { sessionId },
     });
     expect(session?.visitedPages).toEqual([999, page.id]);
 
     // Verify page visit count incremented
     const updatedPage = await testPrisma.page.findUnique({
-      where: { id: page.id }
+      where: { id: page.id },
     });
     expect(updatedPage?.visits).toBe(1);
   });
@@ -105,8 +105,8 @@ describe("createPageVisit Service", () => {
         sessionId,
         funnelId: funnel.id,
         visitedPages: [page.id],
-        interactions: {}
-      }
+        interactions: {},
+      },
     });
 
     const result = await createPageVisit({ pageId: page.id }, { sessionId });
@@ -116,7 +116,7 @@ describe("createPageVisit Service", () => {
 
     // Verify page visit count not incremented
     const updatedPage = await testPrisma.page.findUnique({
-      where: { id: page.id }
+      where: { id: page.id },
     });
     expect(updatedPage?.visits).toBe(0);
   });
@@ -125,8 +125,9 @@ describe("createPageVisit Service", () => {
     const sessionId = "test-session-999";
     const nonExistentPageId = 99999;
 
-    await expect(createPageVisit({ pageId: nonExistentPageId }, { sessionId }))
-      .rejects.toThrow("Page not found");
+    await expect(
+      createPageVisit({ pageId: nonExistentPageId }, { sessionId })
+    ).rejects.toThrow("Page not found");
   });
 
   it("should handle concurrent visits from different sessions", async () => {
@@ -136,7 +137,7 @@ describe("createPageVisit Service", () => {
     // Simulate concurrent visits
     const [result1, result2] = await Promise.all([
       createPageVisit({ pageId: page.id }, { sessionId: sessionId1 }),
-      createPageVisit({ pageId: page.id }, { sessionId: sessionId2 })
+      createPageVisit({ pageId: page.id }, { sessionId: sessionId2 }),
     ]);
 
     expect(result1.message).toBeDefined();
@@ -144,10 +145,10 @@ describe("createPageVisit Service", () => {
 
     // Verify both sessions were created
     const session1 = await testPrisma.session.findUnique({
-      where: { sessionId: sessionId1 }
+      where: { sessionId: sessionId1 },
     });
     const session2 = await testPrisma.session.findUnique({
-      where: { sessionId: sessionId2 }
+      where: { sessionId: sessionId2 },
     });
 
     expect(session1?.visitedPages).toEqual([page.id]);
@@ -155,7 +156,7 @@ describe("createPageVisit Service", () => {
 
     // Verify page visit count incremented for both visits
     const updatedPage = await testPrisma.page.findUnique({
-      where: { id: page.id }
+      where: { id: page.id },
     });
     expect(updatedPage?.visits).toBe(2);
   });

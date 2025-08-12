@@ -40,7 +40,9 @@ export class RedisService {
 
     (this.client as any).on("connect", () => {
       console.log("Redis Client Connected");
-      console.log(`Redis: Using database ${this.config.database} on ${this.config.url}`);
+      console.log(
+        `Redis: Using database ${this.config.database} on ${this.config.url}`
+      );
       this.isConnected = true;
     });
 
@@ -75,7 +77,7 @@ export class RedisService {
     }
 
     const serializedValue = JSON.stringify(value);
-    
+
     // If ttl is 0 or explicitly false, set without expiry (cache forever)
     if (ttl === 0) {
       await this.client.set(key, serializedValue);
@@ -216,7 +218,7 @@ export class RedisService {
     return {
       url: this.config.url,
       database: this.config.database || 0,
-      isConnected: this.isConnected
+      isConnected: this.isConnected,
     };
   }
 }

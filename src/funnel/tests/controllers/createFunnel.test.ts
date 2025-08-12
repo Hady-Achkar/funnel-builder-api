@@ -12,7 +12,7 @@ describe("createFunnel Controller", () => {
   describe("POST /funnels", () => {
     it("creates funnel successfully with provided name", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ name: "Test Funnel", status: "DRAFT" })
@@ -29,7 +29,7 @@ describe("createFunnel Controller", () => {
 
     it("creates funnel with auto-generated name when none provided", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ status: "DRAFT" })
@@ -40,13 +40,15 @@ describe("createFunnel Controller", () => {
       expect(response.body.message).toContain("created successfully");
       expect(response.body.data).toBeDefined();
       expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.name).toMatch(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$/); // Date format
+      expect(response.body.data.name).toMatch(
+        /^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$/
+      ); // Date format
       expect(response.body.data.status).toBe("DRAFT");
     });
 
     it("creates funnel with default status when none provided", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ name: "Test Funnel" })
@@ -59,7 +61,7 @@ describe("createFunnel Controller", () => {
 
     it("returns 400 for empty string name", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ name: " " })
@@ -74,7 +76,7 @@ describe("createFunnel Controller", () => {
     it("returns 400 for name too long", async () => {
       const user = getUser();
       const longName = "a".repeat(101);
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ name: longName })
@@ -88,7 +90,7 @@ describe("createFunnel Controller", () => {
 
     it("returns 400 for invalid status", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .post("/funnels")
         .send({ name: "Test Funnel", status: "INVALID_STATUS" })

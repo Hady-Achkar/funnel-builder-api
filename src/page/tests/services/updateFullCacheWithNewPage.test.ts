@@ -64,7 +64,11 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
       pages: [existingPage],
     };
 
-    await cacheService.set(`user:${userId}:funnel:${funnelId}:full`, initialFullCache, { ttl: 0 });
+    await cacheService.set(
+      `user:${userId}:funnel:${funnelId}:full`,
+      initialFullCache,
+      { ttl: 0 }
+    );
 
     // Add new page with order 2
     const newPage = {
@@ -93,12 +97,12 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
     expect(updatedFullCache!.pages[1].id).toBe(2);
     expect(updatedFullCache!.pages[1].order).toBe(2);
     expect(updatedFullCache!.pages[1].seoTitle).toBe("SEO Title");
-    
+
     // Verify theme data is preserved
     expect(updatedFullCache!.theme).toBeDefined();
     expect(updatedFullCache!.theme!.name).toBe("Default Theme");
     expect(updatedFullCache!.theme!.backgroundColor).toBe("#ffffff");
-    
+
     // Verify updatedAt was updated (may be serialized as string from Redis)
     expect(updatedFullCache!.updatedAt).toBeDefined();
     const updatedAtTime = new Date(updatedFullCache!.updatedAt).getTime();
@@ -143,7 +147,11 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
       pages: initialPages,
     };
 
-    await cacheService.set(`user:${userId}:funnel:${funnelId}:full`, initialFullCache, { ttl: 0 });
+    await cacheService.set(
+      `user:${userId}:funnel:${funnelId}:full`,
+      initialFullCache,
+      { ttl: 0 }
+    );
 
     // Insert page with order 1 (should become first)
     const newPage = {
@@ -190,10 +198,14 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
     };
 
     // Should not throw error even when :full cache doesn't exist
-    await expect(updateFunnelDataCacheWithNewPage(userId, funnelId, newPage)).resolves.toBeUndefined();
+    await expect(
+      updateFunnelDataCacheWithNewPage(userId, funnelId, newPage)
+    ).resolves.toBeUndefined();
 
     // Verify :full cache is still null (wasn't created)
-    const fullCacheAfter = await cacheService.get(`user:${userId}:funnel:${funnelId}:full`);
+    const fullCacheAfter = await cacheService.get(
+      `user:${userId}:funnel:${funnelId}:full`
+    );
     expect(fullCacheAfter).toBeNull();
   });
 
@@ -238,8 +250,16 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
     };
 
     await Promise.all([
-      cacheService.set(`user:${userId}:funnel:${funnelId}:pages`, initialPagesCache, { ttl: 0 }),
-      cacheService.set(`user:${userId}:funnel:${funnelId}:full`, initialFullCache, { ttl: 0 }),
+      cacheService.set(
+        `user:${userId}:funnel:${funnelId}:pages`,
+        initialPagesCache,
+        { ttl: 0 }
+      ),
+      cacheService.set(
+        `user:${userId}:funnel:${funnelId}:full`,
+        initialFullCache,
+        { ttl: 0 }
+      ),
     ]);
 
     // Add new page
@@ -260,7 +280,9 @@ describe("updateFunnelDataCacheWithNewPage - :full cache updates", () => {
     // Verify both caches were updated consistently
     const [updatedPagesCache, updatedFullCache] = await Promise.all([
       cacheService.get(`user:${userId}:funnel:${funnelId}:pages`),
-      cacheService.get<CachedFunnelWithPages>(`user:${userId}:funnel:${funnelId}:full`),
+      cacheService.get<CachedFunnelWithPages>(
+        `user:${userId}:funnel:${funnelId}:full`
+      ),
     ]);
 
     // Both caches should have 2 pages

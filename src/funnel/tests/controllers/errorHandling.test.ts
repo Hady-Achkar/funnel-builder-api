@@ -31,8 +31,7 @@ describe("Funnel Controller Error Handling", () => {
     });
 
     it("returns 401 for missing authentication on delete", async () => {
-      const response = await request(app)
-        .delete("/funnels/1");
+      const response = await request(app).delete("/funnels/1");
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -42,7 +41,7 @@ describe("Funnel Controller Error Handling", () => {
   describe("Validation Errors", () => {
     it("returns 400 for invalid funnel ID format", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .put("/funnels/invalid-id")
         .send({ name: "Updated Funnel" })
@@ -50,7 +49,9 @@ describe("Funnel Controller Error Handling", () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe("Invalid input: Funnel ID must be a number");
+      expect(response.body.error).toBe(
+        "Invalid input: Funnel ID must be a number"
+      );
     });
   });
 });

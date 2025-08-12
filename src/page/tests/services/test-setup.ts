@@ -14,13 +14,13 @@ export const mockCacheService = {
 };
 
 vi.mock("../../../services/cache/cache.service", () => ({
-  cacheService: mockCacheService
+  cacheService: mockCacheService,
 }));
 
 // Also mock the cache-helpers since they directly import cacheService
 export const mockCacheHelpers = {
   cachePageData: vi.fn().mockResolvedValue(undefined),
-  cachePageSummary: vi.fn().mockResolvedValue(undefined),  
+  cachePageSummary: vi.fn().mockResolvedValue(undefined),
   cachePagesList: vi.fn().mockResolvedValue(undefined),
   getCachedPagesList: vi.fn().mockResolvedValue(null),
   getCachedPage: vi.fn().mockResolvedValue(null),
@@ -43,8 +43,10 @@ vi.mock("../../../services/page/cache-helpers", () => ({
   invalidatePageCache: mockCacheHelpers.invalidatePageCache,
   updatePagesCacheAfterReorder: mockCacheHelpers.updatePagesCacheAfterReorder,
   invalidateFunnelCache: mockCacheHelpers.invalidateFunnelCache,
-  updateFunnelCachesWithUpdatedPage: mockCacheHelpers.updateFunnelCachesWithUpdatedPage,
-  updateFunnelDataCacheWithNewPage: mockCacheHelpers.updateFunnelDataCacheWithNewPage,
+  updateFunnelCachesWithUpdatedPage:
+    mockCacheHelpers.updateFunnelCachesWithUpdatedPage,
+  updateFunnelDataCacheWithNewPage:
+    mockCacheHelpers.updateFunnelDataCacheWithNewPage,
 }));
 
 // Create mock Prisma client

@@ -93,9 +93,8 @@ export const reorderPages = async (
 
       // Update funnel:full cache using copy->delete->update->save pattern
       const funnelFullKey = `user:${userId}:funnel:${funnelId}:full`;
-      const cachedFunnel = await cacheService.get<CachedFunnelWithPages>(
-        funnelFullKey
-      );
+      const cachedFunnel =
+        await cacheService.get<CachedFunnelWithPages>(funnelFullKey);
 
       if (cachedFunnel?.pages) {
         const funnelDataCopy = { ...cachedFunnel };

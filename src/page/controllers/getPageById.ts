@@ -25,11 +25,9 @@ export const getPageById = async (req: AuthRequest, res: Response) => {
     if (error.message.includes("not found")) {
       return res.status(404).json({ success: false, error: error.message });
     }
-    return res
-      .status(500)
-      .json({
-        success: false,
-        error: error.message || "An unexpected error occurred",
-      });
+    return res.status(500).json({
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    });
   }
 };

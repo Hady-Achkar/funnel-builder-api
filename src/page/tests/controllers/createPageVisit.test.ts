@@ -4,7 +4,8 @@ import { setupPageControllerTest } from "./test-setup";
 import { testPrisma } from "../../../test/helpers";
 
 describe("createPageVisit Controller", () => {
-  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } = setupPageControllerTest();
+  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } =
+    setupPageControllerTest();
 
   describe("createPageVisit", () => {
     it("should create page visit successfully", async () => {
@@ -14,7 +15,7 @@ describe("createPageVisit Controller", () => {
       // Make sure the funnel is LIVE for visit tracking
       await testPrisma.funnel.update({
         where: { id: funnel.id },
-        data: { status: "LIVE" }
+        data: { status: "LIVE" },
       });
 
       // Create a test page
@@ -25,35 +26,35 @@ describe("createPageVisit Controller", () => {
           order: 1,
           linkingId: "test-page",
           visits: 0,
-          funnelId: funnel.id
-        }
+          funnelId: funnel.id,
+        },
       });
-      
+
       // No authentication needed for page visits
-      setMockReq({ 
+      setMockReq({
         params: { pageId: page.id.toString() },
-        body: { sessionId: "test-session-123" }
+        body: { sessionId: "test-session-123" },
       });
 
       await createPageVisit(getMockReq(), getMockRes());
 
       expect(getMockRes().json).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: true
+          success: true,
         })
       );
 
       // Verify the visit was recorded in database
       const updatedPage = await testPrisma.page.findUnique({
-        where: { id: page.id }
+        where: { id: page.id },
       });
       expect(updatedPage?.visits).toBe(1);
     });
 
     it("should return 400 for invalid page ID", async () => {
-      setMockReq({ 
+      setMockReq({
         params: { pageId: "invalid" },
-        body: { sessionId: "test-session-123" }
+        body: { sessionId: "test-session-123" },
       });
 
       await createPageVisit(getMockReq(), getMockRes());
@@ -66,9 +67,9 @@ describe("createPageVisit Controller", () => {
     });
 
     it("should return 404 for non-existent page", async () => {
-      setMockReq({ 
+      setMockReq({
         params: { pageId: "99999" }, // Non-existent page ID
-        body: { sessionId: "test-session-456" }
+        body: { sessionId: "test-session-456" },
       });
 
       await createPageVisit(getMockReq(), getMockRes());

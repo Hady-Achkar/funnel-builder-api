@@ -10,6 +10,7 @@ import funnelRoutes from "./funnel/routes/funnels";
 import pageRoutes from "./page/routes/pages";
 import domainRoutes from "./routes/domains";
 import themeRoutes from "./theme/routes/themes";
+import imageFolderRoutes from "./image-folder/routes";
 
 export function createServer(): Express {
   const app = express();
@@ -46,6 +47,7 @@ export function createServer(): Express {
   app.use("/api/pages", pageRoutes);
   app.use("/api/domains", domainRoutes);
   app.use("/api/themes", themeRoutes);
+  app.use("/api/image-folders", imageFolderRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {
@@ -107,12 +109,25 @@ export function createServer(): Express {
       // Don't leak error details in production
       const isDevelopment = process.env.NODE_ENV === "development";
 
-      res.status(err.status || 500).json({
-        error: "Internal Server Error",
-        message: isDevelopment ? err.message : "Something went wrong",
-        ...(isDevelopment && { stack: err.stack }),
-        timestamp: new Date().toISOString(),
-      });
+      // Get status code from error or default to 500
+      const status = err.status || 500;
+
+      // Build error response
+      const errorResponse: any = {
+        error: err.message || "Internal Server Error",
+      };
+
+      // Add validation errors if present
+      if (err.errors && status === 400) {
+        errorResponse.errors = err.errors;
+      }
+
+      // Add stack trace in development
+      if (isDevelopment && err.stack) {
+        errorResponse.stack = err.stack;
+      }
+
+      res.status(status).json(errorResponse);
     }
   );
 

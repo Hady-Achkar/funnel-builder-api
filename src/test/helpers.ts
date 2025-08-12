@@ -53,14 +53,14 @@ export class TestHelpers {
   ): Promise<Domain> {
     return testFactory.createDomain(userId, overrides);
   }
-  
+
   // New helper methods using test factory
   static async createTestTheme(
     overrides: Parameters<typeof testFactory.createTheme>[0] = {}
   ): Promise<Theme> {
     return testFactory.createTheme(overrides);
   }
-  
+
   static async createTestPage(
     funnelId: number,
     overrides: Parameters<typeof testFactory.createPage>[1] = {}
@@ -77,7 +77,7 @@ export class TestHelpers {
   static async cleanupUser(userId: number): Promise<void> {
     return testFactory.cleanupUser(userId);
   }
-  
+
   // New transaction helper for isolated test execution
   static async runInTransaction<T>(
     fn: (prisma: typeof testPrisma) => Promise<T>

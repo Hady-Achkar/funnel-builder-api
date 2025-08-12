@@ -14,22 +14,23 @@ export class PrismaTestEnvironment {
     // Generate unique schema name for test isolation
     this.schemaName = `test_${randomBytes(4).toString("hex")}`;
     this.originalDatabaseUrl = process.env.DATABASE_URL || "";
-    
+
     // Parse and modify DATABASE_URL to use a unique schema
     const url = new URL(this.originalDatabaseUrl);
     url.searchParams.set("schema", this.schemaName);
     this.databaseUrl = url.toString();
-    
+
     // Set the modified URL for Prisma
     process.env.DATABASE_URL = this.databaseUrl;
-    
+
     this.prisma = new PrismaClient({
       datasources: {
         db: {
           url: this.databaseUrl,
         },
       },
-      log: process.env.DEBUG === "true" ? ["query", "error", "warn"] : ["error"],
+      log:
+        process.env.DEBUG === "true" ? ["query", "error", "warn"] : ["error"],
     });
   }
 
@@ -43,8 +44,10 @@ export class PrismaTestEnvironment {
   async setup(): Promise<void> {
     try {
       // Create schema and run migrations
-      await this.prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${this.schemaName}"`);
-      
+      await this.prisma.$executeRawUnsafe(
+        `CREATE SCHEMA IF NOT EXISTS "${this.schemaName}"`
+      );
+
       // Run migrations for the test schema
       const prismaBinary = path.join(
         process.cwd(),
@@ -52,14 +55,14 @@ export class PrismaTestEnvironment {
         ".bin",
         "prisma"
       );
-      
+
       execSync(`${prismaBinary} migrate deploy --skip-seed`, {
         env: {
           ...process.env,
           DATABASE_URL: this.databaseUrl,
         },
       });
-      
+
       await this.prisma.$connect();
     } catch (error) {
       console.error("Failed to setup test database:", error);
@@ -70,7 +73,7 @@ export class PrismaTestEnvironment {
   async teardown(): Promise<void> {
     try {
       await this.prisma.$disconnect();
-      
+
       // Drop the test schema
       const adminPrisma = new PrismaClient({
         datasources: {
@@ -79,12 +82,12 @@ export class PrismaTestEnvironment {
           },
         },
       });
-      
+
       await adminPrisma.$executeRawUnsafe(
         `DROP SCHEMA IF EXISTS "${this.schemaName}" CASCADE`
       );
       await adminPrisma.$disconnect();
-      
+
       // Restore original DATABASE_URL
       process.env.DATABASE_URL = this.originalDatabaseUrl;
     } catch (error) {
@@ -124,12 +127,15 @@ export class PrismaTestEnvironment {
   async executeInTransaction<T>(
     fn: (tx: PrismaClient) => Promise<T>
   ): Promise<T> {
-    return this.prisma.$transaction(async (tx) => {
-      return fn(tx as PrismaClient);
-    }, {
-      maxWait: 5000,
-      timeout: 10000,
-    });
+    return this.prisma.$transaction(
+      async (tx) => {
+        return fn(tx as PrismaClient);
+      },
+      {
+        maxWait: 5000,
+        timeout: 10000,
+      }
+    );
   }
 }
 

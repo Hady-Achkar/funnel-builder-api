@@ -43,9 +43,9 @@ describe("AuthService", () => {
     it("should throw error if user already exists", async () => {
       // Use test factory to create existing user
       const existingUser = await testFactory.createUser({
-        email: "existing@example.com"
+        email: "existing@example.com",
       });
-      
+
       const userData = {
         email: existingUser.email,
         name: "Duplicate User",

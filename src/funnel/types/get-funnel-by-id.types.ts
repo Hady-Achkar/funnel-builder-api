@@ -10,21 +10,44 @@ export const GetFunnelByIdParamsSchema = z.object({
 
 export const ThemeDataSchema = z.object({
   id: z.number({ message: "Theme ID must be a number" }).int().positive(),
-  name: z.string({ message: "Theme name is required" }).min(1, "Theme name cannot be empty"),
-  backgroundColor: z.string({ message: "Background color is required" }).min(1, "Background color cannot be empty"),
-  textColor: z.string({ message: "Text color is required" }).min(1, "Text color cannot be empty"),
-  buttonColor: z.string({ message: "Button color is required" }).min(1, "Button color cannot be empty"),
-  buttonTextColor: z.string({ message: "Button text color is required" }).min(1, "Button text color cannot be empty"),
-  borderColor: z.string({ message: "Border color is required" }).min(1, "Border color cannot be empty"),
-  optionColor: z.string({ message: "Option color is required" }).min(1, "Option color cannot be empty"),
-  fontFamily: z.string({ message: "Font family is required" }).min(1, "Font family cannot be empty"),
-  borderRadius: z.string({ message: "Border radius is required" }).min(1, "Border radius cannot be empty"),
+  name: z
+    .string({ message: "Theme name is required" })
+    .min(1, "Theme name cannot be empty"),
+  backgroundColor: z
+    .string({ message: "Background color is required" })
+    .min(1, "Background color cannot be empty"),
+  textColor: z
+    .string({ message: "Text color is required" })
+    .min(1, "Text color cannot be empty"),
+  buttonColor: z
+    .string({ message: "Button color is required" })
+    .min(1, "Button color cannot be empty"),
+  buttonTextColor: z
+    .string({ message: "Button text color is required" })
+    .min(1, "Button text color cannot be empty"),
+  borderColor: z
+    .string({ message: "Border color is required" })
+    .min(1, "Border color cannot be empty"),
+  optionColor: z
+    .string({ message: "Option color is required" })
+    .min(1, "Option color cannot be empty"),
+  fontFamily: z
+    .string({ message: "Font family is required" })
+    .min(1, "Font family cannot be empty"),
+  borderRadius: z
+    .string({ message: "Border radius is required" })
+    .min(1, "Border radius cannot be empty"),
 });
 
 export const PageDataSchema = z.object({
   id: z.number({ message: "Page ID must be a number" }).int().positive(),
-  name: z.string({ message: "Page name is required" }).min(1, "Page name cannot be empty"),
-  order: z.number({ message: "Page order must be a number" }).int().min(1, "Page order must be at least 1"),
+  name: z
+    .string({ message: "Page name is required" })
+    .min(1, "Page name cannot be empty"),
+  order: z
+    .number({ message: "Page order must be a number" })
+    .int()
+    .min(1, "Page order must be at least 1"),
   linkingId: z.string().nullable(),
   seoTitle: z.string().nullable(),
   seoDescription: z.string().nullable(),
@@ -35,8 +58,12 @@ export const PageDataSchema = z.object({
 
 export const FunnelWithPagesAndThemeSchema = z.object({
   id: z.number({ message: "Funnel ID must be a number" }).int().positive(),
-  name: z.string({ message: "Funnel name is required" }).min(1, "Funnel name cannot be empty"),
-  status: z.nativeEnum($Enums.FunnelStatus, { message: "Invalid funnel status" }),
+  name: z
+    .string({ message: "Funnel name is required" })
+    .min(1, "Funnel name cannot be empty"),
+  status: z.nativeEnum($Enums.FunnelStatus, {
+    message: "Invalid funnel status",
+  }),
   userId: z.number({ message: "User ID must be a number" }).int().positive(),
   createdAt: z.coerce.date({ message: "Created date is invalid" }),
   updatedAt: z.coerce.date({ message: "Updated date is invalid" }),

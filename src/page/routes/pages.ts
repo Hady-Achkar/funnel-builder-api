@@ -1,14 +1,14 @@
 import express, { Router } from "express";
 import { authenticateToken } from "../../middleware/auth";
-import { 
-  createPage, 
-  getPageById, 
-  getPublicPage, 
-  updatePage, 
-  deletePage, 
-  reorderPages, 
+import {
+  createPage,
+  getPageById,
+  getPublicPage,
+  updatePage,
+  deletePage,
+  reorderPages,
   duplicatePage,
-  createPageVisit
+  createPageVisit,
 } from "../controllers";
 
 const router: Router = express.Router();

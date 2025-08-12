@@ -16,7 +16,7 @@ describe("deletePage Controller", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     req = {
       userId: 1,
       params: { id: "1" },
@@ -37,10 +37,7 @@ describe("deletePage Controller", () => {
 
     await deletePage(req as AuthRequest, res as Response);
 
-    expect(PageService.deletePage).toHaveBeenCalledWith(
-      { pageId: 1 },
-      1
-    );
+    expect(PageService.deletePage).toHaveBeenCalledWith({ pageId: 1 }, 1);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({

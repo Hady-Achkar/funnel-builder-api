@@ -1,5 +1,9 @@
 import { cacheService } from "../../services/cache/cache.service";
-import { CachedFunnelData, CachedFunnelWithPages, UpdateFunnelData } from "../types";
+import {
+  CachedFunnelData,
+  CachedFunnelWithPages,
+  UpdateFunnelData,
+} from "../types";
 import { getPrisma } from "../../lib/prisma";
 
 export const updateFunnelCache = async (
@@ -10,11 +14,12 @@ export const updateFunnelCache = async (
 ): Promise<void> => {
   try {
     // Update summary cache (without pages)
-    const summaryCached = await cacheService.getUserFunnelCache<CachedFunnelData>(
-      userId,
-      funnelId,
-      "summary"
-    );
+    const summaryCached =
+      await cacheService.getUserFunnelCache<CachedFunnelData>(
+        userId,
+        funnelId,
+        "summary"
+      );
 
     if (summaryCached) {
       // Update only changed fields in summary cache
@@ -57,11 +62,12 @@ export const updateFunnelCache = async (
     }
 
     // Also update full cache if it exists (getFunnelById uses this)
-    const fullCached = await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
-      userId,
-      funnelId,
-      "full"
-    );
+    const fullCached =
+      await cacheService.getUserFunnelCache<CachedFunnelWithPages>(
+        userId,
+        funnelId,
+        "full"
+      );
 
     if (fullCached) {
       // Update only changed fields in full cache
@@ -97,11 +103,12 @@ export const getCachedFunnelsWithFallback = async (
   // Try to get each funnel from cache using :summary key (without pages)
   for (const funnelId of funnelIds) {
     try {
-      const cachedFunnel = await cacheService.getUserFunnelCache<CachedFunnelData>(
-        userId,
-        funnelId,
-        "summary"
-      );
+      const cachedFunnel =
+        await cacheService.getUserFunnelCache<CachedFunnelData>(
+          userId,
+          funnelId,
+          "summary"
+        );
 
       if (cachedFunnel) {
         cachedFunnels.push(cachedFunnel);

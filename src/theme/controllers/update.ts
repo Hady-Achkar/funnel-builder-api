@@ -21,8 +21,8 @@ export const updateTheme = async (req: AuthRequest, res: Response) => {
     const status = e.message?.includes("not found")
       ? 404
       : e.message?.includes("permission")
-      ? 403
-      : 400;
+        ? 403
+        : 400;
     return res
       .status(status)
       .json({ success: false, error: e.message || "Failed to update theme" });

@@ -1,6 +1,12 @@
-import { PrismaClient, Template, TemplateCategory, Funnel, Page } from '../generated/prisma-client';
-import { azureBlobStorageService } from './azure-blob-storage.service';
-import { createSlug } from '../utils/slug';
+import {
+  PrismaClient,
+  Template,
+  TemplateCategory,
+  Funnel,
+  Page,
+} from "../generated/prisma-client";
+import { azureBlobStorageService } from "./azure-blob-storage.service";
+import { createSlug } from "../utils/slug";
 
 const prisma = new PrismaClient();
 
@@ -51,7 +57,7 @@ export class TemplateService {
     });
 
     if (!user?.isAdmin) {
-      throw new Error('Only admin users can create templates');
+      throw new Error("Only admin users can create templates");
     }
 
     // Verify funnel exists and belongs to user or user is admin
@@ -65,13 +71,13 @@ export class TemplateService {
       },
       include: {
         pages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
       },
     });
 
     if (!funnel) {
-      throw new Error('Funnel not found or access denied');
+      throw new Error("Funnel not found or access denied");
     }
 
     // Verify category exists
@@ -80,7 +86,7 @@ export class TemplateService {
     });
 
     if (!category) {
-      throw new Error('Template category not found');
+      throw new Error("Template category not found");
     }
 
     // Generate unique slug
@@ -129,14 +135,14 @@ export class TemplateService {
           data: {
             templateId: template.id,
             imageUrl: `/api/templates/${template.id}/thumbnail`, // Placeholder
-            imageType: 'thumbnail',
+            imageType: "thumbnail",
             order: 0,
-            caption: 'Auto-generated thumbnail',
+            caption: "Auto-generated thumbnail",
           },
         });
         copiedImages++;
       } catch (error) {
-        console.warn('Failed to create thumbnail:', error);
+        console.warn("Failed to create thumbnail:", error);
       }
     }
 
@@ -147,15 +153,17 @@ export class TemplateService {
     };
   }
 
-  async getTemplates(options: {
-    categoryId?: number;
-    isPublic?: boolean;
-    search?: string;
-    page?: number;
-    limit?: number;
-    orderBy?: 'name' | 'usageCount' | 'createdAt';
-    orderDirection?: 'asc' | 'desc';
-  } = {}): Promise<{
+  async getTemplates(
+    options: {
+      categoryId?: number;
+      isPublic?: boolean;
+      search?: string;
+      page?: number;
+      limit?: number;
+      orderBy?: "name" | "usageCount" | "createdAt";
+      orderDirection?: "asc" | "desc";
+    } = {}
+  ): Promise<{
     templates: TemplateWithDetails[];
     total: number;
     page: number;
@@ -168,8 +176,8 @@ export class TemplateService {
       search,
       page = 1,
       limit = 20,
-      orderBy = 'createdAt',
-      orderDirection = 'desc',
+      orderBy = "createdAt",
+      orderDirection = "desc",
     } = options;
 
     const offset = (page - 1) * limit;
@@ -185,8 +193,8 @@ export class TemplateService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
         { tags: { has: search } },
       ];
     }
@@ -197,7 +205,7 @@ export class TemplateService {
         include: {
           category: true,
           previewImages: {
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
             select: {
               id: true,
               imageUrl: true,
@@ -207,7 +215,7 @@ export class TemplateService {
             },
           },
           pages: {
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
             select: {
               id: true,
               name: true,
@@ -244,7 +252,7 @@ export class TemplateService {
       include: {
         category: true,
         previewImages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
           select: {
             id: true,
             imageUrl: true,
@@ -254,7 +262,7 @@ export class TemplateService {
           },
         },
         pages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
           select: {
             id: true,
             name: true,
@@ -280,10 +288,10 @@ export class TemplateService {
       include: {
         category: true,
         previewImages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         pages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         createdBy: {
           select: {
@@ -314,7 +322,7 @@ export class TemplateService {
     });
 
     if (!user?.isAdmin) {
-      throw new Error('Only admin users can manage template images');
+      throw new Error("Only admin users can manage template images");
     }
 
     // Verify template exists
@@ -323,7 +331,7 @@ export class TemplateService {
     });
 
     if (!template) {
-      throw new Error('Template not found');
+      throw new Error("Template not found");
     }
 
     // Generate filename and upload to Azure
@@ -333,16 +341,19 @@ export class TemplateService {
       options.imageType
     );
 
-    const uploadResult = await azureBlobStorageService.uploadBuffer(imageBuffer, {
-      fileName,
-      contentType: options.contentType,
-      folder: 'templates',
-    });
+    const uploadResult = await azureBlobStorageService.uploadBuffer(
+      imageBuffer,
+      {
+        fileName,
+        contentType: options.contentType,
+        folder: "templates",
+      }
+    );
 
     // Get next order number
     const lastImage = await prisma.templateImage.findFirst({
       where: { templateId },
-      orderBy: { order: 'desc' },
+      orderBy: { order: "desc" },
     });
 
     const order = (lastImage?.order || 0) + 1;
@@ -373,7 +384,7 @@ export class TemplateService {
   async getTemplateCategories(): Promise<TemplateCategory[]> {
     return prisma.templateCategory.findMany({
       where: { isActive: true },
-      orderBy: { order: 'asc' },
+      orderBy: { order: "asc" },
     });
   }
 

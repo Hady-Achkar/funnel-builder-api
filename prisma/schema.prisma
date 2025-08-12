@@ -9,19 +9,20 @@ datasource db {
 }
 
 model User {
-  id                     Int       @id @default(autoincrement())
-  email                  String    @unique
+  id                     Int           @id @default(autoincrement())
+  email                  String        @unique
   name                   String?
   password               String
-  passwordResetToken     String?   @unique
+  passwordResetToken     String?       @unique
   passwordResetExpiresAt DateTime?
-  isAdmin                Boolean   @default(false)
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  maximumFunnels Int? 
+  isAdmin                Boolean       @default(false)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  maximumFunnels         Int? 
   funnels                Funnel[]
   domains                Domain[]
   templates              Template[]
+  imageFolders           ImageFolder[]
 
   @@map("users")
 }
@@ -254,4 +255,34 @@ model TemplatePages {
 
   @@index([templateId])
   @@map("template_pages")
+}
+
+model Image {
+  id          Int          @id @default(autoincrement())
+  name        String?
+  url         String
+  altText     String?
+  size        Int?
+  folderId    Int?
+  folder      ImageFolder? @relation("ImageFolderImages", fields: [folderId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("images")
+}
+
+model ImageFolder {
+  id          Int      @id @default(autoincrement())
+  name        String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images      Image[]  @relation("ImageFolderImages")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("image_folders")
 }

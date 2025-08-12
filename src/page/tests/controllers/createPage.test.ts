@@ -3,16 +3,17 @@ import { createPage } from "../../controllers";
 import { setupPageControllerTest } from "./test-setup";
 
 describe("createPage Controller", () => {
-  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } = setupPageControllerTest();
+  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } =
+    setupPageControllerTest();
 
   describe("createPage", () => {
     it("should create a page with funnelId from URL params", async () => {
       const user = getUser();
       const funnel = getFunnel();
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
-        params: { funnelId: funnel.id.toString() } 
+        params: { funnelId: funnel.id.toString() },
       });
 
       await createPage(getMockReq(), getMockRes());
@@ -27,9 +28,9 @@ describe("createPage Controller", () => {
     });
 
     it("should return 401 for missing authentication", async () => {
-      setMockReq({ 
+      setMockReq({
         userId: undefined,
-        params: { funnelId: "1" } 
+        params: { funnelId: "1" },
       });
 
       await createPage(getMockReq(), getMockRes());
@@ -43,9 +44,9 @@ describe("createPage Controller", () => {
 
     it("should return 400 for invalid funnel ID (handled by Zod)", async () => {
       const user = getUser();
-      setMockReq({ 
+      setMockReq({
         userId: user.id,
-        params: { funnelId: "0" } // Invalid - must be positive
+        params: { funnelId: "0" }, // Invalid - must be positive
       });
 
       await createPage(getMockReq(), getMockRes());
@@ -61,10 +62,10 @@ describe("createPage Controller", () => {
 
     it("should handle funnel not found errors", async () => {
       const user = getUser();
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
-        params: { funnelId: "99999" } // Non-existent funnel ID
+        params: { funnelId: "99999" }, // Non-existent funnel ID
       });
 
       await createPage(getMockReq(), getMockRes());
@@ -79,16 +80,16 @@ describe("createPage Controller", () => {
     it("should create page with custom data", async () => {
       const user = getUser();
       const funnel = getFunnel();
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
         params: { funnelId: funnel.id.toString() },
         body: {
           name: "Custom Page",
           content: "<h1>Custom Content</h1>",
           linkingId: "custom-page",
-          seoTitle: "Custom SEO Title"
-        }
+          seoTitle: "Custom SEO Title",
+        },
       });
 
       await createPage(getMockReq(), getMockRes());

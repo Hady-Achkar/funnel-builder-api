@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { PageService } from "../../services";
-import { 
-  mockPrisma, 
-  createMockFunnel, 
-  createMockPage, 
-  setupPageServiceTest
+import {
+  mockPrisma,
+  createMockFunnel,
+  createMockPage,
+  setupPageServiceTest,
 } from "./test-setup";
 
 describe("PageService.duplicatePage", () => {
@@ -21,26 +21,27 @@ describe("PageService.duplicatePage", () => {
   });
 
   it("should duplicate page successfully within same funnel", async () => {
-    const originalPage = createMockPage({ 
-      funnelId: 1, 
+    const originalPage = createMockPage({
+      funnelId: 1,
       name: "Original Page",
       linkingId: "original-page",
-      content: "<h1>Original Content</h1>"
+      content: "<h1>Original Content</h1>",
     });
-    const duplicatedPage = createMockPage({ 
-      id: 2, 
-      funnelId: 1, 
-      name: "Original Page (Copy)", 
+    const duplicatedPage = createMockPage({
+      id: 2,
+      funnelId: 1,
+      name: "Original Page (Copy)",
       linkingId: "original-page-copy",
       content: "<h1>Original Content</h1>",
-      order: 2 
+      order: 2,
     });
 
-    mockPrisma.page.findFirst = vi.fn()
+    mockPrisma.page.findFirst = vi
+      .fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - no duplicate
       .mockResolvedValueOnce(null); // LinkingId check - no duplicate
-    
+
     mockPrisma.page.count = vi.fn().mockResolvedValue(1);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
@@ -52,47 +53,46 @@ describe("PageService.duplicatePage", () => {
         name: expect.stringContaining("Copy"),
         content: "<h1>Original Content</h1>",
         funnelId: 1,
-        order: 2
-      })
+        order: 2,
+      }),
     });
   });
 
   it("should duplicate page to different funnel", async () => {
-    const originalPage = createMockPage({ 
-      funnelId: 1, 
+    const originalPage = createMockPage({
+      funnelId: 1,
       name: "Original Page",
-      linkingId: "original-page"
+      linkingId: "original-page",
     });
     const targetFunnel = createMockFunnel({ id: 2 });
-    const duplicatedPage = createMockPage({ 
-      id: 2, 
-      funnelId: 2, 
+    const duplicatedPage = createMockPage({
+      id: 2,
+      funnelId: 2,
       name: "Original Page",
-      linkingId: "original-page", 
-      order: 1 
+      linkingId: "original-page",
+      order: 1,
     });
 
-    mockPrisma.page.findFirst = vi.fn()
+    mockPrisma.page.findFirst = vi
+      .fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - no duplicate
       .mockResolvedValueOnce(null); // LinkingId check - no duplicate
-    
+
     mockPrisma.funnel.findFirst = vi.fn().mockResolvedValue(targetFunnel);
     mockPrisma.page.count = vi.fn().mockResolvedValue(0);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 
-    const result = await PageService.duplicatePage(
-      { pageId: 1 }, 
-      1, 
-      { targetFunnelId: 2 }
-    );
+    const result = await PageService.duplicatePage({ pageId: 1 }, 1, {
+      targetFunnelId: 2,
+    });
 
     expect(result.message).toContain("duplicated successfully");
     expect(mockPrisma.page.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         funnelId: 2,
-        order: 1
-      })
+        order: 1,
+      }),
     });
   });
 
@@ -116,23 +116,24 @@ describe("PageService.duplicatePage", () => {
   });
 
   it("should handle duplicate names appropriately", async () => {
-    const originalPage = createMockPage({ 
-      funnelId: 1, 
+    const originalPage = createMockPage({
+      funnelId: 1,
       name: "Test Page",
-      linkingId: "test-page"
+      linkingId: "test-page",
     });
-    const duplicatedPage = createMockPage({ 
-      id: 2, 
-      funnelId: 1, 
+    const duplicatedPage = createMockPage({
+      id: 2,
+      funnelId: 1,
       name: "Test Page (Copy)",
-      linkingId: "test-page-copy"
+      linkingId: "test-page-copy",
     });
 
-    mockPrisma.page.findFirst = vi.fn()
+    mockPrisma.page.findFirst = vi
+      .fn()
       .mockResolvedValueOnce(originalPage) // Original page lookup
       .mockResolvedValueOnce(null) // Name check - "Test Page (Copy)" is available
       .mockResolvedValueOnce(null); // LinkingId check
-    
+
     mockPrisma.page.count = vi.fn().mockResolvedValue(1);
     mockPrisma.page.create = vi.fn().mockResolvedValue(duplicatedPage);
 

@@ -22,7 +22,7 @@ export const setupPageControllerTest = () => {
     // Create test user and funnel
     user = await TestHelpers.createTestUser();
     funnel = await TestHelpers.createTestFunnel(user.id, {
-      name: "Test Funnel"
+      name: "Test Funnel",
     });
 
     // Setup mocks
@@ -45,7 +45,9 @@ export const setupPageControllerTest = () => {
   return {
     getMockReq: () => mockReq as AuthRequest,
     getMockRes: () => mockRes as Response,
-    setMockReq: (req: Partial<AuthRequest>) => { mockReq = { ...mockReq, ...req }; },
+    setMockReq: (req: Partial<AuthRequest>) => {
+      mockReq = { ...mockReq, ...req };
+    },
     getUser: () => user,
     getFunnel: () => funnel,
     getMockCache: () => mockCache,

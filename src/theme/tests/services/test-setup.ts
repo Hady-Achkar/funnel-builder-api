@@ -10,7 +10,7 @@ const mockCacheService = {
 };
 
 vi.mock("../../../services/cache/cache.service", () => ({
-  cacheService: mockCacheService
+  cacheService: mockCacheService,
 }));
 
 // Create mock Prisma client
@@ -51,7 +51,7 @@ export { mockCacheService };
 export const setupMocks = () => {
   vi.clearAllMocks();
   setPrismaClient(mockPrisma);
-  
+
   // Reset cache service mocks
   mockCacheService.get.mockReset();
   mockCacheService.set.mockReset();

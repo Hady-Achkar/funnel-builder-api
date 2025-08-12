@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { getPrisma } from "../../lib/prisma";
-import { 
-  CreatePageParams, 
-  CreatePageBody, 
+import {
+  CreatePageParams,
+  CreatePageBody,
   CreatePageResponse,
   CreatePageParamsSchema,
   CreatePageBodySchema,
-  CreatePageResponseSchema
+  CreatePageResponseSchema,
 } from "../types";
 import { cacheService } from "../../services/cache/cache.service";
 
@@ -28,7 +28,10 @@ export const createPage = async (
     });
     if (!funnel) throw new Error("Funnel not found or you don't have access");
 
-    const order = (await prisma.page.count({ where: { funnelId: validatedParams.funnelId } })) + 1;
+    const order =
+      (await prisma.page.count({
+        where: { funnelId: validatedParams.funnelId },
+      })) + 1;
 
     let name = validatedBody.name;
     if (!name) {

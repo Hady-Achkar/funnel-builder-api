@@ -43,7 +43,6 @@ export const CreatePageResponseSchema = z.object({
     .min(1, "Message cannot be empty"),
 });
 
-
 // Validated types (after Zod parsing)
 export type CreatePageParams = z.infer<typeof CreatePageParamsSchema>;
 export type CreatePageBody = z.infer<typeof CreatePageBodySchema>;

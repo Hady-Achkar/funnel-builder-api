@@ -136,13 +136,13 @@ describe("Example Test Suite - New Test Setup", () => {
           email: `bulk-user-${i}@example.com`,
           name: `Bulk User ${i}`,
         });
-        
+
         // Create 2 funnels per user
         for (let j = 0; j < 2; j++) {
           const funnel = await TestHelpers.createTestFunnel(user.id, {
             name: `User ${i} Funnel ${j}`,
           });
-          
+
           // Create 3 pages per funnel
           for (let k = 0; k < 3; k++) {
             await TestHelpers.createTestPage(funnel.id, {
@@ -151,7 +151,7 @@ describe("Example Test Suite - New Test Setup", () => {
             });
           }
         }
-        
+
         users.push(user);
       }
 
@@ -165,7 +165,7 @@ describe("Example Test Suite - New Test Setup", () => {
         });
 
         expect(funnels).toHaveLength(2);
-        
+
         // Each funnel should have 3 pages
         for (const funnel of funnels) {
           expect(funnel.pages).toHaveLength(3);

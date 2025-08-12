@@ -27,13 +27,13 @@ beforeAll(async () => {
     // Initialize test database
     testDatabase = getTestDatabase();
     await testDatabase.setup();
-    
+
     // Get Prisma client from test database
     testPrisma = testDatabase.getPrismaClient();
-    
+
     // Initialize test factory
     testFactory = new TestFactory(testPrisma);
-    
+
     // Inject test Prisma client into all services
     setAuthPrismaClient(testPrisma);
     setUserPrismaClient(testPrisma);

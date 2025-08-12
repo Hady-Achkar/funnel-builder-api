@@ -13,10 +13,12 @@ dotenv.config({ path: envPath });
 if (!process.env.DATABASE_URL) {
   // Check if running in CI
   if (process.env.CI === "true") {
-    process.env.DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/funnel_builder_test";
+    process.env.DATABASE_URL =
+      "postgresql://postgres:postgres@localhost:5432/funnel_builder_test";
   } else {
     // Local development
-    process.env.DATABASE_URL = "postgresql://hadi@localhost:5432/funnel_builder_test";
+    process.env.DATABASE_URL =
+      "postgresql://hadi@localhost:5432/funnel_builder_test";
   }
 }
 
@@ -32,4 +34,7 @@ if (!process.env.JWT_SECRET) {
 
 console.log("Environment Setup: NODE_ENV =", process.env.NODE_ENV);
 console.log("Environment Setup: CI =", process.env.CI || "false");
-console.log("Environment Setup: Database =", process.env.DATABASE_URL?.split("@")[1]?.split("/")[0] || "Not set");
+console.log(
+  "Environment Setup: Database =",
+  process.env.DATABASE_URL?.split("@")[1]?.split("/")[0] || "Not set"
+);

@@ -22,10 +22,10 @@ export const DuplicatePageBodySchema = z.object({
     .string({ message: "New linking ID must be a string" })
     .min(1, { message: "New linking ID cannot be empty" })
     .max(50, { message: "New linking ID cannot exceed 50 characters" })
-    .regex(
-      /^[a-z0-9-]+$/,
-      { message: "Linking ID can only contain lowercase letters, numbers, and hyphens" }
-    )
+    .regex(/^[a-z0-9-]+$/, {
+      message:
+        "Linking ID can only contain lowercase letters, numbers, and hyphens",
+    })
     .optional(),
 });
 

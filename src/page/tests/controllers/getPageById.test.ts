@@ -4,7 +4,8 @@ import { setupPageControllerTest } from "./test-setup";
 import { testPrisma } from "../../../test/helpers";
 
 describe("getPageById Controller", () => {
-  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } = setupPageControllerTest();
+  const { getMockReq, getMockRes, setMockReq, getUser, getFunnel } =
+    setupPageControllerTest();
 
   describe("getPageById", () => {
     it("should get page by ID successfully", async () => {
@@ -17,13 +18,13 @@ describe("getPageById Controller", () => {
           content: "Page content",
           order: 1,
           linkingId: "test-page",
-          funnelId: funnel.id
-        }
+          funnelId: funnel.id,
+        },
       });
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
-        params: { id: page.id.toString() } 
+        params: { id: page.id.toString() },
       });
 
       await getPageById(getMockReq(), getMockRes());
@@ -39,15 +40,15 @@ describe("getPageById Controller", () => {
             order: 1,
             linkingId: "test-page",
           }),
-          message: "Page retrieved successfully"
+          message: "Page retrieved successfully",
         })
       );
     });
 
     it("should return 401 for missing authentication", async () => {
-      setMockReq({ 
+      setMockReq({
         userId: undefined,
-        params: { id: "1" } 
+        params: { id: "1" },
       });
 
       await getPageById(getMockReq(), getMockRes());
@@ -61,10 +62,10 @@ describe("getPageById Controller", () => {
 
     it("should return 404 for non-existent page", async () => {
       const user = getUser();
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
-        params: { id: "99999" }
+        params: { id: "99999" },
       });
 
       await getPageById(getMockReq(), getMockRes());
@@ -78,10 +79,10 @@ describe("getPageById Controller", () => {
 
     it("should handle validation errors", async () => {
       const user = getUser();
-      
-      setMockReq({ 
+
+      setMockReq({
         userId: user.id,
-        params: { id: "invalid" }
+        params: { id: "invalid" },
       });
 
       await getPageById(getMockReq(), getMockRes());

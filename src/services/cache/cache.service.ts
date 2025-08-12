@@ -1,4 +1,4 @@
-import { redisService } from './redis.service';
+import { redisService } from "./redis.service";
 
 export interface CacheOptions {
   ttl?: number;
@@ -63,83 +63,180 @@ export class CacheService {
   }
 
   // Domain-specific cache methods
-  async getUserCache<T>(userId: number, key: string, options?: CacheOptions): Promise<T | null> {
+  async getUserCache<T>(
+    userId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
     return await this.get<T>(key, { ...options, prefix: `user:${userId}` });
   }
 
-  async setUserCache(userId: number, key: string, value: any, options?: CacheOptions): Promise<void> {
+  async setUserCache(
+    userId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
     await this.set(key, value, { ...options, prefix: `user:${userId}` });
   }
 
   async invalidateUserCache(userId: number): Promise<void> {
-    await this.invalidatePattern('*', `user:${userId}`);
+    await this.invalidatePattern("*", `user:${userId}`);
   }
 
-  async getDomainCache<T>(domainId: number, key: string, options?: CacheOptions): Promise<T | null> {
+  async getDomainCache<T>(
+    domainId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
     return await this.get<T>(key, { ...options, prefix: `domain:${domainId}` });
   }
 
-  async setDomainCache(domainId: number, key: string, value: any, options?: CacheOptions): Promise<void> {
+  async setDomainCache(
+    domainId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
     await this.set(key, value, { ...options, prefix: `domain:${domainId}` });
   }
 
   async invalidateDomainCache(domainId: number): Promise<void> {
-    await this.invalidatePattern('*', `domain:${domainId}`);
+    await this.invalidatePattern("*", `domain:${domainId}`);
   }
 
-  async getFunnelCache<T>(funnelId: number, key: string, options?: CacheOptions): Promise<T | null> {
+  async getFunnelCache<T>(
+    funnelId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
     return await this.get<T>(key, { ...options, prefix: `funnel:${funnelId}` });
   }
 
-  async setFunnelCache(funnelId: number, key: string, value: any, options?: CacheOptions): Promise<void> {
+  async setFunnelCache(
+    funnelId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
     await this.set(key, value, { ...options, prefix: `funnel:${funnelId}` });
   }
 
   async invalidateFunnelCache(funnelId: number): Promise<void> {
-    await this.invalidatePattern('*', `funnel:${funnelId}`);
+    await this.invalidatePattern("*", `funnel:${funnelId}`);
   }
 
-  async getUserFunnelCache<T>(userId: number, funnelId: number, key: string, options?: CacheOptions): Promise<T | null> {
-    return await this.get<T>(key, { ...options, prefix: `user:${userId}:funnel:${funnelId}` });
+  async getUserFunnelCache<T>(
+    userId: number,
+    funnelId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(key, {
+      ...options,
+      prefix: `user:${userId}:funnel:${funnelId}`,
+    });
   }
 
-  async setUserFunnelCache(userId: number, funnelId: number, key: string, value: any, options?: CacheOptions): Promise<void> {
-    await this.set(key, value, { ...options, prefix: `user:${userId}:funnel:${funnelId}` });
+  async setUserFunnelCache(
+    userId: number,
+    funnelId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(key, value, {
+      ...options,
+      prefix: `user:${userId}:funnel:${funnelId}`,
+    });
   }
 
-  async invalidateUserFunnelCache(userId: number, funnelId: number): Promise<void> {
-    await this.invalidatePattern('*', `user:${userId}:funnel:${funnelId}`);
+  async invalidateUserFunnelCache(
+    userId: number,
+    funnelId: number
+  ): Promise<void> {
+    await this.invalidatePattern("*", `user:${userId}:funnel:${funnelId}`);
+  }
+
+  async getUserFolderCache<T>(
+    userId: number,
+    folderId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(key, {
+      ...options,
+      prefix: `user:${userId}:folder:${folderId}`,
+    });
+  }
+
+  async setUserFolderCache(
+    userId: number,
+    folderId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(key, value, {
+      ...options,
+      prefix: `user:${userId}:folder:${folderId}`,
+    });
+  }
+
+  async invalidateUserFolderCache(
+    userId: number,
+    folderId: number
+  ): Promise<void> {
+    await this.invalidatePattern("*", `user:${userId}:folder:${folderId}`);
   }
 
   // CloudFlare zone cache
   async getZoneId(domain: string): Promise<string | null> {
-    return await this.get<string>(`zone:${domain}`, { prefix: 'cloudflare', ttl: 86400 }); // 24 hours
+    return await this.get<string>(`zone:${domain}`, {
+      prefix: "cloudflare",
+      ttl: 86400,
+    }); // 24 hours
   }
 
   async setZoneId(domain: string, zoneId: string): Promise<void> {
-    await this.set(`zone:${domain}`, zoneId, { prefix: 'cloudflare', ttl: 86400 });
+    await this.set(`zone:${domain}`, zoneId, {
+      prefix: "cloudflare",
+      ttl: 86400,
+    });
   }
 
   // Rate limiting
-  async checkRateLimit(identifier: string, limit: number, window: number): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+  async checkRateLimit(
+    identifier: string,
+    limit: number,
+    window: number
+  ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
     const key = `ratelimit:${identifier}`;
     const current = await redisService.incrementCounter(key, window);
-    
+
     const allowed = current <= limit;
     const remaining = Math.max(0, limit - current);
-    const resetTime = Date.now() + (window * 1000);
+    const resetTime = Date.now() + window * 1000;
 
     return { allowed, remaining, resetTime };
   }
 
   // Session management
-  async createSession(userId: number, sessionData: any, ttl = 86400): Promise<string> {
+  async createSession(
+    userId: number,
+    sessionData: any,
+    ttl = 86400
+  ): Promise<string> {
     const sessionId = `${userId}_${Date.now()}_${Math.random().toString(36)}`;
-    await redisService.setSession(sessionId, {
-      userId,
-      createdAt: new Date().toISOString(),
-      ...sessionData
-    }, ttl);
+    await redisService.setSession(
+      sessionId,
+      {
+        userId,
+        createdAt: new Date().toISOString(),
+        ...sessionData,
+      },
+      ttl
+    );
     return sessionId;
   }
 

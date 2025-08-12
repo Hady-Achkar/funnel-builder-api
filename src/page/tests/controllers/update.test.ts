@@ -16,7 +16,7 @@ describe("updatePage Controller", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     req = {
       userId: 1,
       params: { id: "1" },
@@ -54,14 +54,10 @@ describe("updatePage Controller", () => {
 
     await updatePage(req as AuthRequest, res as Response);
 
-    expect(PageService.updatePage).toHaveBeenCalledWith(
-      { pageId: 1 },
-      1,
-      {
-        name: "Updated Page",
-        content: "<h1>Updated Content</h1>",
-      }
-    );
+    expect(PageService.updatePage).toHaveBeenCalledWith({ pageId: 1 }, 1, {
+      name: "Updated Page",
+      content: "<h1>Updated Content</h1>",
+    });
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({

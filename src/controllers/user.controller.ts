@@ -1,6 +1,6 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import { UserService } from '../services/user.service';
+import { Response } from "express";
+import { AuthRequest } from "../middleware/auth";
+import { UserService } from "../services/user.service";
 
 export class UserController {
   static async getProfile(req: AuthRequest, res: Response): Promise<void> {
@@ -9,14 +9,14 @@ export class UserController {
       const user = await UserService.getUserProfile(userId);
 
       if (!user) {
-        res.status(404).json({ error: 'User not found' });
+        res.status(404).json({ error: "User not found" });
         return;
       }
 
       res.json({ user });
     } catch (error) {
-      console.error('Profile error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Profile error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -28,14 +28,14 @@ export class UserController {
       const user = await UserService.updateUserProfile(userId, { name, email });
       res.json({ user });
     } catch (error: any) {
-      console.error('Update profile error:', error);
-      
-      if (error.code === 'P2002') {
-        res.status(400).json({ error: 'Email already exists' });
+      console.error("Update profile error:", error);
+
+      if (error.code === "P2002") {
+        res.status(400).json({ error: "Email already exists" });
         return;
       }
-      
-      res.status(500).json({ error: 'Internal server error' });
+
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -43,10 +43,10 @@ export class UserController {
     try {
       const userId = req.userId!;
       await UserService.deleteUser(userId);
-      res.json({ message: 'Account deleted successfully' });
+      res.json({ message: "Account deleted successfully" });
     } catch (error) {
-      console.error('Delete account error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Delete account error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }

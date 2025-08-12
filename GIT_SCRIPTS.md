@@ -19,6 +19,7 @@ This project includes several Git automation scripts to streamline your developm
 ```
 
 **Features:**
+
 - ✅ Interactive confirmation before committing
 - ✅ Colored output for better readability
 - ✅ Git repository validation
@@ -40,6 +41,7 @@ This project includes several Git automation scripts to streamline your developm
 ```
 
 **Features:**
+
 - 🚀 No confirmation prompts
 - 🚀 Automatic Claude Code signature
 - 🚀 Minimal output
@@ -62,6 +64,7 @@ git-push.bat "Update documentation"
 ### For Unix/Linux/macOS:
 
 1. **Make scripts executable:**
+
    ```bash
    chmod +x git-push.sh quick-push.sh
    ```
@@ -87,11 +90,11 @@ git-push.bat "Update documentation"
 
 ## 🎯 When to Use Which Script
 
-| Script | Use Case | Best For |
-|--------|----------|----------|
-| `git-push.sh` | Production changes, important commits | When you want confirmation and detailed output |
-| `quick-push.sh` | Development, quick fixes, iterations | When you want speed and simplicity |
-| `git-push.bat` | Windows development | Windows users who prefer batch files |
+| Script          | Use Case                              | Best For                                       |
+| --------------- | ------------------------------------- | ---------------------------------------------- |
+| `git-push.sh`   | Production changes, important commits | When you want confirmation and detailed output |
+| `quick-push.sh` | Development, quick fixes, iterations  | When you want speed and simplicity             |
+| `git-push.bat`  | Windows development                   | Windows users who prefer batch files           |
 
 ## ⚠️ Important Notes
 
@@ -111,6 +114,7 @@ git-push.bat "Update documentation"
 ## 🎨 Output Examples
 
 ### Interactive Script (`git-push.sh`):
+
 ```
 [INFO] Checking git status...
 M  src/app.ts
@@ -130,6 +134,7 @@ abc1234 Add new authentication feature
 ```
 
 ### Quick Script (`quick-push.sh`):
+
 ```
 📝 Adding changes...
 💾 Committing...
@@ -150,16 +155,19 @@ You can modify these scripts to fit your workflow:
 ## 📞 Troubleshooting
 
 **Script not executable:**
+
 ```bash
 chmod +x git-push.sh quick-push.sh
 ```
 
 **Permission denied:**
+
 ```bash
 sudo chmod +x git-push.sh quick-push.sh
 ```
 
 **Windows script not working:**
+
 - Make sure you're in Command Prompt or PowerShell
 - Check if Git is installed and in PATH
 

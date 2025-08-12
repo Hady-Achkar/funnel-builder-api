@@ -13,9 +13,13 @@ describe("getUserFunnels Controller", () => {
   describe("GET /funnels", () => {
     it("gets user funnels successfully", async () => {
       const user = getUser();
-      
-      const funnel1 = await TestHelpers.createTestFunnel(user.id, { name: "Funnel 1" });
-      const funnel2 = await TestHelpers.createTestFunnel(user.id, { name: "Funnel 2" });
+
+      const funnel1 = await TestHelpers.createTestFunnel(user.id, {
+        name: "Funnel 1",
+      });
+      const funnel2 = await TestHelpers.createTestFunnel(user.id, {
+        name: "Funnel 2",
+      });
 
       const response = await request(app)
         .get("/funnels")
@@ -42,8 +46,7 @@ describe("getUserFunnels Controller", () => {
     });
 
     it("returns 401 when no user ID provided", async () => {
-      const response = await request(app)
-        .get("/funnels");
+      const response = await request(app).get("/funnels");
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);

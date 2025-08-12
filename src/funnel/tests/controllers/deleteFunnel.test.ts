@@ -13,10 +13,10 @@ describe("deleteFunnel Controller", () => {
   describe("DELETE /funnels/:id", () => {
     it("deletes funnel successfully", async () => {
       const user = getUser();
-      
+
       const funnel = await TestHelpers.createTestFunnel(user.id, {
         name: "Test Funnel",
-        status: "DRAFT"
+        status: "DRAFT",
       });
 
       const response = await request(app)
@@ -25,13 +25,15 @@ describe("deleteFunnel Controller", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe("Funnel Test Funnel was deleted successfully");
+      expect(response.body.message).toBe(
+        "Funnel Test Funnel was deleted successfully"
+      );
       expect(response.body.data).toBeUndefined();
     });
 
     it("returns 400 for invalid funnel ID", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .delete("/funnels/invalid")
         .set("x-user-id", user.id.toString());
@@ -43,7 +45,7 @@ describe("deleteFunnel Controller", () => {
 
     it("returns 404 for non-existent funnel", async () => {
       const user = getUser();
-      
+
       const response = await request(app)
         .delete("/funnels/999999")
         .set("x-user-id", user.id.toString());
@@ -55,10 +57,10 @@ describe("deleteFunnel Controller", () => {
 
     it("returns 400 for LIVE funnel", async () => {
       const user = getUser();
-      
+
       const funnel = await TestHelpers.createTestFunnel(user.id, {
         name: "Live Funnel",
-        status: "LIVE"
+        status: "LIVE",
       });
 
       const response = await request(app)
@@ -71,8 +73,7 @@ describe("deleteFunnel Controller", () => {
     });
 
     it("returns 401 when no user ID provided", async () => {
-      const response = await request(app)
-        .delete("/funnels/1");
+      const response = await request(app).delete("/funnels/1");
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);

@@ -1,22 +1,42 @@
-import { PrismaClient, User, Funnel, Domain, Page, Theme, Template, TemplateCategory } from "../generated/prisma-client";
+import {
+  PrismaClient,
+  User,
+  Funnel,
+  Domain,
+  Page,
+  Theme,
+  Template,
+  TemplateCategory,
+} from "../generated/prisma-client";
 import bcrypt from "bcryptjs";
-import { DomainType, DomainStatus, FunnelStatus, BorderRadius, SslStatus } from "../generated/prisma-client";
+import {
+  DomainType,
+  DomainStatus,
+  FunnelStatus,
+  BorderRadius,
+  SslStatus,
+} from "../generated/prisma-client";
 
 // Factory for creating test data with sensible defaults
 export class TestFactory {
   constructor(private prisma: PrismaClient) {}
 
   // User factory
-  async createUser(overrides: Partial<{
-    email: string;
-    name: string;
-    password: string;
-    isAdmin: boolean;
-    maximumFunnels: number;
-  }> = {}): Promise<User> {
+  async createUser(
+    overrides: Partial<{
+      email: string;
+      name: string;
+      password: string;
+      isAdmin: boolean;
+      maximumFunnels: number;
+    }> = {}
+  ): Promise<User> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    const hashedPassword = await bcrypt.hash(overrides.password || "password123", 10);
+    const hashedPassword = await bcrypt.hash(
+      overrides.password || "password123",
+      10
+    );
 
     return this.prisma.user.create({
       data: {
@@ -30,19 +50,21 @@ export class TestFactory {
   }
 
   // Theme factory
-  async createTheme(overrides: Partial<{
-    name: string;
-    backgroundColor: string;
-    textColor: string;
-    buttonColor: string;
-    buttonTextColor: string;
-    borderColor: string;
-    optionColor: string;
-    fontFamily: string;
-    borderRadius: BorderRadius;
-  }> = {}): Promise<Theme> {
+  async createTheme(
+    overrides: Partial<{
+      name: string;
+      backgroundColor: string;
+      textColor: string;
+      buttonColor: string;
+      buttonTextColor: string;
+      borderColor: string;
+      optionColor: string;
+      fontFamily: string;
+      borderRadius: BorderRadius;
+    }> = {}
+  ): Promise<Theme> {
     const timestamp = Date.now();
-    
+
     return this.prisma.theme.create({
       data: {
         name: overrides.name || `Test Theme ${timestamp}`,
@@ -59,15 +81,18 @@ export class TestFactory {
   }
 
   // Funnel factory
-  async createFunnel(userId: number, overrides: Partial<{
-    name: string;
-    status: FunnelStatus;
-    themeId: number;
-    templateId: number;
-  }> = {}): Promise<Funnel> {
+  async createFunnel(
+    userId: number,
+    overrides: Partial<{
+      name: string;
+      status: FunnelStatus;
+      themeId: number;
+      templateId: number;
+    }> = {}
+  ): Promise<Funnel> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    
+
     // Create theme if not provided
     let themeId = overrides.themeId;
     if (!themeId) {
@@ -92,22 +117,26 @@ export class TestFactory {
   }
 
   // Domain factory
-  async createDomain(userId: number, overrides: Partial<{
-    hostname: string;
-    type: DomainType;
-    status: DomainStatus;
-    sslStatus: SslStatus;
-    cloudflareHostnameId: string;
-    cloudflareZoneId: string;
-    cloudflareRecordId: string;
-    verificationToken: string;
-  }> = {}): Promise<Domain> {
+  async createDomain(
+    userId: number,
+    overrides: Partial<{
+      hostname: string;
+      type: DomainType;
+      status: DomainStatus;
+      sslStatus: SslStatus;
+      cloudflareHostnameId: string;
+      cloudflareZoneId: string;
+      cloudflareRecordId: string;
+      verificationToken: string;
+    }> = {}
+  ): Promise<Domain> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
 
     return this.prisma.domain.create({
       data: {
-        hostname: overrides.hostname || `test-${timestamp}-${randomId}.example.com`,
+        hostname:
+          overrides.hostname || `test-${timestamp}-${randomId}.example.com`,
         type: overrides.type || DomainType.CUSTOM_DOMAIN,
         status: overrides.status || DomainStatus.PENDING,
         sslStatus: overrides.sslStatus || SslStatus.PENDING,
@@ -121,19 +150,22 @@ export class TestFactory {
   }
 
   // Page factory
-  async createPage(funnelId: number, overrides: Partial<{
-    name: string;
-    content: string;
-    order: number;
-    linkingId: string;
-    seoTitle: string;
-    seoDescription: string;
-    seoKeywords: string;
-    visits: number;
-  }> = {}): Promise<Page> {
+  async createPage(
+    funnelId: number,
+    overrides: Partial<{
+      name: string;
+      content: string;
+      order: number;
+      linkingId: string;
+      seoTitle: string;
+      seoDescription: string;
+      seoKeywords: string;
+      visits: number;
+    }> = {}
+  ): Promise<Page> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    
+
     // Get the next order if not provided
     let order = overrides.order;
     if (order === undefined) {
@@ -161,17 +193,19 @@ export class TestFactory {
   }
 
   // Template Category factory
-  async createTemplateCategory(overrides: Partial<{
-    name: string;
-    slug: string;
-    description: string;
-    icon: string;
-    order: number;
-    isActive: boolean;
-  }> = {}): Promise<TemplateCategory> {
+  async createTemplateCategory(
+    overrides: Partial<{
+      name: string;
+      slug: string;
+      description: string;
+      icon: string;
+      order: number;
+      isActive: boolean;
+    }> = {}
+  ): Promise<TemplateCategory> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    
+
     return this.prisma.templateCategory.create({
       data: {
         name: overrides.name || `Test Category ${timestamp}`,
@@ -185,20 +219,24 @@ export class TestFactory {
   }
 
   // Template factory
-  async createTemplate(categoryId: number, createdByUserId: number, overrides: Partial<{
-    name: string;
-    slug: string;
-    description: string;
-    thumbnailImage: string;
-    tags: string[];
-    usageCount: number;
-    isActive: boolean;
-    isPublic: boolean;
-    metadata: any;
-  }> = {}): Promise<Template> {
+  async createTemplate(
+    categoryId: number,
+    createdByUserId: number,
+    overrides: Partial<{
+      name: string;
+      slug: string;
+      description: string;
+      thumbnailImage: string;
+      tags: string[];
+      usageCount: number;
+      isActive: boolean;
+      isPublic: boolean;
+      metadata: any;
+    }> = {}
+  ): Promise<Template> {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    
+
     return this.prisma.template.create({
       data: {
         name: overrides.name || `Test Template ${timestamp}`,
@@ -222,7 +260,11 @@ export class TestFactory {
   }
 
   // Funnel-Domain connection factory
-  async connectFunnelToDomain(funnelId: number, domainId: number, isActive = true) {
+  async connectFunnelToDomain(
+    funnelId: number,
+    domainId: number,
+    isActive = true
+  ) {
     return this.prisma.funnelDomain.create({
       data: {
         funnelId,
@@ -233,14 +275,17 @@ export class TestFactory {
   }
 
   // Session factory
-  async createSession(funnelId: number, overrides: Partial<{
-    sessionId: string;
-    visitedPages: number[];
-    interactions: any;
-  }> = {}) {
+  async createSession(
+    funnelId: number,
+    overrides: Partial<{
+      sessionId: string;
+      visitedPages: number[];
+      interactions: any;
+    }> = {}
+  ) {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    
+
     return this.prisma.session.create({
       data: {
         sessionId: overrides.sessionId || `session-${timestamp}-${randomId}`,
@@ -254,19 +299,19 @@ export class TestFactory {
   // Bulk creation helpers
   async createUsersWithFunnels(count: number): Promise<User[]> {
     const users: User[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       const user = await this.createUser({
         email: `user${i + 1}@example.com`,
         name: `User ${i + 1}`,
       });
-      
+
       // Create 2 funnels per user
       for (let j = 0; j < 2; j++) {
         const funnel = await this.createFunnel(user.id, {
           name: `User ${i + 1} Funnel ${j + 1}`,
         });
-        
+
         // Create 3 pages per funnel
         for (let k = 0; k < 3; k++) {
           await this.createPage(funnel.id, {
@@ -275,10 +320,10 @@ export class TestFactory {
           });
         }
       }
-      
+
       users.push(user);
     }
-    
+
     return users;
   }
 
@@ -289,17 +334,17 @@ export class TestFactory {
       where: { userId },
       select: { themeId: true },
     });
-    
+
     // Delete user (cascades to funnels, pages, domains, etc.)
     await this.prisma.user.delete({
       where: { id: userId },
     });
-    
+
     // Clean up orphaned themes
     const themeIds = funnels
-      .map(f => f.themeId)
+      .map((f) => f.themeId)
       .filter((id): id is number => id !== null);
-    
+
     if (themeIds.length > 0) {
       await this.prisma.theme.deleteMany({
         where: { id: { in: themeIds } },

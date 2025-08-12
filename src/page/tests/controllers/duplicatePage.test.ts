@@ -16,7 +16,7 @@ describe("duplicatePage Controller", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     req = {
       userId: 1,
       params: { pageId: "1" },
@@ -66,15 +66,11 @@ describe("duplicatePage Controller", () => {
 
     await duplicatePage(req as AuthRequest, res as Response);
 
-    expect(PageService.duplicatePage).toHaveBeenCalledWith(
-      { pageId: 1 },
-      1,
-      {
-        targetFunnelId: 2,
-        newName: "Custom Name",
-        newLinkingId: "custom-linking-id",
-      }
-    );
+    expect(PageService.duplicatePage).toHaveBeenCalledWith({ pageId: 1 }, 1, {
+      targetFunnelId: 2,
+      newName: "Custom Name",
+      newLinkingId: "custom-linking-id",
+    });
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({

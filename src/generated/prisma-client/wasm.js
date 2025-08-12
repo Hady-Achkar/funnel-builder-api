@@ -268,6 +268,25 @@ exports.Prisma.TemplatePagesScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ImageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  url: 'url',
+  altText: 'altText',
+  size: 'size',
+  folderId: 'folderId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ImageFolderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -341,7 +360,9 @@ exports.Prisma.ModelName = {
   TemplateCategory: 'TemplateCategory',
   Template: 'Template',
   TemplateImage: 'TemplateImage',
-  TemplatePages: 'TemplatePages'
+  TemplatePages: 'TemplatePages',
+  Image: 'Image',
+  ImageFolder: 'ImageFolder'
 };
 
 /**

@@ -15,11 +15,11 @@ describe("getPublicPage Controller", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     req = {
-      params: { 
-        funnelId: "1", 
-        linkingId: "test-page" 
+      params: {
+        funnelId: "1",
+        linkingId: "test-page",
       },
     };
 

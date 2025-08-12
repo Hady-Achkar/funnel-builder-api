@@ -16,7 +16,7 @@ describe("reorderPages Controller", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     req = {
       userId: 1,
       params: { funnelId: "1" },
@@ -43,16 +43,12 @@ describe("reorderPages Controller", () => {
 
     await reorderPages(req as AuthRequest, res as Response);
 
-    expect(PageService.reorderPages).toHaveBeenCalledWith(
-      { funnelId: 1 },
-      1,
-      {
-        pageOrders: [
-          { id: 1, order: 1 },
-          { id: 2, order: 2 },
-        ],
-      }
-    );
+    expect(PageService.reorderPages).toHaveBeenCalledWith({ funnelId: 1 }, 1, {
+      pageOrders: [
+        { id: 1, order: 1 },
+        { id: 2, order: 2 },
+      ],
+    });
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({

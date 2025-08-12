@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 import { FunnelService } from "../../services";
-import { 
-  mockPrisma, 
-  createMockUser, 
-  createMockTheme, 
-  createMockFunnel, 
+import {
+  mockPrisma,
+  createMockUser,
+  createMockTheme,
+  createMockFunnel,
   createMockPage,
-  setupFunnelServiceTest 
+  setupFunnelServiceTest,
 } from "./test-setup";
 
 describe("FunnelService.createFunnel", () => {
@@ -23,9 +23,15 @@ describe("FunnelService.createFunnel", () => {
       mockPrisma.funnel.count = vi.fn().mockResolvedValue(0);
       mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
         const transactionalPrisma = {
-          funnel: { 
+          funnel: {
             create: vi.fn().mockResolvedValue(mockFunnel),
-            update: vi.fn().mockResolvedValue({ ...mockFunnel, themeId: mockTheme.id, theme: mockTheme })
+            update: vi
+              .fn()
+              .mockResolvedValue({
+                ...mockFunnel,
+                themeId: mockTheme.id,
+                theme: mockTheme,
+              }),
           },
           theme: { create: vi.fn().mockResolvedValue(mockTheme) },
           page: { create: vi.fn().mockResolvedValue(mockPage) },
@@ -33,7 +39,10 @@ describe("FunnelService.createFunnel", () => {
         return await callback(transactionalPrisma);
       });
 
-      const result = await FunnelService.createFunnel(1, { name: "Test Funnel", status: "DRAFT" });
+      const result = await FunnelService.createFunnel(1, {
+        name: "Test Funnel",
+        status: "DRAFT",
+      });
 
       expect(result.message).toContain("created successfully");
       expect(result.data).toBeDefined();
@@ -47,11 +56,20 @@ describe("FunnelService.createFunnel", () => {
       const mockUser = createMockUser();
       const mockTheme = createMockTheme();
       // Create a mock funnel with a date-formatted name to match the expected auto-generated format
-      const dateFormattedName = new Date().toLocaleDateString('en-GB', { 
-        day: '2-digit', month: '2-digit', year: 'numeric' 
-      }).replace(/\//g, '.') + ' ' + new Date().toLocaleTimeString('en-GB', { 
-        hour: '2-digit', minute: '2-digit', hour12: false 
-      });
+      const dateFormattedName =
+        new Date()
+          .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+          .replace(/\//g, ".") +
+        " " +
+        new Date().toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
       const mockFunnel = createMockFunnel(1, dateFormattedName);
       const mockPage = createMockPage();
 
@@ -59,9 +77,15 @@ describe("FunnelService.createFunnel", () => {
       mockPrisma.funnel.count = vi.fn().mockResolvedValue(0);
       mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
         const transactionalPrisma = {
-          funnel: { 
+          funnel: {
             create: vi.fn().mockResolvedValue(mockFunnel),
-            update: vi.fn().mockResolvedValue({ ...mockFunnel, themeId: mockTheme.id, theme: mockTheme })
+            update: vi
+              .fn()
+              .mockResolvedValue({
+                ...mockFunnel,
+                themeId: mockTheme.id,
+                theme: mockTheme,
+              }),
           },
           theme: { create: vi.fn().mockResolvedValue(mockTheme) },
           page: { create: vi.fn().mockResolvedValue(mockPage) },
@@ -85,9 +109,15 @@ describe("FunnelService.createFunnel", () => {
       mockPrisma.funnel.count = vi.fn().mockResolvedValue(1);
       mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
         const transactionalPrisma = {
-          funnel: { 
+          funnel: {
             create: vi.fn().mockResolvedValue(mockFunnel),
-            update: vi.fn().mockResolvedValue({ ...mockFunnel, themeId: mockTheme.id, theme: mockTheme })
+            update: vi
+              .fn()
+              .mockResolvedValue({
+                ...mockFunnel,
+                themeId: mockTheme.id,
+                theme: mockTheme,
+              }),
           },
           theme: { create: vi.fn().mockResolvedValue(mockTheme) },
           page: { create: vi.fn().mockResolvedValue(mockPage) },
@@ -95,7 +125,9 @@ describe("FunnelService.createFunnel", () => {
         return await callback(transactionalPrisma);
       });
 
-      const result = await FunnelService.createFunnel(1, { name: "Test Funnel" });
+      const result = await FunnelService.createFunnel(1, {
+        name: "Test Funnel",
+      });
 
       expect(result.data.id).toBe(mockFunnel.id);
       expect(result.message).toContain("created successfully");
@@ -111,9 +143,15 @@ describe("FunnelService.createFunnel", () => {
       mockPrisma.funnel.count = vi.fn().mockResolvedValue(10); // High count should not matter
       mockPrisma.$transaction = vi.fn().mockImplementation(async (callback) => {
         const transactionalPrisma = {
-          funnel: { 
+          funnel: {
             create: vi.fn().mockResolvedValue(mockFunnel),
-            update: vi.fn().mockResolvedValue({ ...mockFunnel, themeId: mockTheme.id, theme: mockTheme })
+            update: vi
+              .fn()
+              .mockResolvedValue({
+                ...mockFunnel,
+                themeId: mockTheme.id,
+                theme: mockTheme,
+              }),
           },
           theme: { create: vi.fn().mockResolvedValue(mockTheme) },
           page: { create: vi.fn().mockResolvedValue(mockPage) },
@@ -121,7 +159,9 @@ describe("FunnelService.createFunnel", () => {
         return await callback(transactionalPrisma);
       });
 
-      const result = await FunnelService.createFunnel(1, { name: "Test Funnel" });
+      const result = await FunnelService.createFunnel(1, {
+        name: "Test Funnel",
+      });
 
       expect(result.data.id).toBe(mockFunnel.id);
       expect(result.message).toContain("created successfully");
@@ -143,15 +183,20 @@ describe("FunnelService.createFunnel", () => {
 
     it("should throw error when name is too long", async () => {
       const longName = "a".repeat(101);
-      
+
       await expect(
         FunnelService.createFunnel(1, { name: longName })
-      ).rejects.toThrow("Invalid input: Funnel name must be less than 100 characters");
+      ).rejects.toThrow(
+        "Invalid input: Funnel name must be less than 100 characters"
+      );
     });
 
     it("should throw error for invalid status", async () => {
       await expect(
-        FunnelService.createFunnel(1, { name: "Test Funnel", status: "INVALID" as any })
+        FunnelService.createFunnel(1, {
+          name: "Test Funnel",
+          status: "INVALID" as any,
+        })
       ).rejects.toThrow("Invalid input");
     });
   });
@@ -172,7 +217,9 @@ describe("FunnelService.createFunnel", () => {
 
       await expect(
         FunnelService.createFunnel(1, { name: "Test Funnel" })
-      ).rejects.toThrow("Funnel creation limit reached: You've reached your limit of 2 funnels");
+      ).rejects.toThrow(
+        "Funnel creation limit reached: You've reached your limit of 2 funnels"
+      );
     });
   });
 });

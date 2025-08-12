@@ -1,6 +1,6 @@
-import { PrismaClient, Funnel, Page } from '../generated/prisma-client';
-import { templateService } from './template.service';
-import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient, Funnel, Page } from "../generated/prisma-client";
+import { templateService } from "./template.service";
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -37,17 +37,17 @@ export class FunnelFromTemplateService {
       where: { id: data.templateId, isActive: true },
       include: {
         pages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
       },
     });
 
     if (!template) {
-      throw new Error('Template not found');
+      throw new Error("Template not found");
     }
 
     if (!template.isPublic) {
-      throw new Error('Template is not publicly available');
+      throw new Error("Template is not publicly available");
     }
 
     // Verify user exists
@@ -56,38 +56,40 @@ export class FunnelFromTemplateService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     // Create funnel
     const funnel = await prisma.funnel.create({
       data: {
         name: data.funnelName,
-        status: 'DRAFT',
+        status: "DRAFT",
         userId: data.userId,
         templateId: data.templateId,
       },
     });
 
     // Generate linking context for all pages first to avoid circular dependencies
-    const linkingContexts: PageLinkingContext[] = template.pages.map((templatePage) => {
-      const newLinkingId = uuidv4();
-      const settings = templatePage.settings as any;
-      const oldLinkingId = templatePage.linkingIdPrefix 
-        ? `${templatePage.linkingIdPrefix}-${templatePage.order}`
-        : settings?.originalLinkingId || uuidv4();
+    const linkingContexts: PageLinkingContext[] = template.pages.map(
+      (templatePage) => {
+        const newLinkingId = uuidv4();
+        const settings = templatePage.settings as any;
+        const oldLinkingId = templatePage.linkingIdPrefix
+          ? `${templatePage.linkingIdPrefix}-${templatePage.order}`
+          : settings?.originalLinkingId || uuidv4();
 
-      return {
-        oldLinkingId,
-        newLinkingId,
-        templatePageId: templatePage.id,
-        newPageId: 0, // Will be filled after page creation
-      };
-    });
+        return {
+          oldLinkingId,
+          newLinkingId,
+          templatePageId: templatePage.id,
+          newPageId: 0, // Will be filled after page creation
+        };
+      }
+    );
 
     // Create linking map
     const linkingMap: Record<string, string> = {};
-    linkingContexts.forEach(context => {
+    linkingContexts.forEach((context) => {
       linkingMap[context.oldLinkingId] = context.newLinkingId;
     });
 
@@ -98,29 +100,42 @@ export class FunnelFromTemplateService {
       const context = linkingContexts[i];
 
       // Get custom page name if provided
-      const pageName = data.customizations?.pageNames?.[templatePage.id] 
-        || templatePage.name;
+      const pageName =
+        data.customizations?.pageNames?.[templatePage.id] || templatePage.name;
 
       // Process content to replace linking IDs and apply customizations
-      let processedContent = templatePage.content || '';
-      
+      let processedContent = templatePage.content || "";
+
       // Replace all old linking IDs with new ones in content
       Object.entries(linkingMap).forEach(([oldId, newId]) => {
-        processedContent = processedContent.replace(new RegExp(oldId, 'g'), newId);
+        processedContent = processedContent.replace(
+          new RegExp(oldId, "g"),
+          newId
+        );
       });
 
       // Apply text replacements if provided
       if (data.customizations?.replaceText) {
-        Object.entries(data.customizations.replaceText).forEach(([search, replace]) => {
-          processedContent = processedContent.replace(new RegExp(search, 'g'), replace);
-        });
+        Object.entries(data.customizations.replaceText).forEach(
+          ([search, replace]) => {
+            processedContent = processedContent.replace(
+              new RegExp(search, "g"),
+              replace
+            );
+          }
+        );
       }
 
       // Apply image replacements if provided
       if (data.customizations?.replaceImages) {
-        Object.entries(data.customizations.replaceImages).forEach(([oldUrl, newUrl]) => {
-          processedContent = processedContent.replace(new RegExp(oldUrl, 'g'), newUrl);
-        });
+        Object.entries(data.customizations.replaceImages).forEach(
+          ([oldUrl, newUrl]) => {
+            processedContent = processedContent.replace(
+              new RegExp(oldUrl, "g"),
+              newUrl
+            );
+          }
+        );
       }
 
       // Create the page
@@ -160,23 +175,23 @@ export class FunnelFromTemplateService {
     }>;
   }> {
     const template = await templateService.getTemplateById(templateId);
-    
+
     if (!template) {
-      throw new Error('Template not found');
+      throw new Error("Template not found");
     }
 
     // Get detailed page information
     const templatePages = await prisma.templatePages.findMany({
       where: { templateId },
-      orderBy: { order: 'asc' },
+      orderBy: { order: "asc" },
     });
 
-    const pageStructure = templatePages.map(page => ({
+    const pageStructure = templatePages.map((page) => ({
       id: page.id,
       name: page.name,
       order: page.order,
       hasContent: !!(page.content && page.content.length > 0),
-      estimatedElements: this.estimateContentElements(page.content || ''),
+      estimatedElements: this.estimateContentElements(page.content || ""),
     }));
 
     return {
@@ -207,20 +222,23 @@ export class FunnelFromTemplateService {
     });
 
     if (!funnel) {
-      throw new Error('Funnel not found or access denied');
+      throw new Error("Funnel not found or access denied");
     }
 
     // Create template from funnel (admin only for now, but this could be extended)
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user?.isAdmin) {
-      throw new Error('Template creation requires admin privileges');
+      throw new Error("Template creation requires admin privileges");
     }
 
-    const templateResult = await templateService.createTemplateFromFunnel(userId, {
-      ...templateData,
-      funnelId,
-      isPublic: false, // Private template for duplication
-    });
+    const templateResult = await templateService.createTemplateFromFunnel(
+      userId,
+      {
+        ...templateData,
+        funnelId,
+        isPublic: false, // Private template for duplication
+      }
+    );
 
     // Now create a new funnel from the template
     return this.createFunnelFromTemplate({
@@ -232,11 +250,13 @@ export class FunnelFromTemplateService {
 
   private estimateContentElements(content: string): number {
     if (!content) return 0;
-    
+
     // Simple heuristic to estimate content complexity
     const htmlTags = (content.match(/<[^>]+>/g) || []).length;
-    const textBlocks = content.split(/\s+/).filter(word => word.length > 0).length;
-    
+    const textBlocks = content
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+
     return Math.max(1, Math.floor((htmlTags + textBlocks) / 20));
   }
 
@@ -252,38 +272,43 @@ export class FunnelFromTemplateService {
       where: { id: templateId },
       include: {
         pages: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         category: true,
       },
     });
 
     if (!template) {
-      errors.push('Template not found');
+      errors.push("Template not found");
       return { isValid: false, errors, warnings };
     }
 
     // Check if template has pages
     if (template.pages.length === 0) {
-      errors.push('Template must have at least one page');
+      errors.push("Template must have at least one page");
     }
 
     // Check for sequential page ordering
     const expectedOrders = template.pages.map((_, index) => index + 1);
-    const actualOrders = template.pages.map(page => page.order);
-    if (JSON.stringify(expectedOrders) !== JSON.stringify(actualOrders.sort((a, b) => a - b))) {
-      warnings.push('Page ordering is not sequential');
+    const actualOrders = template.pages.map((page) => page.order);
+    if (
+      JSON.stringify(expectedOrders) !==
+      JSON.stringify(actualOrders.sort((a, b) => a - b))
+    ) {
+      warnings.push("Page ordering is not sequential");
     }
 
     // Check for pages with empty content
-    const emptyPages = template.pages.filter(page => !page.content || page.content.trim().length === 0);
+    const emptyPages = template.pages.filter(
+      (page) => !page.content || page.content.trim().length === 0
+    );
     if (emptyPages.length > 0) {
       warnings.push(`${emptyPages.length} page(s) have empty content`);
     }
 
     // Check category validity
     if (!template.category?.isActive) {
-      errors.push('Template category is inactive or missing');
+      errors.push("Template category is inactive or missing");
     }
 
     return {

@@ -15,16 +15,17 @@ export class TestDatabase {
 
   constructor(config: TestDatabaseConfig = {}) {
     this.isCI = process.env.CI === "true";
-    
+
     // Use CI database URL or local test database
-    this.databaseUrl = config.connectionUrl || 
-      process.env.DATABASE_URL || 
-      (this.isCI 
+    this.databaseUrl =
+      config.connectionUrl ||
+      process.env.DATABASE_URL ||
+      (this.isCI
         ? "postgresql://postgres:postgres@localhost:5432/funnel_builder_test"
         : "postgresql://hadi@localhost:5432/funnel_builder_test");
-    
+
     process.env.DATABASE_URL = this.databaseUrl;
-    
+
     this.prisma = new PrismaClient({
       datasources: {
         db: {
@@ -41,13 +42,13 @@ export class TestDatabase {
       if (!this.isCI) {
         await this.ensureDatabaseExists();
       }
-      
+
       // Run migrations
       await this.runMigrations();
-      
+
       // Connect to database
       await this.prisma.$connect();
-      
+
       // Clean database before tests
       await this.clean();
     } catch (error) {
@@ -93,7 +94,7 @@ export class TestDatabase {
     const dbName = "funnel_builder_test";
     const url = new URL(this.databaseUrl);
     const baseUrl = `${url.protocol}//${url.username}${url.password ? `:${url.password}` : ""}@${url.host}/postgres`;
-    
+
     try {
       // Check if database exists
       const checkDb = new PrismaClient({
@@ -103,19 +104,19 @@ export class TestDatabase {
           },
         },
       });
-      
+
       const result = await checkDb.$queryRaw<Array<{ exists: boolean }>>`
         SELECT EXISTS (
           SELECT FROM pg_database WHERE datname = ${dbName}
         ) as exists
       `;
-      
+
       if (!result[0]?.exists) {
         // Create database if it doesn't exist
         await checkDb.$executeRawUnsafe(`CREATE DATABASE ${dbName}`);
         console.log(`Created test database: ${dbName}`);
       }
-      
+
       await checkDb.$disconnect();
     } catch (error) {
       console.warn("Could not ensure database exists:", error);
@@ -130,7 +131,7 @@ export class TestDatabase {
         ".bin",
         "prisma"
       );
-      
+
       // Reset database and apply migrations
       if (this.isCI) {
         // In CI, just deploy migrations
@@ -167,7 +168,7 @@ export class TestDatabase {
     fn: (prisma: PrismaClient) => Promise<T>
   ): Promise<T> {
     let result: T;
-    
+
     try {
       await this.prisma.$transaction(async (tx) => {
         result = await fn(tx as PrismaClient);
@@ -180,7 +181,7 @@ export class TestDatabase {
       }
       throw error;
     }
-    
+
     return result!;
   }
 }

@@ -68,6 +68,16 @@ export type TemplateImage = $Result.DefaultSelection<Prisma.$TemplateImagePayloa
  * 
  */
 export type TemplatePages = $Result.DefaultSelection<Prisma.$TemplatePagesPayload>
+/**
+ * Model Image
+ * 
+ */
+export type Image = $Result.DefaultSelection<Prisma.$ImagePayload>
+/**
+ * Model ImageFolder
+ * 
+ */
+export type ImageFolder = $Result.DefaultSelection<Prisma.$ImageFolderPayload>
 
 /**
  * Enums
@@ -376,6 +386,26 @@ export class PrismaClient<
     * ```
     */
   get templatePages(): Prisma.TemplatePagesDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.image`: Exposes CRUD operations for the **Image** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Images
+    * const images = await prisma.image.findMany()
+    * ```
+    */
+  get image(): Prisma.ImageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.imageFolder`: Exposes CRUD operations for the **ImageFolder** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ImageFolders
+    * const imageFolders = await prisma.imageFolder.findMany()
+    * ```
+    */
+  get imageFolder(): Prisma.ImageFolderDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -826,7 +856,9 @@ export namespace Prisma {
     TemplateCategory: 'TemplateCategory',
     Template: 'Template',
     TemplateImage: 'TemplateImage',
-    TemplatePages: 'TemplatePages'
+    TemplatePages: 'TemplatePages',
+    Image: 'Image',
+    ImageFolder: 'ImageFolder'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -845,7 +877,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePages"
+      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePages" | "image" | "imageFolder"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1663,6 +1695,154 @@ export namespace Prisma {
           }
         }
       }
+      Image: {
+        payload: Prisma.$ImagePayload<ExtArgs>
+        fields: Prisma.ImageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ImageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ImageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          findFirst: {
+            args: Prisma.ImageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ImageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          findMany: {
+            args: Prisma.ImageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>[]
+          }
+          create: {
+            args: Prisma.ImageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          createMany: {
+            args: Prisma.ImageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ImageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>[]
+          }
+          delete: {
+            args: Prisma.ImageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          update: {
+            args: Prisma.ImageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          deleteMany: {
+            args: Prisma.ImageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ImageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ImageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>[]
+          }
+          upsert: {
+            args: Prisma.ImageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImagePayload>
+          }
+          aggregate: {
+            args: Prisma.ImageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateImage>
+          }
+          groupBy: {
+            args: Prisma.ImageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ImageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ImageCountArgs<ExtArgs>
+            result: $Utils.Optional<ImageCountAggregateOutputType> | number
+          }
+        }
+      }
+      ImageFolder: {
+        payload: Prisma.$ImageFolderPayload<ExtArgs>
+        fields: Prisma.ImageFolderFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ImageFolderFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ImageFolderFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          findFirst: {
+            args: Prisma.ImageFolderFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ImageFolderFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          findMany: {
+            args: Prisma.ImageFolderFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>[]
+          }
+          create: {
+            args: Prisma.ImageFolderCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          createMany: {
+            args: Prisma.ImageFolderCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ImageFolderCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>[]
+          }
+          delete: {
+            args: Prisma.ImageFolderDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          update: {
+            args: Prisma.ImageFolderUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          deleteMany: {
+            args: Prisma.ImageFolderDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ImageFolderUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ImageFolderUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>[]
+          }
+          upsert: {
+            args: Prisma.ImageFolderUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageFolderPayload>
+          }
+          aggregate: {
+            args: Prisma.ImageFolderAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateImageFolder>
+          }
+          groupBy: {
+            args: Prisma.ImageFolderGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ImageFolderGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ImageFolderCountArgs<ExtArgs>
+            result: $Utils.Optional<ImageFolderCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1766,6 +1946,8 @@ export namespace Prisma {
     template?: TemplateOmit
     templateImage?: TemplateImageOmit
     templatePages?: TemplatePagesOmit
+    image?: ImageOmit
+    imageFolder?: ImageFolderOmit
   }
 
   /* Types for Logging */
@@ -1868,12 +2050,14 @@ export namespace Prisma {
     funnels: number
     domains: number
     templates: number
+    imageFolders: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnels?: boolean | UserCountOutputTypeCountFunnelsArgs
     domains?: boolean | UserCountOutputTypeCountDomainsArgs
     templates?: boolean | UserCountOutputTypeCountTemplatesArgs
+    imageFolders?: boolean | UserCountOutputTypeCountImageFoldersArgs
   }
 
   // Custom InputTypes
@@ -1906,6 +2090,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountTemplatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TemplateWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountImageFoldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ImageFolderWhereInput
   }
 
 
@@ -2057,6 +2248,37 @@ export namespace Prisma {
    */
   export type TemplateCountOutputTypeCountFunnelsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FunnelWhereInput
+  }
+
+
+  /**
+   * Count Type ImageFolderCountOutputType
+   */
+
+  export type ImageFolderCountOutputType = {
+    images: number
+  }
+
+  export type ImageFolderCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    images?: boolean | ImageFolderCountOutputTypeCountImagesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ImageFolderCountOutputType without action
+   */
+  export type ImageFolderCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolderCountOutputType
+     */
+    select?: ImageFolderCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ImageFolderCountOutputType without action
+   */
+  export type ImageFolderCountOutputTypeCountImagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ImageWhereInput
   }
 
 
@@ -2309,6 +2531,7 @@ export namespace Prisma {
     funnels?: boolean | User$funnelsArgs<ExtArgs>
     domains?: boolean | User$domainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
+    imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2356,6 +2579,7 @@ export namespace Prisma {
     funnels?: boolean | User$funnelsArgs<ExtArgs>
     domains?: boolean | User$domainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
+    imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2367,6 +2591,7 @@ export namespace Prisma {
       funnels: Prisma.$FunnelPayload<ExtArgs>[]
       domains: Prisma.$DomainPayload<ExtArgs>[]
       templates: Prisma.$TemplatePayload<ExtArgs>[]
+      imageFolders: Prisma.$ImageFolderPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2776,6 +3001,7 @@ export namespace Prisma {
     funnels<T extends User$funnelsArgs<ExtArgs> = {}>(args?: Subset<T, User$funnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     domains<T extends User$domainsArgs<ExtArgs> = {}>(args?: Subset<T, User$domainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     templates<T extends User$templatesArgs<ExtArgs> = {}>(args?: Subset<T, User$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    imageFolders<T extends User$imageFoldersArgs<ExtArgs> = {}>(args?: Subset<T, User$imageFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3272,6 +3498,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TemplateScalarFieldEnum | TemplateScalarFieldEnum[]
+  }
+
+  /**
+   * User.imageFolders
+   */
+  export type User$imageFoldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    where?: ImageFolderWhereInput
+    orderBy?: ImageFolderOrderByWithRelationInput | ImageFolderOrderByWithRelationInput[]
+    cursor?: ImageFolderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ImageFolderScalarFieldEnum | ImageFolderScalarFieldEnum[]
   }
 
   /**
@@ -15163,6 +15413,2290 @@ export namespace Prisma {
 
 
   /**
+   * Model Image
+   */
+
+  export type AggregateImage = {
+    _count: ImageCountAggregateOutputType | null
+    _avg: ImageAvgAggregateOutputType | null
+    _sum: ImageSumAggregateOutputType | null
+    _min: ImageMinAggregateOutputType | null
+    _max: ImageMaxAggregateOutputType | null
+  }
+
+  export type ImageAvgAggregateOutputType = {
+    id: number | null
+    size: number | null
+    folderId: number | null
+  }
+
+  export type ImageSumAggregateOutputType = {
+    id: number | null
+    size: number | null
+    folderId: number | null
+  }
+
+  export type ImageMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    url: string | null
+    altText: string | null
+    size: number | null
+    folderId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    url: string | null
+    altText: string | null
+    size: number | null
+    folderId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageCountAggregateOutputType = {
+    id: number
+    name: number
+    url: number
+    altText: number
+    size: number
+    folderId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ImageAvgAggregateInputType = {
+    id?: true
+    size?: true
+    folderId?: true
+  }
+
+  export type ImageSumAggregateInputType = {
+    id?: true
+    size?: true
+    folderId?: true
+  }
+
+  export type ImageMinAggregateInputType = {
+    id?: true
+    name?: true
+    url?: true
+    altText?: true
+    size?: true
+    folderId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageMaxAggregateInputType = {
+    id?: true
+    name?: true
+    url?: true
+    altText?: true
+    size?: true
+    folderId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageCountAggregateInputType = {
+    id?: true
+    name?: true
+    url?: true
+    altText?: true
+    size?: true
+    folderId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ImageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Image to aggregate.
+     */
+    where?: ImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Images to fetch.
+     */
+    orderBy?: ImageOrderByWithRelationInput | ImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Images from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Images.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Images
+    **/
+    _count?: true | ImageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ImageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ImageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ImageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ImageMaxAggregateInputType
+  }
+
+  export type GetImageAggregateType<T extends ImageAggregateArgs> = {
+        [P in keyof T & keyof AggregateImage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateImage[P]>
+      : GetScalarType<T[P], AggregateImage[P]>
+  }
+
+
+
+
+  export type ImageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ImageWhereInput
+    orderBy?: ImageOrderByWithAggregationInput | ImageOrderByWithAggregationInput[]
+    by: ImageScalarFieldEnum[] | ImageScalarFieldEnum
+    having?: ImageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ImageCountAggregateInputType | true
+    _avg?: ImageAvgAggregateInputType
+    _sum?: ImageSumAggregateInputType
+    _min?: ImageMinAggregateInputType
+    _max?: ImageMaxAggregateInputType
+  }
+
+  export type ImageGroupByOutputType = {
+    id: number
+    name: string | null
+    url: string
+    altText: string | null
+    size: number | null
+    folderId: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ImageCountAggregateOutputType | null
+    _avg: ImageAvgAggregateOutputType | null
+    _sum: ImageSumAggregateOutputType | null
+    _min: ImageMinAggregateOutputType | null
+    _max: ImageMaxAggregateOutputType | null
+  }
+
+  type GetImageGroupByPayload<T extends ImageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ImageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ImageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ImageGroupByOutputType[P]>
+            : GetScalarType<T[P], ImageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ImageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    url?: boolean
+    altText?: boolean
+    size?: boolean
+    folderId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }, ExtArgs["result"]["image"]>
+
+  export type ImageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    url?: boolean
+    altText?: boolean
+    size?: boolean
+    folderId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }, ExtArgs["result"]["image"]>
+
+  export type ImageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    url?: boolean
+    altText?: boolean
+    size?: boolean
+    folderId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }, ExtArgs["result"]["image"]>
+
+  export type ImageSelectScalar = {
+    id?: boolean
+    name?: boolean
+    url?: boolean
+    altText?: boolean
+    size?: boolean
+    folderId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ImageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "altText" | "size" | "folderId" | "createdAt" | "updatedAt", ExtArgs["result"]["image"]>
+  export type ImageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }
+  export type ImageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }
+  export type ImageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    folder?: boolean | Image$folderArgs<ExtArgs>
+  }
+
+  export type $ImagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Image"
+    objects: {
+      folder: Prisma.$ImageFolderPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string | null
+      url: string
+      altText: string | null
+      size: number | null
+      folderId: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["image"]>
+    composites: {}
+  }
+
+  type ImageGetPayload<S extends boolean | null | undefined | ImageDefaultArgs> = $Result.GetResult<Prisma.$ImagePayload, S>
+
+  type ImageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ImageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ImageCountAggregateInputType | true
+    }
+
+  export interface ImageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Image'], meta: { name: 'Image' } }
+    /**
+     * Find zero or one Image that matches the filter.
+     * @param {ImageFindUniqueArgs} args - Arguments to find a Image
+     * @example
+     * // Get one Image
+     * const image = await prisma.image.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ImageFindUniqueArgs>(args: SelectSubset<T, ImageFindUniqueArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Image that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ImageFindUniqueOrThrowArgs} args - Arguments to find a Image
+     * @example
+     * // Get one Image
+     * const image = await prisma.image.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ImageFindUniqueOrThrowArgs>(args: SelectSubset<T, ImageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Image that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFindFirstArgs} args - Arguments to find a Image
+     * @example
+     * // Get one Image
+     * const image = await prisma.image.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ImageFindFirstArgs>(args?: SelectSubset<T, ImageFindFirstArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Image that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFindFirstOrThrowArgs} args - Arguments to find a Image
+     * @example
+     * // Get one Image
+     * const image = await prisma.image.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ImageFindFirstOrThrowArgs>(args?: SelectSubset<T, ImageFindFirstOrThrowArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Images that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Images
+     * const images = await prisma.image.findMany()
+     * 
+     * // Get first 10 Images
+     * const images = await prisma.image.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const imageWithIdOnly = await prisma.image.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ImageFindManyArgs>(args?: SelectSubset<T, ImageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Image.
+     * @param {ImageCreateArgs} args - Arguments to create a Image.
+     * @example
+     * // Create one Image
+     * const Image = await prisma.image.create({
+     *   data: {
+     *     // ... data to create a Image
+     *   }
+     * })
+     * 
+     */
+    create<T extends ImageCreateArgs>(args: SelectSubset<T, ImageCreateArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Images.
+     * @param {ImageCreateManyArgs} args - Arguments to create many Images.
+     * @example
+     * // Create many Images
+     * const image = await prisma.image.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ImageCreateManyArgs>(args?: SelectSubset<T, ImageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Images and returns the data saved in the database.
+     * @param {ImageCreateManyAndReturnArgs} args - Arguments to create many Images.
+     * @example
+     * // Create many Images
+     * const image = await prisma.image.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Images and only return the `id`
+     * const imageWithIdOnly = await prisma.image.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ImageCreateManyAndReturnArgs>(args?: SelectSubset<T, ImageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Image.
+     * @param {ImageDeleteArgs} args - Arguments to delete one Image.
+     * @example
+     * // Delete one Image
+     * const Image = await prisma.image.delete({
+     *   where: {
+     *     // ... filter to delete one Image
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ImageDeleteArgs>(args: SelectSubset<T, ImageDeleteArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Image.
+     * @param {ImageUpdateArgs} args - Arguments to update one Image.
+     * @example
+     * // Update one Image
+     * const image = await prisma.image.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ImageUpdateArgs>(args: SelectSubset<T, ImageUpdateArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Images.
+     * @param {ImageDeleteManyArgs} args - Arguments to filter Images to delete.
+     * @example
+     * // Delete a few Images
+     * const { count } = await prisma.image.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ImageDeleteManyArgs>(args?: SelectSubset<T, ImageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Images.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Images
+     * const image = await prisma.image.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ImageUpdateManyArgs>(args: SelectSubset<T, ImageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Images and returns the data updated in the database.
+     * @param {ImageUpdateManyAndReturnArgs} args - Arguments to update many Images.
+     * @example
+     * // Update many Images
+     * const image = await prisma.image.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Images and only return the `id`
+     * const imageWithIdOnly = await prisma.image.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ImageUpdateManyAndReturnArgs>(args: SelectSubset<T, ImageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Image.
+     * @param {ImageUpsertArgs} args - Arguments to update or create a Image.
+     * @example
+     * // Update or create a Image
+     * const image = await prisma.image.upsert({
+     *   create: {
+     *     // ... data to create a Image
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Image we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ImageUpsertArgs>(args: SelectSubset<T, ImageUpsertArgs<ExtArgs>>): Prisma__ImageClient<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Images.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageCountArgs} args - Arguments to filter Images to count.
+     * @example
+     * // Count the number of Images
+     * const count = await prisma.image.count({
+     *   where: {
+     *     // ... the filter for the Images we want to count
+     *   }
+     * })
+    **/
+    count<T extends ImageCountArgs>(
+      args?: Subset<T, ImageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ImageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Image.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ImageAggregateArgs>(args: Subset<T, ImageAggregateArgs>): Prisma.PrismaPromise<GetImageAggregateType<T>>
+
+    /**
+     * Group by Image.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ImageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ImageGroupByArgs['orderBy'] }
+        : { orderBy?: ImageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ImageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetImageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Image model
+   */
+  readonly fields: ImageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Image.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ImageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    folder<T extends Image$folderArgs<ExtArgs> = {}>(args?: Subset<T, Image$folderArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Image model
+   */
+  interface ImageFieldRefs {
+    readonly id: FieldRef<"Image", 'Int'>
+    readonly name: FieldRef<"Image", 'String'>
+    readonly url: FieldRef<"Image", 'String'>
+    readonly altText: FieldRef<"Image", 'String'>
+    readonly size: FieldRef<"Image", 'Int'>
+    readonly folderId: FieldRef<"Image", 'Int'>
+    readonly createdAt: FieldRef<"Image", 'DateTime'>
+    readonly updatedAt: FieldRef<"Image", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Image findUnique
+   */
+  export type ImageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter, which Image to fetch.
+     */
+    where: ImageWhereUniqueInput
+  }
+
+  /**
+   * Image findUniqueOrThrow
+   */
+  export type ImageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter, which Image to fetch.
+     */
+    where: ImageWhereUniqueInput
+  }
+
+  /**
+   * Image findFirst
+   */
+  export type ImageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter, which Image to fetch.
+     */
+    where?: ImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Images to fetch.
+     */
+    orderBy?: ImageOrderByWithRelationInput | ImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Images.
+     */
+    cursor?: ImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Images from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Images.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Images.
+     */
+    distinct?: ImageScalarFieldEnum | ImageScalarFieldEnum[]
+  }
+
+  /**
+   * Image findFirstOrThrow
+   */
+  export type ImageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter, which Image to fetch.
+     */
+    where?: ImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Images to fetch.
+     */
+    orderBy?: ImageOrderByWithRelationInput | ImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Images.
+     */
+    cursor?: ImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Images from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Images.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Images.
+     */
+    distinct?: ImageScalarFieldEnum | ImageScalarFieldEnum[]
+  }
+
+  /**
+   * Image findMany
+   */
+  export type ImageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter, which Images to fetch.
+     */
+    where?: ImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Images to fetch.
+     */
+    orderBy?: ImageOrderByWithRelationInput | ImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Images.
+     */
+    cursor?: ImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Images from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Images.
+     */
+    skip?: number
+    distinct?: ImageScalarFieldEnum | ImageScalarFieldEnum[]
+  }
+
+  /**
+   * Image create
+   */
+  export type ImageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Image.
+     */
+    data: XOR<ImageCreateInput, ImageUncheckedCreateInput>
+  }
+
+  /**
+   * Image createMany
+   */
+  export type ImageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Images.
+     */
+    data: ImageCreateManyInput | ImageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Image createManyAndReturn
+   */
+  export type ImageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * The data used to create many Images.
+     */
+    data: ImageCreateManyInput | ImageCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Image update
+   */
+  export type ImageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Image.
+     */
+    data: XOR<ImageUpdateInput, ImageUncheckedUpdateInput>
+    /**
+     * Choose, which Image to update.
+     */
+    where: ImageWhereUniqueInput
+  }
+
+  /**
+   * Image updateMany
+   */
+  export type ImageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Images.
+     */
+    data: XOR<ImageUpdateManyMutationInput, ImageUncheckedUpdateManyInput>
+    /**
+     * Filter which Images to update
+     */
+    where?: ImageWhereInput
+    /**
+     * Limit how many Images to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Image updateManyAndReturn
+   */
+  export type ImageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * The data used to update Images.
+     */
+    data: XOR<ImageUpdateManyMutationInput, ImageUncheckedUpdateManyInput>
+    /**
+     * Filter which Images to update
+     */
+    where?: ImageWhereInput
+    /**
+     * Limit how many Images to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Image upsert
+   */
+  export type ImageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Image to update in case it exists.
+     */
+    where: ImageWhereUniqueInput
+    /**
+     * In case the Image found by the `where` argument doesn't exist, create a new Image with this data.
+     */
+    create: XOR<ImageCreateInput, ImageUncheckedCreateInput>
+    /**
+     * In case the Image was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ImageUpdateInput, ImageUncheckedUpdateInput>
+  }
+
+  /**
+   * Image delete
+   */
+  export type ImageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    /**
+     * Filter which Image to delete.
+     */
+    where: ImageWhereUniqueInput
+  }
+
+  /**
+   * Image deleteMany
+   */
+  export type ImageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Images to delete
+     */
+    where?: ImageWhereInput
+    /**
+     * Limit how many Images to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Image.folder
+   */
+  export type Image$folderArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    where?: ImageFolderWhereInput
+  }
+
+  /**
+   * Image without action
+   */
+  export type ImageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ImageFolder
+   */
+
+  export type AggregateImageFolder = {
+    _count: ImageFolderCountAggregateOutputType | null
+    _avg: ImageFolderAvgAggregateOutputType | null
+    _sum: ImageFolderSumAggregateOutputType | null
+    _min: ImageFolderMinAggregateOutputType | null
+    _max: ImageFolderMaxAggregateOutputType | null
+  }
+
+  export type ImageFolderAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ImageFolderSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ImageFolderMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    userId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageFolderMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    userId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageFolderCountAggregateOutputType = {
+    id: number
+    name: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ImageFolderAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ImageFolderSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ImageFolderMinAggregateInputType = {
+    id?: true
+    name?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageFolderMaxAggregateInputType = {
+    id?: true
+    name?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageFolderCountAggregateInputType = {
+    id?: true
+    name?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ImageFolderAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ImageFolder to aggregate.
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageFolders to fetch.
+     */
+    orderBy?: ImageFolderOrderByWithRelationInput | ImageFolderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ImageFolderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageFolders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageFolders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ImageFolders
+    **/
+    _count?: true | ImageFolderCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ImageFolderAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ImageFolderSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ImageFolderMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ImageFolderMaxAggregateInputType
+  }
+
+  export type GetImageFolderAggregateType<T extends ImageFolderAggregateArgs> = {
+        [P in keyof T & keyof AggregateImageFolder]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateImageFolder[P]>
+      : GetScalarType<T[P], AggregateImageFolder[P]>
+  }
+
+
+
+
+  export type ImageFolderGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ImageFolderWhereInput
+    orderBy?: ImageFolderOrderByWithAggregationInput | ImageFolderOrderByWithAggregationInput[]
+    by: ImageFolderScalarFieldEnum[] | ImageFolderScalarFieldEnum
+    having?: ImageFolderScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ImageFolderCountAggregateInputType | true
+    _avg?: ImageFolderAvgAggregateInputType
+    _sum?: ImageFolderSumAggregateInputType
+    _min?: ImageFolderMinAggregateInputType
+    _max?: ImageFolderMaxAggregateInputType
+  }
+
+  export type ImageFolderGroupByOutputType = {
+    id: number
+    name: string
+    userId: number
+    createdAt: Date
+    updatedAt: Date
+    _count: ImageFolderCountAggregateOutputType | null
+    _avg: ImageFolderAvgAggregateOutputType | null
+    _sum: ImageFolderSumAggregateOutputType | null
+    _min: ImageFolderMinAggregateOutputType | null
+    _max: ImageFolderMaxAggregateOutputType | null
+  }
+
+  type GetImageFolderGroupByPayload<T extends ImageFolderGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ImageFolderGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ImageFolderGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ImageFolderGroupByOutputType[P]>
+            : GetScalarType<T[P], ImageFolderGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ImageFolderSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    images?: boolean | ImageFolder$imagesArgs<ExtArgs>
+    _count?: boolean | ImageFolderCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["imageFolder"]>
+
+  export type ImageFolderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["imageFolder"]>
+
+  export type ImageFolderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["imageFolder"]>
+
+  export type ImageFolderSelectScalar = {
+    id?: boolean
+    name?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ImageFolderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["imageFolder"]>
+  export type ImageFolderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    images?: boolean | ImageFolder$imagesArgs<ExtArgs>
+    _count?: boolean | ImageFolderCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ImageFolderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type ImageFolderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $ImageFolderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ImageFolder"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      images: Prisma.$ImagePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      userId: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["imageFolder"]>
+    composites: {}
+  }
+
+  type ImageFolderGetPayload<S extends boolean | null | undefined | ImageFolderDefaultArgs> = $Result.GetResult<Prisma.$ImageFolderPayload, S>
+
+  type ImageFolderCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ImageFolderFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ImageFolderCountAggregateInputType | true
+    }
+
+  export interface ImageFolderDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ImageFolder'], meta: { name: 'ImageFolder' } }
+    /**
+     * Find zero or one ImageFolder that matches the filter.
+     * @param {ImageFolderFindUniqueArgs} args - Arguments to find a ImageFolder
+     * @example
+     * // Get one ImageFolder
+     * const imageFolder = await prisma.imageFolder.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ImageFolderFindUniqueArgs>(args: SelectSubset<T, ImageFolderFindUniqueArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ImageFolder that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ImageFolderFindUniqueOrThrowArgs} args - Arguments to find a ImageFolder
+     * @example
+     * // Get one ImageFolder
+     * const imageFolder = await prisma.imageFolder.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ImageFolderFindUniqueOrThrowArgs>(args: SelectSubset<T, ImageFolderFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ImageFolder that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderFindFirstArgs} args - Arguments to find a ImageFolder
+     * @example
+     * // Get one ImageFolder
+     * const imageFolder = await prisma.imageFolder.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ImageFolderFindFirstArgs>(args?: SelectSubset<T, ImageFolderFindFirstArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ImageFolder that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderFindFirstOrThrowArgs} args - Arguments to find a ImageFolder
+     * @example
+     * // Get one ImageFolder
+     * const imageFolder = await prisma.imageFolder.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ImageFolderFindFirstOrThrowArgs>(args?: SelectSubset<T, ImageFolderFindFirstOrThrowArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ImageFolders that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ImageFolders
+     * const imageFolders = await prisma.imageFolder.findMany()
+     * 
+     * // Get first 10 ImageFolders
+     * const imageFolders = await prisma.imageFolder.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const imageFolderWithIdOnly = await prisma.imageFolder.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ImageFolderFindManyArgs>(args?: SelectSubset<T, ImageFolderFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ImageFolder.
+     * @param {ImageFolderCreateArgs} args - Arguments to create a ImageFolder.
+     * @example
+     * // Create one ImageFolder
+     * const ImageFolder = await prisma.imageFolder.create({
+     *   data: {
+     *     // ... data to create a ImageFolder
+     *   }
+     * })
+     * 
+     */
+    create<T extends ImageFolderCreateArgs>(args: SelectSubset<T, ImageFolderCreateArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ImageFolders.
+     * @param {ImageFolderCreateManyArgs} args - Arguments to create many ImageFolders.
+     * @example
+     * // Create many ImageFolders
+     * const imageFolder = await prisma.imageFolder.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ImageFolderCreateManyArgs>(args?: SelectSubset<T, ImageFolderCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ImageFolders and returns the data saved in the database.
+     * @param {ImageFolderCreateManyAndReturnArgs} args - Arguments to create many ImageFolders.
+     * @example
+     * // Create many ImageFolders
+     * const imageFolder = await prisma.imageFolder.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ImageFolders and only return the `id`
+     * const imageFolderWithIdOnly = await prisma.imageFolder.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ImageFolderCreateManyAndReturnArgs>(args?: SelectSubset<T, ImageFolderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ImageFolder.
+     * @param {ImageFolderDeleteArgs} args - Arguments to delete one ImageFolder.
+     * @example
+     * // Delete one ImageFolder
+     * const ImageFolder = await prisma.imageFolder.delete({
+     *   where: {
+     *     // ... filter to delete one ImageFolder
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ImageFolderDeleteArgs>(args: SelectSubset<T, ImageFolderDeleteArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ImageFolder.
+     * @param {ImageFolderUpdateArgs} args - Arguments to update one ImageFolder.
+     * @example
+     * // Update one ImageFolder
+     * const imageFolder = await prisma.imageFolder.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ImageFolderUpdateArgs>(args: SelectSubset<T, ImageFolderUpdateArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ImageFolders.
+     * @param {ImageFolderDeleteManyArgs} args - Arguments to filter ImageFolders to delete.
+     * @example
+     * // Delete a few ImageFolders
+     * const { count } = await prisma.imageFolder.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ImageFolderDeleteManyArgs>(args?: SelectSubset<T, ImageFolderDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ImageFolders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ImageFolders
+     * const imageFolder = await prisma.imageFolder.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ImageFolderUpdateManyArgs>(args: SelectSubset<T, ImageFolderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ImageFolders and returns the data updated in the database.
+     * @param {ImageFolderUpdateManyAndReturnArgs} args - Arguments to update many ImageFolders.
+     * @example
+     * // Update many ImageFolders
+     * const imageFolder = await prisma.imageFolder.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ImageFolders and only return the `id`
+     * const imageFolderWithIdOnly = await prisma.imageFolder.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ImageFolderUpdateManyAndReturnArgs>(args: SelectSubset<T, ImageFolderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ImageFolder.
+     * @param {ImageFolderUpsertArgs} args - Arguments to update or create a ImageFolder.
+     * @example
+     * // Update or create a ImageFolder
+     * const imageFolder = await prisma.imageFolder.upsert({
+     *   create: {
+     *     // ... data to create a ImageFolder
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ImageFolder we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ImageFolderUpsertArgs>(args: SelectSubset<T, ImageFolderUpsertArgs<ExtArgs>>): Prisma__ImageFolderClient<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ImageFolders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderCountArgs} args - Arguments to filter ImageFolders to count.
+     * @example
+     * // Count the number of ImageFolders
+     * const count = await prisma.imageFolder.count({
+     *   where: {
+     *     // ... the filter for the ImageFolders we want to count
+     *   }
+     * })
+    **/
+    count<T extends ImageFolderCountArgs>(
+      args?: Subset<T, ImageFolderCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ImageFolderCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ImageFolder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ImageFolderAggregateArgs>(args: Subset<T, ImageFolderAggregateArgs>): Prisma.PrismaPromise<GetImageFolderAggregateType<T>>
+
+    /**
+     * Group by ImageFolder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageFolderGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ImageFolderGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ImageFolderGroupByArgs['orderBy'] }
+        : { orderBy?: ImageFolderGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ImageFolderGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetImageFolderGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ImageFolder model
+   */
+  readonly fields: ImageFolderFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ImageFolder.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ImageFolderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    images<T extends ImageFolder$imagesArgs<ExtArgs> = {}>(args?: Subset<T, ImageFolder$imagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ImageFolder model
+   */
+  interface ImageFolderFieldRefs {
+    readonly id: FieldRef<"ImageFolder", 'Int'>
+    readonly name: FieldRef<"ImageFolder", 'String'>
+    readonly userId: FieldRef<"ImageFolder", 'Int'>
+    readonly createdAt: FieldRef<"ImageFolder", 'DateTime'>
+    readonly updatedAt: FieldRef<"ImageFolder", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ImageFolder findUnique
+   */
+  export type ImageFolderFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter, which ImageFolder to fetch.
+     */
+    where: ImageFolderWhereUniqueInput
+  }
+
+  /**
+   * ImageFolder findUniqueOrThrow
+   */
+  export type ImageFolderFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter, which ImageFolder to fetch.
+     */
+    where: ImageFolderWhereUniqueInput
+  }
+
+  /**
+   * ImageFolder findFirst
+   */
+  export type ImageFolderFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter, which ImageFolder to fetch.
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageFolders to fetch.
+     */
+    orderBy?: ImageFolderOrderByWithRelationInput | ImageFolderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ImageFolders.
+     */
+    cursor?: ImageFolderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageFolders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageFolders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ImageFolders.
+     */
+    distinct?: ImageFolderScalarFieldEnum | ImageFolderScalarFieldEnum[]
+  }
+
+  /**
+   * ImageFolder findFirstOrThrow
+   */
+  export type ImageFolderFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter, which ImageFolder to fetch.
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageFolders to fetch.
+     */
+    orderBy?: ImageFolderOrderByWithRelationInput | ImageFolderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ImageFolders.
+     */
+    cursor?: ImageFolderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageFolders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageFolders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ImageFolders.
+     */
+    distinct?: ImageFolderScalarFieldEnum | ImageFolderScalarFieldEnum[]
+  }
+
+  /**
+   * ImageFolder findMany
+   */
+  export type ImageFolderFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter, which ImageFolders to fetch.
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageFolders to fetch.
+     */
+    orderBy?: ImageFolderOrderByWithRelationInput | ImageFolderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ImageFolders.
+     */
+    cursor?: ImageFolderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageFolders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageFolders.
+     */
+    skip?: number
+    distinct?: ImageFolderScalarFieldEnum | ImageFolderScalarFieldEnum[]
+  }
+
+  /**
+   * ImageFolder create
+   */
+  export type ImageFolderCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ImageFolder.
+     */
+    data: XOR<ImageFolderCreateInput, ImageFolderUncheckedCreateInput>
+  }
+
+  /**
+   * ImageFolder createMany
+   */
+  export type ImageFolderCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ImageFolders.
+     */
+    data: ImageFolderCreateManyInput | ImageFolderCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ImageFolder createManyAndReturn
+   */
+  export type ImageFolderCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * The data used to create many ImageFolders.
+     */
+    data: ImageFolderCreateManyInput | ImageFolderCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ImageFolder update
+   */
+  export type ImageFolderUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ImageFolder.
+     */
+    data: XOR<ImageFolderUpdateInput, ImageFolderUncheckedUpdateInput>
+    /**
+     * Choose, which ImageFolder to update.
+     */
+    where: ImageFolderWhereUniqueInput
+  }
+
+  /**
+   * ImageFolder updateMany
+   */
+  export type ImageFolderUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ImageFolders.
+     */
+    data: XOR<ImageFolderUpdateManyMutationInput, ImageFolderUncheckedUpdateManyInput>
+    /**
+     * Filter which ImageFolders to update
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * Limit how many ImageFolders to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageFolder updateManyAndReturn
+   */
+  export type ImageFolderUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * The data used to update ImageFolders.
+     */
+    data: XOR<ImageFolderUpdateManyMutationInput, ImageFolderUncheckedUpdateManyInput>
+    /**
+     * Filter which ImageFolders to update
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * Limit how many ImageFolders to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ImageFolder upsert
+   */
+  export type ImageFolderUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ImageFolder to update in case it exists.
+     */
+    where: ImageFolderWhereUniqueInput
+    /**
+     * In case the ImageFolder found by the `where` argument doesn't exist, create a new ImageFolder with this data.
+     */
+    create: XOR<ImageFolderCreateInput, ImageFolderUncheckedCreateInput>
+    /**
+     * In case the ImageFolder was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ImageFolderUpdateInput, ImageFolderUncheckedUpdateInput>
+  }
+
+  /**
+   * ImageFolder delete
+   */
+  export type ImageFolderDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+    /**
+     * Filter which ImageFolder to delete.
+     */
+    where: ImageFolderWhereUniqueInput
+  }
+
+  /**
+   * ImageFolder deleteMany
+   */
+  export type ImageFolderDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ImageFolders to delete
+     */
+    where?: ImageFolderWhereInput
+    /**
+     * Limit how many ImageFolders to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageFolder.images
+   */
+  export type ImageFolder$imagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Image
+     */
+    select?: ImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Image
+     */
+    omit?: ImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageInclude<ExtArgs> | null
+    where?: ImageWhereInput
+    orderBy?: ImageOrderByWithRelationInput | ImageOrderByWithRelationInput[]
+    cursor?: ImageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ImageScalarFieldEnum | ImageScalarFieldEnum[]
+  }
+
+  /**
+   * ImageFolder without action
+   */
+  export type ImageFolderDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageFolder
+     */
+    select?: ImageFolderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageFolder
+     */
+    omit?: ImageFolderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ImageFolderInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -15355,6 +17889,31 @@ export namespace Prisma {
   };
 
   export type TemplatePagesScalarFieldEnum = (typeof TemplatePagesScalarFieldEnum)[keyof typeof TemplatePagesScalarFieldEnum]
+
+
+  export const ImageScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    url: 'url',
+    altText: 'altText',
+    size: 'size',
+    folderId: 'folderId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ImageScalarFieldEnum = (typeof ImageScalarFieldEnum)[keyof typeof ImageScalarFieldEnum]
+
+
+  export const ImageFolderScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ImageFolderScalarFieldEnum = (typeof ImageFolderScalarFieldEnum)[keyof typeof ImageFolderScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -15577,6 +18136,7 @@ export namespace Prisma {
     funnels?: FunnelListRelationFilter
     domains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
+    imageFolders?: ImageFolderListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -15593,6 +18153,7 @@ export namespace Prisma {
     funnels?: FunnelOrderByRelationAggregateInput
     domains?: DomainOrderByRelationAggregateInput
     templates?: TemplateOrderByRelationAggregateInput
+    imageFolders?: ImageFolderOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -15612,6 +18173,7 @@ export namespace Prisma {
     funnels?: FunnelListRelationFilter
     domains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
+    imageFolders?: ImageFolderListRelationFilter
   }, "id" | "email" | "passwordResetToken">
 
   export type UserOrderByWithAggregationInput = {
@@ -16522,6 +19084,139 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"TemplatePages"> | Date | string
   }
 
+  export type ImageWhereInput = {
+    AND?: ImageWhereInput | ImageWhereInput[]
+    OR?: ImageWhereInput[]
+    NOT?: ImageWhereInput | ImageWhereInput[]
+    id?: IntFilter<"Image"> | number
+    name?: StringNullableFilter<"Image"> | string | null
+    url?: StringFilter<"Image"> | string
+    altText?: StringNullableFilter<"Image"> | string | null
+    size?: IntNullableFilter<"Image"> | number | null
+    folderId?: IntNullableFilter<"Image"> | number | null
+    createdAt?: DateTimeFilter<"Image"> | Date | string
+    updatedAt?: DateTimeFilter<"Image"> | Date | string
+    folder?: XOR<ImageFolderNullableScalarRelationFilter, ImageFolderWhereInput> | null
+  }
+
+  export type ImageOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrderInput | SortOrder
+    url?: SortOrder
+    altText?: SortOrderInput | SortOrder
+    size?: SortOrderInput | SortOrder
+    folderId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    folder?: ImageFolderOrderByWithRelationInput
+  }
+
+  export type ImageWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ImageWhereInput | ImageWhereInput[]
+    OR?: ImageWhereInput[]
+    NOT?: ImageWhereInput | ImageWhereInput[]
+    name?: StringNullableFilter<"Image"> | string | null
+    url?: StringFilter<"Image"> | string
+    altText?: StringNullableFilter<"Image"> | string | null
+    size?: IntNullableFilter<"Image"> | number | null
+    folderId?: IntNullableFilter<"Image"> | number | null
+    createdAt?: DateTimeFilter<"Image"> | Date | string
+    updatedAt?: DateTimeFilter<"Image"> | Date | string
+    folder?: XOR<ImageFolderNullableScalarRelationFilter, ImageFolderWhereInput> | null
+  }, "id">
+
+  export type ImageOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrderInput | SortOrder
+    url?: SortOrder
+    altText?: SortOrderInput | SortOrder
+    size?: SortOrderInput | SortOrder
+    folderId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ImageCountOrderByAggregateInput
+    _avg?: ImageAvgOrderByAggregateInput
+    _max?: ImageMaxOrderByAggregateInput
+    _min?: ImageMinOrderByAggregateInput
+    _sum?: ImageSumOrderByAggregateInput
+  }
+
+  export type ImageScalarWhereWithAggregatesInput = {
+    AND?: ImageScalarWhereWithAggregatesInput | ImageScalarWhereWithAggregatesInput[]
+    OR?: ImageScalarWhereWithAggregatesInput[]
+    NOT?: ImageScalarWhereWithAggregatesInput | ImageScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Image"> | number
+    name?: StringNullableWithAggregatesFilter<"Image"> | string | null
+    url?: StringWithAggregatesFilter<"Image"> | string
+    altText?: StringNullableWithAggregatesFilter<"Image"> | string | null
+    size?: IntNullableWithAggregatesFilter<"Image"> | number | null
+    folderId?: IntNullableWithAggregatesFilter<"Image"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"Image"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Image"> | Date | string
+  }
+
+  export type ImageFolderWhereInput = {
+    AND?: ImageFolderWhereInput | ImageFolderWhereInput[]
+    OR?: ImageFolderWhereInput[]
+    NOT?: ImageFolderWhereInput | ImageFolderWhereInput[]
+    id?: IntFilter<"ImageFolder"> | number
+    name?: StringFilter<"ImageFolder"> | string
+    userId?: IntFilter<"ImageFolder"> | number
+    createdAt?: DateTimeFilter<"ImageFolder"> | Date | string
+    updatedAt?: DateTimeFilter<"ImageFolder"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    images?: ImageListRelationFilter
+  }
+
+  export type ImageFolderOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    images?: ImageOrderByRelationAggregateInput
+  }
+
+  export type ImageFolderWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    userId_name?: ImageFolderUserIdNameCompoundUniqueInput
+    AND?: ImageFolderWhereInput | ImageFolderWhereInput[]
+    OR?: ImageFolderWhereInput[]
+    NOT?: ImageFolderWhereInput | ImageFolderWhereInput[]
+    name?: StringFilter<"ImageFolder"> | string
+    userId?: IntFilter<"ImageFolder"> | number
+    createdAt?: DateTimeFilter<"ImageFolder"> | Date | string
+    updatedAt?: DateTimeFilter<"ImageFolder"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    images?: ImageListRelationFilter
+  }, "id" | "userId_name">
+
+  export type ImageFolderOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ImageFolderCountOrderByAggregateInput
+    _avg?: ImageFolderAvgOrderByAggregateInput
+    _max?: ImageFolderMaxOrderByAggregateInput
+    _min?: ImageFolderMinOrderByAggregateInput
+    _sum?: ImageFolderSumOrderByAggregateInput
+  }
+
+  export type ImageFolderScalarWhereWithAggregatesInput = {
+    AND?: ImageFolderScalarWhereWithAggregatesInput | ImageFolderScalarWhereWithAggregatesInput[]
+    OR?: ImageFolderScalarWhereWithAggregatesInput[]
+    NOT?: ImageFolderScalarWhereWithAggregatesInput | ImageFolderScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ImageFolder"> | number
+    name?: StringWithAggregatesFilter<"ImageFolder"> | string
+    userId?: IntWithAggregatesFilter<"ImageFolder"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"ImageFolder"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ImageFolder"> | Date | string
+  }
+
   export type UserCreateInput = {
     email: string
     name?: string | null
@@ -16535,6 +19230,7 @@ export namespace Prisma {
     funnels?: FunnelCreateNestedManyWithoutUserInput
     domains?: DomainCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -16551,6 +19247,7 @@ export namespace Prisma {
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -16566,6 +19263,7 @@ export namespace Prisma {
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     domains?: DomainUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -16582,6 +19280,7 @@ export namespace Prisma {
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -17561,6 +20260,135 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ImageCreateInput = {
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    folder?: ImageFolderCreateNestedOneWithoutImagesInput
+  }
+
+  export type ImageUncheckedCreateInput = {
+    id?: number
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    folderId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageUpdateInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    folder?: ImageFolderUpdateOneWithoutImagesNestedInput
+  }
+
+  export type ImageUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    folderId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageCreateManyInput = {
+    id?: number
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    folderId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageUpdateManyMutationInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    folderId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageFolderCreateInput = {
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutImageFoldersInput
+    images?: ImageCreateNestedManyWithoutFolderInput
+  }
+
+  export type ImageFolderUncheckedCreateInput = {
+    id?: number
+    name: string
+    userId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    images?: ImageUncheckedCreateNestedManyWithoutFolderInput
+  }
+
+  export type ImageFolderUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutImageFoldersNestedInput
+    images?: ImageUpdateManyWithoutFolderNestedInput
+  }
+
+  export type ImageFolderUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    images?: ImageUncheckedUpdateManyWithoutFolderNestedInput
+  }
+
+  export type ImageFolderCreateManyInput = {
+    id?: number
+    name: string
+    userId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageFolderUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageFolderUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -17658,6 +20486,12 @@ export namespace Prisma {
     none?: TemplateWhereInput
   }
 
+  export type ImageFolderListRelationFilter = {
+    every?: ImageFolderWhereInput
+    some?: ImageFolderWhereInput
+    none?: ImageFolderWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -17672,6 +20506,10 @@ export namespace Prisma {
   }
 
   export type TemplateOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ImageFolderOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -18620,6 +21458,105 @@ export namespace Prisma {
     order?: SortOrder
   }
 
+  export type ImageFolderNullableScalarRelationFilter = {
+    is?: ImageFolderWhereInput | null
+    isNot?: ImageFolderWhereInput | null
+  }
+
+  export type ImageCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    altText?: SortOrder
+    size?: SortOrder
+    folderId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageAvgOrderByAggregateInput = {
+    id?: SortOrder
+    size?: SortOrder
+    folderId?: SortOrder
+  }
+
+  export type ImageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    altText?: SortOrder
+    size?: SortOrder
+    folderId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    altText?: SortOrder
+    size?: SortOrder
+    folderId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageSumOrderByAggregateInput = {
+    id?: SortOrder
+    size?: SortOrder
+    folderId?: SortOrder
+  }
+
+  export type ImageListRelationFilter = {
+    every?: ImageWhereInput
+    some?: ImageWhereInput
+    none?: ImageWhereInput
+  }
+
+  export type ImageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ImageFolderUserIdNameCompoundUniqueInput = {
+    userId: number
+    name: string
+  }
+
+  export type ImageFolderCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageFolderAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type ImageFolderMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageFolderMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageFolderSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
   export type FunnelCreateNestedManyWithoutUserInput = {
     create?: XOR<FunnelCreateWithoutUserInput, FunnelUncheckedCreateWithoutUserInput> | FunnelCreateWithoutUserInput[] | FunnelUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FunnelCreateOrConnectWithoutUserInput | FunnelCreateOrConnectWithoutUserInput[]
@@ -18641,6 +21578,13 @@ export namespace Prisma {
     connect?: TemplateWhereUniqueInput | TemplateWhereUniqueInput[]
   }
 
+  export type ImageFolderCreateNestedManyWithoutUserInput = {
+    create?: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput> | ImageFolderCreateWithoutUserInput[] | ImageFolderUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutUserInput | ImageFolderCreateOrConnectWithoutUserInput[]
+    createMany?: ImageFolderCreateManyUserInputEnvelope
+    connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+  }
+
   export type FunnelUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<FunnelCreateWithoutUserInput, FunnelUncheckedCreateWithoutUserInput> | FunnelCreateWithoutUserInput[] | FunnelUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FunnelCreateOrConnectWithoutUserInput | FunnelCreateOrConnectWithoutUserInput[]
@@ -18660,6 +21604,13 @@ export namespace Prisma {
     connectOrCreate?: TemplateCreateOrConnectWithoutCreatedByInput | TemplateCreateOrConnectWithoutCreatedByInput[]
     createMany?: TemplateCreateManyCreatedByInputEnvelope
     connect?: TemplateWhereUniqueInput | TemplateWhereUniqueInput[]
+  }
+
+  export type ImageFolderUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput> | ImageFolderCreateWithoutUserInput[] | ImageFolderUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutUserInput | ImageFolderCreateOrConnectWithoutUserInput[]
+    createMany?: ImageFolderCreateManyUserInputEnvelope
+    connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -18732,6 +21683,20 @@ export namespace Prisma {
     deleteMany?: TemplateScalarWhereInput | TemplateScalarWhereInput[]
   }
 
+  export type ImageFolderUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput> | ImageFolderCreateWithoutUserInput[] | ImageFolderUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutUserInput | ImageFolderCreateOrConnectWithoutUserInput[]
+    upsert?: ImageFolderUpsertWithWhereUniqueWithoutUserInput | ImageFolderUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ImageFolderCreateManyUserInputEnvelope
+    set?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    disconnect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    delete?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    update?: ImageFolderUpdateWithWhereUniqueWithoutUserInput | ImageFolderUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ImageFolderUpdateManyWithWhereWithoutUserInput | ImageFolderUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -18780,6 +21745,20 @@ export namespace Prisma {
     update?: TemplateUpdateWithWhereUniqueWithoutCreatedByInput | TemplateUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: TemplateUpdateManyWithWhereWithoutCreatedByInput | TemplateUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: TemplateScalarWhereInput | TemplateScalarWhereInput[]
+  }
+
+  export type ImageFolderUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput> | ImageFolderCreateWithoutUserInput[] | ImageFolderUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutUserInput | ImageFolderCreateOrConnectWithoutUserInput[]
+    upsert?: ImageFolderUpsertWithWhereUniqueWithoutUserInput | ImageFolderUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ImageFolderCreateManyUserInputEnvelope
+    set?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    disconnect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    delete?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
+    update?: ImageFolderUpdateWithWhereUniqueWithoutUserInput | ImageFolderUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ImageFolderUpdateManyWithWhereWithoutUserInput | ImageFolderUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutFunnelsInput = {
@@ -19304,6 +22283,78 @@ export namespace Prisma {
     update?: XOR<XOR<TemplateUpdateToOneWithWhereWithoutPagesInput, TemplateUpdateWithoutPagesInput>, TemplateUncheckedUpdateWithoutPagesInput>
   }
 
+  export type ImageFolderCreateNestedOneWithoutImagesInput = {
+    create?: XOR<ImageFolderCreateWithoutImagesInput, ImageFolderUncheckedCreateWithoutImagesInput>
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutImagesInput
+    connect?: ImageFolderWhereUniqueInput
+  }
+
+  export type ImageFolderUpdateOneWithoutImagesNestedInput = {
+    create?: XOR<ImageFolderCreateWithoutImagesInput, ImageFolderUncheckedCreateWithoutImagesInput>
+    connectOrCreate?: ImageFolderCreateOrConnectWithoutImagesInput
+    upsert?: ImageFolderUpsertWithoutImagesInput
+    disconnect?: ImageFolderWhereInput | boolean
+    delete?: ImageFolderWhereInput | boolean
+    connect?: ImageFolderWhereUniqueInput
+    update?: XOR<XOR<ImageFolderUpdateToOneWithWhereWithoutImagesInput, ImageFolderUpdateWithoutImagesInput>, ImageFolderUncheckedUpdateWithoutImagesInput>
+  }
+
+  export type UserCreateNestedOneWithoutImageFoldersInput = {
+    create?: XOR<UserCreateWithoutImageFoldersInput, UserUncheckedCreateWithoutImageFoldersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutImageFoldersInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ImageCreateNestedManyWithoutFolderInput = {
+    create?: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput> | ImageCreateWithoutFolderInput[] | ImageUncheckedCreateWithoutFolderInput[]
+    connectOrCreate?: ImageCreateOrConnectWithoutFolderInput | ImageCreateOrConnectWithoutFolderInput[]
+    createMany?: ImageCreateManyFolderInputEnvelope
+    connect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+  }
+
+  export type ImageUncheckedCreateNestedManyWithoutFolderInput = {
+    create?: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput> | ImageCreateWithoutFolderInput[] | ImageUncheckedCreateWithoutFolderInput[]
+    connectOrCreate?: ImageCreateOrConnectWithoutFolderInput | ImageCreateOrConnectWithoutFolderInput[]
+    createMany?: ImageCreateManyFolderInputEnvelope
+    connect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneRequiredWithoutImageFoldersNestedInput = {
+    create?: XOR<UserCreateWithoutImageFoldersInput, UserUncheckedCreateWithoutImageFoldersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutImageFoldersInput
+    upsert?: UserUpsertWithoutImageFoldersInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutImageFoldersInput, UserUpdateWithoutImageFoldersInput>, UserUncheckedUpdateWithoutImageFoldersInput>
+  }
+
+  export type ImageUpdateManyWithoutFolderNestedInput = {
+    create?: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput> | ImageCreateWithoutFolderInput[] | ImageUncheckedCreateWithoutFolderInput[]
+    connectOrCreate?: ImageCreateOrConnectWithoutFolderInput | ImageCreateOrConnectWithoutFolderInput[]
+    upsert?: ImageUpsertWithWhereUniqueWithoutFolderInput | ImageUpsertWithWhereUniqueWithoutFolderInput[]
+    createMany?: ImageCreateManyFolderInputEnvelope
+    set?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    disconnect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    delete?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    connect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    update?: ImageUpdateWithWhereUniqueWithoutFolderInput | ImageUpdateWithWhereUniqueWithoutFolderInput[]
+    updateMany?: ImageUpdateManyWithWhereWithoutFolderInput | ImageUpdateManyWithWhereWithoutFolderInput[]
+    deleteMany?: ImageScalarWhereInput | ImageScalarWhereInput[]
+  }
+
+  export type ImageUncheckedUpdateManyWithoutFolderNestedInput = {
+    create?: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput> | ImageCreateWithoutFolderInput[] | ImageUncheckedCreateWithoutFolderInput[]
+    connectOrCreate?: ImageCreateOrConnectWithoutFolderInput | ImageCreateOrConnectWithoutFolderInput[]
+    upsert?: ImageUpsertWithWhereUniqueWithoutFolderInput | ImageUpsertWithWhereUniqueWithoutFolderInput[]
+    createMany?: ImageCreateManyFolderInputEnvelope
+    set?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    disconnect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    delete?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    connect?: ImageWhereUniqueInput | ImageWhereUniqueInput[]
+    update?: ImageUpdateWithWhereUniqueWithoutFolderInput | ImageUpdateWithWhereUniqueWithoutFolderInput[]
+    updateMany?: ImageUpdateManyWithWhereWithoutFolderInput | ImageUpdateManyWithWhereWithoutFolderInput[]
+    deleteMany?: ImageScalarWhereInput | ImageScalarWhereInput[]
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -19769,6 +22820,31 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ImageFolderCreateWithoutUserInput = {
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    images?: ImageCreateNestedManyWithoutFolderInput
+  }
+
+  export type ImageFolderUncheckedCreateWithoutUserInput = {
+    id?: number
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    images?: ImageUncheckedCreateNestedManyWithoutFolderInput
+  }
+
+  export type ImageFolderCreateOrConnectWithoutUserInput = {
+    where: ImageFolderWhereUniqueInput
+    create: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput>
+  }
+
+  export type ImageFolderCreateManyUserInputEnvelope = {
+    data: ImageFolderCreateManyUserInput | ImageFolderCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type FunnelUpsertWithWhereUniqueWithoutUserInput = {
     where: FunnelWhereUniqueInput
     update: XOR<FunnelUpdateWithoutUserInput, FunnelUncheckedUpdateWithoutUserInput>
@@ -19876,6 +22952,33 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Template"> | Date | string
   }
 
+  export type ImageFolderUpsertWithWhereUniqueWithoutUserInput = {
+    where: ImageFolderWhereUniqueInput
+    update: XOR<ImageFolderUpdateWithoutUserInput, ImageFolderUncheckedUpdateWithoutUserInput>
+    create: XOR<ImageFolderCreateWithoutUserInput, ImageFolderUncheckedCreateWithoutUserInput>
+  }
+
+  export type ImageFolderUpdateWithWhereUniqueWithoutUserInput = {
+    where: ImageFolderWhereUniqueInput
+    data: XOR<ImageFolderUpdateWithoutUserInput, ImageFolderUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ImageFolderUpdateManyWithWhereWithoutUserInput = {
+    where: ImageFolderScalarWhereInput
+    data: XOR<ImageFolderUpdateManyMutationInput, ImageFolderUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ImageFolderScalarWhereInput = {
+    AND?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
+    OR?: ImageFolderScalarWhereInput[]
+    NOT?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
+    id?: IntFilter<"ImageFolder"> | number
+    name?: StringFilter<"ImageFolder"> | string
+    userId?: IntFilter<"ImageFolder"> | number
+    createdAt?: DateTimeFilter<"ImageFolder"> | Date | string
+    updatedAt?: DateTimeFilter<"ImageFolder"> | Date | string
+  }
+
   export type UserCreateWithoutFunnelsInput = {
     email: string
     name?: string | null
@@ -19888,6 +22991,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     domains?: DomainCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFunnelsInput = {
@@ -19903,6 +23007,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFunnelsInput = {
@@ -20071,6 +23176,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     domains?: DomainUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFunnelsInput = {
@@ -20086,6 +23192,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TemplateUpsertWithoutFunnelsCreatedInput = {
@@ -20250,6 +23357,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     funnels?: FunnelCreateNestedManyWithoutUserInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDomainsInput = {
@@ -20265,6 +23373,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDomainsInput = {
@@ -20320,6 +23429,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDomainsInput = {
@@ -20335,6 +23445,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type FunnelDomainUpsertWithWhereUniqueWithoutDomainInput = {
@@ -20806,6 +23917,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     funnels?: FunnelCreateNestedManyWithoutUserInput
     domains?: DomainCreateNestedManyWithoutUserInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTemplatesInput = {
@@ -20821,6 +23933,7 @@ export namespace Prisma {
     maximumFunnels?: number | null
     funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
     domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTemplatesInput = {
@@ -20980,6 +24093,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUpdateManyWithoutUserNestedInput
     domains?: DomainUpdateManyWithoutUserNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTemplatesInput = {
@@ -20995,6 +24109,7 @@ export namespace Prisma {
     maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
     funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type FunnelUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -21193,6 +24308,189 @@ export namespace Prisma {
     funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
+  export type ImageFolderCreateWithoutImagesInput = {
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutImageFoldersInput
+  }
+
+  export type ImageFolderUncheckedCreateWithoutImagesInput = {
+    id?: number
+    name: string
+    userId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageFolderCreateOrConnectWithoutImagesInput = {
+    where: ImageFolderWhereUniqueInput
+    create: XOR<ImageFolderCreateWithoutImagesInput, ImageFolderUncheckedCreateWithoutImagesInput>
+  }
+
+  export type ImageFolderUpsertWithoutImagesInput = {
+    update: XOR<ImageFolderUpdateWithoutImagesInput, ImageFolderUncheckedUpdateWithoutImagesInput>
+    create: XOR<ImageFolderCreateWithoutImagesInput, ImageFolderUncheckedCreateWithoutImagesInput>
+    where?: ImageFolderWhereInput
+  }
+
+  export type ImageFolderUpdateToOneWithWhereWithoutImagesInput = {
+    where?: ImageFolderWhereInput
+    data: XOR<ImageFolderUpdateWithoutImagesInput, ImageFolderUncheckedUpdateWithoutImagesInput>
+  }
+
+  export type ImageFolderUpdateWithoutImagesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutImageFoldersNestedInput
+  }
+
+  export type ImageFolderUncheckedUpdateWithoutImagesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserCreateWithoutImageFoldersInput = {
+    email: string
+    name?: string | null
+    password: string
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number | null
+    funnels?: FunnelCreateNestedManyWithoutUserInput
+    domains?: DomainCreateNestedManyWithoutUserInput
+    templates?: TemplateCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutImageFoldersInput = {
+    id?: number
+    email: string
+    name?: string | null
+    password: string
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number | null
+    funnels?: FunnelUncheckedCreateNestedManyWithoutUserInput
+    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutImageFoldersInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutImageFoldersInput, UserUncheckedCreateWithoutImageFoldersInput>
+  }
+
+  export type ImageCreateWithoutFolderInput = {
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageUncheckedCreateWithoutFolderInput = {
+    id?: number
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageCreateOrConnectWithoutFolderInput = {
+    where: ImageWhereUniqueInput
+    create: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput>
+  }
+
+  export type ImageCreateManyFolderInputEnvelope = {
+    data: ImageCreateManyFolderInput | ImageCreateManyFolderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutImageFoldersInput = {
+    update: XOR<UserUpdateWithoutImageFoldersInput, UserUncheckedUpdateWithoutImageFoldersInput>
+    create: XOR<UserCreateWithoutImageFoldersInput, UserUncheckedCreateWithoutImageFoldersInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutImageFoldersInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutImageFoldersInput, UserUncheckedUpdateWithoutImageFoldersInput>
+  }
+
+  export type UserUpdateWithoutImageFoldersInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    funnels?: FunnelUpdateManyWithoutUserNestedInput
+    domains?: DomainUpdateManyWithoutUserNestedInput
+    templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutImageFoldersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    funnels?: FunnelUncheckedUpdateManyWithoutUserNestedInput
+    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type ImageUpsertWithWhereUniqueWithoutFolderInput = {
+    where: ImageWhereUniqueInput
+    update: XOR<ImageUpdateWithoutFolderInput, ImageUncheckedUpdateWithoutFolderInput>
+    create: XOR<ImageCreateWithoutFolderInput, ImageUncheckedCreateWithoutFolderInput>
+  }
+
+  export type ImageUpdateWithWhereUniqueWithoutFolderInput = {
+    where: ImageWhereUniqueInput
+    data: XOR<ImageUpdateWithoutFolderInput, ImageUncheckedUpdateWithoutFolderInput>
+  }
+
+  export type ImageUpdateManyWithWhereWithoutFolderInput = {
+    where: ImageScalarWhereInput
+    data: XOR<ImageUpdateManyMutationInput, ImageUncheckedUpdateManyWithoutFolderInput>
+  }
+
+  export type ImageScalarWhereInput = {
+    AND?: ImageScalarWhereInput | ImageScalarWhereInput[]
+    OR?: ImageScalarWhereInput[]
+    NOT?: ImageScalarWhereInput | ImageScalarWhereInput[]
+    id?: IntFilter<"Image"> | number
+    name?: StringNullableFilter<"Image"> | string | null
+    url?: StringFilter<"Image"> | string
+    altText?: StringNullableFilter<"Image"> | string | null
+    size?: IntNullableFilter<"Image"> | number | null
+    folderId?: IntNullableFilter<"Image"> | number | null
+    createdAt?: DateTimeFilter<"Image"> | Date | string
+    updatedAt?: DateTimeFilter<"Image"> | Date | string
+  }
+
   export type FunnelCreateManyUserInput = {
     id?: number
     name: string
@@ -21236,6 +24534,13 @@ export namespace Prisma {
     isActive?: boolean
     isPublic?: boolean
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageFolderCreateManyUserInput = {
+    id?: number
+    name: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21386,6 +24691,28 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageFolderUpdateWithoutUserInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    images?: ImageUpdateManyWithoutFolderNestedInput
+  }
+
+  export type ImageFolderUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    images?: ImageUncheckedUpdateManyWithoutFolderNestedInput
+  }
+
+  export type ImageFolderUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21703,6 +25030,45 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type ImageCreateManyFolderInput = {
+    id?: number
+    name?: string | null
+    url: string
+    altText?: string | null
+    size?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageUpdateWithoutFolderInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageUncheckedUpdateWithoutFolderInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageUncheckedUpdateManyWithoutFolderInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: StringFieldUpdateOperationsInput | string
+    altText?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

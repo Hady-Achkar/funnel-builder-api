@@ -11,7 +11,7 @@ describe("FunnelService.deleteFunnel", () => {
 
   beforeEach(async () => {
     testUser = await TestHelpers.createTestUser();
-    
+
     // Create funnel with theme
     testTheme = await testPrisma.theme.create({
       data: {
@@ -36,38 +36,64 @@ describe("FunnelService.deleteFunnel", () => {
     // Create test pages
     await testPrisma.page.createMany({
       data: [
-        { name: "Page 1", order: 1, funnelId: testFunnel.id, visits: 0, content: "Content 1" },
-        { name: "Page 2", order: 2, funnelId: testFunnel.id, visits: 0, content: "Content 2" },
+        {
+          name: "Page 1",
+          order: 1,
+          funnelId: testFunnel.id,
+          visits: 0,
+          content: "Content 1",
+        },
+        {
+          name: "Page 2",
+          order: 2,
+          funnelId: testFunnel.id,
+          visits: 0,
+          content: "Content 2",
+        },
       ],
     });
 
     // Clear any existing cache
     await cacheService.del(`user:${testUser.id}:funnel:${testFunnel.id}:full`);
-    await cacheService.del(`user:${testUser.id}:funnel:${testFunnel.id}:summary`);
+    await cacheService.del(
+      `user:${testUser.id}:funnel:${testFunnel.id}:summary`
+    );
   });
 
   afterEach(async () => {
     // Clean up cache
     await cacheService.del(`user:${testUser.id}:funnel:${testFunnel.id}:full`);
-    await cacheService.del(`user:${testUser.id}:funnel:${testFunnel.id}:summary`);
+    await cacheService.del(
+      `user:${testUser.id}:funnel:${testFunnel.id}:summary`
+    );
   });
 
   it("should require user authentication", async () => {
-    await expect(FunnelService.deleteFunnel(testFunnel.id, 0)).rejects.toThrow("Please provide userId.");
+    await expect(FunnelService.deleteFunnel(testFunnel.id, 0)).rejects.toThrow(
+      "Please provide userId."
+    );
   });
 
   it("should validate funnelId", async () => {
-    await expect(FunnelService.deleteFunnel(-1, testUser.id)).rejects.toThrow("Invalid input");
-    await expect(FunnelService.deleteFunnel(0, testUser.id)).rejects.toThrow("Invalid input");
+    await expect(FunnelService.deleteFunnel(-1, testUser.id)).rejects.toThrow(
+      "Invalid input"
+    );
+    await expect(FunnelService.deleteFunnel(0, testUser.id)).rejects.toThrow(
+      "Invalid input"
+    );
   });
 
   it("should throw error for non-existent funnel", async () => {
-    await expect(FunnelService.deleteFunnel(999999, testUser.id)).rejects.toThrow("Funnel not found.");
+    await expect(
+      FunnelService.deleteFunnel(999999, testUser.id)
+    ).rejects.toThrow("Funnel not found.");
   });
 
   it("should throw access denied for unauthorized user", async () => {
     const otherUser = await TestHelpers.createTestUser();
-    await expect(FunnelService.deleteFunnel(testFunnel.id, otherUser.id)).rejects.toThrow("You can't delete this funnel.");
+    await expect(
+      FunnelService.deleteFunnel(testFunnel.id, otherUser.id)
+    ).rejects.toThrow("You can't delete this funnel.");
   });
 
   it("should prevent deletion of LIVE funnel", async () => {
@@ -77,7 +103,9 @@ describe("FunnelService.deleteFunnel", () => {
       data: { status: $Enums.FunnelStatus.LIVE },
     });
 
-    await expect(FunnelService.deleteFunnel(testFunnel.id, testUser.id)).rejects.toThrow(
+    await expect(
+      FunnelService.deleteFunnel(testFunnel.id, testUser.id)
+    ).rejects.toThrow(
       "This funnel is live. Switch it to Draft or Archived first."
     );
   });
@@ -133,7 +161,10 @@ describe("FunnelService.deleteFunnel", () => {
       status: $Enums.FunnelStatus.DRAFT,
     });
 
-    const result = await FunnelService.deleteFunnel(funnelNoTheme.id, testUser.id);
+    const result = await FunnelService.deleteFunnel(
+      funnelNoTheme.id,
+      testUser.id
+    );
 
     expect(result).toBeDefined();
     expect(result.name).toBe("No Theme Funnel");
@@ -163,20 +194,36 @@ describe("FunnelService.deleteFunnel", () => {
 
   it("should invalidate cache after deletion", async () => {
     // Set some cache data
-    await cacheService.set(`user:${testUser.id}:funnel:${testFunnel.id}:full`, { test: "data" }, { ttl: 0 });
-    await cacheService.set(`user:${testUser.id}:funnel:${testFunnel.id}:summary`, { test: "summary" }, { ttl: 0 });
+    await cacheService.set(
+      `user:${testUser.id}:funnel:${testFunnel.id}:full`,
+      { test: "data" },
+      { ttl: 0 }
+    );
+    await cacheService.set(
+      `user:${testUser.id}:funnel:${testFunnel.id}:summary`,
+      { test: "summary" },
+      { ttl: 0 }
+    );
 
     // Verify cache exists
-    const fullCacheBefore = await cacheService.get(`user:${testUser.id}:funnel:${testFunnel.id}:full`);
-    const summaryCacheBefore = await cacheService.get(`user:${testUser.id}:funnel:${testFunnel.id}:summary`);
+    const fullCacheBefore = await cacheService.get(
+      `user:${testUser.id}:funnel:${testFunnel.id}:full`
+    );
+    const summaryCacheBefore = await cacheService.get(
+      `user:${testUser.id}:funnel:${testFunnel.id}:summary`
+    );
     expect(fullCacheBefore).toBeDefined();
     expect(summaryCacheBefore).toBeDefined();
 
     await FunnelService.deleteFunnel(testFunnel.id, testUser.id);
 
     // Verify cache is cleared
-    const fullCacheAfter = await cacheService.get(`user:${testUser.id}:funnel:${testFunnel.id}:full`);
-    const summaryCacheAfter = await cacheService.get(`user:${testUser.id}:funnel:${testFunnel.id}:summary`);
+    const fullCacheAfter = await cacheService.get(
+      `user:${testUser.id}:funnel:${testFunnel.id}:full`
+    );
+    const summaryCacheAfter = await cacheService.get(
+      `user:${testUser.id}:funnel:${testFunnel.id}:summary`
+    );
     expect(fullCacheAfter).toBeNull();
     expect(summaryCacheAfter).toBeNull();
   });
@@ -190,7 +237,10 @@ describe("FunnelService.deleteFunnel", () => {
 
     try {
       // Should still delete successfully despite cache error
-      const result = await FunnelService.deleteFunnel(testFunnel.id, testUser.id);
+      const result = await FunnelService.deleteFunnel(
+        testFunnel.id,
+        testUser.id
+      );
       expect(result).toBeDefined();
       expect(result.name).toBe("Test Funnel");
 
