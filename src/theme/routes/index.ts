@@ -1,0 +1,1 @@
+export { default as themeRoutes } from "./themes";

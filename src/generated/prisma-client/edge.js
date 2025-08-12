@@ -326,7 +326,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/hadi/Desktop/funnel-builder-api/src/generated/prisma-client",
+      "value": "/home/ahmad/apps/funnel-builder-api/src/generated/prisma-client",
       "fromEnvVar": null
     },
     "config": {
@@ -335,12 +335,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
+        "value": "debian-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/hadi/Desktop/funnel-builder-api/prisma/schema.prisma",
+    "sourceFilePath": "/home/ahmad/apps/funnel-builder-api/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
