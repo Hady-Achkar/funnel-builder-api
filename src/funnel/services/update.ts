@@ -38,15 +38,19 @@ export const updateFunnel = async (
     const updates: any = {};
     const changed: string[] = [];
 
-    const fieldsToCheck = [
-      { key: 'name', displayName: 'name', transform: (v: string) => v.trim() },
-      { key: 'status', displayName: 'status' }
-    ] as const;
+    const fieldsToCheck: {
+      key: keyof typeof validatedData;
+      displayName: string;
+      transform?: (v: any) => any;
+    }[] = [
+      { key: "name", displayName: "name", transform: (v: string) => v.trim() },
+      { key: "status", displayName: "status" },
+    ];
 
     fieldsToCheck.forEach(({ key, displayName, transform }) => {
       const value = validatedData[key as keyof typeof validatedData];
       const existingValue = existingFunnel[key as keyof typeof existingFunnel];
-      
+
       if (value !== undefined && value !== null) {
         const processedValue = transform ? transform(value as any) : value;
         if (processedValue !== existingValue) {
