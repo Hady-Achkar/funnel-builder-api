@@ -18,13 +18,18 @@ if (!process.env.DATABASE_URL) {
   } else {
     // Local development
     process.env.DATABASE_URL =
-      "postgresql://hadi@localhost:5432/funnel_builder_test";
+      "postgresql://postgres:ASKsome123!@localhost:5432/funnel_builder_test";
   }
 }
 
 // Set Redis URL if not set
 if (!process.env.REDIS_URL) {
   process.env.REDIS_URL = "redis://localhost:6379";
+}
+
+// Set Redis DB for tests
+if (!process.env.REDIS_DB) {
+  process.env.REDIS_DB = "1";
 }
 
 // Set JWT secret for tests if not set
@@ -38,3 +43,4 @@ console.log(
   "Environment Setup: Database =",
   process.env.DATABASE_URL?.split("@")[1]?.split("/")[0] || "Not set"
 );
+console.log("Environment Setup: Redis DB =", process.env.REDIS_DB || "0");

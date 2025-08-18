@@ -73,7 +73,7 @@ export class TestDatabase {
       // Delete in correct order due to foreign key constraints
       await this.prisma.session.deleteMany().catch(() => {});
       await this.prisma.funnelDomain.deleteMany().catch(() => {});
-      await this.prisma.templatePages.deleteMany().catch(() => {});
+      await this.prisma.templatePage.deleteMany().catch(() => {});
       await this.prisma.templateImage.deleteMany().catch(() => {});
       await this.prisma.template.deleteMany().catch(() => {});
       await this.prisma.templateCategory.deleteMany().catch(() => {});

@@ -2,6 +2,7 @@ import {
   PrismaClient,
   Template,
   TemplateCategory,
+  TemplateImageType,
   Funnel,
   Page,
 } from "../generated/prisma-client";
@@ -30,7 +31,7 @@ interface TemplateWithDetails extends Template {
   previewImages: Array<{
     id: number;
     imageUrl: string;
-    imageType: string;
+    imageType: TemplateImageType;
     order: number;
     caption?: string;
   }>;
@@ -109,13 +110,13 @@ export class TemplateService {
     // Copy pages to template
     let copiedPages = 0;
     for (const page of funnel.pages) {
-      await prisma.templatePages.create({
+      await prisma.templatePage.create({
         data: {
           templateId: template.id,
           name: page.name,
           content: page.content,
           order: page.order,
-          linkingIdPrefix: `template-${template.id}-page`,
+          linkingId: `template-${template.id}-page-${page.order}`,
           settings: {
             originalPageId: page.id,
             originalLinkingId: page.linkingId,
@@ -135,7 +136,7 @@ export class TemplateService {
           data: {
             templateId: template.id,
             imageUrl: `/api/templates/${template.id}/thumbnail`, // Placeholder
-            imageType: "thumbnail",
+            imageType: "THUMBNAIL",
             order: 0,
             caption: "Auto-generated thumbnail",
           },
@@ -311,7 +312,7 @@ export class TemplateService {
     userId: number,
     imageBuffer: Buffer,
     options: {
-      imageType: string;
+      imageType: TemplateImageType;
       caption?: string;
       contentType?: string;
     }
@@ -383,8 +384,7 @@ export class TemplateService {
 
   async getTemplateCategories(): Promise<TemplateCategory[]> {
     return prisma.templateCategory.findMany({
-      where: { isActive: true },
-      orderBy: { order: "asc" },
+      orderBy: { name: "asc" },
     });
   }
 

@@ -11,8 +11,17 @@ export const getFunnelById = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const funnelId = Number(req.params.id);
+    
+    if (!req.params.id || isNaN(funnelId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid funnel ID provided",
+      });
+    }
+
     const result = await FunnelService.getFunnelById(
-      Number(req.params.id),
+      funnelId,
       req.userId
     );
 
@@ -27,6 +36,8 @@ export const getFunnelById = async (req: AuthRequest, res: Response) => {
         return res
           .status(404)
           .json({ success: false, error: "Funnel not found" });
+      if (error.message.includes("Failed to get funnel"))
+        return res.status(500).json({ success: false, error: error.message });
     }
     return res
       .status(500)

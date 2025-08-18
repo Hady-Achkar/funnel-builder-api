@@ -64,10 +64,10 @@ export type Template = $Result.DefaultSelection<Prisma.$TemplatePayload>
  */
 export type TemplateImage = $Result.DefaultSelection<Prisma.$TemplateImagePayload>
 /**
- * Model TemplatePages
+ * Model TemplatePage
  * 
  */
-export type TemplatePages = $Result.DefaultSelection<Prisma.$TemplatePagesPayload>
+export type TemplatePage = $Result.DefaultSelection<Prisma.$TemplatePagePayload>
 /**
  * Model Image
  * 
@@ -130,6 +130,14 @@ export const BorderRadius: {
 
 export type BorderRadius = (typeof BorderRadius)[keyof typeof BorderRadius]
 
+
+export const TemplateImageType: {
+  THUMBNAIL: 'THUMBNAIL',
+  PREVIEW: 'PREVIEW'
+};
+
+export type TemplateImageType = (typeof TemplateImageType)[keyof typeof TemplateImageType]
+
 }
 
 export type FunnelStatus = $Enums.FunnelStatus
@@ -151,6 +159,10 @@ export const SslStatus: typeof $Enums.SslStatus
 export type BorderRadius = $Enums.BorderRadius
 
 export const BorderRadius: typeof $Enums.BorderRadius
+
+export type TemplateImageType = $Enums.TemplateImageType
+
+export const TemplateImageType: typeof $Enums.TemplateImageType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -378,14 +390,14 @@ export class PrismaClient<
   get templateImage(): Prisma.TemplateImageDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.templatePages`: Exposes CRUD operations for the **TemplatePages** model.
+   * `prisma.templatePage`: Exposes CRUD operations for the **TemplatePage** model.
     * Example usage:
     * ```ts
     * // Fetch zero or more TemplatePages
-    * const templatePages = await prisma.templatePages.findMany()
+    * const templatePages = await prisma.templatePage.findMany()
     * ```
     */
-  get templatePages(): Prisma.TemplatePagesDelegate<ExtArgs, ClientOptions>;
+  get templatePage(): Prisma.TemplatePageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.image`: Exposes CRUD operations for the **Image** model.
@@ -856,7 +868,7 @@ export namespace Prisma {
     TemplateCategory: 'TemplateCategory',
     Template: 'Template',
     TemplateImage: 'TemplateImage',
-    TemplatePages: 'TemplatePages',
+    TemplatePage: 'TemplatePage',
     Image: 'Image',
     ImageFolder: 'ImageFolder'
   };
@@ -877,7 +889,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePages" | "image" | "imageFolder"
+      modelProps: "user" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePage" | "image" | "imageFolder"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1621,77 +1633,77 @@ export namespace Prisma {
           }
         }
       }
-      TemplatePages: {
-        payload: Prisma.$TemplatePagesPayload<ExtArgs>
-        fields: Prisma.TemplatePagesFieldRefs
+      TemplatePage: {
+        payload: Prisma.$TemplatePagePayload<ExtArgs>
+        fields: Prisma.TemplatePageFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.TemplatePagesFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload> | null
+            args: Prisma.TemplatePageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.TemplatePagesFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           findFirst: {
-            args: Prisma.TemplatePagesFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload> | null
+            args: Prisma.TemplatePageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.TemplatePagesFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           findMany: {
-            args: Prisma.TemplatePagesFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>[]
+            args: Prisma.TemplatePageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>[]
           }
           create: {
-            args: Prisma.TemplatePagesCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           createMany: {
-            args: Prisma.TemplatePagesCreateManyArgs<ExtArgs>
+            args: Prisma.TemplatePageCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.TemplatePagesCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>[]
+            args: Prisma.TemplatePageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>[]
           }
           delete: {
-            args: Prisma.TemplatePagesDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           update: {
-            args: Prisma.TemplatePagesUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           deleteMany: {
-            args: Prisma.TemplatePagesDeleteManyArgs<ExtArgs>
+            args: Prisma.TemplatePageDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.TemplatePagesUpdateManyArgs<ExtArgs>
+            args: Prisma.TemplatePageUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.TemplatePagesUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>[]
+            args: Prisma.TemplatePageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>[]
           }
           upsert: {
-            args: Prisma.TemplatePagesUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePagesPayload>
+            args: Prisma.TemplatePageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemplatePagePayload>
           }
           aggregate: {
-            args: Prisma.TemplatePagesAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateTemplatePages>
+            args: Prisma.TemplatePageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTemplatePage>
           }
           groupBy: {
-            args: Prisma.TemplatePagesGroupByArgs<ExtArgs>
-            result: $Utils.Optional<TemplatePagesGroupByOutputType>[]
+            args: Prisma.TemplatePageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TemplatePageGroupByOutputType>[]
           }
           count: {
-            args: Prisma.TemplatePagesCountArgs<ExtArgs>
-            result: $Utils.Optional<TemplatePagesCountAggregateOutputType> | number
+            args: Prisma.TemplatePageCountArgs<ExtArgs>
+            result: $Utils.Optional<TemplatePageCountAggregateOutputType> | number
           }
         }
       }
@@ -1945,7 +1957,7 @@ export namespace Prisma {
     templateCategory?: TemplateCategoryOmit
     template?: TemplateOmit
     templateImage?: TemplateImageOmit
-    templatePages?: TemplatePagesOmit
+    templatePage?: TemplatePageOmit
     image?: ImageOmit
     imageFolder?: ImageFolderOmit
   }
@@ -2209,13 +2221,11 @@ export namespace Prisma {
   export type TemplateCountOutputType = {
     previewImages: number
     pages: number
-    funnelsCreated: number
   }
 
   export type TemplateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     previewImages?: boolean | TemplateCountOutputTypeCountPreviewImagesArgs
     pages?: boolean | TemplateCountOutputTypeCountPagesArgs
-    funnelsCreated?: boolean | TemplateCountOutputTypeCountFunnelsCreatedArgs
   }
 
   // Custom InputTypes
@@ -2240,14 +2250,7 @@ export namespace Prisma {
    * TemplateCountOutputType without action
    */
   export type TemplateCountOutputTypeCountPagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TemplatePagesWhereInput
-  }
-
-  /**
-   * TemplateCountOutputType without action
-   */
-  export type TemplateCountOutputTypeCountFunnelsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: FunnelWhereInput
+    where?: TemplatePageWhereInput
   }
 
 
@@ -3558,14 +3561,12 @@ export namespace Prisma {
   export type FunnelAvgAggregateOutputType = {
     id: number | null
     userId: number | null
-    templateId: number | null
     themeId: number | null
   }
 
   export type FunnelSumAggregateOutputType = {
     id: number | null
     userId: number | null
-    templateId: number | null
     themeId: number | null
   }
 
@@ -3574,7 +3575,6 @@ export namespace Prisma {
     name: string | null
     status: $Enums.FunnelStatus | null
     userId: number | null
-    templateId: number | null
     createdAt: Date | null
     updatedAt: Date | null
     themeId: number | null
@@ -3585,7 +3585,6 @@ export namespace Prisma {
     name: string | null
     status: $Enums.FunnelStatus | null
     userId: number | null
-    templateId: number | null
     createdAt: Date | null
     updatedAt: Date | null
     themeId: number | null
@@ -3596,7 +3595,6 @@ export namespace Prisma {
     name: number
     status: number
     userId: number
-    templateId: number
     createdAt: number
     updatedAt: number
     themeId: number
@@ -3607,14 +3605,12 @@ export namespace Prisma {
   export type FunnelAvgAggregateInputType = {
     id?: true
     userId?: true
-    templateId?: true
     themeId?: true
   }
 
   export type FunnelSumAggregateInputType = {
     id?: true
     userId?: true
-    templateId?: true
     themeId?: true
   }
 
@@ -3623,7 +3619,6 @@ export namespace Prisma {
     name?: true
     status?: true
     userId?: true
-    templateId?: true
     createdAt?: true
     updatedAt?: true
     themeId?: true
@@ -3634,7 +3629,6 @@ export namespace Prisma {
     name?: true
     status?: true
     userId?: true
-    templateId?: true
     createdAt?: true
     updatedAt?: true
     themeId?: true
@@ -3645,7 +3639,6 @@ export namespace Prisma {
     name?: true
     status?: true
     userId?: true
-    templateId?: true
     createdAt?: true
     updatedAt?: true
     themeId?: true
@@ -3743,7 +3736,6 @@ export namespace Prisma {
     name: string
     status: $Enums.FunnelStatus
     userId: number
-    templateId: number | null
     createdAt: Date
     updatedAt: Date
     themeId: number | null
@@ -3773,12 +3765,10 @@ export namespace Prisma {
     name?: boolean
     status?: boolean
     userId?: boolean
-    templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     themeId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
     pages?: boolean | Funnel$pagesArgs<ExtArgs>
@@ -3790,12 +3780,10 @@ export namespace Prisma {
     name?: boolean
     status?: boolean
     userId?: boolean
-    templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     themeId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
@@ -3804,12 +3792,10 @@ export namespace Prisma {
     name?: boolean
     status?: boolean
     userId?: boolean
-    templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     themeId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
@@ -3818,16 +3804,14 @@ export namespace Prisma {
     name?: boolean
     status?: boolean
     userId?: boolean
-    templateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     themeId?: boolean
   }
 
-  export type FunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "userId" | "templateId" | "createdAt" | "updatedAt" | "themeId", ExtArgs["result"]["funnel"]>
+  export type FunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "userId" | "createdAt" | "updatedAt" | "themeId", ExtArgs["result"]["funnel"]>
   export type FunnelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
     pages?: boolean | Funnel$pagesArgs<ExtArgs>
@@ -3835,12 +3819,10 @@ export namespace Prisma {
   }
   export type FunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
   }
   export type FunnelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    template?: boolean | Funnel$templateArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
   }
 
@@ -3848,7 +3830,6 @@ export namespace Prisma {
     name: "Funnel"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      template: Prisma.$TemplatePayload<ExtArgs> | null
       domainConnections: Prisma.$FunnelDomainPayload<ExtArgs>[]
       theme: Prisma.$ThemePayload<ExtArgs> | null
       pages: Prisma.$PagePayload<ExtArgs>[]
@@ -3858,7 +3839,6 @@ export namespace Prisma {
       name: string
       status: $Enums.FunnelStatus
       userId: number
-      templateId: number | null
       createdAt: Date
       updatedAt: Date
       themeId: number | null
@@ -4257,7 +4237,6 @@ export namespace Prisma {
   export interface Prisma__FunnelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    template<T extends Funnel$templateArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$templateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     domainConnections<T extends Funnel$domainConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$domainConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     theme<T extends Funnel$themeArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$themeArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     pages<T extends Funnel$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4294,7 +4273,6 @@ export namespace Prisma {
     readonly name: FieldRef<"Funnel", 'String'>
     readonly status: FieldRef<"Funnel", 'FunnelStatus'>
     readonly userId: FieldRef<"Funnel", 'Int'>
-    readonly templateId: FieldRef<"Funnel", 'Int'>
     readonly createdAt: FieldRef<"Funnel", 'DateTime'>
     readonly updatedAt: FieldRef<"Funnel", 'DateTime'>
     readonly themeId: FieldRef<"Funnel", 'Int'>
@@ -4691,25 +4669,6 @@ export namespace Prisma {
      * Limit how many Funnels to delete.
      */
     limit?: number
-  }
-
-  /**
-   * Funnel.template
-   */
-  export type Funnel$templateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TemplateInclude<ExtArgs> | null
-    where?: TemplateWhereInput
   }
 
   /**
@@ -10663,12 +10622,10 @@ export namespace Prisma {
 
   export type TemplateCategoryAvgAggregateOutputType = {
     id: number | null
-    order: number | null
   }
 
   export type TemplateCategorySumAggregateOutputType = {
     id: number | null
-    order: number | null
   }
 
   export type TemplateCategoryMinAggregateOutputType = {
@@ -10676,9 +10633,6 @@ export namespace Prisma {
     name: string | null
     slug: string | null
     description: string | null
-    icon: string | null
-    order: number | null
-    isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10688,9 +10642,6 @@ export namespace Prisma {
     name: string | null
     slug: string | null
     description: string | null
-    icon: string | null
-    order: number | null
-    isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10700,9 +10651,6 @@ export namespace Prisma {
     name: number
     slug: number
     description: number
-    icon: number
-    order: number
-    isActive: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10711,12 +10659,10 @@ export namespace Prisma {
 
   export type TemplateCategoryAvgAggregateInputType = {
     id?: true
-    order?: true
   }
 
   export type TemplateCategorySumAggregateInputType = {
     id?: true
-    order?: true
   }
 
   export type TemplateCategoryMinAggregateInputType = {
@@ -10724,9 +10670,6 @@ export namespace Prisma {
     name?: true
     slug?: true
     description?: true
-    icon?: true
-    order?: true
-    isActive?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10736,9 +10679,6 @@ export namespace Prisma {
     name?: true
     slug?: true
     description?: true
-    icon?: true
-    order?: true
-    isActive?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10748,9 +10688,6 @@ export namespace Prisma {
     name?: true
     slug?: true
     description?: true
-    icon?: true
-    order?: true
-    isActive?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10847,9 +10784,6 @@ export namespace Prisma {
     name: string
     slug: string
     description: string | null
-    icon: string | null
-    order: number
-    isActive: boolean
     createdAt: Date
     updatedAt: Date
     _count: TemplateCategoryCountAggregateOutputType | null
@@ -10878,9 +10812,6 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     description?: boolean
-    icon?: boolean
-    order?: boolean
-    isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     templates?: boolean | TemplateCategory$templatesArgs<ExtArgs>
@@ -10892,9 +10823,6 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     description?: boolean
-    icon?: boolean
-    order?: boolean
-    isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["templateCategory"]>
@@ -10904,9 +10832,6 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     description?: boolean
-    icon?: boolean
-    order?: boolean
-    isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["templateCategory"]>
@@ -10916,14 +10841,11 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     description?: boolean
-    icon?: boolean
-    order?: boolean
-    isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TemplateCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "icon" | "order" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["templateCategory"]>
+  export type TemplateCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["templateCategory"]>
   export type TemplateCategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     templates?: boolean | TemplateCategory$templatesArgs<ExtArgs>
     _count?: boolean | TemplateCategoryCountOutputTypeDefaultArgs<ExtArgs>
@@ -10941,9 +10863,6 @@ export namespace Prisma {
       name: string
       slug: string
       description: string | null
-      icon: string | null
-      order: number
-      isActive: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["templateCategory"]>
@@ -11374,9 +11293,6 @@ export namespace Prisma {
     readonly name: FieldRef<"TemplateCategory", 'String'>
     readonly slug: FieldRef<"TemplateCategory", 'String'>
     readonly description: FieldRef<"TemplateCategory", 'String'>
-    readonly icon: FieldRef<"TemplateCategory", 'String'>
-    readonly order: FieldRef<"TemplateCategory", 'Int'>
-    readonly isActive: FieldRef<"TemplateCategory", 'Boolean'>
     readonly createdAt: FieldRef<"TemplateCategory", 'DateTime'>
     readonly updatedAt: FieldRef<"TemplateCategory", 'DateTime'>
   }
@@ -11841,7 +11757,6 @@ export namespace Prisma {
     slug: string | null
     description: string | null
     categoryId: number | null
-    thumbnailImage: string | null
     usageCount: number | null
     isActive: boolean | null
     isPublic: boolean | null
@@ -11856,7 +11771,6 @@ export namespace Prisma {
     slug: string | null
     description: string | null
     categoryId: number | null
-    thumbnailImage: string | null
     usageCount: number | null
     isActive: boolean | null
     isPublic: boolean | null
@@ -11871,13 +11785,11 @@ export namespace Prisma {
     slug: number
     description: number
     categoryId: number
-    thumbnailImage: number
     tags: number
     usageCount: number
     isActive: number
     isPublic: number
     createdByUserId: number
-    metadata: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11904,7 +11816,6 @@ export namespace Prisma {
     slug?: true
     description?: true
     categoryId?: true
-    thumbnailImage?: true
     usageCount?: true
     isActive?: true
     isPublic?: true
@@ -11919,7 +11830,6 @@ export namespace Prisma {
     slug?: true
     description?: true
     categoryId?: true
-    thumbnailImage?: true
     usageCount?: true
     isActive?: true
     isPublic?: true
@@ -11934,13 +11844,11 @@ export namespace Prisma {
     slug?: true
     description?: true
     categoryId?: true
-    thumbnailImage?: true
     tags?: true
     usageCount?: true
     isActive?: true
     isPublic?: true
     createdByUserId?: true
-    metadata?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12038,13 +11946,11 @@ export namespace Prisma {
     slug: string
     description: string | null
     categoryId: number
-    thumbnailImage: string | null
     tags: string[]
     usageCount: number
     isActive: boolean
     isPublic: boolean
     createdByUserId: number
-    metadata: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: TemplateCountAggregateOutputType | null
@@ -12074,20 +11980,17 @@ export namespace Prisma {
     slug?: boolean
     description?: boolean
     categoryId?: boolean
-    thumbnailImage?: boolean
     tags?: boolean
     usageCount?: boolean
     isActive?: boolean
     isPublic?: boolean
     createdByUserId?: boolean
-    metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
     previewImages?: boolean | Template$previewImagesArgs<ExtArgs>
     pages?: boolean | Template$pagesArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
-    funnelsCreated?: boolean | Template$funnelsCreatedArgs<ExtArgs>
     _count?: boolean | TemplateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["template"]>
 
@@ -12097,13 +12000,11 @@ export namespace Prisma {
     slug?: boolean
     description?: boolean
     categoryId?: boolean
-    thumbnailImage?: boolean
     tags?: boolean
     usageCount?: boolean
     isActive?: boolean
     isPublic?: boolean
     createdByUserId?: boolean
-    metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
@@ -12116,13 +12017,11 @@ export namespace Prisma {
     slug?: boolean
     description?: boolean
     categoryId?: boolean
-    thumbnailImage?: boolean
     tags?: boolean
     usageCount?: boolean
     isActive?: boolean
     isPublic?: boolean
     createdByUserId?: boolean
-    metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
@@ -12135,24 +12034,21 @@ export namespace Prisma {
     slug?: boolean
     description?: boolean
     categoryId?: boolean
-    thumbnailImage?: boolean
     tags?: boolean
     usageCount?: boolean
     isActive?: boolean
     isPublic?: boolean
     createdByUserId?: boolean
-    metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "categoryId" | "thumbnailImage" | "tags" | "usageCount" | "isActive" | "isPublic" | "createdByUserId" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["template"]>
+  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "categoryId" | "tags" | "usageCount" | "isActive" | "isPublic" | "createdByUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["template"]>
   export type TemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | TemplateCategoryDefaultArgs<ExtArgs>
     previewImages?: boolean | Template$previewImagesArgs<ExtArgs>
     pages?: boolean | Template$pagesArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
-    funnelsCreated?: boolean | Template$funnelsCreatedArgs<ExtArgs>
     _count?: boolean | TemplateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TemplateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12169,9 +12065,8 @@ export namespace Prisma {
     objects: {
       category: Prisma.$TemplateCategoryPayload<ExtArgs>
       previewImages: Prisma.$TemplateImagePayload<ExtArgs>[]
-      pages: Prisma.$TemplatePagesPayload<ExtArgs>[]
+      pages: Prisma.$TemplatePagePayload<ExtArgs>[]
       createdBy: Prisma.$UserPayload<ExtArgs>
-      funnelsCreated: Prisma.$FunnelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -12179,13 +12074,11 @@ export namespace Prisma {
       slug: string
       description: string | null
       categoryId: number
-      thumbnailImage: string | null
       tags: string[]
       usageCount: number
       isActive: boolean
       isPublic: boolean
       createdByUserId: number
-      metadata: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["template"]>
@@ -12584,9 +12477,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     category<T extends TemplateCategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateCategoryDefaultArgs<ExtArgs>>): Prisma__TemplateCategoryClient<$Result.GetResult<Prisma.$TemplateCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     previewImages<T extends Template$previewImagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$previewImagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplateImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    pages<T extends Template$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pages<T extends Template$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Template$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    funnelsCreated<T extends Template$funnelsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, Template$funnelsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12621,13 +12513,11 @@ export namespace Prisma {
     readonly slug: FieldRef<"Template", 'String'>
     readonly description: FieldRef<"Template", 'String'>
     readonly categoryId: FieldRef<"Template", 'Int'>
-    readonly thumbnailImage: FieldRef<"Template", 'String'>
     readonly tags: FieldRef<"Template", 'String[]'>
     readonly usageCount: FieldRef<"Template", 'Int'>
     readonly isActive: FieldRef<"Template", 'Boolean'>
     readonly isPublic: FieldRef<"Template", 'Boolean'>
     readonly createdByUserId: FieldRef<"Template", 'Int'>
-    readonly metadata: FieldRef<"Template", 'Json'>
     readonly createdAt: FieldRef<"Template", 'DateTime'>
     readonly updatedAt: FieldRef<"Template", 'DateTime'>
   }
@@ -13054,47 +12944,23 @@ export namespace Prisma {
    */
   export type Template$pagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TemplatePagesInclude<ExtArgs> | null
-    where?: TemplatePagesWhereInput
-    orderBy?: TemplatePagesOrderByWithRelationInput | TemplatePagesOrderByWithRelationInput[]
-    cursor?: TemplatePagesWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: TemplatePagesScalarFieldEnum | TemplatePagesScalarFieldEnum[]
-  }
-
-  /**
-   * Template.funnelsCreated
-   */
-  export type Template$funnelsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Funnel
-     */
-    select?: FunnelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Funnel
-     */
-    omit?: FunnelOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: FunnelInclude<ExtArgs> | null
-    where?: FunnelWhereInput
-    orderBy?: FunnelOrderByWithRelationInput | FunnelOrderByWithRelationInput[]
-    cursor?: FunnelWhereUniqueInput
+    include?: TemplatePageInclude<ExtArgs> | null
+    where?: TemplatePageWhereInput
+    orderBy?: TemplatePageOrderByWithRelationInput | TemplatePageOrderByWithRelationInput[]
+    cursor?: TemplatePageWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: FunnelScalarFieldEnum | FunnelScalarFieldEnum[]
+    distinct?: TemplatePageScalarFieldEnum | TemplatePageScalarFieldEnum[]
   }
 
   /**
@@ -13144,7 +13010,7 @@ export namespace Prisma {
     id: number | null
     templateId: number | null
     imageUrl: string | null
-    imageType: string | null
+    imageType: $Enums.TemplateImageType | null
     order: number | null
     caption: string | null
     createdAt: Date | null
@@ -13155,7 +13021,7 @@ export namespace Prisma {
     id: number | null
     templateId: number | null
     imageUrl: string | null
-    imageType: string | null
+    imageType: $Enums.TemplateImageType | null
     order: number | null
     caption: string | null
     createdAt: Date | null
@@ -13311,7 +13177,7 @@ export namespace Prisma {
     id: number
     templateId: number
     imageUrl: string
-    imageType: string
+    imageType: $Enums.TemplateImageType
     order: number
     caption: string | null
     createdAt: Date
@@ -13404,7 +13270,7 @@ export namespace Prisma {
       id: number
       templateId: number
       imageUrl: string
-      imageType: string
+      imageType: $Enums.TemplateImageType
       order: number
       caption: string | null
       createdAt: Date
@@ -13836,7 +13702,7 @@ export namespace Prisma {
     readonly id: FieldRef<"TemplateImage", 'Int'>
     readonly templateId: FieldRef<"TemplateImage", 'Int'>
     readonly imageUrl: FieldRef<"TemplateImage", 'String'>
-    readonly imageType: FieldRef<"TemplateImage", 'String'>
+    readonly imageType: FieldRef<"TemplateImage", 'TemplateImageType'>
     readonly order: FieldRef<"TemplateImage", 'Int'>
     readonly caption: FieldRef<"TemplateImage", 'String'>
     readonly createdAt: FieldRef<"TemplateImage", 'DateTime'>
@@ -14256,131 +14122,147 @@ export namespace Prisma {
 
 
   /**
-   * Model TemplatePages
+   * Model TemplatePage
    */
 
-  export type AggregateTemplatePages = {
-    _count: TemplatePagesCountAggregateOutputType | null
-    _avg: TemplatePagesAvgAggregateOutputType | null
-    _sum: TemplatePagesSumAggregateOutputType | null
-    _min: TemplatePagesMinAggregateOutputType | null
-    _max: TemplatePagesMaxAggregateOutputType | null
+  export type AggregateTemplatePage = {
+    _count: TemplatePageCountAggregateOutputType | null
+    _avg: TemplatePageAvgAggregateOutputType | null
+    _sum: TemplatePageSumAggregateOutputType | null
+    _min: TemplatePageMinAggregateOutputType | null
+    _max: TemplatePageMaxAggregateOutputType | null
   }
 
-  export type TemplatePagesAvgAggregateOutputType = {
+  export type TemplatePageAvgAggregateOutputType = {
     id: number | null
     templateId: number | null
     order: number | null
   }
 
-  export type TemplatePagesSumAggregateOutputType = {
+  export type TemplatePageSumAggregateOutputType = {
     id: number | null
     templateId: number | null
     order: number | null
   }
 
-  export type TemplatePagesMinAggregateOutputType = {
-    id: number | null
-    templateId: number | null
-    name: string | null
-    content: string | null
-    order: number | null
-    linkingIdPrefix: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type TemplatePagesMaxAggregateOutputType = {
+  export type TemplatePageMinAggregateOutputType = {
     id: number | null
     templateId: number | null
     name: string | null
     content: string | null
     order: number | null
-    linkingIdPrefix: string | null
+    linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
-  export type TemplatePagesCountAggregateOutputType = {
+  export type TemplatePageMaxAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    name: string | null
+    content: string | null
+    order: number | null
+    linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TemplatePageCountAggregateOutputType = {
     id: number
     templateId: number
     name: number
     content: number
     order: number
     settings: number
-    linkingIdPrefix: number
-    metadata: number
+    linkingId: number
+    seoTitle: number
+    seoDescription: number
+    seoKeywords: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
 
-  export type TemplatePagesAvgAggregateInputType = {
+  export type TemplatePageAvgAggregateInputType = {
     id?: true
     templateId?: true
     order?: true
   }
 
-  export type TemplatePagesSumAggregateInputType = {
+  export type TemplatePageSumAggregateInputType = {
     id?: true
     templateId?: true
     order?: true
   }
 
-  export type TemplatePagesMinAggregateInputType = {
-    id?: true
-    templateId?: true
-    name?: true
-    content?: true
-    order?: true
-    linkingIdPrefix?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type TemplatePagesMaxAggregateInputType = {
+  export type TemplatePageMinAggregateInputType = {
     id?: true
     templateId?: true
     name?: true
     content?: true
     order?: true
-    linkingIdPrefix?: true
+    linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
     createdAt?: true
     updatedAt?: true
   }
 
-  export type TemplatePagesCountAggregateInputType = {
+  export type TemplatePageMaxAggregateInputType = {
+    id?: true
+    templateId?: true
+    name?: true
+    content?: true
+    order?: true
+    linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TemplatePageCountAggregateInputType = {
     id?: true
     templateId?: true
     name?: true
     content?: true
     order?: true
     settings?: true
-    linkingIdPrefix?: true
-    metadata?: true
+    linkingId?: true
+    seoTitle?: true
+    seoDescription?: true
+    seoKeywords?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
   }
 
-  export type TemplatePagesAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which TemplatePages to aggregate.
+     * Filter which TemplatePage to aggregate.
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
      * Determine the order of TemplatePages to fetch.
      */
-    orderBy?: TemplatePagesOrderByWithRelationInput | TemplatePagesOrderByWithRelationInput[]
+    orderBy?: TemplatePageOrderByWithRelationInput | TemplatePageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: TemplatePagesWhereUniqueInput
+    cursor?: TemplatePageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
@@ -14398,158 +14280,168 @@ export namespace Prisma {
      * 
      * Count returned TemplatePages
     **/
-    _count?: true | TemplatePagesCountAggregateInputType
+    _count?: true | TemplatePageCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
-    _avg?: TemplatePagesAvgAggregateInputType
+    _avg?: TemplatePageAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
-    _sum?: TemplatePagesSumAggregateInputType
+    _sum?: TemplatePageSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: TemplatePagesMinAggregateInputType
+    _min?: TemplatePageMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: TemplatePagesMaxAggregateInputType
+    _max?: TemplatePageMaxAggregateInputType
   }
 
-  export type GetTemplatePagesAggregateType<T extends TemplatePagesAggregateArgs> = {
-        [P in keyof T & keyof AggregateTemplatePages]: P extends '_count' | 'count'
+  export type GetTemplatePageAggregateType<T extends TemplatePageAggregateArgs> = {
+        [P in keyof T & keyof AggregateTemplatePage]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateTemplatePages[P]>
-      : GetScalarType<T[P], AggregateTemplatePages[P]>
+        : GetScalarType<T[P], AggregateTemplatePage[P]>
+      : GetScalarType<T[P], AggregateTemplatePage[P]>
   }
 
 
 
 
-  export type TemplatePagesGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TemplatePagesWhereInput
-    orderBy?: TemplatePagesOrderByWithAggregationInput | TemplatePagesOrderByWithAggregationInput[]
-    by: TemplatePagesScalarFieldEnum[] | TemplatePagesScalarFieldEnum
-    having?: TemplatePagesScalarWhereWithAggregatesInput
+  export type TemplatePageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TemplatePageWhereInput
+    orderBy?: TemplatePageOrderByWithAggregationInput | TemplatePageOrderByWithAggregationInput[]
+    by: TemplatePageScalarFieldEnum[] | TemplatePageScalarFieldEnum
+    having?: TemplatePageScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: TemplatePagesCountAggregateInputType | true
-    _avg?: TemplatePagesAvgAggregateInputType
-    _sum?: TemplatePagesSumAggregateInputType
-    _min?: TemplatePagesMinAggregateInputType
-    _max?: TemplatePagesMaxAggregateInputType
+    _count?: TemplatePageCountAggregateInputType | true
+    _avg?: TemplatePageAvgAggregateInputType
+    _sum?: TemplatePageSumAggregateInputType
+    _min?: TemplatePageMinAggregateInputType
+    _max?: TemplatePageMaxAggregateInputType
   }
 
-  export type TemplatePagesGroupByOutputType = {
+  export type TemplatePageGroupByOutputType = {
     id: number
     templateId: number
     name: string
     content: string | null
     order: number
     settings: JsonValue | null
-    linkingIdPrefix: string | null
-    metadata: JsonValue | null
+    linkingId: string | null
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
     createdAt: Date
     updatedAt: Date
-    _count: TemplatePagesCountAggregateOutputType | null
-    _avg: TemplatePagesAvgAggregateOutputType | null
-    _sum: TemplatePagesSumAggregateOutputType | null
-    _min: TemplatePagesMinAggregateOutputType | null
-    _max: TemplatePagesMaxAggregateOutputType | null
+    _count: TemplatePageCountAggregateOutputType | null
+    _avg: TemplatePageAvgAggregateOutputType | null
+    _sum: TemplatePageSumAggregateOutputType | null
+    _min: TemplatePageMinAggregateOutputType | null
+    _max: TemplatePageMaxAggregateOutputType | null
   }
 
-  type GetTemplatePagesGroupByPayload<T extends TemplatePagesGroupByArgs> = Prisma.PrismaPromise<
+  type GetTemplatePageGroupByPayload<T extends TemplatePageGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<TemplatePagesGroupByOutputType, T['by']> &
+      PickEnumerable<TemplatePageGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof TemplatePagesGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof TemplatePageGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], TemplatePagesGroupByOutputType[P]>
-            : GetScalarType<T[P], TemplatePagesGroupByOutputType[P]>
+              : GetScalarType<T[P], TemplatePageGroupByOutputType[P]>
+            : GetScalarType<T[P], TemplatePageGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type TemplatePagesSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type TemplatePageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     templateId?: boolean
     name?: boolean
     content?: boolean
     order?: boolean
     settings?: boolean
-    linkingIdPrefix?: boolean
-    metadata?: boolean
+    linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | TemplateDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["templatePages"]>
+  }, ExtArgs["result"]["templatePage"]>
 
-  export type TemplatePagesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type TemplatePageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     templateId?: boolean
     name?: boolean
     content?: boolean
     order?: boolean
     settings?: boolean
-    linkingIdPrefix?: boolean
-    metadata?: boolean
+    linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | TemplateDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["templatePages"]>
+  }, ExtArgs["result"]["templatePage"]>
 
-  export type TemplatePagesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type TemplatePageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     templateId?: boolean
     name?: boolean
     content?: boolean
     order?: boolean
     settings?: boolean
-    linkingIdPrefix?: boolean
-    metadata?: boolean
+    linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | TemplateDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["templatePages"]>
+  }, ExtArgs["result"]["templatePage"]>
 
-  export type TemplatePagesSelectScalar = {
+  export type TemplatePageSelectScalar = {
     id?: boolean
     templateId?: boolean
     name?: boolean
     content?: boolean
     order?: boolean
     settings?: boolean
-    linkingIdPrefix?: boolean
-    metadata?: boolean
+    linkingId?: boolean
+    seoTitle?: boolean
+    seoDescription?: boolean
+    seoKeywords?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TemplatePagesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "name" | "content" | "order" | "settings" | "linkingIdPrefix" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["templatePages"]>
-  export type TemplatePagesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "name" | "content" | "order" | "settings" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "createdAt" | "updatedAt", ExtArgs["result"]["templatePage"]>
+  export type TemplatePageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
-  export type TemplatePagesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
-  export type TemplatePagesIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
 
-  export type $TemplatePagesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "TemplatePages"
+  export type $TemplatePagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TemplatePage"
     objects: {
       template: Prisma.$TemplatePayload<ExtArgs>
     }
@@ -14560,140 +14452,142 @@ export namespace Prisma {
       content: string | null
       order: number
       settings: Prisma.JsonValue | null
-      linkingIdPrefix: string | null
-      metadata: Prisma.JsonValue | null
+      linkingId: string | null
+      seoTitle: string | null
+      seoDescription: string | null
+      seoKeywords: string | null
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["templatePages"]>
+    }, ExtArgs["result"]["templatePage"]>
     composites: {}
   }
 
-  type TemplatePagesGetPayload<S extends boolean | null | undefined | TemplatePagesDefaultArgs> = $Result.GetResult<Prisma.$TemplatePagesPayload, S>
+  type TemplatePageGetPayload<S extends boolean | null | undefined | TemplatePageDefaultArgs> = $Result.GetResult<Prisma.$TemplatePagePayload, S>
 
-  type TemplatePagesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<TemplatePagesFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: TemplatePagesCountAggregateInputType | true
+  type TemplatePageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemplatePageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TemplatePageCountAggregateInputType | true
     }
 
-  export interface TemplatePagesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemplatePages'], meta: { name: 'TemplatePages' } }
+  export interface TemplatePageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemplatePage'], meta: { name: 'TemplatePage' } }
     /**
-     * Find zero or one TemplatePages that matches the filter.
-     * @param {TemplatePagesFindUniqueArgs} args - Arguments to find a TemplatePages
+     * Find zero or one TemplatePage that matches the filter.
+     * @param {TemplatePageFindUniqueArgs} args - Arguments to find a TemplatePage
      * @example
-     * // Get one TemplatePages
-     * const templatePages = await prisma.templatePages.findUnique({
+     * // Get one TemplatePage
+     * const templatePage = await prisma.templatePage.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends TemplatePagesFindUniqueArgs>(args: SelectSubset<T, TemplatePagesFindUniqueArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends TemplatePageFindUniqueArgs>(args: SelectSubset<T, TemplatePageFindUniqueArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one TemplatePages that matches the filter or throw an error with `error.code='P2025'`
+     * Find one TemplatePage that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {TemplatePagesFindUniqueOrThrowArgs} args - Arguments to find a TemplatePages
+     * @param {TemplatePageFindUniqueOrThrowArgs} args - Arguments to find a TemplatePage
      * @example
-     * // Get one TemplatePages
-     * const templatePages = await prisma.templatePages.findUniqueOrThrow({
+     * // Get one TemplatePage
+     * const templatePage = await prisma.templatePage.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends TemplatePagesFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplatePagesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends TemplatePageFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplatePageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first TemplatePages that matches the filter.
+     * Find the first TemplatePage that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesFindFirstArgs} args - Arguments to find a TemplatePages
+     * @param {TemplatePageFindFirstArgs} args - Arguments to find a TemplatePage
      * @example
-     * // Get one TemplatePages
-     * const templatePages = await prisma.templatePages.findFirst({
+     * // Get one TemplatePage
+     * const templatePage = await prisma.templatePage.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends TemplatePagesFindFirstArgs>(args?: SelectSubset<T, TemplatePagesFindFirstArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends TemplatePageFindFirstArgs>(args?: SelectSubset<T, TemplatePageFindFirstArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first TemplatePages that matches the filter or
+     * Find the first TemplatePage that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesFindFirstOrThrowArgs} args - Arguments to find a TemplatePages
+     * @param {TemplatePageFindFirstOrThrowArgs} args - Arguments to find a TemplatePage
      * @example
-     * // Get one TemplatePages
-     * const templatePages = await prisma.templatePages.findFirstOrThrow({
+     * // Get one TemplatePage
+     * const templatePage = await prisma.templatePage.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends TemplatePagesFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplatePagesFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends TemplatePageFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplatePageFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more TemplatePages that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {TemplatePageFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
      * // Get all TemplatePages
-     * const templatePages = await prisma.templatePages.findMany()
+     * const templatePages = await prisma.templatePage.findMany()
      * 
      * // Get first 10 TemplatePages
-     * const templatePages = await prisma.templatePages.findMany({ take: 10 })
+     * const templatePages = await prisma.templatePage.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const templatePagesWithIdOnly = await prisma.templatePages.findMany({ select: { id: true } })
+     * const templatePageWithIdOnly = await prisma.templatePage.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends TemplatePagesFindManyArgs>(args?: SelectSubset<T, TemplatePagesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends TemplatePageFindManyArgs>(args?: SelectSubset<T, TemplatePageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a TemplatePages.
-     * @param {TemplatePagesCreateArgs} args - Arguments to create a TemplatePages.
+     * Create a TemplatePage.
+     * @param {TemplatePageCreateArgs} args - Arguments to create a TemplatePage.
      * @example
-     * // Create one TemplatePages
-     * const TemplatePages = await prisma.templatePages.create({
+     * // Create one TemplatePage
+     * const TemplatePage = await prisma.templatePage.create({
      *   data: {
-     *     // ... data to create a TemplatePages
+     *     // ... data to create a TemplatePage
      *   }
      * })
      * 
      */
-    create<T extends TemplatePagesCreateArgs>(args: SelectSubset<T, TemplatePagesCreateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends TemplatePageCreateArgs>(args: SelectSubset<T, TemplatePageCreateArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many TemplatePages.
-     * @param {TemplatePagesCreateManyArgs} args - Arguments to create many TemplatePages.
+     * @param {TemplatePageCreateManyArgs} args - Arguments to create many TemplatePages.
      * @example
      * // Create many TemplatePages
-     * const templatePages = await prisma.templatePages.createMany({
+     * const templatePage = await prisma.templatePage.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends TemplatePagesCreateManyArgs>(args?: SelectSubset<T, TemplatePagesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends TemplatePageCreateManyArgs>(args?: SelectSubset<T, TemplatePageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create many TemplatePages and returns the data saved in the database.
-     * @param {TemplatePagesCreateManyAndReturnArgs} args - Arguments to create many TemplatePages.
+     * @param {TemplatePageCreateManyAndReturnArgs} args - Arguments to create many TemplatePages.
      * @example
      * // Create many TemplatePages
-     * const templatePages = await prisma.templatePages.createManyAndReturn({
+     * const templatePage = await prisma.templatePage.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
      * // Create many TemplatePages and only return the `id`
-     * const templatePagesWithIdOnly = await prisma.templatePages.createManyAndReturn({
+     * const templatePageWithIdOnly = await prisma.templatePage.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -14703,28 +14597,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends TemplatePagesCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplatePagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends TemplatePageCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplatePageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a TemplatePages.
-     * @param {TemplatePagesDeleteArgs} args - Arguments to delete one TemplatePages.
+     * Delete a TemplatePage.
+     * @param {TemplatePageDeleteArgs} args - Arguments to delete one TemplatePage.
      * @example
-     * // Delete one TemplatePages
-     * const TemplatePages = await prisma.templatePages.delete({
+     * // Delete one TemplatePage
+     * const TemplatePage = await prisma.templatePage.delete({
      *   where: {
-     *     // ... filter to delete one TemplatePages
+     *     // ... filter to delete one TemplatePage
      *   }
      * })
      * 
      */
-    delete<T extends TemplatePagesDeleteArgs>(args: SelectSubset<T, TemplatePagesDeleteArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends TemplatePageDeleteArgs>(args: SelectSubset<T, TemplatePageDeleteArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one TemplatePages.
-     * @param {TemplatePagesUpdateArgs} args - Arguments to update one TemplatePages.
+     * Update one TemplatePage.
+     * @param {TemplatePageUpdateArgs} args - Arguments to update one TemplatePage.
      * @example
-     * // Update one TemplatePages
-     * const templatePages = await prisma.templatePages.update({
+     * // Update one TemplatePage
+     * const templatePage = await prisma.templatePage.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -14734,30 +14628,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends TemplatePagesUpdateArgs>(args: SelectSubset<T, TemplatePagesUpdateArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends TemplatePageUpdateArgs>(args: SelectSubset<T, TemplatePageUpdateArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more TemplatePages.
-     * @param {TemplatePagesDeleteManyArgs} args - Arguments to filter TemplatePages to delete.
+     * @param {TemplatePageDeleteManyArgs} args - Arguments to filter TemplatePages to delete.
      * @example
      * // Delete a few TemplatePages
-     * const { count } = await prisma.templatePages.deleteMany({
+     * const { count } = await prisma.templatePage.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends TemplatePagesDeleteManyArgs>(args?: SelectSubset<T, TemplatePagesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends TemplatePageDeleteManyArgs>(args?: SelectSubset<T, TemplatePageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more TemplatePages.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {TemplatePageUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
      * // Update many TemplatePages
-     * const templatePages = await prisma.templatePages.updateMany({
+     * const templatePage = await prisma.templatePage.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -14767,14 +14661,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends TemplatePagesUpdateManyArgs>(args: SelectSubset<T, TemplatePagesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends TemplatePageUpdateManyArgs>(args: SelectSubset<T, TemplatePageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more TemplatePages and returns the data updated in the database.
-     * @param {TemplatePagesUpdateManyAndReturnArgs} args - Arguments to update many TemplatePages.
+     * @param {TemplatePageUpdateManyAndReturnArgs} args - Arguments to update many TemplatePages.
      * @example
      * // Update many TemplatePages
-     * const templatePages = await prisma.templatePages.updateManyAndReturn({
+     * const templatePage = await prisma.templatePage.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -14784,7 +14678,7 @@ export namespace Prisma {
      * })
      * 
      * // Update zero or more TemplatePages and only return the `id`
-     * const templatePagesWithIdOnly = await prisma.templatePages.updateManyAndReturn({
+     * const templatePageWithIdOnly = await prisma.templatePage.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -14797,56 +14691,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends TemplatePagesUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplatePagesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends TemplatePageUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplatePageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one TemplatePages.
-     * @param {TemplatePagesUpsertArgs} args - Arguments to update or create a TemplatePages.
+     * Create or update one TemplatePage.
+     * @param {TemplatePageUpsertArgs} args - Arguments to update or create a TemplatePage.
      * @example
-     * // Update or create a TemplatePages
-     * const templatePages = await prisma.templatePages.upsert({
+     * // Update or create a TemplatePage
+     * const templatePage = await prisma.templatePage.upsert({
      *   create: {
-     *     // ... data to create a TemplatePages
+     *     // ... data to create a TemplatePage
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the TemplatePages we want to update
+     *     // ... the filter for the TemplatePage we want to update
      *   }
      * })
      */
-    upsert<T extends TemplatePagesUpsertArgs>(args: SelectSubset<T, TemplatePagesUpsertArgs<ExtArgs>>): Prisma__TemplatePagesClient<$Result.GetResult<Prisma.$TemplatePagesPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends TemplatePageUpsertArgs>(args: SelectSubset<T, TemplatePageUpsertArgs<ExtArgs>>): Prisma__TemplatePageClient<$Result.GetResult<Prisma.$TemplatePagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
      * Count the number of TemplatePages.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesCountArgs} args - Arguments to filter TemplatePages to count.
+     * @param {TemplatePageCountArgs} args - Arguments to filter TemplatePages to count.
      * @example
      * // Count the number of TemplatePages
-     * const count = await prisma.templatePages.count({
+     * const count = await prisma.templatePage.count({
      *   where: {
      *     // ... the filter for the TemplatePages we want to count
      *   }
      * })
     **/
-    count<T extends TemplatePagesCountArgs>(
-      args?: Subset<T, TemplatePagesCountArgs>,
+    count<T extends TemplatePageCountArgs>(
+      args?: Subset<T, TemplatePageCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], TemplatePagesCountAggregateOutputType>
+          : GetScalarType<T['select'], TemplatePageCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a TemplatePages.
+     * Allows you to perform aggregations operations on a TemplatePage.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {TemplatePageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -14866,13 +14760,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends TemplatePagesAggregateArgs>(args: Subset<T, TemplatePagesAggregateArgs>): Prisma.PrismaPromise<GetTemplatePagesAggregateType<T>>
+    aggregate<T extends TemplatePageAggregateArgs>(args: Subset<T, TemplatePageAggregateArgs>): Prisma.PrismaPromise<GetTemplatePageAggregateType<T>>
 
     /**
-     * Group by TemplatePages.
+     * Group by TemplatePage.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplatePagesGroupByArgs} args - Group by arguments.
+     * @param {TemplatePageGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -14887,14 +14781,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends TemplatePagesGroupByArgs,
+      T extends TemplatePageGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: TemplatePagesGroupByArgs['orderBy'] }
-        : { orderBy?: TemplatePagesGroupByArgs['orderBy'] },
+        ? { orderBy: TemplatePageGroupByArgs['orderBy'] }
+        : { orderBy?: TemplatePageGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -14943,20 +14837,20 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, TemplatePagesGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTemplatePagesGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, TemplatePageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTemplatePageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the TemplatePages model
+   * Fields of the TemplatePage model
    */
-  readonly fields: TemplatePagesFieldRefs;
+  readonly fields: TemplatePageFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for TemplatePages.
+   * The delegate class that acts as a "Promise-like" for TemplatePage.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__TemplatePagesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__TemplatePageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     template<T extends TemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TemplateDefaultArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -14985,99 +14879,101 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the TemplatePages model
+   * Fields of the TemplatePage model
    */
-  interface TemplatePagesFieldRefs {
-    readonly id: FieldRef<"TemplatePages", 'Int'>
-    readonly templateId: FieldRef<"TemplatePages", 'Int'>
-    readonly name: FieldRef<"TemplatePages", 'String'>
-    readonly content: FieldRef<"TemplatePages", 'String'>
-    readonly order: FieldRef<"TemplatePages", 'Int'>
-    readonly settings: FieldRef<"TemplatePages", 'Json'>
-    readonly linkingIdPrefix: FieldRef<"TemplatePages", 'String'>
-    readonly metadata: FieldRef<"TemplatePages", 'Json'>
-    readonly createdAt: FieldRef<"TemplatePages", 'DateTime'>
-    readonly updatedAt: FieldRef<"TemplatePages", 'DateTime'>
+  interface TemplatePageFieldRefs {
+    readonly id: FieldRef<"TemplatePage", 'Int'>
+    readonly templateId: FieldRef<"TemplatePage", 'Int'>
+    readonly name: FieldRef<"TemplatePage", 'String'>
+    readonly content: FieldRef<"TemplatePage", 'String'>
+    readonly order: FieldRef<"TemplatePage", 'Int'>
+    readonly settings: FieldRef<"TemplatePage", 'Json'>
+    readonly linkingId: FieldRef<"TemplatePage", 'String'>
+    readonly seoTitle: FieldRef<"TemplatePage", 'String'>
+    readonly seoDescription: FieldRef<"TemplatePage", 'String'>
+    readonly seoKeywords: FieldRef<"TemplatePage", 'String'>
+    readonly createdAt: FieldRef<"TemplatePage", 'DateTime'>
+    readonly updatedAt: FieldRef<"TemplatePage", 'DateTime'>
   }
     
 
   // Custom InputTypes
   /**
-   * TemplatePages findUnique
+   * TemplatePage findUnique
    */
-  export type TemplatePagesFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * Filter, which TemplatePages to fetch.
+     * Filter, which TemplatePage to fetch.
      */
-    where: TemplatePagesWhereUniqueInput
+    where: TemplatePageWhereUniqueInput
   }
 
   /**
-   * TemplatePages findUniqueOrThrow
+   * TemplatePage findUniqueOrThrow
    */
-  export type TemplatePagesFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * Filter, which TemplatePages to fetch.
+     * Filter, which TemplatePage to fetch.
      */
-    where: TemplatePagesWhereUniqueInput
+    where: TemplatePageWhereUniqueInput
   }
 
   /**
-   * TemplatePages findFirst
+   * TemplatePage findFirst
    */
-  export type TemplatePagesFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * Filter, which TemplatePages to fetch.
+     * Filter, which TemplatePage to fetch.
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
      * Determine the order of TemplatePages to fetch.
      */
-    orderBy?: TemplatePagesOrderByWithRelationInput | TemplatePagesOrderByWithRelationInput[]
+    orderBy?: TemplatePageOrderByWithRelationInput | TemplatePageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the position for searching for TemplatePages.
      */
-    cursor?: TemplatePagesWhereUniqueInput
+    cursor?: TemplatePageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
@@ -15095,41 +14991,41 @@ export namespace Prisma {
      * 
      * Filter by unique combinations of TemplatePages.
      */
-    distinct?: TemplatePagesScalarFieldEnum | TemplatePagesScalarFieldEnum[]
+    distinct?: TemplatePageScalarFieldEnum | TemplatePageScalarFieldEnum[]
   }
 
   /**
-   * TemplatePages findFirstOrThrow
+   * TemplatePage findFirstOrThrow
    */
-  export type TemplatePagesFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * Filter, which TemplatePages to fetch.
+     * Filter, which TemplatePage to fetch.
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
      * Determine the order of TemplatePages to fetch.
      */
-    orderBy?: TemplatePagesOrderByWithRelationInput | TemplatePagesOrderByWithRelationInput[]
+    orderBy?: TemplatePageOrderByWithRelationInput | TemplatePageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the position for searching for TemplatePages.
      */
-    cursor?: TemplatePagesWhereUniqueInput
+    cursor?: TemplatePageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
@@ -15147,41 +15043,41 @@ export namespace Prisma {
      * 
      * Filter by unique combinations of TemplatePages.
      */
-    distinct?: TemplatePagesScalarFieldEnum | TemplatePagesScalarFieldEnum[]
+    distinct?: TemplatePageScalarFieldEnum | TemplatePageScalarFieldEnum[]
   }
 
   /**
-   * TemplatePages findMany
+   * TemplatePage findMany
    */
-  export type TemplatePagesFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
      * Filter, which TemplatePages to fetch.
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
      * Determine the order of TemplatePages to fetch.
      */
-    orderBy?: TemplatePagesOrderByWithRelationInput | TemplatePagesOrderByWithRelationInput[]
+    orderBy?: TemplatePageOrderByWithRelationInput | TemplatePageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the position for listing TemplatePages.
      */
-    cursor?: TemplatePagesWhereUniqueInput
+    cursor?: TemplatePageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
@@ -15194,103 +15090,103 @@ export namespace Prisma {
      * Skip the first `n` TemplatePages.
      */
     skip?: number
-    distinct?: TemplatePagesScalarFieldEnum | TemplatePagesScalarFieldEnum[]
+    distinct?: TemplatePageScalarFieldEnum | TemplatePageScalarFieldEnum[]
   }
 
   /**
-   * TemplatePages create
+   * TemplatePage create
    */
-  export type TemplatePagesCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * The data needed to create a TemplatePages.
+     * The data needed to create a TemplatePage.
      */
-    data: XOR<TemplatePagesCreateInput, TemplatePagesUncheckedCreateInput>
+    data: XOR<TemplatePageCreateInput, TemplatePageUncheckedCreateInput>
   }
 
   /**
-   * TemplatePages createMany
+   * TemplatePage createMany
    */
-  export type TemplatePagesCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * The data used to create many TemplatePages.
      */
-    data: TemplatePagesCreateManyInput | TemplatePagesCreateManyInput[]
+    data: TemplatePageCreateManyInput | TemplatePageCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * TemplatePages createManyAndReturn
+   * TemplatePage createManyAndReturn
    */
-  export type TemplatePagesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelectCreateManyAndReturn<ExtArgs> | null
+    select?: TemplatePageSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * The data used to create many TemplatePages.
      */
-    data: TemplatePagesCreateManyInput | TemplatePagesCreateManyInput[]
+    data: TemplatePageCreateManyInput | TemplatePageCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesIncludeCreateManyAndReturn<ExtArgs> | null
+    include?: TemplatePageIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * TemplatePages update
+   * TemplatePage update
    */
-  export type TemplatePagesUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * The data needed to update a TemplatePages.
+     * The data needed to update a TemplatePage.
      */
-    data: XOR<TemplatePagesUpdateInput, TemplatePagesUncheckedUpdateInput>
+    data: XOR<TemplatePageUpdateInput, TemplatePageUncheckedUpdateInput>
     /**
-     * Choose, which TemplatePages to update.
+     * Choose, which TemplatePage to update.
      */
-    where: TemplatePagesWhereUniqueInput
+    where: TemplatePageWhereUniqueInput
   }
 
   /**
-   * TemplatePages updateMany
+   * TemplatePage updateMany
    */
-  export type TemplatePagesUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * The data used to update TemplatePages.
      */
-    data: XOR<TemplatePagesUpdateManyMutationInput, TemplatePagesUncheckedUpdateManyInput>
+    data: XOR<TemplatePageUpdateManyMutationInput, TemplatePageUncheckedUpdateManyInput>
     /**
      * Filter which TemplatePages to update
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * Limit how many TemplatePages to update.
      */
@@ -15298,25 +15194,25 @@ export namespace Prisma {
   }
 
   /**
-   * TemplatePages updateManyAndReturn
+   * TemplatePage updateManyAndReturn
    */
-  export type TemplatePagesUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: TemplatePageSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * The data used to update TemplatePages.
      */
-    data: XOR<TemplatePagesUpdateManyMutationInput, TemplatePagesUncheckedUpdateManyInput>
+    data: XOR<TemplatePageUpdateManyMutationInput, TemplatePageUncheckedUpdateManyInput>
     /**
      * Filter which TemplatePages to update
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * Limit how many TemplatePages to update.
      */
@@ -15324,69 +15220,69 @@ export namespace Prisma {
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesIncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: TemplatePageIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * TemplatePages upsert
+   * TemplatePage upsert
    */
-  export type TemplatePagesUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * The filter to search for the TemplatePages to update in case it exists.
+     * The filter to search for the TemplatePage to update in case it exists.
      */
-    where: TemplatePagesWhereUniqueInput
+    where: TemplatePageWhereUniqueInput
     /**
-     * In case the TemplatePages found by the `where` argument doesn't exist, create a new TemplatePages with this data.
+     * In case the TemplatePage found by the `where` argument doesn't exist, create a new TemplatePage with this data.
      */
-    create: XOR<TemplatePagesCreateInput, TemplatePagesUncheckedCreateInput>
+    create: XOR<TemplatePageCreateInput, TemplatePageUncheckedCreateInput>
     /**
-     * In case the TemplatePages was found with the provided `where` argument, update it with this data.
+     * In case the TemplatePage was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<TemplatePagesUpdateInput, TemplatePagesUncheckedUpdateInput>
+    update: XOR<TemplatePageUpdateInput, TemplatePageUncheckedUpdateInput>
   }
 
   /**
-   * TemplatePages delete
+   * TemplatePage delete
    */
-  export type TemplatePagesDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
     /**
-     * Filter which TemplatePages to delete.
+     * Filter which TemplatePage to delete.
      */
-    where: TemplatePagesWhereUniqueInput
+    where: TemplatePageWhereUniqueInput
   }
 
   /**
-   * TemplatePages deleteMany
+   * TemplatePage deleteMany
    */
-  export type TemplatePagesDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Filter which TemplatePages to delete
      */
-    where?: TemplatePagesWhereInput
+    where?: TemplatePageWhereInput
     /**
      * Limit how many TemplatePages to delete.
      */
@@ -15394,21 +15290,21 @@ export namespace Prisma {
   }
 
   /**
-   * TemplatePages without action
+   * TemplatePage without action
    */
-  export type TemplatePagesDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TemplatePageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TemplatePages
+     * Select specific fields to fetch from the TemplatePage
      */
-    select?: TemplatePagesSelect<ExtArgs> | null
+    select?: TemplatePageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TemplatePages
+     * Omit specific fields from the TemplatePage
      */
-    omit?: TemplatePagesOmit<ExtArgs> | null
+    omit?: TemplatePageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: TemplatePagesInclude<ExtArgs> | null
+    include?: TemplatePageInclude<ExtArgs> | null
   }
 
 
@@ -17731,7 +17627,6 @@ export namespace Prisma {
     name: 'name',
     status: 'status',
     userId: 'userId',
-    templateId: 'templateId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     themeId: 'themeId'
@@ -17831,9 +17726,6 @@ export namespace Prisma {
     name: 'name',
     slug: 'slug',
     description: 'description',
-    icon: 'icon',
-    order: 'order',
-    isActive: 'isActive',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -17847,13 +17739,11 @@ export namespace Prisma {
     slug: 'slug',
     description: 'description',
     categoryId: 'categoryId',
-    thumbnailImage: 'thumbnailImage',
     tags: 'tags',
     usageCount: 'usageCount',
     isActive: 'isActive',
     isPublic: 'isPublic',
     createdByUserId: 'createdByUserId',
-    metadata: 'metadata',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -17875,20 +17765,22 @@ export namespace Prisma {
   export type TemplateImageScalarFieldEnum = (typeof TemplateImageScalarFieldEnum)[keyof typeof TemplateImageScalarFieldEnum]
 
 
-  export const TemplatePagesScalarFieldEnum: {
+  export const TemplatePageScalarFieldEnum: {
     id: 'id',
     templateId: 'templateId',
     name: 'name',
     content: 'content',
     order: 'order',
     settings: 'settings',
-    linkingIdPrefix: 'linkingIdPrefix',
-    metadata: 'metadata',
+    linkingId: 'linkingId',
+    seoTitle: 'seoTitle',
+    seoDescription: 'seoDescription',
+    seoKeywords: 'seoKeywords',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
-  export type TemplatePagesScalarFieldEnum = (typeof TemplatePagesScalarFieldEnum)[keyof typeof TemplatePagesScalarFieldEnum]
+  export type TemplatePageScalarFieldEnum = (typeof TemplatePageScalarFieldEnum)[keyof typeof TemplatePageScalarFieldEnum]
 
 
   export const ImageScalarFieldEnum: {
@@ -18103,6 +17995,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TemplateImageType'
+   */
+  export type EnumTemplateImageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TemplateImageType'>
+    
+
+
+  /**
+   * Reference to a field of type 'TemplateImageType[]'
+   */
+  export type ListEnumTemplateImageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TemplateImageType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -18218,12 +18124,10 @@ export namespace Prisma {
     name?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
-    templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
     themeId?: IntNullableFilter<"Funnel"> | number | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    template?: XOR<TemplateNullableScalarRelationFilter, TemplateWhereInput> | null
     domainConnections?: FunnelDomainListRelationFilter
     theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
     pages?: PageListRelationFilter
@@ -18234,12 +18138,10 @@ export namespace Prisma {
     name?: SortOrder
     status?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     themeId?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
-    template?: TemplateOrderByWithRelationInput
     domainConnections?: FunnelDomainOrderByRelationAggregateInput
     theme?: ThemeOrderByWithRelationInput
     pages?: PageOrderByRelationAggregateInput
@@ -18254,11 +18156,9 @@ export namespace Prisma {
     name?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
-    templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    template?: XOR<TemplateNullableScalarRelationFilter, TemplateWhereInput> | null
     domainConnections?: FunnelDomainListRelationFilter
     theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
     pages?: PageListRelationFilter
@@ -18269,7 +18169,6 @@ export namespace Prisma {
     name?: SortOrder
     status?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     themeId?: SortOrderInput | SortOrder
@@ -18288,7 +18187,6 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Funnel"> | string
     status?: EnumFunnelStatusWithAggregatesFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntWithAggregatesFilter<"Funnel"> | number
-    templateId?: IntNullableWithAggregatesFilter<"Funnel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Funnel"> | Date | string
     themeId?: IntNullableWithAggregatesFilter<"Funnel"> | number | null
@@ -18747,9 +18645,6 @@ export namespace Prisma {
     name?: StringFilter<"TemplateCategory"> | string
     slug?: StringFilter<"TemplateCategory"> | string
     description?: StringNullableFilter<"TemplateCategory"> | string | null
-    icon?: StringNullableFilter<"TemplateCategory"> | string | null
-    order?: IntFilter<"TemplateCategory"> | number
-    isActive?: BoolFilter<"TemplateCategory"> | boolean
     createdAt?: DateTimeFilter<"TemplateCategory"> | Date | string
     updatedAt?: DateTimeFilter<"TemplateCategory"> | Date | string
     templates?: TemplateListRelationFilter
@@ -18760,9 +18655,6 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     description?: SortOrderInput | SortOrder
-    icon?: SortOrderInput | SortOrder
-    order?: SortOrder
-    isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     templates?: TemplateOrderByRelationAggregateInput
@@ -18776,9 +18668,6 @@ export namespace Prisma {
     OR?: TemplateCategoryWhereInput[]
     NOT?: TemplateCategoryWhereInput | TemplateCategoryWhereInput[]
     description?: StringNullableFilter<"TemplateCategory"> | string | null
-    icon?: StringNullableFilter<"TemplateCategory"> | string | null
-    order?: IntFilter<"TemplateCategory"> | number
-    isActive?: BoolFilter<"TemplateCategory"> | boolean
     createdAt?: DateTimeFilter<"TemplateCategory"> | Date | string
     updatedAt?: DateTimeFilter<"TemplateCategory"> | Date | string
     templates?: TemplateListRelationFilter
@@ -18789,9 +18678,6 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     description?: SortOrderInput | SortOrder
-    icon?: SortOrderInput | SortOrder
-    order?: SortOrder
-    isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TemplateCategoryCountOrderByAggregateInput
@@ -18809,9 +18695,6 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"TemplateCategory"> | string
     slug?: StringWithAggregatesFilter<"TemplateCategory"> | string
     description?: StringNullableWithAggregatesFilter<"TemplateCategory"> | string | null
-    icon?: StringNullableWithAggregatesFilter<"TemplateCategory"> | string | null
-    order?: IntWithAggregatesFilter<"TemplateCategory"> | number
-    isActive?: BoolWithAggregatesFilter<"TemplateCategory"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"TemplateCategory"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TemplateCategory"> | Date | string
   }
@@ -18825,20 +18708,17 @@ export namespace Prisma {
     slug?: StringFilter<"Template"> | string
     description?: StringNullableFilter<"Template"> | string | null
     categoryId?: IntFilter<"Template"> | number
-    thumbnailImage?: StringNullableFilter<"Template"> | string | null
     tags?: StringNullableListFilter<"Template">
     usageCount?: IntFilter<"Template"> | number
     isActive?: BoolFilter<"Template"> | boolean
     isPublic?: BoolFilter<"Template"> | boolean
     createdByUserId?: IntFilter<"Template"> | number
-    metadata?: JsonNullableFilter<"Template">
     createdAt?: DateTimeFilter<"Template"> | Date | string
     updatedAt?: DateTimeFilter<"Template"> | Date | string
     category?: XOR<TemplateCategoryScalarRelationFilter, TemplateCategoryWhereInput>
     previewImages?: TemplateImageListRelationFilter
-    pages?: TemplatePagesListRelationFilter
+    pages?: TemplatePageListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-    funnelsCreated?: FunnelListRelationFilter
   }
 
   export type TemplateOrderByWithRelationInput = {
@@ -18847,20 +18727,17 @@ export namespace Prisma {
     slug?: SortOrder
     description?: SortOrderInput | SortOrder
     categoryId?: SortOrder
-    thumbnailImage?: SortOrderInput | SortOrder
     tags?: SortOrder
     usageCount?: SortOrder
     isActive?: SortOrder
     isPublic?: SortOrder
     createdByUserId?: SortOrder
-    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     category?: TemplateCategoryOrderByWithRelationInput
     previewImages?: TemplateImageOrderByRelationAggregateInput
-    pages?: TemplatePagesOrderByRelationAggregateInput
+    pages?: TemplatePageOrderByRelationAggregateInput
     createdBy?: UserOrderByWithRelationInput
-    funnelsCreated?: FunnelOrderByRelationAggregateInput
   }
 
   export type TemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -18872,20 +18749,17 @@ export namespace Prisma {
     name?: StringFilter<"Template"> | string
     description?: StringNullableFilter<"Template"> | string | null
     categoryId?: IntFilter<"Template"> | number
-    thumbnailImage?: StringNullableFilter<"Template"> | string | null
     tags?: StringNullableListFilter<"Template">
     usageCount?: IntFilter<"Template"> | number
     isActive?: BoolFilter<"Template"> | boolean
     isPublic?: BoolFilter<"Template"> | boolean
     createdByUserId?: IntFilter<"Template"> | number
-    metadata?: JsonNullableFilter<"Template">
     createdAt?: DateTimeFilter<"Template"> | Date | string
     updatedAt?: DateTimeFilter<"Template"> | Date | string
     category?: XOR<TemplateCategoryScalarRelationFilter, TemplateCategoryWhereInput>
     previewImages?: TemplateImageListRelationFilter
-    pages?: TemplatePagesListRelationFilter
+    pages?: TemplatePageListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-    funnelsCreated?: FunnelListRelationFilter
   }, "id" | "slug">
 
   export type TemplateOrderByWithAggregationInput = {
@@ -18894,13 +18768,11 @@ export namespace Prisma {
     slug?: SortOrder
     description?: SortOrderInput | SortOrder
     categoryId?: SortOrder
-    thumbnailImage?: SortOrderInput | SortOrder
     tags?: SortOrder
     usageCount?: SortOrder
     isActive?: SortOrder
     isPublic?: SortOrder
     createdByUserId?: SortOrder
-    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TemplateCountOrderByAggregateInput
@@ -18919,13 +18791,11 @@ export namespace Prisma {
     slug?: StringWithAggregatesFilter<"Template"> | string
     description?: StringNullableWithAggregatesFilter<"Template"> | string | null
     categoryId?: IntWithAggregatesFilter<"Template"> | number
-    thumbnailImage?: StringNullableWithAggregatesFilter<"Template"> | string | null
     tags?: StringNullableListFilter<"Template">
     usageCount?: IntWithAggregatesFilter<"Template"> | number
     isActive?: BoolWithAggregatesFilter<"Template"> | boolean
     isPublic?: BoolWithAggregatesFilter<"Template"> | boolean
     createdByUserId?: IntWithAggregatesFilter<"Template"> | number
-    metadata?: JsonNullableWithAggregatesFilter<"Template">
     createdAt?: DateTimeWithAggregatesFilter<"Template"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Template"> | Date | string
   }
@@ -18937,7 +18807,7 @@ export namespace Prisma {
     id?: IntFilter<"TemplateImage"> | number
     templateId?: IntFilter<"TemplateImage"> | number
     imageUrl?: StringFilter<"TemplateImage"> | string
-    imageType?: StringFilter<"TemplateImage"> | string
+    imageType?: EnumTemplateImageTypeFilter<"TemplateImage"> | $Enums.TemplateImageType
     order?: IntFilter<"TemplateImage"> | number
     caption?: StringNullableFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeFilter<"TemplateImage"> | Date | string
@@ -18964,7 +18834,7 @@ export namespace Prisma {
     NOT?: TemplateImageWhereInput | TemplateImageWhereInput[]
     templateId?: IntFilter<"TemplateImage"> | number
     imageUrl?: StringFilter<"TemplateImage"> | string
-    imageType?: StringFilter<"TemplateImage"> | string
+    imageType?: EnumTemplateImageTypeFilter<"TemplateImage"> | $Enums.TemplateImageType
     order?: IntFilter<"TemplateImage"> | number
     caption?: StringNullableFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeFilter<"TemplateImage"> | Date | string
@@ -18995,93 +18865,103 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"TemplateImage"> | number
     templateId?: IntWithAggregatesFilter<"TemplateImage"> | number
     imageUrl?: StringWithAggregatesFilter<"TemplateImage"> | string
-    imageType?: StringWithAggregatesFilter<"TemplateImage"> | string
+    imageType?: EnumTemplateImageTypeWithAggregatesFilter<"TemplateImage"> | $Enums.TemplateImageType
     order?: IntWithAggregatesFilter<"TemplateImage"> | number
     caption?: StringNullableWithAggregatesFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"TemplateImage"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TemplateImage"> | Date | string
   }
 
-  export type TemplatePagesWhereInput = {
-    AND?: TemplatePagesWhereInput | TemplatePagesWhereInput[]
-    OR?: TemplatePagesWhereInput[]
-    NOT?: TemplatePagesWhereInput | TemplatePagesWhereInput[]
-    id?: IntFilter<"TemplatePages"> | number
-    templateId?: IntFilter<"TemplatePages"> | number
-    name?: StringFilter<"TemplatePages"> | string
-    content?: StringNullableFilter<"TemplatePages"> | string | null
-    order?: IntFilter<"TemplatePages"> | number
-    settings?: JsonNullableFilter<"TemplatePages">
-    linkingIdPrefix?: StringNullableFilter<"TemplatePages"> | string | null
-    metadata?: JsonNullableFilter<"TemplatePages">
-    createdAt?: DateTimeFilter<"TemplatePages"> | Date | string
-    updatedAt?: DateTimeFilter<"TemplatePages"> | Date | string
+  export type TemplatePageWhereInput = {
+    AND?: TemplatePageWhereInput | TemplatePageWhereInput[]
+    OR?: TemplatePageWhereInput[]
+    NOT?: TemplatePageWhereInput | TemplatePageWhereInput[]
+    id?: IntFilter<"TemplatePage"> | number
+    templateId?: IntFilter<"TemplatePage"> | number
+    name?: StringFilter<"TemplatePage"> | string
+    content?: StringNullableFilter<"TemplatePage"> | string | null
+    order?: IntFilter<"TemplatePage"> | number
+    settings?: JsonNullableFilter<"TemplatePage">
+    linkingId?: StringNullableFilter<"TemplatePage"> | string | null
+    seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
+    seoDescription?: StringNullableFilter<"TemplatePage"> | string | null
+    seoKeywords?: StringNullableFilter<"TemplatePage"> | string | null
+    createdAt?: DateTimeFilter<"TemplatePage"> | Date | string
+    updatedAt?: DateTimeFilter<"TemplatePage"> | Date | string
     template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
   }
 
-  export type TemplatePagesOrderByWithRelationInput = {
+  export type TemplatePageOrderByWithRelationInput = {
     id?: SortOrder
     templateId?: SortOrder
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
     settings?: SortOrderInput | SortOrder
-    linkingIdPrefix?: SortOrderInput | SortOrder
-    metadata?: SortOrderInput | SortOrder
+    linkingId?: SortOrderInput | SortOrder
+    seoTitle?: SortOrderInput | SortOrder
+    seoDescription?: SortOrderInput | SortOrder
+    seoKeywords?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     template?: TemplateOrderByWithRelationInput
   }
 
-  export type TemplatePagesWhereUniqueInput = Prisma.AtLeast<{
+  export type TemplatePageWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    AND?: TemplatePagesWhereInput | TemplatePagesWhereInput[]
-    OR?: TemplatePagesWhereInput[]
-    NOT?: TemplatePagesWhereInput | TemplatePagesWhereInput[]
-    templateId?: IntFilter<"TemplatePages"> | number
-    name?: StringFilter<"TemplatePages"> | string
-    content?: StringNullableFilter<"TemplatePages"> | string | null
-    order?: IntFilter<"TemplatePages"> | number
-    settings?: JsonNullableFilter<"TemplatePages">
-    linkingIdPrefix?: StringNullableFilter<"TemplatePages"> | string | null
-    metadata?: JsonNullableFilter<"TemplatePages">
-    createdAt?: DateTimeFilter<"TemplatePages"> | Date | string
-    updatedAt?: DateTimeFilter<"TemplatePages"> | Date | string
+    linkingId?: string
+    AND?: TemplatePageWhereInput | TemplatePageWhereInput[]
+    OR?: TemplatePageWhereInput[]
+    NOT?: TemplatePageWhereInput | TemplatePageWhereInput[]
+    templateId?: IntFilter<"TemplatePage"> | number
+    name?: StringFilter<"TemplatePage"> | string
+    content?: StringNullableFilter<"TemplatePage"> | string | null
+    order?: IntFilter<"TemplatePage"> | number
+    settings?: JsonNullableFilter<"TemplatePage">
+    seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
+    seoDescription?: StringNullableFilter<"TemplatePage"> | string | null
+    seoKeywords?: StringNullableFilter<"TemplatePage"> | string | null
+    createdAt?: DateTimeFilter<"TemplatePage"> | Date | string
+    updatedAt?: DateTimeFilter<"TemplatePage"> | Date | string
     template?: XOR<TemplateScalarRelationFilter, TemplateWhereInput>
-  }, "id">
+  }, "id" | "linkingId">
 
-  export type TemplatePagesOrderByWithAggregationInput = {
+  export type TemplatePageOrderByWithAggregationInput = {
     id?: SortOrder
     templateId?: SortOrder
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
     settings?: SortOrderInput | SortOrder
-    linkingIdPrefix?: SortOrderInput | SortOrder
-    metadata?: SortOrderInput | SortOrder
+    linkingId?: SortOrderInput | SortOrder
+    seoTitle?: SortOrderInput | SortOrder
+    seoDescription?: SortOrderInput | SortOrder
+    seoKeywords?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    _count?: TemplatePagesCountOrderByAggregateInput
-    _avg?: TemplatePagesAvgOrderByAggregateInput
-    _max?: TemplatePagesMaxOrderByAggregateInput
-    _min?: TemplatePagesMinOrderByAggregateInput
-    _sum?: TemplatePagesSumOrderByAggregateInput
+    _count?: TemplatePageCountOrderByAggregateInput
+    _avg?: TemplatePageAvgOrderByAggregateInput
+    _max?: TemplatePageMaxOrderByAggregateInput
+    _min?: TemplatePageMinOrderByAggregateInput
+    _sum?: TemplatePageSumOrderByAggregateInput
   }
 
-  export type TemplatePagesScalarWhereWithAggregatesInput = {
-    AND?: TemplatePagesScalarWhereWithAggregatesInput | TemplatePagesScalarWhereWithAggregatesInput[]
-    OR?: TemplatePagesScalarWhereWithAggregatesInput[]
-    NOT?: TemplatePagesScalarWhereWithAggregatesInput | TemplatePagesScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"TemplatePages"> | number
-    templateId?: IntWithAggregatesFilter<"TemplatePages"> | number
-    name?: StringWithAggregatesFilter<"TemplatePages"> | string
-    content?: StringNullableWithAggregatesFilter<"TemplatePages"> | string | null
-    order?: IntWithAggregatesFilter<"TemplatePages"> | number
-    settings?: JsonNullableWithAggregatesFilter<"TemplatePages">
-    linkingIdPrefix?: StringNullableWithAggregatesFilter<"TemplatePages"> | string | null
-    metadata?: JsonNullableWithAggregatesFilter<"TemplatePages">
-    createdAt?: DateTimeWithAggregatesFilter<"TemplatePages"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"TemplatePages"> | Date | string
+  export type TemplatePageScalarWhereWithAggregatesInput = {
+    AND?: TemplatePageScalarWhereWithAggregatesInput | TemplatePageScalarWhereWithAggregatesInput[]
+    OR?: TemplatePageScalarWhereWithAggregatesInput[]
+    NOT?: TemplatePageScalarWhereWithAggregatesInput | TemplatePageScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"TemplatePage"> | number
+    templateId?: IntWithAggregatesFilter<"TemplatePage"> | number
+    name?: StringWithAggregatesFilter<"TemplatePage"> | string
+    content?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
+    order?: IntWithAggregatesFilter<"TemplatePage"> | number
+    settings?: JsonNullableWithAggregatesFilter<"TemplatePage">
+    linkingId?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
+    seoTitle?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
+    seoDescription?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
+    seoKeywords?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TemplatePage"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TemplatePage"> | Date | string
   }
 
   export type ImageWhereInput = {
@@ -19327,7 +19207,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
@@ -19338,7 +19217,6 @@ export namespace Prisma {
     name: string
     status?: $Enums.FunnelStatus
     userId: number
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -19352,7 +19230,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
@@ -19363,7 +19240,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -19376,7 +19252,6 @@ export namespace Prisma {
     name: string
     status?: $Enums.FunnelStatus
     userId: number
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -19394,7 +19269,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -19893,9 +19767,6 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    icon?: string | null
-    order?: number
-    isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     templates?: TemplateCreateNestedManyWithoutCategoryInput
@@ -19906,9 +19777,6 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    icon?: string | null
-    order?: number
-    isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     templates?: TemplateUncheckedCreateNestedManyWithoutCategoryInput
@@ -19918,9 +19786,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     templates?: TemplateUpdateManyWithoutCategoryNestedInput
@@ -19931,9 +19796,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     templates?: TemplateUncheckedUpdateManyWithoutCategoryNestedInput
@@ -19944,9 +19806,6 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    icon?: string | null
-    order?: number
-    isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19955,9 +19814,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19967,9 +19823,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19978,19 +19831,16 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category: TemplateCategoryCreateNestedOneWithoutTemplatesInput
     previewImages?: TemplateImageCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageCreateNestedManyWithoutTemplateInput
     createdBy: UserCreateNestedOneWithoutTemplatesInput
-    funnelsCreated?: FunnelCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUncheckedCreateInput = {
@@ -19999,37 +19849,31 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     previewImages?: TemplateImageUncheckedCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelUncheckedCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: TemplateCategoryUpdateOneRequiredWithoutTemplatesNestedInput
     previewImages?: TemplateImageUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUpdateManyWithoutTemplateNestedInput
     createdBy?: UserUpdateOneRequiredWithoutTemplatesNestedInput
-    funnelsCreated?: FunnelUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateInput = {
@@ -20038,18 +19882,15 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     previewImages?: TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateCreateManyInput = {
@@ -20058,13 +19899,11 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20073,12 +19912,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20089,20 +19926,18 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TemplateImageCreateInput = {
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
@@ -20114,7 +19949,7 @@ export namespace Prisma {
     id?: number
     templateId: number
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
@@ -20123,7 +19958,7 @@ export namespace Prisma {
 
   export type TemplateImageUpdateInput = {
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20135,7 +19970,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     templateId?: IntFieldUpdateOperationsInput | number
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20146,7 +19981,7 @@ export namespace Prisma {
     id?: number
     templateId: number
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
@@ -20155,7 +19990,7 @@ export namespace Prisma {
 
   export type TemplateImageUpdateManyMutationInput = {
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20166,96 +20001,110 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     templateId?: IntFieldUpdateOperationsInput | number
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TemplatePagesCreateInput = {
+  export type TemplatePageCreateInput = {
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     template: TemplateCreateNestedOneWithoutPagesInput
   }
 
-  export type TemplatePagesUncheckedCreateInput = {
+  export type TemplatePageUncheckedCreateInput = {
     id?: number
     templateId: number
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type TemplatePagesUpdateInput = {
+  export type TemplatePageUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     template?: TemplateUpdateOneRequiredWithoutPagesNestedInput
   }
 
-  export type TemplatePagesUncheckedUpdateInput = {
+  export type TemplatePageUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     templateId?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TemplatePagesCreateManyInput = {
+  export type TemplatePageCreateManyInput = {
     id?: number
     templateId: number
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type TemplatePagesUpdateManyMutationInput = {
+  export type TemplatePageUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TemplatePagesUncheckedUpdateManyInput = {
+  export type TemplatePageUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     templateId?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20678,11 +20527,6 @@ export namespace Prisma {
     isNot?: UserWhereInput
   }
 
-  export type TemplateNullableScalarRelationFilter = {
-    is?: TemplateWhereInput | null
-    isNot?: TemplateWhereInput | null
-  }
-
   export type FunnelDomainListRelationFilter = {
     every?: FunnelDomainWhereInput
     some?: FunnelDomainWhereInput
@@ -20713,7 +20557,6 @@ export namespace Prisma {
     name?: SortOrder
     status?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     themeId?: SortOrder
@@ -20722,7 +20565,6 @@ export namespace Prisma {
   export type FunnelAvgOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrder
     themeId?: SortOrder
   }
 
@@ -20731,7 +20573,6 @@ export namespace Prisma {
     name?: SortOrder
     status?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     themeId?: SortOrder
@@ -20742,7 +20583,6 @@ export namespace Prisma {
     name?: SortOrder
     status?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     themeId?: SortOrder
@@ -20751,7 +20591,6 @@ export namespace Prisma {
   export type FunnelSumOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    templateId?: SortOrder
     themeId?: SortOrder
   }
 
@@ -21226,16 +21065,12 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     description?: SortOrder
-    icon?: SortOrder
-    order?: SortOrder
-    isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type TemplateCategoryAvgOrderByAggregateInput = {
     id?: SortOrder
-    order?: SortOrder
   }
 
   export type TemplateCategoryMaxOrderByAggregateInput = {
@@ -21243,9 +21078,6 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     description?: SortOrder
-    icon?: SortOrder
-    order?: SortOrder
-    isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -21255,16 +21087,12 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     description?: SortOrder
-    icon?: SortOrder
-    order?: SortOrder
-    isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type TemplateCategorySumOrderByAggregateInput = {
     id?: SortOrder
-    order?: SortOrder
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -21286,17 +21114,17 @@ export namespace Prisma {
     none?: TemplateImageWhereInput
   }
 
-  export type TemplatePagesListRelationFilter = {
-    every?: TemplatePagesWhereInput
-    some?: TemplatePagesWhereInput
-    none?: TemplatePagesWhereInput
+  export type TemplatePageListRelationFilter = {
+    every?: TemplatePageWhereInput
+    some?: TemplatePageWhereInput
+    none?: TemplatePageWhereInput
   }
 
   export type TemplateImageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type TemplatePagesOrderByRelationAggregateInput = {
+  export type TemplatePageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21306,13 +21134,11 @@ export namespace Prisma {
     slug?: SortOrder
     description?: SortOrder
     categoryId?: SortOrder
-    thumbnailImage?: SortOrder
     tags?: SortOrder
     usageCount?: SortOrder
     isActive?: SortOrder
     isPublic?: SortOrder
     createdByUserId?: SortOrder
-    metadata?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -21330,7 +21156,6 @@ export namespace Prisma {
     slug?: SortOrder
     description?: SortOrder
     categoryId?: SortOrder
-    thumbnailImage?: SortOrder
     usageCount?: SortOrder
     isActive?: SortOrder
     isPublic?: SortOrder
@@ -21345,7 +21170,6 @@ export namespace Prisma {
     slug?: SortOrder
     description?: SortOrder
     categoryId?: SortOrder
-    thumbnailImage?: SortOrder
     usageCount?: SortOrder
     isActive?: SortOrder
     isPublic?: SortOrder
@@ -21359,6 +21183,13 @@ export namespace Prisma {
     categoryId?: SortOrder
     usageCount?: SortOrder
     createdByUserId?: SortOrder
+  }
+
+  export type EnumTemplateImageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TemplateImageType | EnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTemplateImageTypeFilter<$PrismaModel> | $Enums.TemplateImageType
   }
 
   export type TemplateScalarRelationFilter = {
@@ -21411,48 +21242,66 @@ export namespace Prisma {
     order?: SortOrder
   }
 
-  export type TemplatePagesCountOrderByAggregateInput = {
+  export type EnumTemplateImageTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TemplateImageType | EnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTemplateImageTypeWithAggregatesFilter<$PrismaModel> | $Enums.TemplateImageType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTemplateImageTypeFilter<$PrismaModel>
+    _max?: NestedEnumTemplateImageTypeFilter<$PrismaModel>
+  }
+
+  export type TemplatePageCountOrderByAggregateInput = {
     id?: SortOrder
     templateId?: SortOrder
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
     settings?: SortOrder
-    linkingIdPrefix?: SortOrder
-    metadata?: SortOrder
+    linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type TemplatePagesAvgOrderByAggregateInput = {
+  export type TemplatePageAvgOrderByAggregateInput = {
     id?: SortOrder
     templateId?: SortOrder
     order?: SortOrder
   }
 
-  export type TemplatePagesMaxOrderByAggregateInput = {
-    id?: SortOrder
-    templateId?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    order?: SortOrder
-    linkingIdPrefix?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TemplatePagesMinOrderByAggregateInput = {
+  export type TemplatePageMaxOrderByAggregateInput = {
     id?: SortOrder
     templateId?: SortOrder
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
-    linkingIdPrefix?: SortOrder
+    linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type TemplatePagesSumOrderByAggregateInput = {
+  export type TemplatePageMinOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    name?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    linkingId?: SortOrder
+    seoTitle?: SortOrder
+    seoDescription?: SortOrder
+    seoKeywords?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TemplatePageSumOrderByAggregateInput = {
     id?: SortOrder
     templateId?: SortOrder
     order?: SortOrder
@@ -21767,12 +21616,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type TemplateCreateNestedOneWithoutFunnelsCreatedInput = {
-    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
-    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
-    connect?: TemplateWhereUniqueInput
-  }
-
   export type FunnelDomainCreateNestedManyWithoutFunnelInput = {
     create?: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput> | FunnelDomainCreateWithoutFunnelInput[] | FunnelDomainUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: FunnelDomainCreateOrConnectWithoutFunnelInput | FunnelDomainCreateOrConnectWithoutFunnelInput[]
@@ -21817,16 +21660,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutFunnelsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFunnelsInput, UserUpdateWithoutFunnelsInput>, UserUncheckedUpdateWithoutFunnelsInput>
-  }
-
-  export type TemplateUpdateOneWithoutFunnelsCreatedNestedInput = {
-    create?: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
-    connectOrCreate?: TemplateCreateOrConnectWithoutFunnelsCreatedInput
-    upsert?: TemplateUpsertWithoutFunnelsCreatedInput
-    disconnect?: TemplateWhereInput | boolean
-    delete?: TemplateWhereInput | boolean
-    connect?: TemplateWhereUniqueInput
-    update?: XOR<XOR<TemplateUpdateToOneWithWhereWithoutFunnelsCreatedInput, TemplateUpdateWithoutFunnelsCreatedInput>, TemplateUncheckedUpdateWithoutFunnelsCreatedInput>
   }
 
   export type FunnelDomainUpdateManyWithoutFunnelNestedInput = {
@@ -22109,24 +21942,17 @@ export namespace Prisma {
     connect?: TemplateImageWhereUniqueInput | TemplateImageWhereUniqueInput[]
   }
 
-  export type TemplatePagesCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput> | TemplatePagesCreateWithoutTemplateInput[] | TemplatePagesUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TemplatePagesCreateOrConnectWithoutTemplateInput | TemplatePagesCreateOrConnectWithoutTemplateInput[]
-    createMany?: TemplatePagesCreateManyTemplateInputEnvelope
-    connect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
+  export type TemplatePageCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput> | TemplatePageCreateWithoutTemplateInput[] | TemplatePageUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: TemplatePageCreateOrConnectWithoutTemplateInput | TemplatePageCreateOrConnectWithoutTemplateInput[]
+    createMany?: TemplatePageCreateManyTemplateInputEnvelope
+    connect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
   }
 
   export type UserCreateNestedOneWithoutTemplatesInput = {
     create?: XOR<UserCreateWithoutTemplatesInput, UserUncheckedCreateWithoutTemplatesInput>
     connectOrCreate?: UserCreateOrConnectWithoutTemplatesInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type FunnelCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput> | FunnelCreateWithoutTemplateInput[] | FunnelUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: FunnelCreateOrConnectWithoutTemplateInput | FunnelCreateOrConnectWithoutTemplateInput[]
-    createMany?: FunnelCreateManyTemplateInputEnvelope
-    connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
   }
 
   export type TemplateImageUncheckedCreateNestedManyWithoutTemplateInput = {
@@ -22136,18 +21962,11 @@ export namespace Prisma {
     connect?: TemplateImageWhereUniqueInput | TemplateImageWhereUniqueInput[]
   }
 
-  export type TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput> | TemplatePagesCreateWithoutTemplateInput[] | TemplatePagesUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TemplatePagesCreateOrConnectWithoutTemplateInput | TemplatePagesCreateOrConnectWithoutTemplateInput[]
-    createMany?: TemplatePagesCreateManyTemplateInputEnvelope
-    connect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-  }
-
-  export type FunnelUncheckedCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput> | FunnelCreateWithoutTemplateInput[] | FunnelUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: FunnelCreateOrConnectWithoutTemplateInput | FunnelCreateOrConnectWithoutTemplateInput[]
-    createMany?: FunnelCreateManyTemplateInputEnvelope
-    connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
+  export type TemplatePageUncheckedCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput> | TemplatePageCreateWithoutTemplateInput[] | TemplatePageUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: TemplatePageCreateOrConnectWithoutTemplateInput | TemplatePageCreateOrConnectWithoutTemplateInput[]
+    createMany?: TemplatePageCreateManyTemplateInputEnvelope
+    connect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
   }
 
   export type TemplateUpdatetagsInput = {
@@ -22177,18 +21996,18 @@ export namespace Prisma {
     deleteMany?: TemplateImageScalarWhereInput | TemplateImageScalarWhereInput[]
   }
 
-  export type TemplatePagesUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput> | TemplatePagesCreateWithoutTemplateInput[] | TemplatePagesUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TemplatePagesCreateOrConnectWithoutTemplateInput | TemplatePagesCreateOrConnectWithoutTemplateInput[]
-    upsert?: TemplatePagesUpsertWithWhereUniqueWithoutTemplateInput | TemplatePagesUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TemplatePagesCreateManyTemplateInputEnvelope
-    set?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    disconnect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    delete?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    connect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    update?: TemplatePagesUpdateWithWhereUniqueWithoutTemplateInput | TemplatePagesUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TemplatePagesUpdateManyWithWhereWithoutTemplateInput | TemplatePagesUpdateManyWithWhereWithoutTemplateInput[]
-    deleteMany?: TemplatePagesScalarWhereInput | TemplatePagesScalarWhereInput[]
+  export type TemplatePageUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput> | TemplatePageCreateWithoutTemplateInput[] | TemplatePageUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: TemplatePageCreateOrConnectWithoutTemplateInput | TemplatePageCreateOrConnectWithoutTemplateInput[]
+    upsert?: TemplatePageUpsertWithWhereUniqueWithoutTemplateInput | TemplatePageUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: TemplatePageCreateManyTemplateInputEnvelope
+    set?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    disconnect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    delete?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    connect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    update?: TemplatePageUpdateWithWhereUniqueWithoutTemplateInput | TemplatePageUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: TemplatePageUpdateManyWithWhereWithoutTemplateInput | TemplatePageUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: TemplatePageScalarWhereInput | TemplatePageScalarWhereInput[]
   }
 
   export type UserUpdateOneRequiredWithoutTemplatesNestedInput = {
@@ -22197,20 +22016,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutTemplatesInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTemplatesInput, UserUpdateWithoutTemplatesInput>, UserUncheckedUpdateWithoutTemplatesInput>
-  }
-
-  export type FunnelUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput> | FunnelCreateWithoutTemplateInput[] | FunnelUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: FunnelCreateOrConnectWithoutTemplateInput | FunnelCreateOrConnectWithoutTemplateInput[]
-    upsert?: FunnelUpsertWithWhereUniqueWithoutTemplateInput | FunnelUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: FunnelCreateManyTemplateInputEnvelope
-    set?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    disconnect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    delete?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    update?: FunnelUpdateWithWhereUniqueWithoutTemplateInput | FunnelUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: FunnelUpdateManyWithWhereWithoutTemplateInput | FunnelUpdateManyWithWhereWithoutTemplateInput[]
-    deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
   }
 
   export type TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput = {
@@ -22227,38 +22032,28 @@ export namespace Prisma {
     deleteMany?: TemplateImageScalarWhereInput | TemplateImageScalarWhereInput[]
   }
 
-  export type TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput> | TemplatePagesCreateWithoutTemplateInput[] | TemplatePagesUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TemplatePagesCreateOrConnectWithoutTemplateInput | TemplatePagesCreateOrConnectWithoutTemplateInput[]
-    upsert?: TemplatePagesUpsertWithWhereUniqueWithoutTemplateInput | TemplatePagesUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TemplatePagesCreateManyTemplateInputEnvelope
-    set?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    disconnect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    delete?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    connect?: TemplatePagesWhereUniqueInput | TemplatePagesWhereUniqueInput[]
-    update?: TemplatePagesUpdateWithWhereUniqueWithoutTemplateInput | TemplatePagesUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TemplatePagesUpdateManyWithWhereWithoutTemplateInput | TemplatePagesUpdateManyWithWhereWithoutTemplateInput[]
-    deleteMany?: TemplatePagesScalarWhereInput | TemplatePagesScalarWhereInput[]
-  }
-
-  export type FunnelUncheckedUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput> | FunnelCreateWithoutTemplateInput[] | FunnelUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: FunnelCreateOrConnectWithoutTemplateInput | FunnelCreateOrConnectWithoutTemplateInput[]
-    upsert?: FunnelUpsertWithWhereUniqueWithoutTemplateInput | FunnelUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: FunnelCreateManyTemplateInputEnvelope
-    set?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    disconnect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    delete?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
-    update?: FunnelUpdateWithWhereUniqueWithoutTemplateInput | FunnelUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: FunnelUpdateManyWithWhereWithoutTemplateInput | FunnelUpdateManyWithWhereWithoutTemplateInput[]
-    deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
+  export type TemplatePageUncheckedUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput> | TemplatePageCreateWithoutTemplateInput[] | TemplatePageUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: TemplatePageCreateOrConnectWithoutTemplateInput | TemplatePageCreateOrConnectWithoutTemplateInput[]
+    upsert?: TemplatePageUpsertWithWhereUniqueWithoutTemplateInput | TemplatePageUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: TemplatePageCreateManyTemplateInputEnvelope
+    set?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    disconnect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    delete?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    connect?: TemplatePageWhereUniqueInput | TemplatePageWhereUniqueInput[]
+    update?: TemplatePageUpdateWithWhereUniqueWithoutTemplateInput | TemplatePageUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: TemplatePageUpdateManyWithWhereWithoutTemplateInput | TemplatePageUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: TemplatePageScalarWhereInput | TemplatePageScalarWhereInput[]
   }
 
   export type TemplateCreateNestedOneWithoutPreviewImagesInput = {
     create?: XOR<TemplateCreateWithoutPreviewImagesInput, TemplateUncheckedCreateWithoutPreviewImagesInput>
     connectOrCreate?: TemplateCreateOrConnectWithoutPreviewImagesInput
     connect?: TemplateWhereUniqueInput
+  }
+
+  export type EnumTemplateImageTypeFieldUpdateOperationsInput = {
+    set?: $Enums.TemplateImageType
   }
 
   export type TemplateUpdateOneRequiredWithoutPreviewImagesNestedInput = {
@@ -22687,12 +22482,28 @@ export namespace Prisma {
     _max?: NestedEnumBorderRadiusFilter<$PrismaModel>
   }
 
+  export type NestedEnumTemplateImageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TemplateImageType | EnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTemplateImageTypeFilter<$PrismaModel> | $Enums.TemplateImageType
+  }
+
+  export type NestedEnumTemplateImageTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TemplateImageType | EnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTemplateImageTypeWithAggregatesFilter<$PrismaModel> | $Enums.TemplateImageType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTemplateImageTypeFilter<$PrismaModel>
+    _max?: NestedEnumTemplateImageTypeFilter<$PrismaModel>
+  }
+
   export type FunnelCreateWithoutUserInput = {
     name: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
@@ -22702,7 +22513,6 @@ export namespace Prisma {
     id?: number
     name: string
     status?: $Enums.FunnelStatus
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -22777,18 +22587,15 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category: TemplateCategoryCreateNestedOneWithoutTemplatesInput
     previewImages?: TemplateImageCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUncheckedCreateWithoutCreatedByInput = {
@@ -22797,17 +22604,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     previewImages?: TemplateImageUncheckedCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelUncheckedCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateCreateOrConnectWithoutCreatedByInput = {
@@ -22869,7 +22673,6 @@ export namespace Prisma {
     name?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     userId?: IntFilter<"Funnel"> | number
-    templateId?: IntNullableFilter<"Funnel"> | number | null
     createdAt?: DateTimeFilter<"Funnel"> | Date | string
     updatedAt?: DateTimeFilter<"Funnel"> | Date | string
     themeId?: IntNullableFilter<"Funnel"> | number | null
@@ -22941,13 +22744,11 @@ export namespace Prisma {
     slug?: StringFilter<"Template"> | string
     description?: StringNullableFilter<"Template"> | string | null
     categoryId?: IntFilter<"Template"> | number
-    thumbnailImage?: StringNullableFilter<"Template"> | string | null
     tags?: StringNullableListFilter<"Template">
     usageCount?: IntFilter<"Template"> | number
     isActive?: BoolFilter<"Template"> | boolean
     isPublic?: BoolFilter<"Template"> | boolean
     createdByUserId?: IntFilter<"Template"> | number
-    metadata?: JsonNullableFilter<"Template">
     createdAt?: DateTimeFilter<"Template"> | Date | string
     updatedAt?: DateTimeFilter<"Template"> | Date | string
   }
@@ -23013,48 +22814,6 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutFunnelsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutFunnelsInput, UserUncheckedCreateWithoutFunnelsInput>
-  }
-
-  export type TemplateCreateWithoutFunnelsCreatedInput = {
-    name: string
-    slug: string
-    description?: string | null
-    thumbnailImage?: string | null
-    tags?: TemplateCreatetagsInput | string[]
-    usageCount?: number
-    isActive?: boolean
-    isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    category: TemplateCategoryCreateNestedOneWithoutTemplatesInput
-    previewImages?: TemplateImageCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesCreateNestedManyWithoutTemplateInput
-    createdBy: UserCreateNestedOneWithoutTemplatesInput
-  }
-
-  export type TemplateUncheckedCreateWithoutFunnelsCreatedInput = {
-    id?: number
-    name: string
-    slug: string
-    description?: string | null
-    categoryId: number
-    thumbnailImage?: string | null
-    tags?: TemplateCreatetagsInput | string[]
-    usageCount?: number
-    isActive?: boolean
-    isPublic?: boolean
-    createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    previewImages?: TemplateImageUncheckedCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput
-  }
-
-  export type TemplateCreateOrConnectWithoutFunnelsCreatedInput = {
-    where: TemplateWhereUniqueInput
-    create: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
   }
 
   export type FunnelDomainCreateWithoutFunnelInput = {
@@ -23193,54 +22952,6 @@ export namespace Prisma {
     domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type TemplateUpsertWithoutFunnelsCreatedInput = {
-    update: XOR<TemplateUpdateWithoutFunnelsCreatedInput, TemplateUncheckedUpdateWithoutFunnelsCreatedInput>
-    create: XOR<TemplateCreateWithoutFunnelsCreatedInput, TemplateUncheckedCreateWithoutFunnelsCreatedInput>
-    where?: TemplateWhereInput
-  }
-
-  export type TemplateUpdateToOneWithWhereWithoutFunnelsCreatedInput = {
-    where?: TemplateWhereInput
-    data: XOR<TemplateUpdateWithoutFunnelsCreatedInput, TemplateUncheckedUpdateWithoutFunnelsCreatedInput>
-  }
-
-  export type TemplateUpdateWithoutFunnelsCreatedInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: TemplateUpdatetagsInput | string[]
-    usageCount?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    category?: TemplateCategoryUpdateOneRequiredWithoutTemplatesNestedInput
-    previewImages?: TemplateImageUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUpdateManyWithoutTemplateNestedInput
-    createdBy?: UserUpdateOneRequiredWithoutTemplatesNestedInput
-  }
-
-  export type TemplateUncheckedUpdateWithoutFunnelsCreatedInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: TemplateUpdatetagsInput | string[]
-    usageCount?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
-    createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    previewImages?: TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type FunnelDomainUpsertWithWhereUniqueWithoutFunnelInput = {
@@ -23518,7 +23229,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
   }
@@ -23528,7 +23238,6 @@ export namespace Prisma {
     name: string
     status?: $Enums.FunnelStatus
     userId: number
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -23611,7 +23320,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
   }
@@ -23621,7 +23329,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -23634,7 +23341,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
   }
@@ -23644,7 +23350,6 @@ export namespace Prisma {
     name: string
     status?: $Enums.FunnelStatus
     userId: number
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -23673,7 +23378,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
   }
@@ -23683,7 +23387,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -23696,7 +23399,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFunnelsInput
-    template?: TemplateCreateNestedOneWithoutFunnelsCreatedInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
   }
@@ -23706,7 +23408,6 @@ export namespace Prisma {
     name: string
     status?: $Enums.FunnelStatus
     userId: number
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
@@ -23735,7 +23436,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
   }
@@ -23745,7 +23445,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     userId?: IntFieldUpdateOperationsInput | number
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
@@ -23756,18 +23455,15 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     previewImages?: TemplateImageCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageCreateNestedManyWithoutTemplateInput
     createdBy: UserCreateNestedOneWithoutTemplatesInput
-    funnelsCreated?: FunnelCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUncheckedCreateWithoutCategoryInput = {
@@ -23775,18 +23471,15 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     previewImages?: TemplateImageUncheckedCreateNestedManyWithoutTemplateInput
-    pages?: TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelUncheckedCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateCreateOrConnectWithoutCategoryInput = {
@@ -23819,9 +23512,6 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    icon?: string | null
-    order?: number
-    isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23831,9 +23521,6 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    icon?: string | null
-    order?: number
-    isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23845,7 +23532,7 @@ export namespace Prisma {
 
   export type TemplateImageCreateWithoutTemplateInput = {
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
@@ -23855,7 +23542,7 @@ export namespace Prisma {
   export type TemplateImageUncheckedCreateWithoutTemplateInput = {
     id?: number
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
@@ -23872,36 +23559,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type TemplatePagesCreateWithoutTemplateInput = {
+  export type TemplatePageCreateWithoutTemplateInput = {
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type TemplatePagesUncheckedCreateWithoutTemplateInput = {
+  export type TemplatePageUncheckedCreateWithoutTemplateInput = {
     id?: number
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type TemplatePagesCreateOrConnectWithoutTemplateInput = {
-    where: TemplatePagesWhereUniqueInput
-    create: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput>
+  export type TemplatePageCreateOrConnectWithoutTemplateInput = {
+    where: TemplatePageWhereUniqueInput
+    create: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput>
   }
 
-  export type TemplatePagesCreateManyTemplateInputEnvelope = {
-    data: TemplatePagesCreateManyTemplateInput | TemplatePagesCreateManyTemplateInput[]
+  export type TemplatePageCreateManyTemplateInputEnvelope = {
+    data: TemplatePageCreateManyTemplateInput | TemplatePageCreateManyTemplateInput[]
     skipDuplicates?: boolean
   }
 
@@ -23941,39 +23632,6 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutTemplatesInput, UserUncheckedCreateWithoutTemplatesInput>
   }
 
-  export type FunnelCreateWithoutTemplateInput = {
-    name: string
-    status?: $Enums.FunnelStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutFunnelsInput
-    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
-    theme?: ThemeCreateNestedOneWithoutFunnelInput
-    pages?: PageCreateNestedManyWithoutFunnelInput
-  }
-
-  export type FunnelUncheckedCreateWithoutTemplateInput = {
-    id?: number
-    name: string
-    status?: $Enums.FunnelStatus
-    userId: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    themeId?: number | null
-    domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
-    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
-  }
-
-  export type FunnelCreateOrConnectWithoutTemplateInput = {
-    where: FunnelWhereUniqueInput
-    create: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput>
-  }
-
-  export type FunnelCreateManyTemplateInputEnvelope = {
-    data: FunnelCreateManyTemplateInput | FunnelCreateManyTemplateInput[]
-    skipDuplicates?: boolean
-  }
-
   export type TemplateCategoryUpsertWithoutTemplatesInput = {
     update: XOR<TemplateCategoryUpdateWithoutTemplatesInput, TemplateCategoryUncheckedUpdateWithoutTemplatesInput>
     create: XOR<TemplateCategoryCreateWithoutTemplatesInput, TemplateCategoryUncheckedCreateWithoutTemplatesInput>
@@ -23989,9 +23647,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24001,9 +23656,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24031,43 +23683,45 @@ export namespace Prisma {
     id?: IntFilter<"TemplateImage"> | number
     templateId?: IntFilter<"TemplateImage"> | number
     imageUrl?: StringFilter<"TemplateImage"> | string
-    imageType?: StringFilter<"TemplateImage"> | string
+    imageType?: EnumTemplateImageTypeFilter<"TemplateImage"> | $Enums.TemplateImageType
     order?: IntFilter<"TemplateImage"> | number
     caption?: StringNullableFilter<"TemplateImage"> | string | null
     createdAt?: DateTimeFilter<"TemplateImage"> | Date | string
     updatedAt?: DateTimeFilter<"TemplateImage"> | Date | string
   }
 
-  export type TemplatePagesUpsertWithWhereUniqueWithoutTemplateInput = {
-    where: TemplatePagesWhereUniqueInput
-    update: XOR<TemplatePagesUpdateWithoutTemplateInput, TemplatePagesUncheckedUpdateWithoutTemplateInput>
-    create: XOR<TemplatePagesCreateWithoutTemplateInput, TemplatePagesUncheckedCreateWithoutTemplateInput>
+  export type TemplatePageUpsertWithWhereUniqueWithoutTemplateInput = {
+    where: TemplatePageWhereUniqueInput
+    update: XOR<TemplatePageUpdateWithoutTemplateInput, TemplatePageUncheckedUpdateWithoutTemplateInput>
+    create: XOR<TemplatePageCreateWithoutTemplateInput, TemplatePageUncheckedCreateWithoutTemplateInput>
   }
 
-  export type TemplatePagesUpdateWithWhereUniqueWithoutTemplateInput = {
-    where: TemplatePagesWhereUniqueInput
-    data: XOR<TemplatePagesUpdateWithoutTemplateInput, TemplatePagesUncheckedUpdateWithoutTemplateInput>
+  export type TemplatePageUpdateWithWhereUniqueWithoutTemplateInput = {
+    where: TemplatePageWhereUniqueInput
+    data: XOR<TemplatePageUpdateWithoutTemplateInput, TemplatePageUncheckedUpdateWithoutTemplateInput>
   }
 
-  export type TemplatePagesUpdateManyWithWhereWithoutTemplateInput = {
-    where: TemplatePagesScalarWhereInput
-    data: XOR<TemplatePagesUpdateManyMutationInput, TemplatePagesUncheckedUpdateManyWithoutTemplateInput>
+  export type TemplatePageUpdateManyWithWhereWithoutTemplateInput = {
+    where: TemplatePageScalarWhereInput
+    data: XOR<TemplatePageUpdateManyMutationInput, TemplatePageUncheckedUpdateManyWithoutTemplateInput>
   }
 
-  export type TemplatePagesScalarWhereInput = {
-    AND?: TemplatePagesScalarWhereInput | TemplatePagesScalarWhereInput[]
-    OR?: TemplatePagesScalarWhereInput[]
-    NOT?: TemplatePagesScalarWhereInput | TemplatePagesScalarWhereInput[]
-    id?: IntFilter<"TemplatePages"> | number
-    templateId?: IntFilter<"TemplatePages"> | number
-    name?: StringFilter<"TemplatePages"> | string
-    content?: StringNullableFilter<"TemplatePages"> | string | null
-    order?: IntFilter<"TemplatePages"> | number
-    settings?: JsonNullableFilter<"TemplatePages">
-    linkingIdPrefix?: StringNullableFilter<"TemplatePages"> | string | null
-    metadata?: JsonNullableFilter<"TemplatePages">
-    createdAt?: DateTimeFilter<"TemplatePages"> | Date | string
-    updatedAt?: DateTimeFilter<"TemplatePages"> | Date | string
+  export type TemplatePageScalarWhereInput = {
+    AND?: TemplatePageScalarWhereInput | TemplatePageScalarWhereInput[]
+    OR?: TemplatePageScalarWhereInput[]
+    NOT?: TemplatePageScalarWhereInput | TemplatePageScalarWhereInput[]
+    id?: IntFilter<"TemplatePage"> | number
+    templateId?: IntFilter<"TemplatePage"> | number
+    name?: StringFilter<"TemplatePage"> | string
+    content?: StringNullableFilter<"TemplatePage"> | string | null
+    order?: IntFilter<"TemplatePage"> | number
+    settings?: JsonNullableFilter<"TemplatePage">
+    linkingId?: StringNullableFilter<"TemplatePage"> | string | null
+    seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
+    seoDescription?: StringNullableFilter<"TemplatePage"> | string | null
+    seoKeywords?: StringNullableFilter<"TemplatePage"> | string | null
+    createdAt?: DateTimeFilter<"TemplatePage"> | Date | string
+    updatedAt?: DateTimeFilter<"TemplatePage"> | Date | string
   }
 
   export type UserUpsertWithoutTemplatesInput = {
@@ -24112,38 +23766,19 @@ export namespace Prisma {
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type FunnelUpsertWithWhereUniqueWithoutTemplateInput = {
-    where: FunnelWhereUniqueInput
-    update: XOR<FunnelUpdateWithoutTemplateInput, FunnelUncheckedUpdateWithoutTemplateInput>
-    create: XOR<FunnelCreateWithoutTemplateInput, FunnelUncheckedCreateWithoutTemplateInput>
-  }
-
-  export type FunnelUpdateWithWhereUniqueWithoutTemplateInput = {
-    where: FunnelWhereUniqueInput
-    data: XOR<FunnelUpdateWithoutTemplateInput, FunnelUncheckedUpdateWithoutTemplateInput>
-  }
-
-  export type FunnelUpdateManyWithWhereWithoutTemplateInput = {
-    where: FunnelScalarWhereInput
-    data: XOR<FunnelUpdateManyMutationInput, FunnelUncheckedUpdateManyWithoutTemplateInput>
-  }
-
   export type TemplateCreateWithoutPreviewImagesInput = {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category: TemplateCategoryCreateNestedOneWithoutTemplatesInput
-    pages?: TemplatePagesCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageCreateNestedManyWithoutTemplateInput
     createdBy: UserCreateNestedOneWithoutTemplatesInput
-    funnelsCreated?: FunnelCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUncheckedCreateWithoutPreviewImagesInput = {
@@ -24152,17 +23787,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
-    pages?: TemplatePagesUncheckedCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelUncheckedCreateNestedManyWithoutTemplateInput
+    pages?: TemplatePageUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateCreateOrConnectWithoutPreviewImagesInput = {
@@ -24185,18 +23817,15 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: TemplateCategoryUpdateOneRequiredWithoutTemplatesNestedInput
-    pages?: TemplatePagesUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUpdateManyWithoutTemplateNestedInput
     createdBy?: UserUpdateOneRequiredWithoutTemplatesNestedInput
-    funnelsCreated?: FunnelUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateWithoutPreviewImagesInput = {
@@ -24205,35 +23834,29 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateCreateWithoutPagesInput = {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category: TemplateCategoryCreateNestedOneWithoutTemplatesInput
     previewImages?: TemplateImageCreateNestedManyWithoutTemplateInput
     createdBy: UserCreateNestedOneWithoutTemplatesInput
-    funnelsCreated?: FunnelCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateUncheckedCreateWithoutPagesInput = {
@@ -24242,17 +23865,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     previewImages?: TemplateImageUncheckedCreateNestedManyWithoutTemplateInput
-    funnelsCreated?: FunnelUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type TemplateCreateOrConnectWithoutPagesInput = {
@@ -24275,18 +23895,15 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: TemplateCategoryUpdateOneRequiredWithoutTemplatesNestedInput
     previewImages?: TemplateImageUpdateManyWithoutTemplateNestedInput
     createdBy?: UserUpdateOneRequiredWithoutTemplatesNestedInput
-    funnelsCreated?: FunnelUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateWithoutPagesInput = {
@@ -24295,17 +23912,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     previewImages?: TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type ImageFolderCreateWithoutImagesInput = {
@@ -24495,7 +24109,6 @@ export namespace Prisma {
     id?: number
     name: string
     status?: $Enums.FunnelStatus
-    templateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
@@ -24528,12 +24141,10 @@ export namespace Prisma {
     slug: string
     description?: string | null
     categoryId: number
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24550,7 +24161,6 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    template?: TemplateUpdateOneWithoutFunnelsCreatedNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
@@ -24560,7 +24170,6 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24572,7 +24181,6 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
-    templateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24646,18 +24254,15 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: TemplateCategoryUpdateOneRequiredWithoutTemplatesNestedInput
     previewImages?: TemplateImageUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateWithoutCreatedByInput = {
@@ -24666,17 +24271,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     previewImages?: TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateManyWithoutCreatedByInput = {
@@ -24685,12 +24287,10 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: IntFieldUpdateOperationsInput | number
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24839,13 +24439,11 @@ export namespace Prisma {
     name: string
     slug: string
     description?: string | null
-    thumbnailImage?: string | null
     tags?: TemplateCreatetagsInput | string[]
     usageCount?: number
     isActive?: boolean
     isPublic?: boolean
     createdByUserId: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24854,18 +24452,15 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     previewImages?: TemplateImageUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUpdateManyWithoutTemplateNestedInput
     createdBy?: UserUpdateOneRequiredWithoutTemplatesNestedInput
-    funnelsCreated?: FunnelUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateWithoutCategoryInput = {
@@ -24873,18 +24468,15 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     previewImages?: TemplateImageUncheckedUpdateManyWithoutTemplateNestedInput
-    pages?: TemplatePagesUncheckedUpdateManyWithoutTemplateNestedInput
-    funnelsCreated?: FunnelUncheckedUpdateManyWithoutTemplateNestedInput
+    pages?: TemplatePageUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type TemplateUncheckedUpdateManyWithoutCategoryInput = {
@@ -24892,13 +24484,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    thumbnailImage?: NullableStringFieldUpdateOperationsInput | string | null
     tags?: TemplateUpdatetagsInput | string[]
     usageCount?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     createdByUserId?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24906,38 +24496,30 @@ export namespace Prisma {
   export type TemplateImageCreateManyTemplateInput = {
     id?: number
     imageUrl: string
-    imageType: string
+    imageType?: $Enums.TemplateImageType
     order?: number
     caption?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type TemplatePagesCreateManyTemplateInput = {
+  export type TemplatePageCreateManyTemplateInput = {
     id?: number
     name: string
     content?: string | null
     order: number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: string | null
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-  }
-
-  export type FunnelCreateManyTemplateInput = {
-    id?: number
-    name: string
-    status?: $Enums.FunnelStatus
-    userId: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    themeId?: number | null
   }
 
   export type TemplateImageUpdateWithoutTemplateInput = {
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24947,7 +24529,7 @@ export namespace Prisma {
   export type TemplateImageUncheckedUpdateWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24957,79 +24539,52 @@ export namespace Prisma {
   export type TemplateImageUncheckedUpdateManyWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     imageUrl?: StringFieldUpdateOperationsInput | string
-    imageType?: StringFieldUpdateOperationsInput | string
+    imageType?: EnumTemplateImageTypeFieldUpdateOperationsInput | $Enums.TemplateImageType
     order?: IntFieldUpdateOperationsInput | number
     caption?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TemplatePagesUpdateWithoutTemplateInput = {
+  export type TemplatePageUpdateWithoutTemplateInput = {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TemplatePagesUncheckedUpdateWithoutTemplateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    content?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
-    settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TemplatePagesUncheckedUpdateManyWithoutTemplateInput = {
+  export type TemplatePageUncheckedUpdateWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     settings?: NullableJsonNullValueInput | InputJsonValue
-    linkingIdPrefix?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type FunnelUpdateWithoutTemplateInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutFunnelsNestedInput
-    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
-    theme?: ThemeUpdateOneWithoutFunnelNestedInput
-    pages?: PageUpdateManyWithoutFunnelNestedInput
-  }
-
-  export type FunnelUncheckedUpdateWithoutTemplateInput = {
+  export type TemplatePageUncheckedUpdateManyWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
-    userId?: IntFieldUpdateOperationsInput | number
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    linkingId?: NullableStringFieldUpdateOperationsInput | string | null
+    seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    seoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    themeId?: NullableIntFieldUpdateOperationsInput | number | null
-    domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
-    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
-  }
-
-  export type FunnelUncheckedUpdateManyWithoutTemplateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
-    userId?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type ImageCreateManyFolderInput = {

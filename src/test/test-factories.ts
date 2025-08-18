@@ -106,7 +106,6 @@ export class TestFactory {
         status: overrides.status || FunnelStatus.DRAFT,
         userId,
         themeId,
-        templateId: overrides.templateId,
       },
       include: {
         theme: true,
@@ -211,9 +210,6 @@ export class TestFactory {
         name: overrides.name || `Test Category ${timestamp}`,
         slug: overrides.slug || `test-category-${timestamp}-${randomId}`,
         description: overrides.description || "Test category description",
-        icon: overrides.icon || "📁",
-        order: overrides.order || 0,
-        isActive: overrides.isActive !== undefined ? overrides.isActive : true,
       },
     });
   }
@@ -243,13 +239,11 @@ export class TestFactory {
         slug: overrides.slug || `test-template-${timestamp}-${randomId}`,
         description: overrides.description || "Test template description",
         categoryId,
-        thumbnailImage: overrides.thumbnailImage,
         tags: overrides.tags || ["test", "template"],
         usageCount: overrides.usageCount || 0,
         isActive: overrides.isActive !== undefined ? overrides.isActive : true,
         isPublic: overrides.isPublic !== undefined ? overrides.isPublic : true,
         createdByUserId,
-        metadata: overrides.metadata,
       },
       include: {
         category: true,

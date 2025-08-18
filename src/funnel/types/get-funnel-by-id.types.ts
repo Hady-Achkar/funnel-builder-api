@@ -34,9 +34,10 @@ export const ThemeDataSchema = z.object({
   fontFamily: z
     .string({ message: "Font family is required" })
     .min(1, "Font family cannot be empty"),
-  borderRadius: z
-    .string({ message: "Border radius is required" })
-    .min(1, "Border radius cannot be empty"),
+  borderRadius: z.union([
+    z.string(),
+    z.nativeEnum($Enums.BorderRadius)
+  ]).transform(val => String(val)),
 });
 
 export const PageDataSchema = z.object({

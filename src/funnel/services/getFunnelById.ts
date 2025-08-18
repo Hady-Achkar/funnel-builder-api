@@ -48,7 +48,10 @@ export const getFunnelById = async (
             seoDescription: p.seoDescription,
             seoKeywords: p.seoKeywords,
           })),
-          theme: cached.theme,
+          theme: cached.theme ? {
+            ...cached.theme,
+            borderRadius: String(cached.theme.borderRadius)
+          } : null,
         },
       };
 
@@ -60,11 +63,20 @@ export const getFunnelById = async (
 
     const funnel = await prisma.funnel.findFirst({
       where: { id: validFunnelId, userId },
-      omit: { templateId: true, themeId: true },
       include: {
         theme: true,
         pages: {
-          omit: { content: true },
+          select: {
+            id: true,
+            name: true,
+            order: true,
+            linkingId: true,
+            createdAt: true,
+            updatedAt: true,
+            seoTitle: true,
+            seoDescription: true,
+            seoKeywords: true
+          },
           orderBy: { order: "asc" },
         },
       },
@@ -89,7 +101,13 @@ export const getFunnelById = async (
     }
 
     const response = {
-      data: funnel,
+      data: {
+        ...funnel,
+        theme: funnel.theme ? {
+          ...funnel.theme,
+          borderRadius: funnel.theme.borderRadius as string
+        } : null
+      },
     };
 
     GetFunnelByIdResponseSchema.parse(response);

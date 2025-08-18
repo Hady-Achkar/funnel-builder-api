@@ -82,7 +82,17 @@ export const updateTheme = async (
     };
   } catch (e) {
     console.error("Failed to update theme:", e);
-    if (e instanceof Error) throw new Error(e.message);
+    if (e instanceof Error) {
+      // For ZodError, extract the first issue's message
+      if (e.name === 'ZodError') {
+        const zodError = e as any;
+        const firstIssue = zodError.issues?.[0];
+        if (firstIssue) {
+          throw new Error(firstIssue.message);
+        }
+      }
+      throw new Error(e.message);
+    }
     throw new Error("Couldn't update the theme. Please try again.");
   }
 };

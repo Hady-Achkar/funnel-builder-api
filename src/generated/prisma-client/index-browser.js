@@ -138,7 +138,6 @@ exports.Prisma.FunnelScalarFieldEnum = {
   name: 'name',
   status: 'status',
   userId: 'userId',
-  templateId: 'templateId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   themeId: 'themeId'
@@ -220,9 +219,6 @@ exports.Prisma.TemplateCategoryScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
-  icon: 'icon',
-  order: 'order',
-  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -233,13 +229,11 @@ exports.Prisma.TemplateScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   categoryId: 'categoryId',
-  thumbnailImage: 'thumbnailImage',
   tags: 'tags',
   usageCount: 'usageCount',
   isActive: 'isActive',
   isPublic: 'isPublic',
   createdByUserId: 'createdByUserId',
-  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -255,15 +249,17 @@ exports.Prisma.TemplateImageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TemplatePagesScalarFieldEnum = {
+exports.Prisma.TemplatePageScalarFieldEnum = {
   id: 'id',
   templateId: 'templateId',
   name: 'name',
   content: 'content',
   order: 'order',
   settings: 'settings',
-  linkingIdPrefix: 'linkingIdPrefix',
-  metadata: 'metadata',
+  linkingId: 'linkingId',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  seoKeywords: 'seoKeywords',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -349,6 +345,11 @@ exports.BorderRadius = exports.$Enums.BorderRadius = {
   ROUNDED: 'ROUNDED'
 };
 
+exports.TemplateImageType = exports.$Enums.TemplateImageType = {
+  THUMBNAIL: 'THUMBNAIL',
+  PREVIEW: 'PREVIEW'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Funnel: 'Funnel',
@@ -360,7 +361,7 @@ exports.Prisma.ModelName = {
   TemplateCategory: 'TemplateCategory',
   Template: 'Template',
   TemplateImage: 'TemplateImage',
-  TemplatePages: 'TemplatePages',
+  TemplatePage: 'TemplatePage',
   Image: 'Image',
   ImageFolder: 'ImageFolder'
 };

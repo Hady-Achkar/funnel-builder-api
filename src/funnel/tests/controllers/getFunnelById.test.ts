@@ -36,7 +36,7 @@ describe("getFunnelById Controller", () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain("Invalid input");
+      expect(response.body.error).toContain("Invalid funnel ID provided");
     });
 
     it("returns 404 for non-existent funnel", async () => {

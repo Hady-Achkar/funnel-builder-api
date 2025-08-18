@@ -252,6 +252,28 @@ export class CacheService {
     await redisService.expire(`session:${sessionId}`, ttl);
   }
 
+  // Template cache methods
+  async getTemplateCache<T>(
+    templateId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(key, { ...options, prefix: `template:${templateId}` });
+  }
+
+  async setTemplateCache(
+    templateId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(key, value, { ...options, prefix: `template:${templateId}` });
+  }
+
+  async invalidateTemplateCache(templateId: number): Promise<void> {
+    await this.invalidatePattern("*", `template:${templateId}`);
+  }
+
   // Health check
   async healthCheck(): Promise<{ redis: boolean; latency?: number }> {
     const start = Date.now();
