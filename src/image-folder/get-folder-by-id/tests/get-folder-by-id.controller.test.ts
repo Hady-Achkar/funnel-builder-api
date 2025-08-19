@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getImageFolderByIdController } from "../controller/get-folder-by-id.controller";
-import { getFolderById } from "../service/get-folder-by-id.service";
+import { AuthRequest } from "../../../middleware/auth";
 import { UnauthorizedError } from "../../../errors";
 
 vi.mock("../service/get-folder-by-id.service", () => ({
@@ -12,7 +12,7 @@ import { getImageFolderById as mockGetFolderByIdImport } from "../service/get-fo
 const mockGetFolderById = vi.mocked(mockGetFolderByIdImport);
 
 describe("Get Folder By Id Controller", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
 

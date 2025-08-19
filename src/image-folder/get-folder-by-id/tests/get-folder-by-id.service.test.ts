@@ -38,7 +38,7 @@ describe("Get Folder By Id Service", () => {
 
     mockCacheService.get.mockResolvedValue(cachedFolder);
 
-    const result = await getImageFolderById(userId, params);
+    const result = await getImageFolderById(userId, params as any);
 
     expect(result).toEqual(cachedFolder);
     expect(mockCacheService.get).toHaveBeenCalledWith("user:1:folder:1:full");
@@ -61,7 +61,7 @@ describe("Get Folder By Id Service", () => {
     mockPrisma.imageFolder.findFirst.mockResolvedValue(folderFromDb);
     mockCacheService.set.mockResolvedValue(undefined);
 
-    const result = await getImageFolderById(userId, params);
+    const result = await getImageFolderById(userId, params as any);
 
     expect(result).toEqual(folderFromDb);
     expect(mockPrisma.imageFolder.findFirst).toHaveBeenCalledWith({
@@ -82,14 +82,14 @@ describe("Get Folder By Id Service", () => {
   });
 
   it("should throw UnauthorizedError when userId is missing", async () => {
-    await expect(getImageFolderById(0, { id: "1" })).rejects.toThrow(UnauthorizedError);
+    await expect(getImageFolderById(0, { id: "1" } as any)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should throw NotFoundError when folder not found in database", async () => {
     mockCacheService.get.mockResolvedValue(null);
     mockPrisma.imageFolder.findFirst.mockResolvedValue(null);
 
-    await expect(getImageFolderById(1, { id: "1" })).rejects.toThrow(NotFoundError);
+    await expect(getImageFolderById(1, { id: "1" } as any)).rejects.toThrow(NotFoundError);
   });
 
   it("should handle cache errors gracefully", async () => {
@@ -108,7 +108,7 @@ describe("Get Folder By Id Service", () => {
     mockPrisma.imageFolder.findFirst.mockResolvedValue(folderFromDb);
     mockCacheService.set.mockRejectedValue(new Error("Cache error"));
 
-    const result = await getImageFolderById(userId, params);
+    const result = await getImageFolderById(userId, params as any);
 
     expect(result).toEqual(folderFromDb);
     expect(mockPrisma.imageFolder.findFirst).toHaveBeenCalled();

@@ -1,15 +1,18 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getUserImageFoldersController } from "../controller/get-user-folders.controller";
-import { getUserImageFolders } from "../service/get-user-folders.service";
+import { AuthRequest } from "../../../middleware/auth";
 import { UnauthorizedError } from "../../../errors";
 
-vi.mock("../service/get-user-folders.service");
+vi.mock("../service/get-user-folders.service", () => ({
+  getUserImageFolders: vi.fn(),
+}));
 
+import { getUserImageFolders } from "../service/get-user-folders.service";
 const mockGetUserFolders = vi.mocked(getUserImageFolders);
 
 describe("Get User Folders Controller", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
 

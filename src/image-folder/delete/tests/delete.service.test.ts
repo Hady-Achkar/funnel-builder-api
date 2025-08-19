@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { deleteImageFolder } from "../service/delete.service";
 import { getPrisma } from "../../../lib/prisma";
 import { cacheService } from "../../../services/cache/cache.service";
-import { UnauthorizedError, NotFoundError, BadRequestError } from "../../../errors";
+import { UnauthorizedError, NotFoundError } from "../../../errors";
 
 vi.mock("../../../lib/prisma");
 vi.mock("../../../services/cache/cache.service");
@@ -43,7 +43,7 @@ describe("Delete Image Folder Service", () => {
       userId: 1,
     });
     
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       await callback({
         image: { deleteMany: vi.fn() },
         imageFolder: { delete: vi.fn() },
@@ -73,7 +73,7 @@ describe("Delete Image Folder Service", () => {
       userId: 1,
     });
     
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         image: { deleteMany: vi.fn() },
         imageFolder: { delete: vi.fn() },
@@ -116,7 +116,7 @@ describe("Delete Image Folder Service", () => {
       userId: 1,
     });
     
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       await callback({
         image: { deleteMany: vi.fn() },
         imageFolder: { delete: vi.fn() },

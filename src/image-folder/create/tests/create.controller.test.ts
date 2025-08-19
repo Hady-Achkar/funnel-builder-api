@@ -1,15 +1,18 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createImageFolderController } from "../controller/create.controller";
-import { createImageFolder } from "../service/create.service";
+import { AuthRequest } from "../../../middleware/auth";
 import { UnauthorizedError } from "../../../errors";
 
-vi.mock("../service/create.service");
+vi.mock("../service/create.service", () => ({
+  createImageFolder: vi.fn(),
+}));
 
+import { createImageFolder } from "../service/create.service";
 const mockCreateImageFolder = vi.mocked(createImageFolder);
 
 describe("Create Image Folder Controller", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
 
