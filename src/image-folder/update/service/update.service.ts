@@ -81,7 +81,7 @@ export const updateImageFolder = async (
       };
 
       const fullCacheKey = `user:${userId}:folder:${paramsRequest.id}:full`;
-      await cacheService.set(fullCacheKey, fullCacheData, { ttl: 300 });
+      await cacheService.set(fullCacheKey, fullCacheData, { ttl: 0 });
 
       const allFolders = await prisma.imageFolder.findMany({
         where: { userId },
@@ -107,7 +107,7 @@ export const updateImageFolder = async (
       };
 
       const summaryCacheKey = `user:${userId}:folders:summary`;
-      await cacheService.set(summaryCacheKey, summaryResponse, { ttl: 300 });
+      await cacheService.set(summaryCacheKey, summaryResponse, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Cache update failed but folder was updated:", cacheError);
     }

@@ -78,7 +78,7 @@ export const getImageFolderById = async (
     const validatedResponse = getImageFolderByIdResponse.parse(response);
 
     try {
-      await cacheService.set(cacheKey, validatedResponse, { ttl: 300 });
+      await cacheService.set(cacheKey, validatedResponse, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Cache update failed but folder was retrieved:", cacheError);
     }

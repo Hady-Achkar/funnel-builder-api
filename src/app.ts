@@ -12,6 +12,7 @@ import domainRoutes from "./routes/domains";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";
+import imageRoutes from "./image/routes";
 
 export function createServer(): Express {
   const app = express();
@@ -50,6 +51,7 @@ export function createServer(): Express {
   app.use("/api/themes", themeRoutes);
   app.use("/api/image-folders", imageFolderRoutes);
   app.use("/api/templates", templateRoutes);
+  app.use("/api/images", imageRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {

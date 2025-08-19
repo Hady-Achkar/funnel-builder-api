@@ -71,7 +71,7 @@ export const deleteImageFolder = async (
       };
 
       const summaryCacheKey = `user:${userId}:folders:summary`;
-      await cacheService.set(summaryCacheKey, summaryResponse, { ttl: 300 });
+      await cacheService.set(summaryCacheKey, summaryResponse, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Cache update failed but folder was deleted:", cacheError);
     }

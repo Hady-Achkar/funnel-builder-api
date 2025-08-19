@@ -1,0 +1,1 @@
+export { default as uploadImageRoute } from "./upload.route";

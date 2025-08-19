@@ -199,6 +199,20 @@ export class AzureBlobStorageService {
     return blockBlobClient.url;
   }
 
+  async overwriteFileAtExactPath(blobPath: string, buffer: Buffer, contentType: string): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error("Azure Blob Storage is not configured");
+    }
+
+    const blockBlobClient = this.containerClient.getBlockBlobClient(blobPath);
+    
+    await blockBlobClient.upload(buffer, buffer.length, {
+      blobHTTPHeaders: {
+        blobContentType: contentType,
+      },
+    });
+  }
+
   private getFileExtension(contentType: string): string {
     const extensions: Record<string, string> = {
       "image/jpeg": ".jpg",
