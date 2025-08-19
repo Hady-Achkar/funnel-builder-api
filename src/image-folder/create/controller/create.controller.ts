@@ -16,9 +16,7 @@ export const createImageFolderController = async (
 
     const result = await createImageFolder(userId, req.body);
 
-    return res.status(201).json({
-      result,
-    });
+    return res.status(201).json(result);
   } catch (error) {
     next(error);
   }
