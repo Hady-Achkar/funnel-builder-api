@@ -45,7 +45,7 @@ describe("Update Image Service", () => {
   });
 
   it("should update image with file and metadata successfully", async () => {
-    const params = { imageId: "1" };
+    const params = { imageId: "1" } as any;
     const formData = { name: "Updated Image", altText: "Updated alt text" };
     const userId = 1;
 
@@ -86,7 +86,7 @@ describe("Update Image Service", () => {
   });
 
   it("should update image metadata only (no file)", async () => {
-    const params = { imageId: "1" };
+    const params = { imageId: "1" } as any;
     const formData = { name: "Updated Image", altText: "Updated alt text" };
     const userId = 1;
 
@@ -122,32 +122,32 @@ describe("Update Image Service", () => {
   });
 
   it("should throw UnauthorizedError when userId is missing", async () => {
-    await expect(updateImage(0, { imageId: "1" }, {})).rejects.toThrow(UnauthorizedError);
+    await expect(updateImage(0, { imageId: "1" } as any, {})).rejects.toThrow(UnauthorizedError);
   });
 
   it("should throw BadRequestError for invalid file type", async () => {
     const invalidFile = { ...mockFile, mimetype: "text/plain" };
     
-    await expect(updateImage(1, { imageId: "1" }, {}, invalidFile)).rejects.toThrow(BadRequestError);
+    await expect(updateImage(1, { imageId: "1" } as any, {}, invalidFile)).rejects.toThrow(BadRequestError);
   });
 
   it("should throw BadRequestError for oversized file", async () => {
     const largeFile = { ...mockFile, size: 6 * 1024 * 1024 }; // 6MB
 
-    await expect(updateImage(1, { imageId: "1" }, {}, largeFile)).rejects.toThrow(BadRequestError);
+    await expect(updateImage(1, { imageId: "1" } as any, {}, largeFile)).rejects.toThrow(BadRequestError);
   });
 
   it("should throw NotFoundError when user not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    await expect(updateImage(1, { imageId: "1" }, {})).rejects.toThrow(NotFoundError);
+    await expect(updateImage(1, { imageId: "1" } as any, {})).rejects.toThrow(NotFoundError);
   });
 
   it("should throw NotFoundError when image not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
     mockPrisma.image.findUnique.mockResolvedValue(null);
 
-    await expect(updateImage(1, { imageId: "1" }, {})).rejects.toThrow(NotFoundError);
+    await expect(updateImage(1, { imageId: "1" } as any, {})).rejects.toThrow(NotFoundError);
   });
 
   it("should throw UnauthorizedError when user doesn't own image", async () => {
@@ -157,6 +157,6 @@ describe("Update Image Service", () => {
       folder: { userId: 2 }, // Different user
     });
 
-    await expect(updateImage(1, { imageId: "1" }, {})).rejects.toThrow(UnauthorizedError);
+    await expect(updateImage(1, { imageId: "1" } as any, {})).rejects.toThrow(UnauthorizedError);
   });
 });

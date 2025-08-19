@@ -1,15 +1,16 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { uploadImagesController } from "../controller/upload.controller";
 import { uploadImages } from "../service/upload.service";
 import { UnauthorizedError, BadRequestError } from "../../../errors";
+import { AuthRequest } from "../../../middleware/auth";
 
 vi.mock("../service/upload.service");
 
 const mockUploadImages = vi.mocked(uploadImages);
 
 describe("Upload Images Controller", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
 

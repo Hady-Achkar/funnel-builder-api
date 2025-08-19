@@ -3,13 +3,6 @@ import { getAllTemplates } from "../service/get-all-templates.service";
 import { TestHelpers, testPrisma } from "../../../test/helpers";
 import { redisService } from "../../../services/cache/redis.service";
 
-type GetAllTemplatesInput = {
-  page?: string;
-  limit?: string;
-  orderBy?: "createdAt" | "updatedAt" | "name" | "usageCount";
-  order?: "asc" | "desc";
-  category?: string;
-};
 
 describe("getAllTemplates Service", () => {
   let testUser: any;
@@ -81,7 +74,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({ page: "1", limit: "10" });
+      const result = await getAllTemplates({ page: "1", limit: "10" } as any);
 
       expect(result.templates).toHaveLength(3);
       expect(result.pagination.total).toBe(3);
@@ -124,7 +117,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({ category: "category-1" } as GetAllTemplatesInput);
+      const result = await getAllTemplates({ category: "category-1" } as any);
 
       expect(result.templates).toHaveLength(2);
       expect(result.templates.every(t => t.categoryName === "Category 1")).toBe(true);
@@ -154,7 +147,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({} as GetAllTemplatesInput);
+      const result = await getAllTemplates({} as any);
 
       expect(result.templates).toHaveLength(1);
       expect(result.templates[0].name).toBe("Active Template");
@@ -184,7 +177,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({} as GetAllTemplatesInput);
+      const result = await getAllTemplates({} as any);
 
       expect(result.templates).toHaveLength(1);
       expect(result.templates[0].name).toBe("Public Template");
@@ -206,18 +199,18 @@ describe("getAllTemplates Service", () => {
       await testPrisma.template.createMany({ data: templates });
 
       // Get first page
-      const page1 = await getAllTemplates({ page: "1", limit: "5" } as GetAllTemplatesInput);
+      const page1 = await getAllTemplates({ page: "1", limit: "5" } as any);
       expect(page1.templates).toHaveLength(5);
       expect(page1.pagination.page).toBe(1);
       expect(page1.pagination.totalPages).toBe(3);
 
       // Get second page
-      const page2 = await getAllTemplates({ page: "2", limit: "5" } as GetAllTemplatesInput);
+      const page2 = await getAllTemplates({ page: "2", limit: "5" } as any);
       expect(page2.templates).toHaveLength(5);
       expect(page2.pagination.page).toBe(2);
 
       // Get last page
-      const page3 = await getAllTemplates({ page: "3", limit: "5" } as GetAllTemplatesInput);
+      const page3 = await getAllTemplates({ page: "3", limit: "5" } as any);
       expect(page3.templates).toHaveLength(5);
       expect(page3.pagination.page).toBe(3);
     });
@@ -255,7 +248,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({} as GetAllTemplatesInput);
+      const result = await getAllTemplates({} as any);
 
       expect(result.templates).toHaveLength(3);
       expect(result.templates.some(t => t.name.includes("Template"))).toBe(true);
@@ -295,12 +288,12 @@ describe("getAllTemplates Service", () => {
       });
 
       // Sort by name ascending
-      const nameAsc = await getAllTemplates({ orderBy: "name", order: "asc" } as GetAllTemplatesInput);
+      const nameAsc = await getAllTemplates({ orderBy: "name", order: "asc" } as any);
       expect(nameAsc.templates[0].name).toBe("A Template");
       expect(nameAsc.templates[2].name).toBe("Z Template");
 
       // Sort by usage count descending
-      const usageDesc = await getAllTemplates({ orderBy: "usageCount", order: "desc" } as GetAllTemplatesInput);
+      const usageDesc = await getAllTemplates({ orderBy: "usageCount", order: "desc" } as any);
       expect(usageDesc.templates[0].usageCount).toBeGreaterThanOrEqual(usageDesc.templates[1].usageCount);
     });
 
@@ -334,7 +327,7 @@ describe("getAllTemplates Service", () => {
         ]
       });
 
-      const result = await getAllTemplates({} as GetAllTemplatesInput);
+      const result = await getAllTemplates({} as any);
 
       expect(result.templates[0].previewUrls).toHaveLength(2);
     });
@@ -353,11 +346,11 @@ describe("getAllTemplates Service", () => {
       });
 
       // First call - should populate cache
-      const result1 = await getAllTemplates({});
+      const result1 = await getAllTemplates({} as any);
       expect(result1.templates).toHaveLength(1);
 
       // Second call - should use cache
-      const result2 = await getAllTemplates({});
+      const result2 = await getAllTemplates({} as any);
       expect(result2.templates).toHaveLength(1);
       expect(result2).toEqual(result1);
     });
@@ -366,13 +359,13 @@ describe("getAllTemplates Service", () => {
   describe("Error Cases", () => {
     it("should handle invalid page number", async () => {
       await expect(
-        getAllTemplates({ page: "-1" } as GetAllTemplatesInput)
+        getAllTemplates({ page: "-1" } as any)
       ).rejects.toThrow();
     });
 
     it("should handle invalid limit", async () => {
       await expect(
-        getAllTemplates({ limit: "0" } as GetAllTemplatesInput)
+        getAllTemplates({ limit: "0" } as any)
       ).rejects.toThrow();
     });
 
@@ -383,7 +376,7 @@ describe("getAllTemplates Service", () => {
     });
 
     it("should return empty array when no templates exist", async () => {
-      const result = await getAllTemplates({} as GetAllTemplatesInput);
+      const result = await getAllTemplates({} as any);
 
       expect(result.templates).toHaveLength(0);
       expect(result.pagination.total).toBe(0);
@@ -403,7 +396,7 @@ describe("getAllTemplates Service", () => {
         }
       });
 
-      const result = await getAllTemplates({ category: "non-existent" } as GetAllTemplatesInput);
+      const result = await getAllTemplates({ category: "non-existent" } as any);
 
       expect(result.templates).toHaveLength(0);
     });

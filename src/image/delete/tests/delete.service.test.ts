@@ -35,7 +35,7 @@ describe("Delete Image Service", () => {
   });
 
   it("should delete image successfully", async () => {
-    const params = { imageId: "1" };
+    const params = { imageId: "1" } as any;
     const userId = 1;
 
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
@@ -63,20 +63,20 @@ describe("Delete Image Service", () => {
   });
 
   it("should throw UnauthorizedError when userId is missing", async () => {
-    await expect(deleteImage(0, { imageId: "1" })).rejects.toThrow(UnauthorizedError);
+    await expect(deleteImage(0, { imageId: "1" } as any)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should throw NotFoundError when user not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    await expect(deleteImage(1, { imageId: "1" })).rejects.toThrow(NotFoundError);
+    await expect(deleteImage(1, { imageId: "1" } as any)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw NotFoundError when image not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
     mockPrisma.image.findUnique.mockResolvedValue(null);
 
-    await expect(deleteImage(1, { imageId: "1" })).rejects.toThrow(NotFoundError);
+    await expect(deleteImage(1, { imageId: "1" } as any)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw UnauthorizedError when user doesn't own image", async () => {
@@ -86,7 +86,7 @@ describe("Delete Image Service", () => {
       folder: { userId: 2 }, // Different user
     });
 
-    await expect(deleteImage(1, { imageId: "1" })).rejects.toThrow(UnauthorizedError);
+    await expect(deleteImage(1, { imageId: "1" } as any)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should handle Azure deletion failure gracefully", async () => {
@@ -106,7 +106,7 @@ describe("Delete Image Service", () => {
       images: [],
     });
 
-    const result = await deleteImage(1, { imageId: "1" });
+    const result = await deleteImage(1, { imageId: "1" } as any);
 
     expect(result.message).toBe("Image deleted successfully");
     expect(mockPrisma.image.delete).toHaveBeenCalled();

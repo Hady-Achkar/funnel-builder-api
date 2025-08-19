@@ -46,7 +46,7 @@ describe("Upload Images Service", () => {
   });
 
   it("should upload images successfully", async () => {
-    const params = { folderId: "1" };
+    const params = { folderId: "1" } as any;
     const userId = 1;
 
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
@@ -86,16 +86,16 @@ describe("Upload Images Service", () => {
   });
 
   it("should throw UnauthorizedError when userId is missing", async () => {
-    await expect(uploadImages(0, { folderId: "1" }, mockFiles)).rejects.toThrow(UnauthorizedError);
+    await expect(uploadImages(0, { folderId: "1" } as any, mockFiles)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should throw BadRequestError when no files provided", async () => {
-    await expect(uploadImages(1, { folderId: "1" }, [])).rejects.toThrow(BadRequestError);
+    await expect(uploadImages(1, { folderId: "1" } as any, [])).rejects.toThrow(BadRequestError);
   });
 
   it("should throw BadRequestError when too many files", async () => {
     const manyFiles = Array(11).fill(mockFiles[0]);
-    await expect(uploadImages(1, { folderId: "1" }, manyFiles)).rejects.toThrow(BadRequestError);
+    await expect(uploadImages(1, { folderId: "1" } as any, manyFiles)).rejects.toThrow(BadRequestError);
   });
 
   it("should throw BadRequestError for invalid file type", async () => {
@@ -103,7 +103,7 @@ describe("Upload Images Service", () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
     mockPrisma.imageFolder.findUnique.mockResolvedValue({ id: 1, userId: 1 });
 
-    await expect(uploadImages(1, { folderId: "1" }, [invalidFile])).rejects.toThrow(BadRequestError);
+    await expect(uploadImages(1, { folderId: "1" } as any, [invalidFile])).rejects.toThrow(BadRequestError);
   });
 
   it("should throw BadRequestError for oversized file", async () => {
@@ -111,19 +111,19 @@ describe("Upload Images Service", () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
     mockPrisma.imageFolder.findUnique.mockResolvedValue({ id: 1, userId: 1 });
 
-    await expect(uploadImages(1, { folderId: "1" }, [largeFile])).rejects.toThrow(BadRequestError);
+    await expect(uploadImages(1, { folderId: "1" } as any, [largeFile])).rejects.toThrow(BadRequestError);
   });
 
   it("should throw NotFoundError when user not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    await expect(uploadImages(1, { folderId: "1" }, mockFiles)).rejects.toThrow(NotFoundError);
+    await expect(uploadImages(1, { folderId: "1" } as any, mockFiles)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw NotFoundError when folder not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 1 });
     mockPrisma.imageFolder.findUnique.mockResolvedValue(null);
 
-    await expect(uploadImages(1, { folderId: "1" }, mockFiles)).rejects.toThrow(NotFoundError);
+    await expect(uploadImages(1, { folderId: "1" } as any, mockFiles)).rejects.toThrow(NotFoundError);
   });
 });
