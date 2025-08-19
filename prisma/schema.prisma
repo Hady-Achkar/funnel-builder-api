@@ -125,6 +125,8 @@ model Session {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   
+  formSubmissions FormSubmission[]
+  
   @@index([sessionId])
   @@index([funnelId])
   @@index([createdAt])
@@ -282,4 +284,40 @@ model ImageFolder {
   @@unique([userId, name])
   @@index([userId])
   @@map("image_folders")
+}
+
+model Form {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  formContent Json     // JSON form structure/schema
+  isActive    Boolean  @default(true)
+  funnelId    Int?     // Optional: link to specific funnel
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  submissions FormSubmission[]
+  
+  @@index([isActive])
+  @@index([funnelId])
+  @@map("forms")
+}
+
+model FormSubmission {
+  id            Int       @id @default(autoincrement())
+  formId        Int
+  sessionId     String    // FK to Session.sessionId
+  submittedData Json?     // Store actual form submission data
+  isCompleted   Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  form    Form    @relation(fields: [formId], references: [id], onDelete: Cascade)
+  session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  
+  @@unique([formId, sessionId]) // One submission per form per session
+  @@index([sessionId])
+  @@index([isCompleted])
+  @@map("form_submissions")
 }

@@ -283,6 +283,28 @@ exports.Prisma.ImageFolderScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FormScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  formContent: 'formContent',
+  isActive: 'isActive',
+  funnelId: 'funnelId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FormSubmissionScalarFieldEnum = {
+  id: 'id',
+  formId: 'formId',
+  sessionId: 'sessionId',
+  submittedData: 'submittedData',
+  isCompleted: 'isCompleted',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -363,7 +385,9 @@ exports.Prisma.ModelName = {
   TemplateImage: 'TemplateImage',
   TemplatePage: 'TemplatePage',
   Image: 'Image',
-  ImageFolder: 'ImageFolder'
+  ImageFolder: 'ImageFolder',
+  Form: 'Form',
+  FormSubmission: 'FormSubmission'
 };
 
 /**
