@@ -43,7 +43,7 @@ describe("Delete Form Service", () => {
 
     const result = await deleteForm(userId, formId);
 
-    expect(result.message).toBe("Form and all related submissions deleted successfully");
+    expect(result.message).toBe("The form has been deleted successfully");
     expect(mockPrisma.form.delete).toHaveBeenCalledWith({
       where: { id: formId },
     });
@@ -68,7 +68,7 @@ describe("Delete Form Service", () => {
 
     const result = await deleteForm(userId, formId);
 
-    expect(result.message).toBe("Form and all related submissions deleted successfully");
+    expect(result.message).toBe("The form has been deleted successfully");
     expect(mockPrisma.funnel.findUnique).toHaveBeenCalledWith({
       where: { id: 1 },
       select: { userId: true },
@@ -127,7 +127,7 @@ describe("Delete Form Service", () => {
 
     const result = await deleteForm(userId, formId);
 
-    expect(result.message).toContain("submissions deleted successfully");
+    expect(result.message).toBe("The form has been deleted successfully");
     expect(mockPrisma.form.delete).toHaveBeenCalledWith({
       where: { id: formId },
     });
@@ -149,7 +149,7 @@ describe("Delete Form Service", () => {
 
     const result = await deleteForm(userId, formId);
 
-    expect(result.message).toBe("Form and all related submissions deleted successfully");
+    expect(result.message).toBe("The form has been deleted successfully");
     expect(mockPrisma.form.delete).toHaveBeenCalledWith({
       where: { id: formId },
     });

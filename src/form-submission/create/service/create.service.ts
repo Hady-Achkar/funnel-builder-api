@@ -66,7 +66,7 @@ export const createFormSubmission = async (
         data: {
           formId: validatedRequest.formId,
           sessionId: validatedRequest.sessionId,
-          submittedData: validatedRequest.submittedData,
+          submittedData: validatedRequest.submittedData || null,
           isCompleted: validatedRequest.isCompleted,
           completedAt: validatedRequest.isCompleted ? new Date() : null,
         },
