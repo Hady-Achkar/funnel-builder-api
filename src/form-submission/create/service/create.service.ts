@@ -43,7 +43,7 @@ export const createFormSubmission = async (
     });
 
     if (!session) {
-      throw new NotFoundError("Session not found");
+      throw new NotFoundError("Session not found or may have expired");
     }
 
     const existingSubmission = await prisma.formSubmission.findUnique({
@@ -55,27 +55,43 @@ export const createFormSubmission = async (
       },
     });
 
-    if (existingSubmission) {
-      throw new BadRequestError(
-        "Submission already exists for this form and session"
-      );
-    }
+    // We'll handle both create and update in the transaction
 
     const result = await prisma.$transaction(async (tx) => {
-      const formSubmission = await tx.formSubmission.create({
-        data: {
-          formId: validatedRequest.formId,
-          sessionId: validatedRequest.sessionId,
-          submittedData: validatedRequest.submittedData || null,
-          isCompleted: validatedRequest.isCompleted,
-          completedAt: validatedRequest.isCompleted ? new Date() : null,
-        },
-      });
+      let formSubmission;
+      let isUpdate = false;
+
+      if (existingSubmission) {
+        // Update existing submission
+        formSubmission = await tx.formSubmission.update({
+          where: {
+            id: existingSubmission.id,
+          },
+          data: {
+            submittedData: validatedRequest.submittedData || null,
+            isCompleted: validatedRequest.isCompleted,
+            completedAt: validatedRequest.isCompleted ? new Date() : null,
+          },
+        });
+        isUpdate = true;
+      } else {
+        // Create new submission
+        formSubmission = await tx.formSubmission.create({
+          data: {
+            formId: validatedRequest.formId,
+            sessionId: validatedRequest.sessionId,
+            submittedData: validatedRequest.submittedData || null,
+            isCompleted: validatedRequest.isCompleted,
+            completedAt: validatedRequest.isCompleted ? new Date() : null,
+          },
+        });
+      }
 
       const currentInteractions =
         (session.interactions as Record<string, any>) || {};
+      
       const newInteraction = {
-        type: "form_submission",
+        type: isUpdate ? "form_submission_update" : "form_submission",
         formId: validatedRequest.formId,
         formName: form.name,
         submissionId: formSubmission.id,
@@ -84,13 +100,39 @@ export const createFormSubmission = async (
         submittedData: validatedRequest.submittedData,
       };
 
-      const updatedInteractions = {
-        ...currentInteractions,
-        form_submissions: [
-          ...(currentInteractions.form_submissions || []),
-          newInteraction,
-        ],
-      };
+      let updatedInteractions;
+      if (isUpdate) {
+        // Update existing interaction for the same form
+        const formSubmissions = (currentInteractions.form_submissions || []) as any[];
+        const existingIndex = formSubmissions.findIndex(
+          (interaction: any) => interaction.formId === validatedRequest.formId
+        );
+
+        if (existingIndex >= 0) {
+          // Update the existing interaction
+          formSubmissions[existingIndex] = {
+            ...formSubmissions[existingIndex],
+            ...newInteraction,
+          };
+        } else {
+          // Add new interaction if not found
+          formSubmissions.push(newInteraction);
+        }
+
+        updatedInteractions = {
+          ...currentInteractions,
+          form_submissions: formSubmissions,
+        };
+      } else {
+        // Add the new interaction to the existing ones
+        updatedInteractions = {
+          ...currentInteractions,
+          form_submissions: [
+            ...(currentInteractions.form_submissions || []),
+            newInteraction,
+          ],
+        };
+      }
 
       await tx.session.update({
         where: { sessionId: validatedRequest.sessionId },
@@ -103,7 +145,9 @@ export const createFormSubmission = async (
     });
 
     const response = {
-      message: "Form submission created successfully",
+      message: existingSubmission 
+        ? "Form submission updated successfully" 
+        : "Form submission created successfully",
       submissionId: result.id,
     };
 

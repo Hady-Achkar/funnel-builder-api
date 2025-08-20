@@ -147,4 +147,25 @@ describe("Create Form Submission Controller", () => {
     expect(mockRes.status).toHaveBeenCalledWith(201);
     expect(mockRes.json).toHaveBeenCalledWith(mockResponse);
   });
+
+  it("should handle form submission update", async () => {
+    mockReq.body = {
+      formId: 1,
+      sessionId: "session123",
+      submittedData: { field1: "updated_value" },
+      isCompleted: true,
+    };
+
+    const mockResponse = { 
+      message: "Form submission updated successfully",
+      submissionId: 1
+    };
+    mockCreateFormSubmission.mockResolvedValue(mockResponse);
+
+    await createFormSubmissionController(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockCreateFormSubmission).toHaveBeenCalledWith(mockReq.body);
+    expect(mockRes.status).toHaveBeenCalledWith(201);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResponse);
+  });
 });

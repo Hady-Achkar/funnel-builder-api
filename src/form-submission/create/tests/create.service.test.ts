@@ -216,10 +216,17 @@ describe("Create Form Submission Service", () => {
     await expect(createFormSubmission({
       formId: 1,
       sessionId: "nonexistent-session",
-    })).rejects.toThrow(NotFoundError);
+    })).rejects.toThrow("Session not found or may have expired");
   });
 
-  it("should throw BadRequestError when submission already exists", async () => {
+  it("should update existing form submission when submission already exists", async () => {
+    const request = {
+      formId: 1,
+      sessionId: "session123",
+      submittedData: { field1: "updated_value" },
+      isCompleted: true,
+    };
+
     mockPrisma.form.findUnique.mockResolvedValue({
       id: 1,
       isActive: true,
@@ -229,7 +236,17 @@ describe("Create Form Submission Service", () => {
     mockPrisma.session.findUnique.mockResolvedValue({
       id: 1,
       sessionId: "session123",
-      interactions: {},
+      interactions: {
+        form_submissions: [{
+          type: "form_submission",
+          formId: 1,
+          formName: "Test Form",
+          submissionId: 1,
+          isCompleted: false,
+          timestamp: "2023-01-01T00:00:00.000Z",
+          submittedData: { field1: "old_value" },
+        }],
+      },
     });
 
     mockPrisma.formSubmission.findUnique.mockResolvedValue({
@@ -238,10 +255,31 @@ describe("Create Form Submission Service", () => {
       sessionId: "session123",
     }); // Existing submission
 
-    await expect(createFormSubmission({
-      formId: 1,
-      sessionId: "session123",
-    })).rejects.toThrow(BadRequestError);
+    // Mock the transaction for update
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+      const mockTx = {
+        formSubmission: {
+          update: vi.fn().mockResolvedValue({
+            id: 1,
+            formId: 1,
+            sessionId: "session123",
+            submittedData: { field1: "updated_value" },
+            isCompleted: true,
+            completedAt: new Date(),
+          }),
+        },
+        session: {
+          update: vi.fn().mockResolvedValue({}),
+        },
+      };
+      return callback(mockTx);
+    });
+
+    const result = await createFormSubmission(request);
+
+    expect(result.message).toBe("Form submission updated successfully");
+    expect(result.submissionId).toBe(1);
+    expect(mockPrisma.$transaction).toHaveBeenCalled();
   });
 
   it("should handle empty submitted data", async () => {
@@ -367,6 +405,86 @@ describe("Create Form Submission Service", () => {
           isCompleted: true,
           timestamp: expect.any(String),
           submittedData: { name: "John Doe" },
+        },
+      ],
+    });
+  });
+
+  it("should update session interactions when updating existing submission", async () => {
+    const request = {
+      formId: 1,
+      sessionId: "session123",
+      submittedData: { name: "Updated Name" },
+      isCompleted: true,
+    };
+
+    mockPrisma.form.findUnique.mockResolvedValue({
+      id: 1,
+      isActive: true,
+      name: "Contact Form",
+    });
+
+    mockPrisma.session.findUnique.mockResolvedValue({
+      id: 1,
+      sessionId: "session123",
+      interactions: {
+        existing_data: "test",
+        form_submissions: [{
+          type: "form_submission",
+          formId: 1,
+          formName: "Contact Form",
+          submissionId: 1,
+          isCompleted: false,
+          timestamp: "2023-01-01T00:00:00.000Z",
+          submittedData: { name: "Old Name" },
+        }],
+      },
+    });
+
+    mockPrisma.formSubmission.findUnique.mockResolvedValue({
+      id: 1,
+      formId: 1,
+      sessionId: "session123",
+    });
+
+    let capturedInteractions: any;
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+      const mockTx = {
+        formSubmission: {
+          update: vi.fn().mockResolvedValue({
+            id: 1,
+            formId: 1,
+            sessionId: "session123",
+            submittedData: { name: "Updated Name" },
+            isCompleted: true,
+            completedAt: new Date(),
+          }),
+        },
+        session: {
+          update: vi.fn().mockImplementation(({ data }) => {
+            capturedInteractions = data.interactions;
+            return Promise.resolve({});
+          }),
+        },
+      };
+      return callback(mockTx);
+    });
+
+    const result = await createFormSubmission(request);
+
+    expect(result.submissionId).toBe(1);
+    expect(result.message).toBe("Form submission updated successfully");
+    expect(capturedInteractions).toEqual({
+      existing_data: "test",
+      form_submissions: [
+        {
+          type: "form_submission_update",
+          formId: 1,
+          formName: "Contact Form",
+          submissionId: 1,
+          isCompleted: true,
+          timestamp: expect.any(String),
+          submittedData: { name: "Updated Name" },
         },
       ],
     });
