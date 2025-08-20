@@ -1,7 +1,4 @@
-import {
-  DeleteFormResponse,
-  deleteFormResponse,
-} from "../types";
+import { DeleteFormResponse, deleteFormResponse } from "../types";
 import { getPrisma } from "../../../lib/prisma";
 import {
   BadRequestError,
@@ -32,7 +29,7 @@ export const deleteForm = async (
 
     const existingForm = await prisma.form.findUnique({
       where: { id: formId },
-      select: { 
+      select: {
         id: true,
         funnelId: true,
       },
@@ -49,7 +46,9 @@ export const deleteForm = async (
       });
 
       if (funnel && funnel.userId !== userId) {
-        throw new ForbiddenError("You can only delete forms for your own funnels");
+        throw new ForbiddenError(
+          "You can only delete forms for your own funnels"
+        );
       }
     }
 
@@ -59,7 +58,7 @@ export const deleteForm = async (
     });
 
     const response = {
-      message: "Form and all related submissions deleted successfully",
+      message: "The form has been deleted successfully",
     };
 
     const validatedResponse = deleteFormResponse.parse(response);
