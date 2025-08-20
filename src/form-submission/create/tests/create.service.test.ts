@@ -53,7 +53,7 @@ describe("Create Form Submission Service", () => {
     mockPrisma.formSubmission.findUnique.mockResolvedValue(null); // No existing submission
 
     // Mock the transaction
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         formSubmission: {
           create: vi.fn().mockResolvedValue({
@@ -104,7 +104,7 @@ describe("Create Form Submission Service", () => {
     mockPrisma.formSubmission.findUnique.mockResolvedValue(null);
 
     // Mock the transaction
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         formSubmission: {
           create: vi.fn().mockResolvedValue({
@@ -155,7 +155,7 @@ describe("Create Form Submission Service", () => {
     mockPrisma.formSubmission.findUnique.mockResolvedValue(null);
 
     // Mock the transaction
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         formSubmission: {
           create: vi.fn().mockResolvedValue({
@@ -267,7 +267,7 @@ describe("Create Form Submission Service", () => {
     mockPrisma.formSubmission.findUnique.mockResolvedValue(null);
 
     // Mock the transaction
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         formSubmission: {
           create: vi.fn().mockResolvedValue({
@@ -331,7 +331,7 @@ describe("Create Form Submission Service", () => {
     mockPrisma.formSubmission.findUnique.mockResolvedValue(null);
 
     let capturedInteractions: any;
-    mockPrisma.$transaction.mockImplementation(async (callback) => {
+    mockPrisma.$transaction.mockImplementation(async (callback: any) => {
       const mockTx = {
         formSubmission: {
           create: vi.fn().mockResolvedValue({

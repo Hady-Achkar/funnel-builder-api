@@ -20,7 +20,8 @@ export const createFormSubmissionRequest = z.object({
     .boolean({
       message: "isCompleted must be a boolean",
     })
-    .default(true),
+    .default(true)
+    .optional(),
 });
 
 export type CreateFormSubmissionRequest = z.infer<typeof createFormSubmissionRequest>;

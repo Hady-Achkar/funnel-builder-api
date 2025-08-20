@@ -25,7 +25,8 @@ export const createFormRequest = z.object({
     .boolean({
       message: "isActive must be a boolean",
     })
-    .default(true),
+    .default(true)
+    .optional(),
   funnelId: z
     .number({
       message: "Funnel ID must be a number",
