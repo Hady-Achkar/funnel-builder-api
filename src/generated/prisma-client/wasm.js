@@ -133,11 +133,33 @@ exports.Prisma.UserScalarFieldEnum = {
   maximumFunnels: 'maximumFunnels'
 };
 
+exports.Prisma.WorkspaceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  ownerId: 'ownerId',
+  description: 'description',
+  settings: 'settings',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WorkspaceMemberScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  workspaceId: 'workspaceId',
+  role: 'role',
+  permissions: 'permissions',
+  joinedAt: 'joinedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FunnelScalarFieldEnum = {
   id: 'id',
   name: 'name',
   status: 'status',
-  userId: 'userId',
+  workspaceId: 'workspaceId',
+  createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   themeId: 'themeId'
@@ -334,6 +356,23 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.WorkspaceRole = exports.$Enums.WorkspaceRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  EDITOR: 'EDITOR',
+  VIEWER: 'VIEWER'
+};
+
+exports.WorkspacePermission = exports.$Enums.WorkspacePermission = {
+  MANAGE_WORKSPACE: 'MANAGE_WORKSPACE',
+  MANAGE_MEMBERS: 'MANAGE_MEMBERS',
+  CREATE_FUNNELS: 'CREATE_FUNNELS',
+  EDIT_FUNNELS: 'EDIT_FUNNELS',
+  EDIT_PAGES: 'EDIT_PAGES',
+  DELETE_FUNNELS: 'DELETE_FUNNELS',
+  VIEW_ANALYTICS: 'VIEW_ANALYTICS'
+};
+
 exports.FunnelStatus = exports.$Enums.FunnelStatus = {
   DRAFT: 'DRAFT',
   LIVE: 'LIVE',
@@ -374,6 +413,8 @@ exports.TemplateImageType = exports.$Enums.TemplateImageType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Workspace: 'Workspace',
+  WorkspaceMember: 'WorkspaceMember',
   Funnel: 'Funnel',
   Domain: 'Domain',
   FunnelDomain: 'FunnelDomain',

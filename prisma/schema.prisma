@@ -9,30 +9,86 @@ datasource db {
 }
 
 model User {
-  id                     Int           @id @default(autoincrement())
-  email                  String        @unique
+  id                     Int                @id @default(autoincrement())
+  email                  String             @unique
   name                   String?
   password               String
-  passwordResetToken     String?       @unique
+  passwordResetToken     String?            @unique
   passwordResetExpiresAt DateTime?
-  isAdmin                Boolean       @default(false)
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
+  isAdmin                Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
   maximumFunnels         Int? 
-  funnels                Funnel[]
-  domains                Domain[]
+  workspaceMembers       WorkspaceMember[]
+  ownedWorkspaces        Workspace[]        @relation("WorkspaceOwner")
+  createdFunnels         Funnel[]           @relation("FunnelCreator")
+  domains                Domain[]           // Keep domains user-owned
   templates              Template[]
   imageFolders           ImageFolder[]
 
   @@map("users")
 }
 
+model Workspace {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  ownerId     Int
+  description String?
+  settings    Json?    @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  members     WorkspaceMember[]
+  funnels     Funnel[]
+  
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          Int                     @id @default(autoincrement())
+  userId      Int
+  workspaceId Int
+  role        WorkspaceRole
+  permissions WorkspacePermission[]
+  joinedAt    DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  
+  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum WorkspacePermission {
+  MANAGE_WORKSPACE
+  MANAGE_MEMBERS
+  CREATE_FUNNELS
+  EDIT_FUNNELS
+  EDIT_PAGES
+  DELETE_FUNNELS
+  VIEW_ANALYTICS
+}
+
 model Funnel {
   id                Int            @id @default(autoincrement())
   name              String
   status            FunnelStatus   @default(DRAFT)
-  userId            Int
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId       Int
+  createdBy         Int
+  workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator           User           @relation("FunnelCreator", fields: [createdBy], references: [id])
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   themeId           Int?           @unique
@@ -40,7 +96,8 @@ model Funnel {
   theme             Theme?         @relation(fields: [themeId], references: [id])
   pages             Page[]
 
-  @@index([userId])
+  @@index([workspaceId])
+  @@index([createdBy])
   @@index([status])
   @@map("funnels")
 }
