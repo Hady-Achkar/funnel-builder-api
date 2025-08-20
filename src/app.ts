@@ -13,6 +13,7 @@ import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";
 import imageRoutes from "./image/routes";
+import formRoutes from "./form/routes";
 
 export function createServer(): Express {
   const app = express();
@@ -52,6 +53,7 @@ export function createServer(): Express {
   app.use("/api/image-folders", imageFolderRoutes);
   app.use("/api/templates", templateRoutes);
   app.use("/api/images", imageRoutes);
+  app.use("/api/forms", formRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {
@@ -87,6 +89,7 @@ export function createServer(): Express {
         domains: "/api/domains",
         health: "/health",
         themes: "/api/themes",
+        forms: "/api/forms",
       },
     });
   });

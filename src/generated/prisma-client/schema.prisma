@@ -290,9 +290,9 @@ model Form {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  formContent Json // JSON form structure/schema
+  formContent Json
   isActive    Boolean  @default(true)
-  funnelId    Int? // Optional: link to specific funnel
+  funnelId    Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -306,8 +306,8 @@ model Form {
 model FormSubmission {
   id            Int       @id @default(autoincrement())
   formId        Int
-  sessionId     String // FK to Session.sessionId
-  submittedData Json? // Store actual form submission data
+  sessionId     String
+  submittedData Json?
   isCompleted   Boolean   @default(false)
   completedAt   DateTime?
   createdAt     DateTime  @default(now())
@@ -316,7 +316,7 @@ model FormSubmission {
   form    Form    @relation(fields: [formId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
 
-  @@unique([formId, sessionId]) // One submission per form per session
+  @@unique([formId, sessionId])
   @@index([sessionId])
   @@index([isCompleted])
   @@map("form_submissions")

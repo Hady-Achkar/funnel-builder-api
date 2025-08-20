@@ -25,7 +25,6 @@ export const createTemplateRequest = z.object({
       message: "Funnel ID must be a number",
     })
     .positive("Funnel ID must be a positive number"),
-
   tags: z
     .array(z.string().trim().min(1, "Tag cannot be empty"))
     .max(10, "Cannot have more than 10 tags")

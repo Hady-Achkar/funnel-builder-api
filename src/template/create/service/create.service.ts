@@ -256,7 +256,7 @@ export const createTemplate = async (
     const validatedResponse = createTemplateResponse.parse(response);
 
     return validatedResponse;
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof ZodError) {
       const message = error.issues[0]?.message || "Invalid data provided";
       throw new BadRequestError(message);

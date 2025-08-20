@@ -1,0 +1,1 @@
+export { default as createFormRoute } from "./create.route";

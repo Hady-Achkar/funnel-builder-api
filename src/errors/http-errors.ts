@@ -38,12 +38,3 @@ export class InternalServerError extends HttpError {
     super(message, 500);
   }
 }
-
-export class ValidationError extends HttpError {
-  errors?: any;
-
-  constructor(message: string = "Validation Error", errors?: any) {
-    super(message, 400);
-    this.errors = errors;
-  }
-}
