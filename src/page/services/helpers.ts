@@ -14,7 +14,7 @@ export const verifyPageAccess = async (
     where: {
       id: pageId,
       funnel: {
-        userId,
+        createdBy: userId,
       },
     },
     select: { id: true },
@@ -30,7 +30,7 @@ export const verifyFunnelAccess = async (
   const funnel = await getPrisma().funnel.findFirst({
     where: {
       id: funnelId,
-      userId,
+      createdBy: userId,
     },
     select: { id: true },
   });

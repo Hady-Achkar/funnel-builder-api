@@ -61,7 +61,8 @@ export interface DomainWithConnections {
   type: DomainType;
   status: DomainStatus;
   sslStatus: SslStatus;
-  userId: number;
+  workspaceId: number;
+  createdBy: number;
   cloudflareHostnameId: string | null;
   cloudflareZoneId: string | null;
   cloudflareRecordId: string | null;
@@ -106,6 +107,16 @@ export class DomainService {
   ): Promise<DomainWithConnections> {
     const hostname = validateHostname(data.hostname);
     const parsed = parseDomain(hostname);
+    
+    // Get user's primary workspace
+    const workspace = await getPrisma().workspace.findFirst({
+      where: { ownerId: userId },
+      select: { id: true },
+    });
+    
+    if (!workspace) {
+      throw new Error("User has no workspace");
+    }
 
     // Require subdomain for custom domains
     if (!parsed.subdomain) {
@@ -149,7 +160,8 @@ export class DomainService {
             detailedHostname.ssl.status === "active"
               ? SslStatus.ACTIVE
               : SslStatus.PENDING,
-          userId,
+          workspaceId: workspace.id,
+          createdBy: userId,
           cloudflareHostnameId: cfHostname.id,
           cloudflareZoneId: config.zoneId,
           verificationToken: ownershipVerification.value,
@@ -193,7 +205,7 @@ export class DomainService {
       // Invalidate user cache
       await cacheService.invalidateUserCache(userId);
 
-      return domain;
+      return { ...domain, funnelConnections: [] };
     } catch (error: any) {
       console.error("[Domain Create] CloudFlare error:", error);
       throw new Error(`Failed to create custom domain: ${error.message}`);
@@ -211,6 +223,16 @@ export class DomainService {
     }
     const config = cf.getConfig();
     const hostname = `${subdomain}.${config.platformMainDomain}`;
+    
+    // Get user's primary workspace
+    const workspace = await getPrisma().workspace.findFirst({
+      where: { ownerId: userId },
+      select: { id: true },
+    });
+    
+    if (!workspace) {
+      throw new Error("User has no workspace");
+    }
 
     // Check if subdomain already exists
     const existingDomain = await getPrisma().domain.findUnique({
@@ -234,7 +256,8 @@ export class DomainService {
           type: DomainType.SUBDOMAIN,
           status: DomainStatus.ACTIVE,
           sslStatus: SslStatus.ACTIVE,
-          userId,
+          workspaceId: workspace.id,
+          createdBy: userId,
           cloudflareZoneId: config.zoneId,
           cloudflareRecordId: dnsRecord.id,
           lastVerifiedAt: new Date(),
@@ -259,7 +282,7 @@ export class DomainService {
       // Invalidate user cache
       await cacheService.invalidateUserCache(userId);
 
-      return domain;
+      return { ...domain, funnelConnections: domain.funnelConnections };
     } catch (error: any) {
       console.error("[Subdomain Create] CloudFlare error:", error);
       throw new Error(`Failed to create subdomain: ${error.message}`);
@@ -273,7 +296,7 @@ export class DomainService {
       "domains",
       async () => {
         const domains = await getPrisma().domain.findMany({
-          where: { userId },
+          where: { createdBy: userId },
           include: {
             funnelConnections: {
               include: {
@@ -303,7 +326,7 @@ export class DomainService {
     const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
-        userId,
+        createdBy: userId,
       },
       include: {
         funnelConnections: {
@@ -354,7 +377,7 @@ export class DomainService {
     const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
-        userId,
+        createdBy: userId,
       },
       include: {
         funnelConnections: {
@@ -463,7 +486,7 @@ export class DomainService {
     const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
-        userId,
+        createdBy: userId,
       },
     });
 
@@ -556,7 +579,7 @@ export class DomainService {
     const funnel = await getPrisma().funnel.findFirst({
       where: {
         id: funnelId,
-        userId,
+        createdBy: userId,
       },
     });
 
@@ -568,7 +591,7 @@ export class DomainService {
     const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
-        userId,
+        createdBy: userId,
       },
     });
 
@@ -609,7 +632,7 @@ export class DomainService {
     const funnel = await getPrisma().funnel.findFirst({
       where: {
         id: funnelId,
-        userId,
+        createdBy: userId,
       },
     });
 
@@ -637,7 +660,7 @@ export class DomainService {
     const domain = await getPrisma().domain.findFirst({
       where: {
         id: domainId,
-        userId,
+        createdBy: userId,
       },
       select: {
         ownershipVerification: true,

@@ -42,10 +42,10 @@ export const deleteForm = async (
     if (existingForm.funnelId) {
       const funnel = await prisma.funnel.findUnique({
         where: { id: existingForm.funnelId },
-        select: { userId: true },
+        select: { createdBy: true },
       });
 
-      if (funnel && funnel.userId !== userId) {
+      if (funnel && funnel.createdBy !== userId) {
         throw new ForbiddenError(
           "You can only delete forms for your own funnels"
         );

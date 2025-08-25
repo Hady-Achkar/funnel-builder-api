@@ -123,14 +123,19 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
-  name: 'name',
+  username: 'username',
+  firstName: 'firstName',
+  lastName: 'lastName',
   password: 'password',
   passwordResetToken: 'passwordResetToken',
   passwordResetExpiresAt: 'passwordResetExpiresAt',
   isAdmin: 'isAdmin',
+  plan: 'plan',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  maximumFunnels: 'maximumFunnels'
+  maximumFunnels: 'maximumFunnels',
+  maximumCustomDomains: 'maximumCustomDomains',
+  maximumSubdomains: 'maximumSubdomains'
 };
 
 exports.Prisma.WorkspaceScalarFieldEnum = {
@@ -140,6 +145,9 @@ exports.Prisma.WorkspaceScalarFieldEnum = {
   ownerId: 'ownerId',
   description: 'description',
   settings: 'settings',
+  allocatedFunnels: 'allocatedFunnels',
+  allocatedCustomDomains: 'allocatedCustomDomains',
+  allocatedSubdomains: 'allocatedSubdomains',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -157,6 +165,7 @@ exports.Prisma.WorkspaceMemberScalarFieldEnum = {
 exports.Prisma.FunnelScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  slug: 'slug',
   status: 'status',
   workspaceId: 'workspaceId',
   createdBy: 'createdBy',
@@ -171,7 +180,8 @@ exports.Prisma.DomainScalarFieldEnum = {
   type: 'type',
   status: 'status',
   sslStatus: 'sslStatus',
-  userId: 'userId',
+  workspaceId: 'workspaceId',
+  createdBy: 'createdBy',
   cloudflareHostnameId: 'cloudflareHostnameId',
   cloudflareZoneId: 'cloudflareZoneId',
   cloudflareRecordId: 'cloudflareRecordId',
@@ -356,6 +366,11 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.UserPlan = exports.$Enums.UserPlan = {
+  BUSINESS: 'BUSINESS',
+  AGENCY: 'AGENCY'
+};
+
 exports.WorkspaceRole = exports.$Enums.WorkspaceRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
@@ -370,7 +385,12 @@ exports.WorkspacePermission = exports.$Enums.WorkspacePermission = {
   EDIT_FUNNELS: 'EDIT_FUNNELS',
   EDIT_PAGES: 'EDIT_PAGES',
   DELETE_FUNNELS: 'DELETE_FUNNELS',
-  VIEW_ANALYTICS: 'VIEW_ANALYTICS'
+  VIEW_ANALYTICS: 'VIEW_ANALYTICS',
+  MANAGE_DOMAINS: 'MANAGE_DOMAINS',
+  CREATE_DOMAINS: 'CREATE_DOMAINS',
+  EDIT_DOMAINS: 'EDIT_DOMAINS',
+  DELETE_DOMAINS: 'DELETE_DOMAINS',
+  CONNECT_DOMAINS: 'CONNECT_DOMAINS'
 };
 
 exports.FunnelStatus = exports.$Enums.FunnelStatus = {

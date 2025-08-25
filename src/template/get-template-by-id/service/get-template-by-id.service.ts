@@ -12,11 +12,11 @@ import {
 export const getTemplateById = async (
   params: GetTemplateRequest
 ): Promise<GetTemplateResponse> => {
+  let fullTemplate: GetTemplateResponse | null = null;
+  
   try {
     const validatedParams = getTemplateRequest.parse(params);
     const templateId = validatedParams.id;
-
-    let fullTemplate: GetTemplateResponse | null = null;
 
     try {
       fullTemplate = await cacheService.getTemplateCache<GetTemplateResponse>(
@@ -28,6 +28,12 @@ export const getTemplateById = async (
         `Failed to get template ${templateId} full data from cache:`,
         cacheError
       );
+    }
+
+    // Validate cache structure - if it doesn't have required arrays, ignore cached data
+    if (fullTemplate && (!Array.isArray(fullTemplate.pages) || !Array.isArray(fullTemplate.previewImages))) {
+      console.log(`Cache contains invalid structure for template ${templateId}, ignoring cache`);
+      fullTemplate = null;
     }
 
     if (!fullTemplate) {
@@ -98,7 +104,7 @@ export const getTemplateById = async (
           name: template.category.name,
           slug: template.category.slug,
         },
-        tags: template.tags,
+        tags: template.tags || [],
         isActive: template.isActive,
         isPublic: template.isPublic,
         createdByUserId: template.createdByUserId,
@@ -138,7 +144,7 @@ export const getTemplateById = async (
   } catch (error) {
     if (error instanceof ZodError) {
       const message = error.issues[0]?.message || "Invalid template ID";
-      throw new BadRequestError(message);
+      throw new BadRequestError(`Invalid input: ${message}`);
     }
     throw error;
   }

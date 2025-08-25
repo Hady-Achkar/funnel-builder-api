@@ -28,7 +28,7 @@ export class RedisService {
       url: process.env.REDIS_URL || "redis://localhost:6379",
       password: process.env.REDIS_PASSWORD || undefined,
       database: parseInt(process.env.REDIS_DB || "0"),
-      ttl: 3600, // 1 hour default
+      ttl: 0, // 1 hour default
     };
   }
 

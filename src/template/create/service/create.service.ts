@@ -1,5 +1,4 @@
 import {
-  CreateTemplateRequest,
   CreateTemplateResponse,
   createTemplateRequest,
   createTemplateResponse,
@@ -10,47 +9,53 @@ import {
   BadRequestError,
   UnauthorizedError,
   NotFoundError,
-  ForbiddenError,
 } from "../../../errors";
 import { ZodError } from "zod";
 import {
-  generateShortUniqueId,
+  checkTemplateCreationPermissions,
+  createLinkingIdMap,
   replaceLinkingIdsInContent,
+  generateShortUniqueId,
+} from "../helpers";
+import {
   createSlug,
   ensureUniqueSlug,
   uploadTemplateThumbnail,
   uploadTemplatePreviewImages,
 } from "../../helpers";
 
-export const createTemplate = async (
+export const createTemplateFromFunnel = async (
   userId: number,
-  request: CreateTemplateRequest,
-  thumbnailFile: Express.Multer.File,
-  previewFiles?: Express.Multer.File[]
+  requestBody: Record<string, unknown>,
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] }
 ): Promise<CreateTemplateResponse> => {
   try {
     if (!userId) throw new UnauthorizedError("User ID is required");
+
+    let thumbnailFile: Express.Multer.File | undefined;
+    let previewFiles: Express.Multer.File[] = [];
+
+    if (Array.isArray(files)) {
+      thumbnailFile = files.find((f) => f.fieldname === "thumbnail");
+      previewFiles = files.filter((f) => f.fieldname === "preview_images");
+    } else if (files && typeof files === "object") {
+      const fileFields = files as {
+        [fieldname: string]: Express.Multer.File[];
+      };
+      thumbnailFile = fileFields.thumbnail?.[0];
+      previewFiles = fileFields.preview_images || [];
+    }
 
     if (!thumbnailFile) {
       throw new BadRequestError("Thumbnail image is required");
     }
 
-    const validatedRequest = createTemplateRequest.parse(request);
+    const validatedRequest = createTemplateRequest.parse(requestBody);
 
     const prisma = getPrisma();
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, isAdmin: true },
-    });
-
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    if (!user.isAdmin) {
-      throw new ForbiddenError("Only admin users can create templates");
-    }
+    // Check permissions (admin + workspace access)
+    await checkTemplateCreationPermissions(userId, validatedRequest.funnelId);
 
     const category = await prisma.templateCategory.findUnique({
       where: { id: validatedRequest.categoryId },
@@ -72,12 +77,6 @@ export const createTemplate = async (
 
     if (!funnel) {
       throw new NotFoundError("Funnel not found");
-    }
-
-    if (!user.isAdmin && funnel.userId !== userId) {
-      throw new ForbiddenError(
-        "You can only create templates from your own funnels"
-      );
     }
 
     if (!funnel.pages || funnel.pages.length === 0) {
@@ -106,8 +105,7 @@ export const createTemplate = async (
       try {
         const uploadResult = await uploadTemplateThumbnail(
           thumbnailFile,
-          template.id,
-          "thumbnail"
+          template.id
         );
 
         await tx.templateImage.create({
@@ -148,12 +146,8 @@ export const createTemplate = async (
         }
       }
 
-      const linkingIdMap = new Map<string, string>();
-      funnel.pages.forEach((page: any) => {
-        if (page.linkingId) {
-          linkingIdMap.set(page.linkingId, generateShortUniqueId());
-        }
-      });
+      // Create linking ID map for maintaining page relationships
+      const linkingIdMap = createLinkingIdMap(funnel.pages);
 
       const templatePagesData = funnel.pages.map((page: any) => {
         const newLinkingId = page.linkingId
@@ -205,7 +199,6 @@ export const createTemplate = async (
       return templateWithPages;
     });
 
-    // Cache the created template summary and full details
     try {
       const thumbnailUrl =
         result.previewImages.find((img: any) => img.imageType === "THUMBNAIL")
@@ -214,12 +207,13 @@ export const createTemplate = async (
         .filter((img: any) => img.imageType === "PREVIEW")
         .map((img: any) => img.imageUrl);
 
-      const templateSummary = {
+      const templateFullData = {
         id: result.id,
         name: result.name,
         slug: result.slug,
         description: result.description,
         categoryId: result.categoryId,
+        category: result.category,
         tags: result.tags,
         isActive: result.isActive,
         isPublic: result.isPublic,
@@ -232,16 +226,31 @@ export const createTemplate = async (
         updatedAt: result.updatedAt,
       };
 
-      await cacheService.setTemplateCache(
-        result.id,
-        "summary",
-        templateSummary,
-        { ttl: 0 }
-      );
-
-      await cacheService.setTemplateCache(result.id, "full", result, {
+      await cacheService.set(`template:${result.id}:full`, templateFullData, {
         ttl: 0,
       });
+
+      for (const page of result.pages) {
+        const pageFullData = {
+          id: page.id,
+          templateId: page.templateId,
+          name: page.name,
+          content: page.content,
+          order: page.order,
+          linkingId: page.linkingId,
+          seoTitle: page.seoTitle,
+          seoDescription: page.seoDescription,
+          seoKeywords: page.seoKeywords,
+          createdAt: page.createdAt,
+          updatedAt: page.updatedAt,
+        };
+
+        await cacheService.set(
+          `template:${result.id}:page:${page.id}:full`,
+          pageFullData,
+          { ttl: 0 }
+        );
+      }
     } catch (cacheError) {
       console.warn(
         "Template cache update failed but template was created:",

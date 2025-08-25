@@ -1,6 +1,6 @@
 import { cacheService } from "../../services/cache/cache.service";
 import { PageSummary } from "../types";
-import { CachedFunnelWithPages } from "../../funnel/types";
+import { CachedFunnelWithPages } from "../../funnel/shared";
 
 // Define PageData interface locally since it's used here
 interface PageData {
@@ -288,8 +288,6 @@ export const updateFunnelCachesWithUpdatedPage = async (
           seoTitle: updatedPage.seoTitle,
           seoDescription: updatedPage.seoDescription,
           seoKeywords: updatedPage.seoKeywords,
-          createdAt: updatedPage.createdAt,
-          updatedAt: updatedPage.updatedAt,
         };
 
         // Sort pages by order and update funnel's updatedAt

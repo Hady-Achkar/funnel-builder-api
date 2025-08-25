@@ -196,7 +196,7 @@ export class CloudFlareAPIService {
       type: "A",
       name: subdomain,
       content: targetIP,
-      ttl: 3600,
+      ttl: 0,
       proxied: true,
     };
 

@@ -1,1 +1,0 @@
-export { updateTheme } from "./update";

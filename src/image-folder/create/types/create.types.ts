@@ -16,6 +16,9 @@ export const createImageFolderResponse = z.object({
   message: z.string({
     message: "Response message must be a string",
   }),
+  folderId: z.number({
+    message: "Folder ID must be a number",
+  }),
 });
 
 export type CreateImageFolderResponse = z.infer<

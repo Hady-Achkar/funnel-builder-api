@@ -36,14 +36,14 @@ export const createForm = async (
     if (validatedRequest.funnelId) {
       const funnel = await prisma.funnel.findUnique({
         where: { id: validatedRequest.funnelId },
-        select: { id: true, userId: true },
+        select: { id: true, createdBy: true },
       });
 
       if (!funnel) {
         throw new NotFoundError("Funnel not found");
       }
 
-      if (funnel.userId !== userId) {
+      if (funnel.createdBy !== userId) {
         throw new ForbiddenError("You can only create forms for your own funnels");
       }
     }

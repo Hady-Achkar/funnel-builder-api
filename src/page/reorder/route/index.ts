@@ -1,0 +1,1 @@
+export { default as reorderPagesRoute } from "./reorder.route";

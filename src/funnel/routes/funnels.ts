@@ -1,23 +1,23 @@
 import express, { Router } from "express";
 import { authenticateToken } from "../../middleware/auth";
-import {
-  createFunnel,
-  getUserFunnels,
-  getFunnelById,
-  updateFunnel,
-  deleteFunnel,
-  createFunnelFromTemplateController,
-} from "../controllers";
+import { createFunnelController } from "../create/controller";
+import { updateFunnelController } from "../update/controller";
+import { getAllFunnelsController } from "../getAll/controller";
+import { getFunnelController } from "../get/controller";
+import { deleteFunnelController } from "../delete/controller";
+import { createFromTemplateController } from "../createFromTemplate/controller";
+import { duplicateFunnelController } from "../duplicate/controller";
 
 const router: Router = express.Router();
 
 router.use(authenticateToken);
 
-router.post("/", createFunnel);
-router.post("/from-template/:templateId", createFunnelFromTemplateController);
-router.get("/", getUserFunnels);
-router.get("/:id", getFunnelById);
-router.put("/:id", updateFunnel);
-router.delete("/:id", deleteFunnel);
+router.post("/", createFunnelController);
+router.post("/from-template/:templateId", createFromTemplateController);
+router.post("/:id/duplicate", duplicateFunnelController);
+router.get("/workspace/:workspaceId", getAllFunnelsController);
+router.get("/:id", getFunnelController);
+router.put("/:id", updateFunnelController);
+router.delete("/:id", deleteFunnelController);
 
 export default router;

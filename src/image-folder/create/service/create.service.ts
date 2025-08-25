@@ -58,6 +58,7 @@ export const createImageFolder = async (
 
     const response = {
       message: "Image folder created successfully",
+      folderId: folder.id,
     };
 
     const validatedResponse = createImageFolderResponse.parse(response);

@@ -4,8 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
 import { redisService } from "./services/cache/redis.service";
-import authRoutes from "./routes/auth";
-import userRoutes from "./routes/users";
+import { authRoutes } from "./auth/routes";
 import funnelRoutes from "./funnel/routes/funnels";
 import pageRoutes from "./page/routes/pages";
 import domainRoutes from "./routes/domains";
@@ -46,7 +45,6 @@ export function createServer(): Express {
 
   // API Routes
   app.use("/api/auth", authRoutes);
-  app.use("/api/users", userRoutes);
   app.use("/api/funnels", funnelRoutes);
   app.use("/api/pages", pageRoutes);
   app.use("/api/domains", domainRoutes);

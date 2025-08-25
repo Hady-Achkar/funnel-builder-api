@@ -64,16 +64,14 @@ export function validateImageFile(
  * Uploads a single template thumbnail image to Azure Blob Storage
  * @param file - Multer file object
  * @param templateId - Template ID for organizing files
- * @param imageType - Type of image (thumbnail, preview, etc.)
  * @returns Promise with upload result
  */
 export async function uploadTemplateThumbnail(
   file: Express.Multer.File,
-  templateId: number,
-  imageType: string = "thumbnail"
+  templateId: number
 ): Promise<UploadedImage> {
-  // Validate file first
-  validateImageFile(file);
+  // Validate file first (5MB limit for thumbnails)
+  validateImageFile(file, { maxSize: 5 * 1024 * 1024 });
 
   // Check if Azure is configured
   if (!azureBlobStorageService.isConfigured()) {
@@ -81,16 +79,18 @@ export async function uploadTemplateThumbnail(
   }
 
   try {
+    // Generate unique file name
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const fileExtension = file.originalname.split(".").pop() || "jpg";
+    const fileName = `template-${templateId}-thumbnail-${timestamp}-${randomString}.${fileExtension}`;
+
     const uploadResult = await azureBlobStorageService.uploadBuffer(
       file.buffer,
       {
-        fileName: azureBlobStorageService.generateFileName(
-          file.originalname,
-          templateId,
-          imageType
-        ),
+        fileName: fileName,
         contentType: file.mimetype,
-        folder: `templates/${templateId}/images`,
+        folder: "template-thumbnails",
       }
     );
 
@@ -101,9 +101,9 @@ export async function uploadTemplateThumbnail(
       contentType: uploadResult.contentType,
     };
   } catch (error: any) {
-    console.error("Image upload failed:", error);
+    console.error("Thumbnail upload failed:", error);
     throw new BadRequestError(
-      `Failed to upload image: ${error.message || "Unknown error"}`
+      `Failed to upload thumbnail: ${error.message || "Unknown error"}`
     );
   }
 }
@@ -122,8 +122,18 @@ export async function uploadTemplatePreviewImages(
     return [];
   }
 
-  // Validate all files first
-  files.forEach((file) => validateImageFile(file));
+  // Validate number of files
+  const MAX_PREVIEW_IMAGES = 10;
+  if (files.length > MAX_PREVIEW_IMAGES) {
+    throw new BadRequestError(
+      `Maximum ${MAX_PREVIEW_IMAGES} preview images are allowed`
+    );
+  }
+
+  // Validate all files first (10MB limit for preview images)
+  files.forEach((file) => 
+    validateImageFile(file, { maxSize: 10 * 1024 * 1024 })
+  );
 
   // Check if Azure is configured
   if (!azureBlobStorageService.isConfigured()) {
@@ -132,16 +142,18 @@ export async function uploadTemplatePreviewImages(
 
   const uploadPromises = files.map(async (file, index) => {
     try {
+      // Generate unique file name
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const fileExtension = file.originalname.split(".").pop() || "jpg";
+      const fileName = `template-${templateId}-preview-${index + 1}-${timestamp}-${randomString}.${fileExtension}`;
+
       const uploadResult = await azureBlobStorageService.uploadBuffer(
         file.buffer,
         {
-          fileName: azureBlobStorageService.generateFileName(
-            file.originalname,
-            templateId,
-            `preview-${index + 1}`
-          ),
+          fileName: fileName,
           contentType: file.mimetype,
-          folder: `templates/${templateId}/images`,
+          folder: "template-previews",
         }
       );
 

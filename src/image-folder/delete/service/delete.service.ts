@@ -4,6 +4,7 @@ import {
   deleteImageFolderResponse,
 } from "../types";
 import { cacheService } from "../../../services/cache/cache.service";
+import { azureBlobStorageService } from "../../../services/azure-blob-storage.service";
 import { getPrisma } from "../../../lib/prisma";
 import { UnauthorizedError, NotFoundError } from "../../../errors";
 
@@ -21,10 +22,32 @@ export const deleteImageFolder = async (
         id: request.id,
         userId,
       },
+      include: {
+        images: true, // Include images to get their URLs for Azure deletion
+      },
     });
 
     if (!existingFolder) {
       throw new NotFoundError("Folder not found or you don't have access");
+    }
+
+    // Delete images from Azure Blob Storage before deleting from database
+    if (existingFolder.images && existingFolder.images.length > 0) {
+      console.log(`Deleting ${existingFolder.images.length} images from Azure Blob Storage...`);
+      
+      for (const image of existingFolder.images) {
+        try {
+          const urlParts = image.url.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          const folderPath = `images/user-${userId}/folder-${image.folderId}`;
+          
+          await azureBlobStorageService.deleteFile(`${folderPath}/${fileName}`);
+          console.log(`Deleted image from Azure: ${fileName}`);
+        } catch (azureError) {
+          console.warn(`Failed to delete image ${image.id} from Azure:`, azureError);
+          // Continue with other deletions even if one fails
+        }
+      }
     }
 
     await prisma.$transaction(async (tx) => {

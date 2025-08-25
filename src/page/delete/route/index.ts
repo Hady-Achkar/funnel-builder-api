@@ -1,0 +1,1 @@
+export { default as deletePageRoute } from "./delete.route";

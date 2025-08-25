@@ -103,7 +103,15 @@ export type FormSubmission = $Result.DefaultSelection<Prisma.$FormSubmissionPayl
  * Enums
  */
 export namespace $Enums {
-  export const WorkspaceRole: {
+  export const UserPlan: {
+  BUSINESS: 'BUSINESS',
+  AGENCY: 'AGENCY'
+};
+
+export type UserPlan = (typeof UserPlan)[keyof typeof UserPlan]
+
+
+export const WorkspaceRole: {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
   EDITOR: 'EDITOR',
@@ -120,7 +128,12 @@ export const WorkspacePermission: {
   EDIT_FUNNELS: 'EDIT_FUNNELS',
   EDIT_PAGES: 'EDIT_PAGES',
   DELETE_FUNNELS: 'DELETE_FUNNELS',
-  VIEW_ANALYTICS: 'VIEW_ANALYTICS'
+  VIEW_ANALYTICS: 'VIEW_ANALYTICS',
+  MANAGE_DOMAINS: 'MANAGE_DOMAINS',
+  CREATE_DOMAINS: 'CREATE_DOMAINS',
+  EDIT_DOMAINS: 'EDIT_DOMAINS',
+  DELETE_DOMAINS: 'DELETE_DOMAINS',
+  CONNECT_DOMAINS: 'CONNECT_DOMAINS'
 };
 
 export type WorkspacePermission = (typeof WorkspacePermission)[keyof typeof WorkspacePermission]
@@ -182,6 +195,10 @@ export const TemplateImageType: {
 export type TemplateImageType = (typeof TemplateImageType)[keyof typeof TemplateImageType]
 
 }
+
+export type UserPlan = $Enums.UserPlan
+
+export const UserPlan: typeof $Enums.UserPlan
 
 export type WorkspaceRole = $Enums.WorkspaceRole
 
@@ -2457,7 +2474,7 @@ export namespace Prisma {
     workspaceMembers: number
     ownedWorkspaces: number
     createdFunnels: number
-    domains: number
+    createdDomains: number
     templates: number
     imageFolders: number
   }
@@ -2466,7 +2483,7 @@ export namespace Prisma {
     workspaceMembers?: boolean | UserCountOutputTypeCountWorkspaceMembersArgs
     ownedWorkspaces?: boolean | UserCountOutputTypeCountOwnedWorkspacesArgs
     createdFunnels?: boolean | UserCountOutputTypeCountCreatedFunnelsArgs
-    domains?: boolean | UserCountOutputTypeCountDomainsArgs
+    createdDomains?: boolean | UserCountOutputTypeCountCreatedDomainsArgs
     templates?: boolean | UserCountOutputTypeCountTemplatesArgs
     imageFolders?: boolean | UserCountOutputTypeCountImageFoldersArgs
   }
@@ -2506,7 +2523,7 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountDomainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountCreatedDomainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DomainWhereInput
   }
 
@@ -2532,11 +2549,13 @@ export namespace Prisma {
   export type WorkspaceCountOutputType = {
     members: number
     funnels: number
+    domains: number
   }
 
   export type WorkspaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     members?: boolean | WorkspaceCountOutputTypeCountMembersArgs
     funnels?: boolean | WorkspaceCountOutputTypeCountFunnelsArgs
+    domains?: boolean | WorkspaceCountOutputTypeCountDomainsArgs
   }
 
   // Custom InputTypes
@@ -2562,6 +2581,13 @@ export namespace Prisma {
    */
   export type WorkspaceCountOutputTypeCountFunnelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FunnelWhereInput
+  }
+
+  /**
+   * WorkspaceCountOutputType without action
+   */
+  export type WorkspaceCountOutputTypeCountDomainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DomainWhereInput
   }
 
 
@@ -2819,50 +2845,69 @@ export namespace Prisma {
   export type UserAvgAggregateOutputType = {
     id: number | null
     maximumFunnels: number | null
+    maximumCustomDomains: number | null
+    maximumSubdomains: number | null
   }
 
   export type UserSumAggregateOutputType = {
     id: number | null
     maximumFunnels: number | null
+    maximumCustomDomains: number | null
+    maximumSubdomains: number | null
   }
 
   export type UserMinAggregateOutputType = {
     id: number | null
     email: string | null
-    name: string | null
+    username: string | null
+    firstName: string | null
+    lastName: string | null
     password: string | null
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
+    plan: $Enums.UserPlan | null
     createdAt: Date | null
     updatedAt: Date | null
     maximumFunnels: number | null
+    maximumCustomDomains: number | null
+    maximumSubdomains: number | null
   }
 
   export type UserMaxAggregateOutputType = {
     id: number | null
     email: string | null
-    name: string | null
+    username: string | null
+    firstName: string | null
+    lastName: string | null
     password: string | null
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
+    plan: $Enums.UserPlan | null
     createdAt: Date | null
     updatedAt: Date | null
     maximumFunnels: number | null
+    maximumCustomDomains: number | null
+    maximumSubdomains: number | null
   }
 
   export type UserCountAggregateOutputType = {
     id: number
     email: number
-    name: number
+    username: number
+    firstName: number
+    lastName: number
     password: number
     passwordResetToken: number
     passwordResetExpiresAt: number
     isAdmin: number
+    plan: number
     createdAt: number
     updatedAt: number
     maximumFunnels: number
+    maximumCustomDomains: number
+    maximumSubdomains: number
     _all: number
   }
 
@@ -2870,50 +2915,69 @@ export namespace Prisma {
   export type UserAvgAggregateInputType = {
     id?: true
     maximumFunnels?: true
+    maximumCustomDomains?: true
+    maximumSubdomains?: true
   }
 
   export type UserSumAggregateInputType = {
     id?: true
     maximumFunnels?: true
+    maximumCustomDomains?: true
+    maximumSubdomains?: true
   }
 
   export type UserMinAggregateInputType = {
     id?: true
     email?: true
-    name?: true
+    username?: true
+    firstName?: true
+    lastName?: true
     password?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
+    plan?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
+    maximumCustomDomains?: true
+    maximumSubdomains?: true
   }
 
   export type UserMaxAggregateInputType = {
     id?: true
     email?: true
-    name?: true
+    username?: true
+    firstName?: true
+    lastName?: true
     password?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
+    plan?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
+    maximumCustomDomains?: true
+    maximumSubdomains?: true
   }
 
   export type UserCountAggregateInputType = {
     id?: true
     email?: true
-    name?: true
+    username?: true
+    firstName?: true
+    lastName?: true
     password?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
+    plan?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
+    maximumCustomDomains?: true
+    maximumSubdomains?: true
     _all?: true
   }
 
@@ -3006,14 +3070,19 @@ export namespace Prisma {
   export type UserGroupByOutputType = {
     id: number
     email: string
-    name: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean
+    plan: $Enums.UserPlan
     createdAt: Date
     updatedAt: Date
-    maximumFunnels: number | null
+    maximumFunnels: number
+    maximumCustomDomains: number
+    maximumSubdomains: number
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -3038,18 +3107,23 @@ export namespace Prisma {
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
-    name?: boolean
+    username?: boolean
+    firstName?: boolean
+    lastName?: boolean
     password?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
+    plan?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
+    maximumCustomDomains?: boolean
+    maximumSubdomains?: boolean
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
     createdFunnels?: boolean | User$createdFunnelsArgs<ExtArgs>
-    domains?: boolean | User$domainsArgs<ExtArgs>
+    createdDomains?: boolean | User$createdDomainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
     imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -3058,48 +3132,63 @@ export namespace Prisma {
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
-    name?: boolean
+    username?: boolean
+    firstName?: boolean
+    lastName?: boolean
     password?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
+    plan?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
+    maximumCustomDomains?: boolean
+    maximumSubdomains?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
-    name?: boolean
+    username?: boolean
+    firstName?: boolean
+    lastName?: boolean
     password?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
+    plan?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
+    maximumCustomDomains?: boolean
+    maximumSubdomains?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     id?: boolean
     email?: boolean
-    name?: boolean
+    username?: boolean
+    firstName?: boolean
+    lastName?: boolean
     password?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
+    plan?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
+    maximumCustomDomains?: boolean
+    maximumSubdomains?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "password" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "createdAt" | "updatedAt" | "maximumFunnels", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
     createdFunnels?: boolean | User$createdFunnelsArgs<ExtArgs>
-    domains?: boolean | User$domainsArgs<ExtArgs>
+    createdDomains?: boolean | User$createdDomainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
     imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -3113,21 +3202,26 @@ export namespace Prisma {
       workspaceMembers: Prisma.$WorkspaceMemberPayload<ExtArgs>[]
       ownedWorkspaces: Prisma.$WorkspacePayload<ExtArgs>[]
       createdFunnels: Prisma.$FunnelPayload<ExtArgs>[]
-      domains: Prisma.$DomainPayload<ExtArgs>[]
+      createdDomains: Prisma.$DomainPayload<ExtArgs>[]
       templates: Prisma.$TemplatePayload<ExtArgs>[]
       imageFolders: Prisma.$ImageFolderPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       email: string
-      name: string | null
+      username: string
+      firstName: string
+      lastName: string
       password: string
       passwordResetToken: string | null
       passwordResetExpiresAt: Date | null
       isAdmin: boolean
+      plan: $Enums.UserPlan
       createdAt: Date
       updatedAt: Date
-      maximumFunnels: number | null
+      maximumFunnels: number
+      maximumCustomDomains: number
+      maximumSubdomains: number
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -3525,7 +3619,7 @@ export namespace Prisma {
     workspaceMembers<T extends User$workspaceMembersArgs<ExtArgs> = {}>(args?: Subset<T, User$workspaceMembersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkspaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ownedWorkspaces<T extends User$ownedWorkspacesArgs<ExtArgs> = {}>(args?: Subset<T, User$ownedWorkspacesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdFunnels<T extends User$createdFunnelsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdFunnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    domains<T extends User$domainsArgs<ExtArgs> = {}>(args?: Subset<T, User$domainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdDomains<T extends User$createdDomainsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdDomainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     templates<T extends User$templatesArgs<ExtArgs> = {}>(args?: Subset<T, User$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     imageFolders<T extends User$imageFoldersArgs<ExtArgs> = {}>(args?: Subset<T, User$imageFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3559,14 +3653,19 @@ export namespace Prisma {
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'Int'>
     readonly email: FieldRef<"User", 'String'>
-    readonly name: FieldRef<"User", 'String'>
+    readonly username: FieldRef<"User", 'String'>
+    readonly firstName: FieldRef<"User", 'String'>
+    readonly lastName: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly passwordResetToken: FieldRef<"User", 'String'>
     readonly passwordResetExpiresAt: FieldRef<"User", 'DateTime'>
     readonly isAdmin: FieldRef<"User", 'Boolean'>
+    readonly plan: FieldRef<"User", 'UserPlan'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly maximumFunnels: FieldRef<"User", 'Int'>
+    readonly maximumCustomDomains: FieldRef<"User", 'Int'>
+    readonly maximumSubdomains: FieldRef<"User", 'Int'>
   }
     
 
@@ -4027,9 +4126,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.domains
+   * User.createdDomains
    */
-  export type User$domainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$createdDomainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Domain
      */
@@ -4132,11 +4231,17 @@ export namespace Prisma {
   export type WorkspaceAvgAggregateOutputType = {
     id: number | null
     ownerId: number | null
+    allocatedFunnels: number | null
+    allocatedCustomDomains: number | null
+    allocatedSubdomains: number | null
   }
 
   export type WorkspaceSumAggregateOutputType = {
     id: number | null
     ownerId: number | null
+    allocatedFunnels: number | null
+    allocatedCustomDomains: number | null
+    allocatedSubdomains: number | null
   }
 
   export type WorkspaceMinAggregateOutputType = {
@@ -4145,6 +4250,9 @@ export namespace Prisma {
     slug: string | null
     ownerId: number | null
     description: string | null
+    allocatedFunnels: number | null
+    allocatedCustomDomains: number | null
+    allocatedSubdomains: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4155,6 +4263,9 @@ export namespace Prisma {
     slug: string | null
     ownerId: number | null
     description: string | null
+    allocatedFunnels: number | null
+    allocatedCustomDomains: number | null
+    allocatedSubdomains: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4166,6 +4277,9 @@ export namespace Prisma {
     ownerId: number
     description: number
     settings: number
+    allocatedFunnels: number
+    allocatedCustomDomains: number
+    allocatedSubdomains: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4175,11 +4289,17 @@ export namespace Prisma {
   export type WorkspaceAvgAggregateInputType = {
     id?: true
     ownerId?: true
+    allocatedFunnels?: true
+    allocatedCustomDomains?: true
+    allocatedSubdomains?: true
   }
 
   export type WorkspaceSumAggregateInputType = {
     id?: true
     ownerId?: true
+    allocatedFunnels?: true
+    allocatedCustomDomains?: true
+    allocatedSubdomains?: true
   }
 
   export type WorkspaceMinAggregateInputType = {
@@ -4188,6 +4308,9 @@ export namespace Prisma {
     slug?: true
     ownerId?: true
     description?: true
+    allocatedFunnels?: true
+    allocatedCustomDomains?: true
+    allocatedSubdomains?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4198,6 +4321,9 @@ export namespace Prisma {
     slug?: true
     ownerId?: true
     description?: true
+    allocatedFunnels?: true
+    allocatedCustomDomains?: true
+    allocatedSubdomains?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4209,6 +4335,9 @@ export namespace Prisma {
     ownerId?: true
     description?: true
     settings?: true
+    allocatedFunnels?: true
+    allocatedCustomDomains?: true
+    allocatedSubdomains?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4307,6 +4436,9 @@ export namespace Prisma {
     ownerId: number
     description: string | null
     settings: JsonValue | null
+    allocatedFunnels: number
+    allocatedCustomDomains: number
+    allocatedSubdomains: number
     createdAt: Date
     updatedAt: Date
     _count: WorkspaceCountAggregateOutputType | null
@@ -4337,11 +4469,15 @@ export namespace Prisma {
     ownerId?: boolean
     description?: boolean
     settings?: boolean
+    allocatedFunnels?: boolean
+    allocatedCustomDomains?: boolean
+    allocatedSubdomains?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
     members?: boolean | Workspace$membersArgs<ExtArgs>
     funnels?: boolean | Workspace$funnelsArgs<ExtArgs>
+    domains?: boolean | Workspace$domainsArgs<ExtArgs>
     _count?: boolean | WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["workspace"]>
 
@@ -4352,6 +4488,9 @@ export namespace Prisma {
     ownerId?: boolean
     description?: boolean
     settings?: boolean
+    allocatedFunnels?: boolean
+    allocatedCustomDomains?: boolean
+    allocatedSubdomains?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -4364,6 +4503,9 @@ export namespace Prisma {
     ownerId?: boolean
     description?: boolean
     settings?: boolean
+    allocatedFunnels?: boolean
+    allocatedCustomDomains?: boolean
+    allocatedSubdomains?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -4376,15 +4518,19 @@ export namespace Prisma {
     ownerId?: boolean
     description?: boolean
     settings?: boolean
+    allocatedFunnels?: boolean
+    allocatedCustomDomains?: boolean
+    allocatedSubdomains?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WorkspaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "ownerId" | "description" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
+  export type WorkspaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "ownerId" | "description" | "settings" | "allocatedFunnels" | "allocatedCustomDomains" | "allocatedSubdomains" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
   export type WorkspaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     members?: boolean | Workspace$membersArgs<ExtArgs>
     funnels?: boolean | Workspace$funnelsArgs<ExtArgs>
+    domains?: boolean | Workspace$domainsArgs<ExtArgs>
     _count?: boolean | WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type WorkspaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4400,6 +4546,7 @@ export namespace Prisma {
       owner: Prisma.$UserPayload<ExtArgs>
       members: Prisma.$WorkspaceMemberPayload<ExtArgs>[]
       funnels: Prisma.$FunnelPayload<ExtArgs>[]
+      domains: Prisma.$DomainPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -4408,6 +4555,9 @@ export namespace Prisma {
       ownerId: number
       description: string | null
       settings: Prisma.JsonValue | null
+      allocatedFunnels: number
+      allocatedCustomDomains: number
+      allocatedSubdomains: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["workspace"]>
@@ -4807,6 +4957,7 @@ export namespace Prisma {
     owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     members<T extends Workspace$membersArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$membersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkspaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     funnels<T extends Workspace$funnelsArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$funnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    domains<T extends Workspace$domainsArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$domainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4842,6 +4993,9 @@ export namespace Prisma {
     readonly ownerId: FieldRef<"Workspace", 'Int'>
     readonly description: FieldRef<"Workspace", 'String'>
     readonly settings: FieldRef<"Workspace", 'Json'>
+    readonly allocatedFunnels: FieldRef<"Workspace", 'Int'>
+    readonly allocatedCustomDomains: FieldRef<"Workspace", 'Int'>
+    readonly allocatedSubdomains: FieldRef<"Workspace", 'Int'>
     readonly createdAt: FieldRef<"Workspace", 'DateTime'>
     readonly updatedAt: FieldRef<"Workspace", 'DateTime'>
   }
@@ -5285,6 +5439,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FunnelScalarFieldEnum | FunnelScalarFieldEnum[]
+  }
+
+  /**
+   * Workspace.domains
+   */
+  export type Workspace$domainsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Domain
+     */
+    select?: DomainSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Domain
+     */
+    omit?: DomainOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DomainInclude<ExtArgs> | null
+    where?: DomainWhereInput
+    orderBy?: DomainOrderByWithRelationInput | DomainOrderByWithRelationInput[]
+    cursor?: DomainWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DomainScalarFieldEnum | DomainScalarFieldEnum[]
   }
 
   /**
@@ -6465,6 +6643,7 @@ export namespace Prisma {
   export type FunnelMinAggregateOutputType = {
     id: number | null
     name: string | null
+    slug: string | null
     status: $Enums.FunnelStatus | null
     workspaceId: number | null
     createdBy: number | null
@@ -6476,6 +6655,7 @@ export namespace Prisma {
   export type FunnelMaxAggregateOutputType = {
     id: number | null
     name: string | null
+    slug: string | null
     status: $Enums.FunnelStatus | null
     workspaceId: number | null
     createdBy: number | null
@@ -6487,6 +6667,7 @@ export namespace Prisma {
   export type FunnelCountAggregateOutputType = {
     id: number
     name: number
+    slug: number
     status: number
     workspaceId: number
     createdBy: number
@@ -6514,6 +6695,7 @@ export namespace Prisma {
   export type FunnelMinAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     status?: true
     workspaceId?: true
     createdBy?: true
@@ -6525,6 +6707,7 @@ export namespace Prisma {
   export type FunnelMaxAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     status?: true
     workspaceId?: true
     createdBy?: true
@@ -6536,6 +6719,7 @@ export namespace Prisma {
   export type FunnelCountAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     status?: true
     workspaceId?: true
     createdBy?: true
@@ -6634,6 +6818,7 @@ export namespace Prisma {
   export type FunnelGroupByOutputType = {
     id: number
     name: string
+    slug: string
     status: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -6664,6 +6849,7 @@ export namespace Prisma {
   export type FunnelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    slug?: boolean
     status?: boolean
     workspaceId?: boolean
     createdBy?: boolean
@@ -6681,6 +6867,7 @@ export namespace Prisma {
   export type FunnelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    slug?: boolean
     status?: boolean
     workspaceId?: boolean
     createdBy?: boolean
@@ -6695,6 +6882,7 @@ export namespace Prisma {
   export type FunnelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    slug?: boolean
     status?: boolean
     workspaceId?: boolean
     createdBy?: boolean
@@ -6709,6 +6897,7 @@ export namespace Prisma {
   export type FunnelSelectScalar = {
     id?: boolean
     name?: boolean
+    slug?: boolean
     status?: boolean
     workspaceId?: boolean
     createdBy?: boolean
@@ -6717,7 +6906,7 @@ export namespace Prisma {
     themeId?: boolean
   }
 
-  export type FunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "workspaceId" | "createdBy" | "createdAt" | "updatedAt" | "themeId", ExtArgs["result"]["funnel"]>
+  export type FunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "status" | "workspaceId" | "createdBy" | "createdAt" | "updatedAt" | "themeId", ExtArgs["result"]["funnel"]>
   export type FunnelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
@@ -6749,6 +6938,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
+      slug: string
       status: $Enums.FunnelStatus
       workspaceId: number
       createdBy: number
@@ -7185,6 +7375,7 @@ export namespace Prisma {
   interface FunnelFieldRefs {
     readonly id: FieldRef<"Funnel", 'Int'>
     readonly name: FieldRef<"Funnel", 'String'>
+    readonly slug: FieldRef<"Funnel", 'String'>
     readonly status: FieldRef<"Funnel", 'FunnelStatus'>
     readonly workspaceId: FieldRef<"Funnel", 'Int'>
     readonly createdBy: FieldRef<"Funnel", 'Int'>
@@ -7686,12 +7877,14 @@ export namespace Prisma {
 
   export type DomainAvgAggregateOutputType = {
     id: number | null
-    userId: number | null
+    workspaceId: number | null
+    createdBy: number | null
   }
 
   export type DomainSumAggregateOutputType = {
     id: number | null
-    userId: number | null
+    workspaceId: number | null
+    createdBy: number | null
   }
 
   export type DomainMinAggregateOutputType = {
@@ -7700,7 +7893,8 @@ export namespace Prisma {
     type: $Enums.DomainType | null
     status: $Enums.DomainStatus | null
     sslStatus: $Enums.SslStatus | null
-    userId: number | null
+    workspaceId: number | null
+    createdBy: number | null
     cloudflareHostnameId: string | null
     cloudflareZoneId: string | null
     cloudflareRecordId: string | null
@@ -7719,7 +7913,8 @@ export namespace Prisma {
     type: $Enums.DomainType | null
     status: $Enums.DomainStatus | null
     sslStatus: $Enums.SslStatus | null
-    userId: number | null
+    workspaceId: number | null
+    createdBy: number | null
     cloudflareHostnameId: string | null
     cloudflareZoneId: string | null
     cloudflareRecordId: string | null
@@ -7738,7 +7933,8 @@ export namespace Prisma {
     type: number
     status: number
     sslStatus: number
-    userId: number
+    workspaceId: number
+    createdBy: number
     cloudflareHostnameId: number
     cloudflareZoneId: number
     cloudflareRecordId: number
@@ -7758,12 +7954,14 @@ export namespace Prisma {
 
   export type DomainAvgAggregateInputType = {
     id?: true
-    userId?: true
+    workspaceId?: true
+    createdBy?: true
   }
 
   export type DomainSumAggregateInputType = {
     id?: true
-    userId?: true
+    workspaceId?: true
+    createdBy?: true
   }
 
   export type DomainMinAggregateInputType = {
@@ -7772,7 +7970,8 @@ export namespace Prisma {
     type?: true
     status?: true
     sslStatus?: true
-    userId?: true
+    workspaceId?: true
+    createdBy?: true
     cloudflareHostnameId?: true
     cloudflareZoneId?: true
     cloudflareRecordId?: true
@@ -7791,7 +7990,8 @@ export namespace Prisma {
     type?: true
     status?: true
     sslStatus?: true
-    userId?: true
+    workspaceId?: true
+    createdBy?: true
     cloudflareHostnameId?: true
     cloudflareZoneId?: true
     cloudflareRecordId?: true
@@ -7810,7 +8010,8 @@ export namespace Prisma {
     type?: true
     status?: true
     sslStatus?: true
-    userId?: true
+    workspaceId?: true
+    createdBy?: true
     cloudflareHostnameId?: true
     cloudflareZoneId?: true
     cloudflareRecordId?: true
@@ -7919,7 +8120,8 @@ export namespace Prisma {
     type: $Enums.DomainType
     status: $Enums.DomainStatus
     sslStatus: $Enums.SslStatus
-    userId: number
+    workspaceId: number
+    createdBy: number
     cloudflareHostnameId: string | null
     cloudflareZoneId: string | null
     cloudflareRecordId: string | null
@@ -7960,7 +8162,8 @@ export namespace Prisma {
     type?: boolean
     status?: boolean
     sslStatus?: boolean
-    userId?: boolean
+    workspaceId?: boolean
+    createdBy?: boolean
     cloudflareHostnameId?: boolean
     cloudflareZoneId?: boolean
     cloudflareRecordId?: boolean
@@ -7974,7 +8177,8 @@ export namespace Prisma {
     notes?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
     funnelConnections?: boolean | Domain$funnelConnectionsArgs<ExtArgs>
     _count?: boolean | DomainCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["domain"]>
@@ -7985,7 +8189,8 @@ export namespace Prisma {
     type?: boolean
     status?: boolean
     sslStatus?: boolean
-    userId?: boolean
+    workspaceId?: boolean
+    createdBy?: boolean
     cloudflareHostnameId?: boolean
     cloudflareZoneId?: boolean
     cloudflareRecordId?: boolean
@@ -7999,7 +8204,8 @@ export namespace Prisma {
     notes?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["domain"]>
 
   export type DomainSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -8008,7 +8214,8 @@ export namespace Prisma {
     type?: boolean
     status?: boolean
     sslStatus?: boolean
-    userId?: boolean
+    workspaceId?: boolean
+    createdBy?: boolean
     cloudflareHostnameId?: boolean
     cloudflareZoneId?: boolean
     cloudflareRecordId?: boolean
@@ -8022,7 +8229,8 @@ export namespace Prisma {
     notes?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["domain"]>
 
   export type DomainSelectScalar = {
@@ -8031,7 +8239,8 @@ export namespace Prisma {
     type?: boolean
     status?: boolean
     sslStatus?: boolean
-    userId?: boolean
+    workspaceId?: boolean
+    createdBy?: boolean
     cloudflareHostnameId?: boolean
     cloudflareZoneId?: boolean
     cloudflareRecordId?: boolean
@@ -8047,23 +8256,27 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type DomainOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hostname" | "type" | "status" | "sslStatus" | "userId" | "cloudflareHostnameId" | "cloudflareZoneId" | "cloudflareRecordId" | "verificationToken" | "ownershipVerification" | "dnsInstructions" | "sslCertificateId" | "sslValidationRecords" | "lastVerifiedAt" | "expiresAt" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["domain"]>
+  export type DomainOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hostname" | "type" | "status" | "sslStatus" | "workspaceId" | "createdBy" | "cloudflareHostnameId" | "cloudflareZoneId" | "cloudflareRecordId" | "verificationToken" | "ownershipVerification" | "dnsInstructions" | "sslCertificateId" | "sslValidationRecords" | "lastVerifiedAt" | "expiresAt" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["domain"]>
   export type DomainInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
     funnelConnections?: boolean | Domain$funnelConnectionsArgs<ExtArgs>
     _count?: boolean | DomainCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DomainIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type DomainIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $DomainPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Domain"
     objects: {
-      user: Prisma.$UserPayload<ExtArgs>
+      workspace: Prisma.$WorkspacePayload<ExtArgs>
+      creator: Prisma.$UserPayload<ExtArgs>
       funnelConnections: Prisma.$FunnelDomainPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -8072,7 +8285,8 @@ export namespace Prisma {
       type: $Enums.DomainType
       status: $Enums.DomainStatus
       sslStatus: $Enums.SslStatus
-      userId: number
+      workspaceId: number
+      createdBy: number
       cloudflareHostnameId: string | null
       cloudflareZoneId: string | null
       cloudflareRecordId: string | null
@@ -8480,7 +8694,8 @@ export namespace Prisma {
    */
   export interface Prisma__DomainClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    workspace<T extends WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WorkspaceDefaultArgs<ExtArgs>>): Prisma__WorkspaceClient<$Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    creator<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     funnelConnections<T extends Domain$funnelConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Domain$funnelConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -8516,7 +8731,8 @@ export namespace Prisma {
     readonly type: FieldRef<"Domain", 'DomainType'>
     readonly status: FieldRef<"Domain", 'DomainStatus'>
     readonly sslStatus: FieldRef<"Domain", 'SslStatus'>
-    readonly userId: FieldRef<"Domain", 'Int'>
+    readonly workspaceId: FieldRef<"Domain", 'Int'>
+    readonly createdBy: FieldRef<"Domain", 'Int'>
     readonly cloudflareHostnameId: FieldRef<"Domain", 'String'>
     readonly cloudflareZoneId: FieldRef<"Domain", 'String'>
     readonly cloudflareRecordId: FieldRef<"Domain", 'String'>
@@ -22881,14 +23097,19 @@ export namespace Prisma {
   export const UserScalarFieldEnum: {
     id: 'id',
     email: 'email',
-    name: 'name',
+    username: 'username',
+    firstName: 'firstName',
+    lastName: 'lastName',
     password: 'password',
     passwordResetToken: 'passwordResetToken',
     passwordResetExpiresAt: 'passwordResetExpiresAt',
     isAdmin: 'isAdmin',
+    plan: 'plan',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    maximumFunnels: 'maximumFunnels'
+    maximumFunnels: 'maximumFunnels',
+    maximumCustomDomains: 'maximumCustomDomains',
+    maximumSubdomains: 'maximumSubdomains'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -22901,6 +23122,9 @@ export namespace Prisma {
     ownerId: 'ownerId',
     description: 'description',
     settings: 'settings',
+    allocatedFunnels: 'allocatedFunnels',
+    allocatedCustomDomains: 'allocatedCustomDomains',
+    allocatedSubdomains: 'allocatedSubdomains',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -22924,6 +23148,7 @@ export namespace Prisma {
   export const FunnelScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    slug: 'slug',
     status: 'status',
     workspaceId: 'workspaceId',
     createdBy: 'createdBy',
@@ -22941,7 +23166,8 @@ export namespace Prisma {
     type: 'type',
     status: 'status',
     sslStatus: 'sslStatus',
-    userId: 'userId',
+    workspaceId: 'workspaceId',
+    createdBy: 'createdBy',
     cloudflareHostnameId: 'cloudflareHostnameId',
     cloudflareZoneId: 'cloudflareZoneId',
     cloudflareRecordId: 'cloudflareRecordId',
@@ -23239,6 +23465,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'UserPlan'
+   */
+  export type EnumUserPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserPlan'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserPlan[]'
+   */
+  export type ListEnumUserPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserPlan[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -23387,18 +23627,23 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     id?: IntFilter<"User"> | number
     email?: StringFilter<"User"> | string
-    name?: StringNullableFilter<"User"> | string | null
+    username?: StringFilter<"User"> | string
+    firstName?: StringFilter<"User"> | string
+    lastName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     passwordResetToken?: StringNullableFilter<"User"> | string | null
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
+    plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    maximumFunnels?: IntNullableFilter<"User"> | number | null
+    maximumFunnels?: IntFilter<"User"> | number
+    maximumCustomDomains?: IntFilter<"User"> | number
+    maximumSubdomains?: IntFilter<"User"> | number
     workspaceMembers?: WorkspaceMemberListRelationFilter
     ownedWorkspaces?: WorkspaceListRelationFilter
     createdFunnels?: FunnelListRelationFilter
-    domains?: DomainListRelationFilter
+    createdDomains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
     imageFolders?: ImageFolderListRelationFilter
   }
@@ -23406,18 +23651,23 @@ export namespace Prisma {
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    username?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
     password?: SortOrder
     passwordResetToken?: SortOrderInput | SortOrder
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
+    plan?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    maximumFunnels?: SortOrderInput | SortOrder
+    maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
     workspaceMembers?: WorkspaceMemberOrderByRelationAggregateInput
     ownedWorkspaces?: WorkspaceOrderByRelationAggregateInput
     createdFunnels?: FunnelOrderByRelationAggregateInput
-    domains?: DomainOrderByRelationAggregateInput
+    createdDomains?: DomainOrderByRelationAggregateInput
     templates?: TemplateOrderByRelationAggregateInput
     imageFolders?: ImageFolderOrderByRelationAggregateInput
   }
@@ -23425,36 +23675,46 @@ export namespace Prisma {
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     email?: string
+    username?: string
     passwordResetToken?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    name?: StringNullableFilter<"User"> | string | null
+    firstName?: StringFilter<"User"> | string
+    lastName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
+    plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    maximumFunnels?: IntNullableFilter<"User"> | number | null
+    maximumFunnels?: IntFilter<"User"> | number
+    maximumCustomDomains?: IntFilter<"User"> | number
+    maximumSubdomains?: IntFilter<"User"> | number
     workspaceMembers?: WorkspaceMemberListRelationFilter
     ownedWorkspaces?: WorkspaceListRelationFilter
     createdFunnels?: FunnelListRelationFilter
-    domains?: DomainListRelationFilter
+    createdDomains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
     imageFolders?: ImageFolderListRelationFilter
-  }, "id" | "email" | "passwordResetToken">
+  }, "id" | "email" | "username" | "passwordResetToken">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    username?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
     password?: SortOrder
     passwordResetToken?: SortOrderInput | SortOrder
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
+    plan?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    maximumFunnels?: SortOrderInput | SortOrder
+    maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -23468,14 +23728,19 @@ export namespace Prisma {
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"User"> | number
     email?: StringWithAggregatesFilter<"User"> | string
-    name?: StringNullableWithAggregatesFilter<"User"> | string | null
+    username?: StringWithAggregatesFilter<"User"> | string
+    firstName?: StringWithAggregatesFilter<"User"> | string
+    lastName?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
     passwordResetToken?: StringNullableWithAggregatesFilter<"User"> | string | null
     passwordResetExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
+    plan?: EnumUserPlanWithAggregatesFilter<"User"> | $Enums.UserPlan
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    maximumFunnels?: IntNullableWithAggregatesFilter<"User"> | number | null
+    maximumFunnels?: IntWithAggregatesFilter<"User"> | number
+    maximumCustomDomains?: IntWithAggregatesFilter<"User"> | number
+    maximumSubdomains?: IntWithAggregatesFilter<"User"> | number
   }
 
   export type WorkspaceWhereInput = {
@@ -23488,11 +23753,15 @@ export namespace Prisma {
     ownerId?: IntFilter<"Workspace"> | number
     description?: StringNullableFilter<"Workspace"> | string | null
     settings?: JsonNullableFilter<"Workspace">
+    allocatedFunnels?: IntFilter<"Workspace"> | number
+    allocatedCustomDomains?: IntFilter<"Workspace"> | number
+    allocatedSubdomains?: IntFilter<"Workspace"> | number
     createdAt?: DateTimeFilter<"Workspace"> | Date | string
     updatedAt?: DateTimeFilter<"Workspace"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     members?: WorkspaceMemberListRelationFilter
     funnels?: FunnelListRelationFilter
+    domains?: DomainListRelationFilter
   }
 
   export type WorkspaceOrderByWithRelationInput = {
@@ -23502,11 +23771,15 @@ export namespace Prisma {
     ownerId?: SortOrder
     description?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     owner?: UserOrderByWithRelationInput
     members?: WorkspaceMemberOrderByRelationAggregateInput
     funnels?: FunnelOrderByRelationAggregateInput
+    domains?: DomainOrderByRelationAggregateInput
   }
 
   export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
@@ -23519,11 +23792,15 @@ export namespace Prisma {
     ownerId?: IntFilter<"Workspace"> | number
     description?: StringNullableFilter<"Workspace"> | string | null
     settings?: JsonNullableFilter<"Workspace">
+    allocatedFunnels?: IntFilter<"Workspace"> | number
+    allocatedCustomDomains?: IntFilter<"Workspace"> | number
+    allocatedSubdomains?: IntFilter<"Workspace"> | number
     createdAt?: DateTimeFilter<"Workspace"> | Date | string
     updatedAt?: DateTimeFilter<"Workspace"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     members?: WorkspaceMemberListRelationFilter
     funnels?: FunnelListRelationFilter
+    domains?: DomainListRelationFilter
   }, "id" | "slug">
 
   export type WorkspaceOrderByWithAggregationInput = {
@@ -23533,6 +23810,9 @@ export namespace Prisma {
     ownerId?: SortOrder
     description?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: WorkspaceCountOrderByAggregateInput
@@ -23552,6 +23832,9 @@ export namespace Prisma {
     ownerId?: IntWithAggregatesFilter<"Workspace"> | number
     description?: StringNullableWithAggregatesFilter<"Workspace"> | string | null
     settings?: JsonNullableWithAggregatesFilter<"Workspace">
+    allocatedFunnels?: IntWithAggregatesFilter<"Workspace"> | number
+    allocatedCustomDomains?: IntWithAggregatesFilter<"Workspace"> | number
+    allocatedSubdomains?: IntWithAggregatesFilter<"Workspace"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Workspace"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Workspace"> | Date | string
   }
@@ -23633,6 +23916,7 @@ export namespace Prisma {
     NOT?: FunnelWhereInput | FunnelWhereInput[]
     id?: IntFilter<"Funnel"> | number
     name?: StringFilter<"Funnel"> | string
+    slug?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     workspaceId?: IntFilter<"Funnel"> | number
     createdBy?: IntFilter<"Funnel"> | number
@@ -23649,6 +23933,7 @@ export namespace Prisma {
   export type FunnelOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     status?: SortOrder
     workspaceId?: SortOrder
     createdBy?: SortOrder
@@ -23665,10 +23950,13 @@ export namespace Prisma {
   export type FunnelWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     themeId?: number
+    workspaceId_name?: FunnelWorkspaceIdNameCompoundUniqueInput
+    workspaceId_slug?: FunnelWorkspaceIdSlugCompoundUniqueInput
     AND?: FunnelWhereInput | FunnelWhereInput[]
     OR?: FunnelWhereInput[]
     NOT?: FunnelWhereInput | FunnelWhereInput[]
     name?: StringFilter<"Funnel"> | string
+    slug?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     workspaceId?: IntFilter<"Funnel"> | number
     createdBy?: IntFilter<"Funnel"> | number
@@ -23679,11 +23967,12 @@ export namespace Prisma {
     domainConnections?: FunnelDomainListRelationFilter
     theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
     pages?: PageListRelationFilter
-  }, "id" | "themeId">
+  }, "id" | "themeId" | "workspaceId_name" | "workspaceId_slug">
 
   export type FunnelOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     status?: SortOrder
     workspaceId?: SortOrder
     createdBy?: SortOrder
@@ -23703,6 +23992,7 @@ export namespace Prisma {
     NOT?: FunnelScalarWhereWithAggregatesInput | FunnelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Funnel"> | number
     name?: StringWithAggregatesFilter<"Funnel"> | string
+    slug?: StringWithAggregatesFilter<"Funnel"> | string
     status?: EnumFunnelStatusWithAggregatesFilter<"Funnel"> | $Enums.FunnelStatus
     workspaceId?: IntWithAggregatesFilter<"Funnel"> | number
     createdBy?: IntWithAggregatesFilter<"Funnel"> | number
@@ -23720,7 +24010,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFilter<"Domain"> | $Enums.DomainType
     status?: EnumDomainStatusFilter<"Domain"> | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFilter<"Domain"> | $Enums.SslStatus
-    userId?: IntFilter<"Domain"> | number
+    workspaceId?: IntFilter<"Domain"> | number
+    createdBy?: IntFilter<"Domain"> | number
     cloudflareHostnameId?: StringNullableFilter<"Domain"> | string | null
     cloudflareZoneId?: StringNullableFilter<"Domain"> | string | null
     cloudflareRecordId?: StringNullableFilter<"Domain"> | string | null
@@ -23734,7 +24025,8 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Domain"> | string | null
     createdAt?: DateTimeFilter<"Domain"> | Date | string
     updatedAt?: DateTimeFilter<"Domain"> | Date | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
+    creator?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelConnections?: FunnelDomainListRelationFilter
   }
 
@@ -23744,7 +24036,8 @@ export namespace Prisma {
     type?: SortOrder
     status?: SortOrder
     sslStatus?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
     cloudflareHostnameId?: SortOrderInput | SortOrder
     cloudflareZoneId?: SortOrderInput | SortOrder
     cloudflareRecordId?: SortOrderInput | SortOrder
@@ -23758,7 +24051,8 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    user?: UserOrderByWithRelationInput
+    workspace?: WorkspaceOrderByWithRelationInput
+    creator?: UserOrderByWithRelationInput
     funnelConnections?: FunnelDomainOrderByRelationAggregateInput
   }
 
@@ -23772,7 +24066,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFilter<"Domain"> | $Enums.DomainType
     status?: EnumDomainStatusFilter<"Domain"> | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFilter<"Domain"> | $Enums.SslStatus
-    userId?: IntFilter<"Domain"> | number
+    workspaceId?: IntFilter<"Domain"> | number
+    createdBy?: IntFilter<"Domain"> | number
     cloudflareZoneId?: StringNullableFilter<"Domain"> | string | null
     cloudflareRecordId?: StringNullableFilter<"Domain"> | string | null
     verificationToken?: StringNullableFilter<"Domain"> | string | null
@@ -23785,7 +24080,8 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Domain"> | string | null
     createdAt?: DateTimeFilter<"Domain"> | Date | string
     updatedAt?: DateTimeFilter<"Domain"> | Date | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
+    creator?: XOR<UserScalarRelationFilter, UserWhereInput>
     funnelConnections?: FunnelDomainListRelationFilter
   }, "id" | "hostname" | "cloudflareHostnameId">
 
@@ -23795,7 +24091,8 @@ export namespace Prisma {
     type?: SortOrder
     status?: SortOrder
     sslStatus?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
     cloudflareHostnameId?: SortOrderInput | SortOrder
     cloudflareZoneId?: SortOrderInput | SortOrder
     cloudflareRecordId?: SortOrderInput | SortOrder
@@ -23825,7 +24122,8 @@ export namespace Prisma {
     type?: EnumDomainTypeWithAggregatesFilter<"Domain"> | $Enums.DomainType
     status?: EnumDomainStatusWithAggregatesFilter<"Domain"> | $Enums.DomainStatus
     sslStatus?: EnumSslStatusWithAggregatesFilter<"Domain"> | $Enums.SslStatus
-    userId?: IntWithAggregatesFilter<"Domain"> | number
+    workspaceId?: IntWithAggregatesFilter<"Domain"> | number
+    createdBy?: IntWithAggregatesFilter<"Domain"> | number
     cloudflareHostnameId?: StringNullableWithAggregatesFilter<"Domain"> | string | null
     cloudflareZoneId?: StringNullableWithAggregatesFilter<"Domain"> | string | null
     cloudflareRecordId?: StringNullableWithAggregatesFilter<"Domain"> | string | null
@@ -24769,18 +25067,23 @@ export namespace Prisma {
 
   export type UserCreateInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
@@ -24788,36 +25091,46 @@ export namespace Prisma {
   export type UserUncheckedCreateInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
@@ -24825,18 +25138,23 @@ export namespace Prisma {
   export type UserUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -24844,39 +25162,54 @@ export namespace Prisma {
   export type UserCreateManyInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
   }
 
   export type UserUpdateManyMutationInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
   }
 
   export type WorkspaceCreateInput = {
@@ -24884,11 +25217,15 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedWorkspacesInput
     members?: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
     funnels?: FunnelCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateInput = {
@@ -24898,10 +25235,14 @@ export namespace Prisma {
     ownerId: number
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
     funnels?: FunnelUncheckedCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUpdateInput = {
@@ -24909,11 +25250,15 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedWorkspacesNestedInput
     members?: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
     funnels?: FunnelUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateInput = {
@@ -24923,10 +25268,14 @@ export namespace Prisma {
     ownerId?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
     funnels?: FunnelUncheckedUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateManyInput = {
@@ -24936,6 +25285,9 @@ export namespace Prisma {
     ownerId: number
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24945,6 +25297,9 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24956,6 +25311,9 @@ export namespace Prisma {
     ownerId?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25027,6 +25385,7 @@ export namespace Prisma {
 
   export type FunnelCreateInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25040,6 +25399,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -25052,6 +25412,7 @@ export namespace Prisma {
 
   export type FunnelUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25065,6 +25426,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdBy?: IntFieldUpdateOperationsInput | number
@@ -25078,6 +25440,7 @@ export namespace Prisma {
   export type FunnelCreateManyInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -25088,6 +25451,7 @@ export namespace Prisma {
 
   export type FunnelUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25096,6 +25460,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdBy?: IntFieldUpdateOperationsInput | number
@@ -25122,7 +25487,8 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutDomainsInput
+    workspace: WorkspaceCreateNestedOneWithoutDomainsInput
+    creator: UserCreateNestedOneWithoutCreatedDomainsInput
     funnelConnections?: FunnelDomainCreateNestedManyWithoutDomainInput
   }
 
@@ -25132,7 +25498,8 @@ export namespace Prisma {
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
     sslStatus?: $Enums.SslStatus
-    userId: number
+    workspaceId: number
+    createdBy: number
     cloudflareHostnameId?: string | null
     cloudflareZoneId?: string | null
     cloudflareRecordId?: string | null
@@ -25167,7 +25534,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutDomainsNestedInput
+    workspace?: WorkspaceUpdateOneRequiredWithoutDomainsNestedInput
+    creator?: UserUpdateOneRequiredWithoutCreatedDomainsNestedInput
     funnelConnections?: FunnelDomainUpdateManyWithoutDomainNestedInput
   }
 
@@ -25177,7 +25545,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
-    userId?: IntFieldUpdateOperationsInput | number
+    workspaceId?: IntFieldUpdateOperationsInput | number
+    createdBy?: IntFieldUpdateOperationsInput | number
     cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25200,7 +25569,8 @@ export namespace Prisma {
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
     sslStatus?: $Enums.SslStatus
-    userId: number
+    workspaceId: number
+    createdBy: number
     cloudflareHostnameId?: string | null
     cloudflareZoneId?: string | null
     cloudflareRecordId?: string | null
@@ -25242,7 +25612,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
-    userId?: IntFieldUpdateOperationsInput | number
+    workspaceId?: IntFieldUpdateOperationsInput | number
+    createdBy?: IntFieldUpdateOperationsInput | number
     cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26279,6 +26650,13 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type EnumUserPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserPlan | EnumUserPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserPlanFilter<$PrismaModel> | $Enums.UserPlan
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -26288,17 +26666,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type WorkspaceMemberListRelationFilter = {
@@ -26369,50 +26736,69 @@ export namespace Prisma {
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrder
+    username?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
     password?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
+    plan?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
     maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrder
+    username?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
     password?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
+    plan?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrder
+    username?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
     password?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
+    plan?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
     maximumFunnels?: SortOrder
+    maximumCustomDomains?: SortOrder
+    maximumSubdomains?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -26489,6 +26875,16 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type EnumUserPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserPlan | EnumUserPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserPlanWithAggregatesFilter<$PrismaModel> | $Enums.UserPlan
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserPlanFilter<$PrismaModel>
+    _max?: NestedEnumUserPlanFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -26501,22 +26897,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -26554,6 +26934,9 @@ export namespace Prisma {
     ownerId?: SortOrder
     description?: SortOrder
     settings?: SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26561,6 +26944,9 @@ export namespace Prisma {
   export type WorkspaceAvgOrderByAggregateInput = {
     id?: SortOrder
     ownerId?: SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
   }
 
   export type WorkspaceMaxOrderByAggregateInput = {
@@ -26569,6 +26955,9 @@ export namespace Prisma {
     slug?: SortOrder
     ownerId?: SortOrder
     description?: SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26579,6 +26968,9 @@ export namespace Prisma {
     slug?: SortOrder
     ownerId?: SortOrder
     description?: SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26586,6 +26978,9 @@ export namespace Prisma {
   export type WorkspaceSumOrderByAggregateInput = {
     id?: SortOrder
     ownerId?: SortOrder
+    allocatedFunnels?: SortOrder
+    allocatedCustomDomains?: SortOrder
+    allocatedSubdomains?: SortOrder
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -26696,6 +27091,17 @@ export namespace Prisma {
     not?: NestedEnumFunnelStatusFilter<$PrismaModel> | $Enums.FunnelStatus
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type FunnelDomainListRelationFilter = {
     every?: FunnelDomainWhereInput
     some?: FunnelDomainWhereInput
@@ -26721,9 +27127,20 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type FunnelWorkspaceIdNameCompoundUniqueInput = {
+    workspaceId: number
+    name: string
+  }
+
+  export type FunnelWorkspaceIdSlugCompoundUniqueInput = {
+    workspaceId: number
+    slug: string
+  }
+
   export type FunnelCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     status?: SortOrder
     workspaceId?: SortOrder
     createdBy?: SortOrder
@@ -26742,6 +27159,7 @@ export namespace Prisma {
   export type FunnelMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     status?: SortOrder
     workspaceId?: SortOrder
     createdBy?: SortOrder
@@ -26753,6 +27171,7 @@ export namespace Prisma {
   export type FunnelMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     status?: SortOrder
     workspaceId?: SortOrder
     createdBy?: SortOrder
@@ -26776,6 +27195,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
     _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumDomainTypeFilter<$PrismaModel = never> = {
@@ -26805,7 +27240,8 @@ export namespace Prisma {
     type?: SortOrder
     status?: SortOrder
     sslStatus?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
     cloudflareHostnameId?: SortOrder
     cloudflareZoneId?: SortOrder
     cloudflareRecordId?: SortOrder
@@ -26823,7 +27259,8 @@ export namespace Prisma {
 
   export type DomainAvgOrderByAggregateInput = {
     id?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type DomainMaxOrderByAggregateInput = {
@@ -26832,7 +27269,8 @@ export namespace Prisma {
     type?: SortOrder
     status?: SortOrder
     sslStatus?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
     cloudflareHostnameId?: SortOrder
     cloudflareZoneId?: SortOrder
     cloudflareRecordId?: SortOrder
@@ -26851,7 +27289,8 @@ export namespace Prisma {
     type?: SortOrder
     status?: SortOrder
     sslStatus?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
     cloudflareHostnameId?: SortOrder
     cloudflareZoneId?: SortOrder
     cloudflareRecordId?: SortOrder
@@ -26866,7 +27305,8 @@ export namespace Prisma {
 
   export type DomainSumOrderByAggregateInput = {
     id?: SortOrder
-    userId?: SortOrder
+    workspaceId?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type EnumDomainTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -27659,10 +28099,10 @@ export namespace Prisma {
     connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
   }
 
-  export type DomainCreateNestedManyWithoutUserInput = {
-    create?: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput> | DomainCreateWithoutUserInput[] | DomainUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DomainCreateOrConnectWithoutUserInput | DomainCreateOrConnectWithoutUserInput[]
-    createMany?: DomainCreateManyUserInputEnvelope
+  export type DomainCreateNestedManyWithoutCreatorInput = {
+    create?: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput> | DomainCreateWithoutCreatorInput[] | DomainUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutCreatorInput | DomainCreateOrConnectWithoutCreatorInput[]
+    createMany?: DomainCreateManyCreatorInputEnvelope
     connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
   }
 
@@ -27701,10 +28141,10 @@ export namespace Prisma {
     connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
   }
 
-  export type DomainUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput> | DomainCreateWithoutUserInput[] | DomainUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DomainCreateOrConnectWithoutUserInput | DomainCreateOrConnectWithoutUserInput[]
-    createMany?: DomainCreateManyUserInputEnvelope
+  export type DomainUncheckedCreateNestedManyWithoutCreatorInput = {
+    create?: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput> | DomainCreateWithoutCreatorInput[] | DomainUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutCreatorInput | DomainCreateOrConnectWithoutCreatorInput[]
+    createMany?: DomainCreateManyCreatorInputEnvelope
     connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
   }
 
@@ -27738,12 +28178,16 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type EnumUserPlanFieldUpdateOperationsInput = {
+    set?: $Enums.UserPlan
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
     increment?: number
     decrement?: number
     multiply?: number
@@ -27792,17 +28236,17 @@ export namespace Prisma {
     deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
   }
 
-  export type DomainUpdateManyWithoutUserNestedInput = {
-    create?: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput> | DomainCreateWithoutUserInput[] | DomainUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DomainCreateOrConnectWithoutUserInput | DomainCreateOrConnectWithoutUserInput[]
-    upsert?: DomainUpsertWithWhereUniqueWithoutUserInput | DomainUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: DomainCreateManyUserInputEnvelope
+  export type DomainUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput> | DomainCreateWithoutCreatorInput[] | DomainUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutCreatorInput | DomainCreateOrConnectWithoutCreatorInput[]
+    upsert?: DomainUpsertWithWhereUniqueWithoutCreatorInput | DomainUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: DomainCreateManyCreatorInputEnvelope
     set?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     disconnect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     delete?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
-    update?: DomainUpdateWithWhereUniqueWithoutUserInput | DomainUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: DomainUpdateManyWithWhereWithoutUserInput | DomainUpdateManyWithWhereWithoutUserInput[]
+    update?: DomainUpdateWithWhereUniqueWithoutCreatorInput | DomainUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: DomainUpdateManyWithWhereWithoutCreatorInput | DomainUpdateManyWithWhereWithoutCreatorInput[]
     deleteMany?: DomainScalarWhereInput | DomainScalarWhereInput[]
   }
 
@@ -27832,14 +28276,6 @@ export namespace Prisma {
     update?: ImageFolderUpdateWithWhereUniqueWithoutUserInput | ImageFolderUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ImageFolderUpdateManyWithWhereWithoutUserInput | ImageFolderUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput = {
@@ -27884,17 +28320,17 @@ export namespace Prisma {
     deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
   }
 
-  export type DomainUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput> | DomainCreateWithoutUserInput[] | DomainUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DomainCreateOrConnectWithoutUserInput | DomainCreateOrConnectWithoutUserInput[]
-    upsert?: DomainUpsertWithWhereUniqueWithoutUserInput | DomainUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: DomainCreateManyUserInputEnvelope
+  export type DomainUncheckedUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput> | DomainCreateWithoutCreatorInput[] | DomainUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutCreatorInput | DomainCreateOrConnectWithoutCreatorInput[]
+    upsert?: DomainUpsertWithWhereUniqueWithoutCreatorInput | DomainUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: DomainCreateManyCreatorInputEnvelope
     set?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     disconnect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     delete?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
     connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
-    update?: DomainUpdateWithWhereUniqueWithoutUserInput | DomainUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: DomainUpdateManyWithWhereWithoutUserInput | DomainUpdateManyWithWhereWithoutUserInput[]
+    update?: DomainUpdateWithWhereUniqueWithoutCreatorInput | DomainUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: DomainUpdateManyWithWhereWithoutCreatorInput | DomainUpdateManyWithWhereWithoutCreatorInput[]
     deleteMany?: DomainScalarWhereInput | DomainScalarWhereInput[]
   }
 
@@ -27946,6 +28382,13 @@ export namespace Prisma {
     connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
   }
 
+  export type DomainCreateNestedManyWithoutWorkspaceInput = {
+    create?: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput> | DomainCreateWithoutWorkspaceInput[] | DomainUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutWorkspaceInput | DomainCreateOrConnectWithoutWorkspaceInput[]
+    createMany?: DomainCreateManyWorkspaceInputEnvelope
+    connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+  }
+
   export type WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput = {
     create?: XOR<WorkspaceMemberCreateWithoutWorkspaceInput, WorkspaceMemberUncheckedCreateWithoutWorkspaceInput> | WorkspaceMemberCreateWithoutWorkspaceInput[] | WorkspaceMemberUncheckedCreateWithoutWorkspaceInput[]
     connectOrCreate?: WorkspaceMemberCreateOrConnectWithoutWorkspaceInput | WorkspaceMemberCreateOrConnectWithoutWorkspaceInput[]
@@ -27958,6 +28401,13 @@ export namespace Prisma {
     connectOrCreate?: FunnelCreateOrConnectWithoutWorkspaceInput | FunnelCreateOrConnectWithoutWorkspaceInput[]
     createMany?: FunnelCreateManyWorkspaceInputEnvelope
     connect?: FunnelWhereUniqueInput | FunnelWhereUniqueInput[]
+  }
+
+  export type DomainUncheckedCreateNestedManyWithoutWorkspaceInput = {
+    create?: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput> | DomainCreateWithoutWorkspaceInput[] | DomainUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutWorkspaceInput | DomainCreateOrConnectWithoutWorkspaceInput[]
+    createMany?: DomainCreateManyWorkspaceInputEnvelope
+    connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutOwnedWorkspacesNestedInput = {
@@ -27996,6 +28446,20 @@ export namespace Prisma {
     deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
   }
 
+  export type DomainUpdateManyWithoutWorkspaceNestedInput = {
+    create?: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput> | DomainCreateWithoutWorkspaceInput[] | DomainUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutWorkspaceInput | DomainCreateOrConnectWithoutWorkspaceInput[]
+    upsert?: DomainUpsertWithWhereUniqueWithoutWorkspaceInput | DomainUpsertWithWhereUniqueWithoutWorkspaceInput[]
+    createMany?: DomainCreateManyWorkspaceInputEnvelope
+    set?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    disconnect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    delete?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    update?: DomainUpdateWithWhereUniqueWithoutWorkspaceInput | DomainUpdateWithWhereUniqueWithoutWorkspaceInput[]
+    updateMany?: DomainUpdateManyWithWhereWithoutWorkspaceInput | DomainUpdateManyWithWhereWithoutWorkspaceInput[]
+    deleteMany?: DomainScalarWhereInput | DomainScalarWhereInput[]
+  }
+
   export type WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput = {
     create?: XOR<WorkspaceMemberCreateWithoutWorkspaceInput, WorkspaceMemberUncheckedCreateWithoutWorkspaceInput> | WorkspaceMemberCreateWithoutWorkspaceInput[] | WorkspaceMemberUncheckedCreateWithoutWorkspaceInput[]
     connectOrCreate?: WorkspaceMemberCreateOrConnectWithoutWorkspaceInput | WorkspaceMemberCreateOrConnectWithoutWorkspaceInput[]
@@ -28022,6 +28486,20 @@ export namespace Prisma {
     update?: FunnelUpdateWithWhereUniqueWithoutWorkspaceInput | FunnelUpdateWithWhereUniqueWithoutWorkspaceInput[]
     updateMany?: FunnelUpdateManyWithWhereWithoutWorkspaceInput | FunnelUpdateManyWithWhereWithoutWorkspaceInput[]
     deleteMany?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
+  }
+
+  export type DomainUncheckedUpdateManyWithoutWorkspaceNestedInput = {
+    create?: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput> | DomainCreateWithoutWorkspaceInput[] | DomainUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: DomainCreateOrConnectWithoutWorkspaceInput | DomainCreateOrConnectWithoutWorkspaceInput[]
+    upsert?: DomainUpsertWithWhereUniqueWithoutWorkspaceInput | DomainUpsertWithWhereUniqueWithoutWorkspaceInput[]
+    createMany?: DomainCreateManyWorkspaceInputEnvelope
+    set?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    disconnect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    delete?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    connect?: DomainWhereUniqueInput | DomainWhereUniqueInput[]
+    update?: DomainUpdateWithWhereUniqueWithoutWorkspaceInput | DomainUpdateWithWhereUniqueWithoutWorkspaceInput[]
+    updateMany?: DomainUpdateManyWithWhereWithoutWorkspaceInput | DomainUpdateManyWithWhereWithoutWorkspaceInput[]
+    deleteMany?: DomainScalarWhereInput | DomainScalarWhereInput[]
   }
 
   export type WorkspaceMemberCreatepermissionsInput = {
@@ -28169,6 +28647,14 @@ export namespace Prisma {
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput = {
     create?: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput> | FunnelDomainCreateWithoutFunnelInput[] | FunnelDomainUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: FunnelDomainCreateOrConnectWithoutFunnelInput | FunnelDomainCreateOrConnectWithoutFunnelInput[]
@@ -28197,9 +28683,15 @@ export namespace Prisma {
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutDomainsInput = {
-    create?: XOR<UserCreateWithoutDomainsInput, UserUncheckedCreateWithoutDomainsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutDomainsInput
+  export type WorkspaceCreateNestedOneWithoutDomainsInput = {
+    create?: XOR<WorkspaceCreateWithoutDomainsInput, WorkspaceUncheckedCreateWithoutDomainsInput>
+    connectOrCreate?: WorkspaceCreateOrConnectWithoutDomainsInput
+    connect?: WorkspaceWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutCreatedDomainsInput = {
+    create?: XOR<UserCreateWithoutCreatedDomainsInput, UserUncheckedCreateWithoutCreatedDomainsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedDomainsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -28229,12 +28721,20 @@ export namespace Prisma {
     set?: $Enums.SslStatus
   }
 
-  export type UserUpdateOneRequiredWithoutDomainsNestedInput = {
-    create?: XOR<UserCreateWithoutDomainsInput, UserUncheckedCreateWithoutDomainsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutDomainsInput
-    upsert?: UserUpsertWithoutDomainsInput
+  export type WorkspaceUpdateOneRequiredWithoutDomainsNestedInput = {
+    create?: XOR<WorkspaceCreateWithoutDomainsInput, WorkspaceUncheckedCreateWithoutDomainsInput>
+    connectOrCreate?: WorkspaceCreateOrConnectWithoutDomainsInput
+    upsert?: WorkspaceUpsertWithoutDomainsInput
+    connect?: WorkspaceWhereUniqueInput
+    update?: XOR<XOR<WorkspaceUpdateToOneWithWhereWithoutDomainsInput, WorkspaceUpdateWithoutDomainsInput>, WorkspaceUncheckedUpdateWithoutDomainsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutCreatedDomainsNestedInput = {
+    create?: XOR<UserCreateWithoutCreatedDomainsInput, UserUncheckedCreateWithoutCreatedDomainsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedDomainsInput
+    upsert?: UserUpsertWithoutCreatedDomainsInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDomainsInput, UserUpdateWithoutDomainsInput>, UserUncheckedUpdateWithoutDomainsInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedDomainsInput, UserUpdateWithoutCreatedDomainsInput>, UserUncheckedUpdateWithoutCreatedDomainsInput>
   }
 
   export type FunnelDomainUpdateManyWithoutDomainNestedInput = {
@@ -28786,6 +29286,13 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedEnumUserPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserPlan | EnumUserPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserPlanFilter<$PrismaModel> | $Enums.UserPlan
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -28795,17 +29302,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -28869,6 +29365,17 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -28891,6 +29398,16 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedEnumUserPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserPlan | EnumUserPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserPlan[] | ListEnumUserPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserPlanWithAggregatesFilter<$PrismaModel> | $Enums.UserPlan
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserPlanFilter<$PrismaModel>
+    _max?: NestedEnumUserPlanFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -28903,33 +29420,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -28987,6 +29477,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
     _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedEnumDomainTypeFilter<$PrismaModel = never> = {
@@ -29129,10 +29646,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
     funnels?: FunnelCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOwnerInput = {
@@ -29141,10 +29662,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
     funnels?: FunnelUncheckedCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOwnerInput = {
@@ -29159,6 +29684,7 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutCreatorInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29171,6 +29697,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateWithoutCreatorInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdAt?: Date | string
@@ -29190,7 +29717,7 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type DomainCreateWithoutUserInput = {
+  export type DomainCreateWithoutCreatorInput = {
     hostname: string
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
@@ -29208,15 +29735,17 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutDomainsInput
     funnelConnections?: FunnelDomainCreateNestedManyWithoutDomainInput
   }
 
-  export type DomainUncheckedCreateWithoutUserInput = {
+  export type DomainUncheckedCreateWithoutCreatorInput = {
     id?: number
     hostname: string
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
     sslStatus?: $Enums.SslStatus
+    workspaceId: number
     cloudflareHostnameId?: string | null
     cloudflareZoneId?: string | null
     cloudflareRecordId?: string | null
@@ -29233,13 +29762,13 @@ export namespace Prisma {
     funnelConnections?: FunnelDomainUncheckedCreateNestedManyWithoutDomainInput
   }
 
-  export type DomainCreateOrConnectWithoutUserInput = {
+  export type DomainCreateOrConnectWithoutCreatorInput = {
     where: DomainWhereUniqueInput
-    create: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput>
+    create: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput>
   }
 
-  export type DomainCreateManyUserInputEnvelope = {
-    data: DomainCreateManyUserInput | DomainCreateManyUserInput[]
+  export type DomainCreateManyCreatorInputEnvelope = {
+    data: DomainCreateManyCreatorInput | DomainCreateManyCreatorInput[]
     skipDuplicates?: boolean
   }
 
@@ -29364,6 +29893,9 @@ export namespace Prisma {
     ownerId?: IntFilter<"Workspace"> | number
     description?: StringNullableFilter<"Workspace"> | string | null
     settings?: JsonNullableFilter<"Workspace">
+    allocatedFunnels?: IntFilter<"Workspace"> | number
+    allocatedCustomDomains?: IntFilter<"Workspace"> | number
+    allocatedSubdomains?: IntFilter<"Workspace"> | number
     createdAt?: DateTimeFilter<"Workspace"> | Date | string
     updatedAt?: DateTimeFilter<"Workspace"> | Date | string
   }
@@ -29390,6 +29922,7 @@ export namespace Prisma {
     NOT?: FunnelScalarWhereInput | FunnelScalarWhereInput[]
     id?: IntFilter<"Funnel"> | number
     name?: StringFilter<"Funnel"> | string
+    slug?: StringFilter<"Funnel"> | string
     status?: EnumFunnelStatusFilter<"Funnel"> | $Enums.FunnelStatus
     workspaceId?: IntFilter<"Funnel"> | number
     createdBy?: IntFilter<"Funnel"> | number
@@ -29398,20 +29931,20 @@ export namespace Prisma {
     themeId?: IntNullableFilter<"Funnel"> | number | null
   }
 
-  export type DomainUpsertWithWhereUniqueWithoutUserInput = {
+  export type DomainUpsertWithWhereUniqueWithoutCreatorInput = {
     where: DomainWhereUniqueInput
-    update: XOR<DomainUpdateWithoutUserInput, DomainUncheckedUpdateWithoutUserInput>
-    create: XOR<DomainCreateWithoutUserInput, DomainUncheckedCreateWithoutUserInput>
+    update: XOR<DomainUpdateWithoutCreatorInput, DomainUncheckedUpdateWithoutCreatorInput>
+    create: XOR<DomainCreateWithoutCreatorInput, DomainUncheckedCreateWithoutCreatorInput>
   }
 
-  export type DomainUpdateWithWhereUniqueWithoutUserInput = {
+  export type DomainUpdateWithWhereUniqueWithoutCreatorInput = {
     where: DomainWhereUniqueInput
-    data: XOR<DomainUpdateWithoutUserInput, DomainUncheckedUpdateWithoutUserInput>
+    data: XOR<DomainUpdateWithoutCreatorInput, DomainUncheckedUpdateWithoutCreatorInput>
   }
 
-  export type DomainUpdateManyWithWhereWithoutUserInput = {
+  export type DomainUpdateManyWithWhereWithoutCreatorInput = {
     where: DomainScalarWhereInput
-    data: XOR<DomainUpdateManyMutationInput, DomainUncheckedUpdateManyWithoutUserInput>
+    data: XOR<DomainUpdateManyMutationInput, DomainUncheckedUpdateManyWithoutCreatorInput>
   }
 
   export type DomainScalarWhereInput = {
@@ -29423,7 +29956,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFilter<"Domain"> | $Enums.DomainType
     status?: EnumDomainStatusFilter<"Domain"> | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFilter<"Domain"> | $Enums.SslStatus
-    userId?: IntFilter<"Domain"> | number
+    workspaceId?: IntFilter<"Domain"> | number
+    createdBy?: IntFilter<"Domain"> | number
     cloudflareHostnameId?: StringNullableFilter<"Domain"> | string | null
     cloudflareZoneId?: StringNullableFilter<"Domain"> | string | null
     cloudflareRecordId?: StringNullableFilter<"Domain"> | string | null
@@ -29502,17 +30036,22 @@ export namespace Prisma {
 
   export type UserCreateWithoutOwnedWorkspacesInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
@@ -29520,17 +30059,22 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutOwnedWorkspacesInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29569,6 +30113,7 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutWorkspaceInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29581,6 +30126,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateWithoutWorkspaceInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdBy: number
     createdAt?: Date | string
@@ -29600,6 +30146,61 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DomainCreateWithoutWorkspaceInput = {
+    hostname: string
+    type: $Enums.DomainType
+    status?: $Enums.DomainStatus
+    sslStatus?: $Enums.SslStatus
+    cloudflareHostnameId?: string | null
+    cloudflareZoneId?: string | null
+    cloudflareRecordId?: string | null
+    verificationToken?: string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: Date | string | null
+    expiresAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    creator: UserCreateNestedOneWithoutCreatedDomainsInput
+    funnelConnections?: FunnelDomainCreateNestedManyWithoutDomainInput
+  }
+
+  export type DomainUncheckedCreateWithoutWorkspaceInput = {
+    id?: number
+    hostname: string
+    type: $Enums.DomainType
+    status?: $Enums.DomainStatus
+    sslStatus?: $Enums.SslStatus
+    createdBy: number
+    cloudflareHostnameId?: string | null
+    cloudflareZoneId?: string | null
+    cloudflareRecordId?: string | null
+    verificationToken?: string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: Date | string | null
+    expiresAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnelConnections?: FunnelDomainUncheckedCreateNestedManyWithoutDomainInput
+  }
+
+  export type DomainCreateOrConnectWithoutWorkspaceInput = {
+    where: DomainWhereUniqueInput
+    create: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput>
+  }
+
+  export type DomainCreateManyWorkspaceInputEnvelope = {
+    data: DomainCreateManyWorkspaceInput | DomainCreateManyWorkspaceInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutOwnedWorkspacesInput = {
     update: XOR<UserUpdateWithoutOwnedWorkspacesInput, UserUncheckedUpdateWithoutOwnedWorkspacesInput>
     create: XOR<UserCreateWithoutOwnedWorkspacesInput, UserUncheckedCreateWithoutOwnedWorkspacesInput>
@@ -29613,17 +30214,22 @@ export namespace Prisma {
 
   export type UserUpdateWithoutOwnedWorkspacesInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
@@ -29631,17 +30237,22 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutOwnedWorkspacesInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29678,19 +30289,40 @@ export namespace Prisma {
     data: XOR<FunnelUpdateManyMutationInput, FunnelUncheckedUpdateManyWithoutWorkspaceInput>
   }
 
+  export type DomainUpsertWithWhereUniqueWithoutWorkspaceInput = {
+    where: DomainWhereUniqueInput
+    update: XOR<DomainUpdateWithoutWorkspaceInput, DomainUncheckedUpdateWithoutWorkspaceInput>
+    create: XOR<DomainCreateWithoutWorkspaceInput, DomainUncheckedCreateWithoutWorkspaceInput>
+  }
+
+  export type DomainUpdateWithWhereUniqueWithoutWorkspaceInput = {
+    where: DomainWhereUniqueInput
+    data: XOR<DomainUpdateWithoutWorkspaceInput, DomainUncheckedUpdateWithoutWorkspaceInput>
+  }
+
+  export type DomainUpdateManyWithWhereWithoutWorkspaceInput = {
+    where: DomainScalarWhereInput
+    data: XOR<DomainUpdateManyMutationInput, DomainUncheckedUpdateManyWithoutWorkspaceInput>
+  }
+
   export type UserCreateWithoutWorkspaceMembersInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
@@ -29698,17 +30330,22 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutWorkspaceMembersInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29723,10 +30360,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedWorkspacesInput
     funnels?: FunnelCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutMembersInput = {
@@ -29736,9 +30377,13 @@ export namespace Prisma {
     ownerId: number
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     funnels?: FunnelUncheckedCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutMembersInput = {
@@ -29759,17 +30404,22 @@ export namespace Prisma {
 
   export type UserUpdateWithoutWorkspaceMembersInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
@@ -29777,17 +30427,22 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutWorkspaceMembersInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29808,10 +30463,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedWorkspacesNestedInput
     funnels?: FunnelUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutMembersInput = {
@@ -29821,9 +30480,13 @@ export namespace Prisma {
     ownerId?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     funnels?: FunnelUncheckedUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutFunnelsInput = {
@@ -29831,10 +30494,14 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedWorkspacesInput
     members?: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutFunnelsInput = {
@@ -29844,9 +30511,13 @@ export namespace Prisma {
     ownerId: number
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+    domains?: DomainUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutFunnelsInput = {
@@ -29856,17 +30527,22 @@ export namespace Prisma {
 
   export type UserCreateWithoutCreatedFunnelsInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
@@ -29874,17 +30550,22 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutCreatedFunnelsInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -30006,10 +30687,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedWorkspacesNestedInput
     members?: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutFunnelsInput = {
@@ -30019,9 +30704,13 @@ export namespace Prisma {
     ownerId?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutCreatedFunnelsInput = {
@@ -30037,17 +30726,22 @@ export namespace Prisma {
 
   export type UserUpdateWithoutCreatedFunnelsInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
@@ -30055,17 +30749,22 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutCreatedFunnelsInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -30172,16 +30871,57 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Page"> | Date | string
   }
 
-  export type UserCreateWithoutDomainsInput = {
+  export type WorkspaceCreateWithoutDomainsInput = {
+    name: string
+    slug: string
+    description?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    owner: UserCreateNestedOneWithoutOwnedWorkspacesInput
+    members?: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+    funnels?: FunnelCreateNestedManyWithoutWorkspaceInput
+  }
+
+  export type WorkspaceUncheckedCreateWithoutDomainsInput = {
+    id?: number
+    name: string
+    slug: string
+    ownerId: number
+    description?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    members?: WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+    funnels?: FunnelUncheckedCreateNestedManyWithoutWorkspaceInput
+  }
+
+  export type WorkspaceCreateOrConnectWithoutDomainsInput = {
+    where: WorkspaceWhereUniqueInput
+    create: XOR<WorkspaceCreateWithoutDomainsInput, WorkspaceUncheckedCreateWithoutDomainsInput>
+  }
+
+  export type UserCreateWithoutCreatedDomainsInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -30189,17 +30929,22 @@ export namespace Prisma {
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
-  export type UserUncheckedCreateWithoutDomainsInput = {
+  export type UserUncheckedCreateWithoutCreatedDomainsInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -30207,9 +30952,9 @@ export namespace Prisma {
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type UserCreateOrConnectWithoutDomainsInput = {
+  export type UserCreateOrConnectWithoutCreatedDomainsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutDomainsInput, UserUncheckedCreateWithoutDomainsInput>
+    create: XOR<UserCreateWithoutCreatedDomainsInput, UserUncheckedCreateWithoutCreatedDomainsInput>
   }
 
   export type FunnelDomainCreateWithoutDomainInput = {
@@ -30237,27 +30982,74 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type UserUpsertWithoutDomainsInput = {
-    update: XOR<UserUpdateWithoutDomainsInput, UserUncheckedUpdateWithoutDomainsInput>
-    create: XOR<UserCreateWithoutDomainsInput, UserUncheckedCreateWithoutDomainsInput>
+  export type WorkspaceUpsertWithoutDomainsInput = {
+    update: XOR<WorkspaceUpdateWithoutDomainsInput, WorkspaceUncheckedUpdateWithoutDomainsInput>
+    create: XOR<WorkspaceCreateWithoutDomainsInput, WorkspaceUncheckedCreateWithoutDomainsInput>
+    where?: WorkspaceWhereInput
+  }
+
+  export type WorkspaceUpdateToOneWithWhereWithoutDomainsInput = {
+    where?: WorkspaceWhereInput
+    data: XOR<WorkspaceUpdateWithoutDomainsInput, WorkspaceUncheckedUpdateWithoutDomainsInput>
+  }
+
+  export type WorkspaceUpdateWithoutDomainsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    owner?: UserUpdateOneRequiredWithoutOwnedWorkspacesNestedInput
+    members?: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+    funnels?: FunnelUpdateManyWithoutWorkspaceNestedInput
+  }
+
+  export type WorkspaceUncheckedUpdateWithoutDomainsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    ownerId?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    members?: WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+    funnels?: FunnelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  }
+
+  export type UserUpsertWithoutCreatedDomainsInput = {
+    update: XOR<UserUpdateWithoutCreatedDomainsInput, UserUncheckedUpdateWithoutCreatedDomainsInput>
+    create: XOR<UserCreateWithoutCreatedDomainsInput, UserUncheckedCreateWithoutCreatedDomainsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutDomainsInput = {
+  export type UserUpdateToOneWithWhereWithoutCreatedDomainsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutDomainsInput, UserUncheckedUpdateWithoutDomainsInput>
+    data: XOR<UserUpdateWithoutCreatedDomainsInput, UserUncheckedUpdateWithoutCreatedDomainsInput>
   }
 
-  export type UserUpdateWithoutDomainsInput = {
+  export type UserUpdateWithoutCreatedDomainsInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -30265,17 +31057,22 @@ export namespace Prisma {
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutDomainsInput = {
+  export type UserUncheckedUpdateWithoutCreatedDomainsInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -30317,7 +31114,8 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutDomainsInput
+    workspace: WorkspaceCreateNestedOneWithoutDomainsInput
+    creator: UserCreateNestedOneWithoutCreatedDomainsInput
   }
 
   export type DomainUncheckedCreateWithoutFunnelConnectionsInput = {
@@ -30326,7 +31124,8 @@ export namespace Prisma {
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
     sslStatus?: $Enums.SslStatus
-    userId: number
+    workspaceId: number
+    createdBy: number
     cloudflareHostnameId?: string | null
     cloudflareZoneId?: string | null
     cloudflareRecordId?: string | null
@@ -30349,6 +31148,7 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutDomainConnectionsInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30361,6 +31161,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateWithoutDomainConnectionsInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -30404,7 +31205,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutDomainsNestedInput
+    workspace?: WorkspaceUpdateOneRequiredWithoutDomainsNestedInput
+    creator?: UserUpdateOneRequiredWithoutCreatedDomainsNestedInput
   }
 
   export type DomainUncheckedUpdateWithoutFunnelConnectionsInput = {
@@ -30413,7 +31215,8 @@ export namespace Prisma {
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
-    userId?: IntFieldUpdateOperationsInput | number
+    workspaceId?: IntFieldUpdateOperationsInput | number
+    createdBy?: IntFieldUpdateOperationsInput | number
     cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30442,6 +31245,7 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutDomainConnectionsInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30454,6 +31258,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateWithoutDomainConnectionsInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdBy?: IntFieldUpdateOperationsInput | number
@@ -30465,6 +31270,7 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutPagesInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30477,6 +31283,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateWithoutPagesInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -30504,6 +31311,7 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutPagesInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30516,6 +31324,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateWithoutPagesInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdBy?: IntFieldUpdateOperationsInput | number
@@ -30586,6 +31395,7 @@ export namespace Prisma {
 
   export type FunnelCreateWithoutThemeInput = {
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30598,6 +31408,7 @@ export namespace Prisma {
   export type FunnelUncheckedCreateWithoutThemeInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdBy: number
@@ -30625,6 +31436,7 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutThemeInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30637,6 +31449,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateWithoutThemeInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdBy?: IntFieldUpdateOperationsInput | number
@@ -30793,36 +31606,46 @@ export namespace Prisma {
 
   export type UserCreateWithoutTemplatesInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTemplatesInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -30936,36 +31759,46 @@ export namespace Prisma {
 
   export type UserUpdateWithoutTemplatesInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTemplatesInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -31173,36 +32006,46 @@ export namespace Prisma {
 
   export type UserCreateWithoutImageFoldersInput = {
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
-    domains?: DomainCreateNestedManyWithoutUserInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutImageFoldersInput = {
     id?: number
     email: string
-    name?: string | null
+    username: string
+    firstName: string
+    lastName: string
     password: string
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
+    plan: $Enums.UserPlan
     createdAt?: Date | string
     updatedAt?: Date | string
-    maximumFunnels?: number | null
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
-    domains?: DomainUncheckedCreateNestedManyWithoutUserInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
@@ -31253,36 +32096,46 @@ export namespace Prisma {
 
   export type UserUpdateWithoutImageFoldersInput = {
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutImageFoldersInput = {
     id?: IntFieldUpdateOperationsInput | number
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    maximumFunnels?: NullableIntFieldUpdateOperationsInput | number | null
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
-    domains?: DomainUncheckedUpdateManyWithoutUserNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
@@ -31490,6 +32343,9 @@ export namespace Prisma {
     slug: string
     description?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: number
+    allocatedCustomDomains?: number
+    allocatedSubdomains?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31497,6 +32353,7 @@ export namespace Prisma {
   export type FunnelCreateManyCreatorInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     workspaceId: number
     createdAt?: Date | string
@@ -31504,12 +32361,13 @@ export namespace Prisma {
     themeId?: number | null
   }
 
-  export type DomainCreateManyUserInput = {
+  export type DomainCreateManyCreatorInput = {
     id?: number
     hostname: string
     type: $Enums.DomainType
     status?: $Enums.DomainStatus
     sslStatus?: $Enums.SslStatus
+    workspaceId: number
     cloudflareHostnameId?: string | null
     cloudflareZoneId?: string | null
     cloudflareRecordId?: string | null
@@ -31577,10 +32435,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
     funnels?: FunnelUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOwnerInput = {
@@ -31589,10 +32451,14 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
     funnels?: FunnelUncheckedUpdateManyWithoutWorkspaceNestedInput
+    domains?: DomainUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateManyWithoutOwnerInput = {
@@ -31601,12 +32467,16 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+    allocatedFunnels?: IntFieldUpdateOperationsInput | number
+    allocatedCustomDomains?: IntFieldUpdateOperationsInput | number
+    allocatedSubdomains?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FunnelUpdateWithoutCreatorInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31619,6 +32489,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31631,6 +32502,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateManyWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     workspaceId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31638,7 +32510,7 @@ export namespace Prisma {
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
-  export type DomainUpdateWithoutUserInput = {
+  export type DomainUpdateWithoutCreatorInput = {
     hostname?: StringFieldUpdateOperationsInput | string
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
@@ -31656,15 +32528,17 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutDomainsNestedInput
     funnelConnections?: FunnelDomainUpdateManyWithoutDomainNestedInput
   }
 
-  export type DomainUncheckedUpdateWithoutUserInput = {
+  export type DomainUncheckedUpdateWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
     hostname?: StringFieldUpdateOperationsInput | string
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
+    workspaceId?: IntFieldUpdateOperationsInput | number
     cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31681,12 +32555,13 @@ export namespace Prisma {
     funnelConnections?: FunnelDomainUncheckedUpdateManyWithoutDomainNestedInput
   }
 
-  export type DomainUncheckedUpdateManyWithoutUserInput = {
+  export type DomainUncheckedUpdateManyWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
     hostname?: StringFieldUpdateOperationsInput | string
     type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
     status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
     sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
+    workspaceId?: IntFieldUpdateOperationsInput | number
     cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
     cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31781,11 +32656,34 @@ export namespace Prisma {
   export type FunnelCreateManyWorkspaceInput = {
     id?: number
     name: string
+    slug: string
     status?: $Enums.FunnelStatus
     createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
+  }
+
+  export type DomainCreateManyWorkspaceInput = {
+    id?: number
+    hostname: string
+    type: $Enums.DomainType
+    status?: $Enums.DomainStatus
+    sslStatus?: $Enums.SslStatus
+    createdBy: number
+    cloudflareHostnameId?: string | null
+    cloudflareZoneId?: string | null
+    cloudflareRecordId?: string | null
+    verificationToken?: string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: Date | string | null
+    expiresAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type WorkspaceMemberUpdateWithoutWorkspaceInput = {
@@ -31816,6 +32714,7 @@ export namespace Prisma {
 
   export type FunnelUpdateWithoutWorkspaceInput = {
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31828,6 +32727,7 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateWithoutWorkspaceInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31840,11 +32740,79 @@ export namespace Prisma {
   export type FunnelUncheckedUpdateManyWithoutWorkspaceInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type DomainUpdateWithoutWorkspaceInput = {
+    hostname?: StringFieldUpdateOperationsInput | string
+    type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
+    status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
+    sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
+    cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: NullableStringFieldUpdateOperationsInput | string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    creator?: UserUpdateOneRequiredWithoutCreatedDomainsNestedInput
+    funnelConnections?: FunnelDomainUpdateManyWithoutDomainNestedInput
+  }
+
+  export type DomainUncheckedUpdateWithoutWorkspaceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    hostname?: StringFieldUpdateOperationsInput | string
+    type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
+    status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
+    sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
+    createdBy?: IntFieldUpdateOperationsInput | number
+    cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: NullableStringFieldUpdateOperationsInput | string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnelConnections?: FunnelDomainUncheckedUpdateManyWithoutDomainNestedInput
+  }
+
+  export type DomainUncheckedUpdateManyWithoutWorkspaceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    hostname?: StringFieldUpdateOperationsInput | string
+    type?: EnumDomainTypeFieldUpdateOperationsInput | $Enums.DomainType
+    status?: EnumDomainStatusFieldUpdateOperationsInput | $Enums.DomainStatus
+    sslStatus?: EnumSslStatusFieldUpdateOperationsInput | $Enums.SslStatus
+    createdBy?: IntFieldUpdateOperationsInput | number
+    cloudflareHostnameId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareZoneId?: NullableStringFieldUpdateOperationsInput | string | null
+    cloudflareRecordId?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    ownershipVerification?: NullableJsonNullValueInput | InputJsonValue
+    dnsInstructions?: NullableJsonNullValueInput | InputJsonValue
+    sslCertificateId?: NullableStringFieldUpdateOperationsInput | string | null
+    sslValidationRecords?: NullableJsonNullValueInput | InputJsonValue
+    lastVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FunnelDomainCreateManyFunnelInput = {

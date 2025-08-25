@@ -1,0 +1,1 @@
+export { default as updateFunnelRoute } from "./update.route";

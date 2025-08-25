@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import { updateTemplate } from "../service";
 import { updateTemplateRequestBody } from "../types";
 import { BadRequestError } from "../../../errors";
+import { 
+  uploadTemplateThumbnail, 
+  uploadTemplatePreviewImages 
+} from "../../helpers/image.helpers";
 
 export const updateTemplateController = async (
   req: Request,
@@ -18,25 +22,41 @@ export const updateTemplateController = async (
       throw new BadRequestError("Valid template ID is required");
     }
 
+    const templateId = parseInt(id);
+
+    let thumbnailUrl: string | undefined;
+    let previewImageUrls: string[] | undefined;
+
+    // Handle thumbnail upload
+    if (files?.thumbnail?.[0]) {
+      try {
+        const uploadResult = await uploadTemplateThumbnail(files.thumbnail[0], templateId);
+        thumbnailUrl = uploadResult.url;
+      } catch (error) {
+        console.error("Thumbnail upload failed:", error);
+        throw new BadRequestError(`Thumbnail upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    // Handle preview images upload
+    if (files?.images?.length) {
+      try {
+        const uploadResults = await uploadTemplatePreviewImages(files.images, templateId);
+        previewImageUrls = uploadResults.map(result => result.url);
+      } catch (error) {
+        console.error("Preview images upload failed:", error);
+        throw new BadRequestError(`Preview images upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
     const bodyData = {
       ...req.body,
-      ...(files?.thumbnail?.[0] && {
-        thumbnail: `/uploads/templates/${id}/thumbnail/${
-          files.thumbnail[0].filename || files.thumbnail[0].originalname
-        }`,
-      }),
-      ...(files?.images?.length && {
-        images: files.images.map(
-          (file, i) =>
-            `/uploads/templates/${id}/images/${i}_${
-              file.filename || file.originalname
-            }`
-        ),
-      }),
+      ...(thumbnailUrl !== undefined && { thumbnail: thumbnailUrl }),
+      ...(previewImageUrls !== undefined && { images: previewImageUrls }),
     };
 
     const validatedBody = updateTemplateRequestBody.parse(bodyData);
-    const result = await updateTemplate({ id: parseInt(id), ...validatedBody });
+    const result = await updateTemplate({ id: templateId, ...validatedBody });
 
     res.json({ success: true, ...result });
   } catch (error) {
