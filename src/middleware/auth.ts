@@ -10,8 +10,13 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ): void => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  // Check for token in cookie first, then fallback to Authorization header
+  let token = req.cookies?.authToken;
+  
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1];
+  }
 
   if (!token) {
     res.status(401).json({ error: "Access token required" });

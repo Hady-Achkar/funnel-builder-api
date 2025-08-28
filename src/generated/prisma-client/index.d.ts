@@ -59,6 +59,16 @@ export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
  */
 export type Theme = $Result.DefaultSelection<Prisma.$ThemePayload>
 /**
+ * Model Insight
+ * 
+ */
+export type Insight = $Result.DefaultSelection<Prisma.$InsightPayload>
+/**
+ * Model InsightSubmission
+ * 
+ */
+export type InsightSubmission = $Result.DefaultSelection<Prisma.$InsightSubmissionPayload>
+/**
  * Model TemplateCategory
  * 
  */
@@ -98,6 +108,11 @@ export type Form = $Result.DefaultSelection<Prisma.$FormPayload>
  * 
  */
 export type FormSubmission = $Result.DefaultSelection<Prisma.$FormSubmissionPayload>
+/**
+ * Model FunnelSettings
+ * 
+ */
+export type FunnelSettings = $Result.DefaultSelection<Prisma.$FunnelSettingsPayload>
 
 /**
  * Enums
@@ -187,6 +202,15 @@ export const BorderRadius: {
 export type BorderRadius = (typeof BorderRadius)[keyof typeof BorderRadius]
 
 
+export const InsightType: {
+  QUIZ: 'QUIZ',
+  SINGLE_CHOICE: 'SINGLE_CHOICE',
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE'
+};
+
+export type InsightType = (typeof InsightType)[keyof typeof InsightType]
+
+
 export const TemplateImageType: {
   THUMBNAIL: 'THUMBNAIL',
   PREVIEW: 'PREVIEW'
@@ -227,6 +251,10 @@ export const SslStatus: typeof $Enums.SslStatus
 export type BorderRadius = $Enums.BorderRadius
 
 export const BorderRadius: typeof $Enums.BorderRadius
+
+export type InsightType = $Enums.InsightType
+
+export const InsightType: typeof $Enums.InsightType
 
 export type TemplateImageType = $Enums.TemplateImageType
 
@@ -448,6 +476,26 @@ export class PrismaClient<
   get theme(): Prisma.ThemeDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.insight`: Exposes CRUD operations for the **Insight** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Insights
+    * const insights = await prisma.insight.findMany()
+    * ```
+    */
+  get insight(): Prisma.InsightDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.insightSubmission`: Exposes CRUD operations for the **InsightSubmission** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InsightSubmissions
+    * const insightSubmissions = await prisma.insightSubmission.findMany()
+    * ```
+    */
+  get insightSubmission(): Prisma.InsightSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.templateCategory`: Exposes CRUD operations for the **TemplateCategory** model.
     * Example usage:
     * ```ts
@@ -526,6 +574,16 @@ export class PrismaClient<
     * ```
     */
   get formSubmission(): Prisma.FormSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.funnelSettings`: Exposes CRUD operations for the **FunnelSettings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FunnelSettings
+    * const funnelSettings = await prisma.funnelSettings.findMany()
+    * ```
+    */
+  get funnelSettings(): Prisma.FunnelSettingsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -975,6 +1033,8 @@ export namespace Prisma {
     Page: 'Page',
     Session: 'Session',
     Theme: 'Theme',
+    Insight: 'Insight',
+    InsightSubmission: 'InsightSubmission',
     TemplateCategory: 'TemplateCategory',
     Template: 'Template',
     TemplateImage: 'TemplateImage',
@@ -982,7 +1042,8 @@ export namespace Prisma {
     Image: 'Image',
     ImageFolder: 'ImageFolder',
     Form: 'Form',
-    FormSubmission: 'FormSubmission'
+    FormSubmission: 'FormSubmission',
+    FunnelSettings: 'FunnelSettings'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1001,7 +1062,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "workspace" | "workspaceMember" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "templateCategory" | "template" | "templateImage" | "templatePage" | "image" | "imageFolder" | "form" | "formSubmission"
+      modelProps: "user" | "workspace" | "workspaceMember" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "insight" | "insightSubmission" | "templateCategory" | "template" | "templateImage" | "templatePage" | "image" | "imageFolder" | "form" | "formSubmission" | "funnelSettings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1671,6 +1732,154 @@ export namespace Prisma {
           }
         }
       }
+      Insight: {
+        payload: Prisma.$InsightPayload<ExtArgs>
+        fields: Prisma.InsightFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InsightFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InsightFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findFirst: {
+            args: Prisma.InsightFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InsightFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findMany: {
+            args: Prisma.InsightFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          create: {
+            args: Prisma.InsightCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          createMany: {
+            args: Prisma.InsightCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InsightCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          delete: {
+            args: Prisma.InsightDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          update: {
+            args: Prisma.InsightUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          deleteMany: {
+            args: Prisma.InsightDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InsightUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InsightUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          upsert: {
+            args: Prisma.InsightUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          aggregate: {
+            args: Prisma.InsightAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInsight>
+          }
+          groupBy: {
+            args: Prisma.InsightGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InsightGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InsightCountArgs<ExtArgs>
+            result: $Utils.Optional<InsightCountAggregateOutputType> | number
+          }
+        }
+      }
+      InsightSubmission: {
+        payload: Prisma.$InsightSubmissionPayload<ExtArgs>
+        fields: Prisma.InsightSubmissionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InsightSubmissionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InsightSubmissionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          findFirst: {
+            args: Prisma.InsightSubmissionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InsightSubmissionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          findMany: {
+            args: Prisma.InsightSubmissionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>[]
+          }
+          create: {
+            args: Prisma.InsightSubmissionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          createMany: {
+            args: Prisma.InsightSubmissionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InsightSubmissionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>[]
+          }
+          delete: {
+            args: Prisma.InsightSubmissionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          update: {
+            args: Prisma.InsightSubmissionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          deleteMany: {
+            args: Prisma.InsightSubmissionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InsightSubmissionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InsightSubmissionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>[]
+          }
+          upsert: {
+            args: Prisma.InsightSubmissionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightSubmissionPayload>
+          }
+          aggregate: {
+            args: Prisma.InsightSubmissionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInsightSubmission>
+          }
+          groupBy: {
+            args: Prisma.InsightSubmissionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InsightSubmissionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InsightSubmissionCountArgs<ExtArgs>
+            result: $Utils.Optional<InsightSubmissionCountAggregateOutputType> | number
+          }
+        }
+      }
       TemplateCategory: {
         payload: Prisma.$TemplateCategoryPayload<ExtArgs>
         fields: Prisma.TemplateCategoryFieldRefs
@@ -2263,6 +2472,80 @@ export namespace Prisma {
           }
         }
       }
+      FunnelSettings: {
+        payload: Prisma.$FunnelSettingsPayload<ExtArgs>
+        fields: Prisma.FunnelSettingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FunnelSettingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FunnelSettingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          findFirst: {
+            args: Prisma.FunnelSettingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FunnelSettingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          findMany: {
+            args: Prisma.FunnelSettingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>[]
+          }
+          create: {
+            args: Prisma.FunnelSettingsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          createMany: {
+            args: Prisma.FunnelSettingsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FunnelSettingsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>[]
+          }
+          delete: {
+            args: Prisma.FunnelSettingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          update: {
+            args: Prisma.FunnelSettingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.FunnelSettingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FunnelSettingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FunnelSettingsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>[]
+          }
+          upsert: {
+            args: Prisma.FunnelSettingsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FunnelSettingsPayload>
+          }
+          aggregate: {
+            args: Prisma.FunnelSettingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFunnelSettings>
+          }
+          groupBy: {
+            args: Prisma.FunnelSettingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FunnelSettingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FunnelSettingsCountArgs<ExtArgs>
+            result: $Utils.Optional<FunnelSettingsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2364,6 +2647,8 @@ export namespace Prisma {
     page?: PageOmit
     session?: SessionOmit
     theme?: ThemeOmit
+    insight?: InsightOmit
+    insightSubmission?: InsightSubmissionOmit
     templateCategory?: TemplateCategoryOmit
     template?: TemplateOmit
     templateImage?: TemplateImageOmit
@@ -2372,6 +2657,7 @@ export namespace Prisma {
     imageFolder?: ImageFolderOmit
     form?: FormOmit
     formSubmission?: FormSubmissionOmit
+    funnelSettings?: FunnelSettingsOmit
   }
 
   /* Types for Logging */
@@ -2598,11 +2884,13 @@ export namespace Prisma {
   export type FunnelCountOutputType = {
     domainConnections: number
     pages: number
+    insights: number
   }
 
   export type FunnelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     domainConnections?: boolean | FunnelCountOutputTypeCountDomainConnectionsArgs
     pages?: boolean | FunnelCountOutputTypeCountPagesArgs
+    insights?: boolean | FunnelCountOutputTypeCountInsightsArgs
   }
 
   // Custom InputTypes
@@ -2628,6 +2916,13 @@ export namespace Prisma {
    */
   export type FunnelCountOutputTypeCountPagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PageWhereInput
+  }
+
+  /**
+   * FunnelCountOutputType without action
+   */
+  export type FunnelCountOutputTypeCountInsightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightWhereInput
   }
 
 
@@ -2668,10 +2963,12 @@ export namespace Prisma {
 
   export type SessionCountOutputType = {
     formSubmissions: number
+    insightSubmissions: number
   }
 
   export type SessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     formSubmissions?: boolean | SessionCountOutputTypeCountFormSubmissionsArgs
+    insightSubmissions?: boolean | SessionCountOutputTypeCountInsightSubmissionsArgs
   }
 
   // Custom InputTypes
@@ -2690,6 +2987,44 @@ export namespace Prisma {
    */
   export type SessionCountOutputTypeCountFormSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FormSubmissionWhereInput
+  }
+
+  /**
+   * SessionCountOutputType without action
+   */
+  export type SessionCountOutputTypeCountInsightSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightSubmissionWhereInput
+  }
+
+
+  /**
+   * Count Type InsightCountOutputType
+   */
+
+  export type InsightCountOutputType = {
+    submissions: number
+  }
+
+  export type InsightCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    submissions?: boolean | InsightCountOutputTypeCountSubmissionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * InsightCountOutputType without action
+   */
+  export type InsightCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightCountOutputType
+     */
+    select?: InsightCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * InsightCountOutputType without action
+   */
+  export type InsightCountOutputTypeCountSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightSubmissionWhereInput
   }
 
 
@@ -2863,6 +3198,9 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     password: string | null
+    verified: boolean | null
+    verificationToken: string | null
+    verificationTokenExpiresAt: Date | null
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
@@ -2881,6 +3219,9 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     password: string | null
+    verified: boolean | null
+    verificationToken: string | null
+    verificationTokenExpiresAt: Date | null
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
@@ -2899,6 +3240,9 @@ export namespace Prisma {
     firstName: number
     lastName: number
     password: number
+    verified: number
+    verificationToken: number
+    verificationTokenExpiresAt: number
     passwordResetToken: number
     passwordResetExpiresAt: number
     isAdmin: number
@@ -2933,6 +3277,9 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     password?: true
+    verified?: true
+    verificationToken?: true
+    verificationTokenExpiresAt?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
@@ -2951,6 +3298,9 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     password?: true
+    verified?: true
+    verificationToken?: true
+    verificationTokenExpiresAt?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
@@ -2969,6 +3319,9 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     password?: true
+    verified?: true
+    verificationToken?: true
+    verificationTokenExpiresAt?: true
     passwordResetToken?: true
     passwordResetExpiresAt?: true
     isAdmin?: true
@@ -3074,6 +3427,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified: boolean
+    verificationToken: string | null
+    verificationTokenExpiresAt: Date | null
     passwordResetToken: string | null
     passwordResetExpiresAt: Date | null
     isAdmin: boolean
@@ -3111,6 +3467,9 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     password?: boolean
+    verified?: boolean
+    verificationToken?: boolean
+    verificationTokenExpiresAt?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
@@ -3136,6 +3495,9 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     password?: boolean
+    verified?: boolean
+    verificationToken?: boolean
+    verificationTokenExpiresAt?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
@@ -3154,6 +3516,9 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     password?: boolean
+    verified?: boolean
+    verificationToken?: boolean
+    verificationTokenExpiresAt?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
@@ -3172,6 +3537,9 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     password?: boolean
+    verified?: boolean
+    verificationToken?: boolean
+    verificationTokenExpiresAt?: boolean
     passwordResetToken?: boolean
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
@@ -3183,7 +3551,7 @@ export namespace Prisma {
     maximumSubdomains?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "verified" | "verificationToken" | "verificationTokenExpiresAt" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
@@ -3213,6 +3581,9 @@ export namespace Prisma {
       firstName: string
       lastName: string
       password: string
+      verified: boolean
+      verificationToken: string | null
+      verificationTokenExpiresAt: Date | null
       passwordResetToken: string | null
       passwordResetExpiresAt: Date | null
       isAdmin: boolean
@@ -3657,6 +4028,9 @@ export namespace Prisma {
     readonly firstName: FieldRef<"User", 'String'>
     readonly lastName: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
+    readonly verified: FieldRef<"User", 'Boolean'>
+    readonly verificationToken: FieldRef<"User", 'String'>
+    readonly verificationTokenExpiresAt: FieldRef<"User", 'DateTime'>
     readonly passwordResetToken: FieldRef<"User", 'String'>
     readonly passwordResetExpiresAt: FieldRef<"User", 'DateTime'>
     readonly isAdmin: FieldRef<"User", 'Boolean'>
@@ -6861,6 +7235,8 @@ export namespace Prisma {
     domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
     pages?: boolean | Funnel$pagesArgs<ExtArgs>
+    settings?: boolean | Funnel$settingsArgs<ExtArgs>
+    insights?: boolean | Funnel$insightsArgs<ExtArgs>
     _count?: boolean | FunnelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
@@ -6913,6 +7289,8 @@ export namespace Prisma {
     domainConnections?: boolean | Funnel$domainConnectionsArgs<ExtArgs>
     theme?: boolean | Funnel$themeArgs<ExtArgs>
     pages?: boolean | Funnel$pagesArgs<ExtArgs>
+    settings?: boolean | Funnel$settingsArgs<ExtArgs>
+    insights?: boolean | Funnel$insightsArgs<ExtArgs>
     _count?: boolean | FunnelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type FunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6934,6 +7312,8 @@ export namespace Prisma {
       domainConnections: Prisma.$FunnelDomainPayload<ExtArgs>[]
       theme: Prisma.$ThemePayload<ExtArgs> | null
       pages: Prisma.$PagePayload<ExtArgs>[]
+      settings: Prisma.$FunnelSettingsPayload<ExtArgs> | null
+      insights: Prisma.$InsightPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7344,6 +7724,8 @@ export namespace Prisma {
     domainConnections<T extends Funnel$domainConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$domainConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelDomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     theme<T extends Funnel$themeArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$themeArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     pages<T extends Funnel$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    settings<T extends Funnel$settingsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$settingsArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    insights<T extends Funnel$insightsArgs<ExtArgs> = {}>(args?: Subset<T, Funnel$insightsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7842,6 +8224,49 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PageScalarFieldEnum | PageScalarFieldEnum[]
+  }
+
+  /**
+   * Funnel.settings
+   */
+  export type Funnel$settingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    where?: FunnelSettingsWhereInput
+  }
+
+  /**
+   * Funnel.insights
+   */
+  export type Funnel$insightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    where?: InsightWhereInput
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    cursor?: InsightWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
   }
 
   /**
@@ -11711,6 +12136,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     formSubmissions?: boolean | Session$formSubmissionsArgs<ExtArgs>
+    insightSubmissions?: boolean | Session$insightSubmissionsArgs<ExtArgs>
     _count?: boolean | SessionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -11747,6 +12173,7 @@ export namespace Prisma {
   export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionId" | "funnelId" | "visitedPages" | "interactions" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     formSubmissions?: boolean | Session$formSubmissionsArgs<ExtArgs>
+    insightSubmissions?: boolean | Session$insightSubmissionsArgs<ExtArgs>
     _count?: boolean | SessionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11756,6 +12183,7 @@ export namespace Prisma {
     name: "Session"
     objects: {
       formSubmissions: Prisma.$FormSubmissionPayload<ExtArgs>[]
+      insightSubmissions: Prisma.$InsightSubmissionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12160,6 +12588,7 @@ export namespace Prisma {
   export interface Prisma__SessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     formSubmissions<T extends Session$formSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Session$formSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    insightSubmissions<T extends Session$insightSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Session$insightSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12605,6 +13034,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Session.insightSubmissions
+   */
+  export type Session$insightSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    where?: InsightSubmissionWhereInput
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    cursor?: InsightSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InsightSubmissionScalarFieldEnum | InsightSubmissionScalarFieldEnum[]
   }
 
   /**
@@ -13811,6 +14264,2302 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ThemeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Insight
+   */
+
+  export type AggregateInsight = {
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  export type InsightAvgAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+  }
+
+  export type InsightSumAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+  }
+
+  export type InsightMinAggregateOutputType = {
+    id: number | null
+    type: $Enums.InsightType | null
+    name: string | null
+    description: string | null
+    funnelId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightMaxAggregateOutputType = {
+    id: number | null
+    type: $Enums.InsightType | null
+    name: string | null
+    description: string | null
+    funnelId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightCountAggregateOutputType = {
+    id: number
+    type: number
+    name: number
+    description: number
+    content: number
+    settings: number
+    funnelId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type InsightAvgAggregateInputType = {
+    id?: true
+    funnelId?: true
+  }
+
+  export type InsightSumAggregateInputType = {
+    id?: true
+    funnelId?: true
+  }
+
+  export type InsightMinAggregateInputType = {
+    id?: true
+    type?: true
+    name?: true
+    description?: true
+    funnelId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightMaxAggregateInputType = {
+    id?: true
+    type?: true
+    name?: true
+    description?: true
+    funnelId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightCountAggregateInputType = {
+    id?: true
+    type?: true
+    name?: true
+    description?: true
+    content?: true
+    settings?: true
+    funnelId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type InsightAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insight to aggregate.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Insights
+    **/
+    _count?: true | InsightCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InsightAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InsightSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InsightMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type GetInsightAggregateType<T extends InsightAggregateArgs> = {
+        [P in keyof T & keyof AggregateInsight]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInsight[P]>
+      : GetScalarType<T[P], AggregateInsight[P]>
+  }
+
+
+
+
+  export type InsightGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightWhereInput
+    orderBy?: InsightOrderByWithAggregationInput | InsightOrderByWithAggregationInput[]
+    by: InsightScalarFieldEnum[] | InsightScalarFieldEnum
+    having?: InsightScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InsightCountAggregateInputType | true
+    _avg?: InsightAvgAggregateInputType
+    _sum?: InsightSumAggregateInputType
+    _min?: InsightMinAggregateInputType
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type InsightGroupByOutputType = {
+    id: number
+    type: $Enums.InsightType
+    name: string
+    description: string | null
+    content: JsonValue
+    settings: JsonValue | null
+    funnelId: number
+    createdAt: Date
+    updatedAt: Date
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  type GetInsightGroupByPayload<T extends InsightGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InsightGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InsightGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InsightGroupByOutputType[P]>
+            : GetScalarType<T[P], InsightGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InsightSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    name?: boolean
+    description?: boolean
+    content?: boolean
+    settings?: boolean
+    funnelId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+    submissions?: boolean | Insight$submissionsArgs<ExtArgs>
+    _count?: boolean | InsightCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    name?: boolean
+    description?: boolean
+    content?: boolean
+    settings?: boolean
+    funnelId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    name?: boolean
+    description?: boolean
+    content?: boolean
+    settings?: boolean
+    funnelId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectScalar = {
+    id?: boolean
+    type?: boolean
+    name?: boolean
+    description?: boolean
+    content?: boolean
+    settings?: boolean
+    funnelId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type InsightOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "description" | "content" | "settings" | "funnelId" | "createdAt" | "updatedAt", ExtArgs["result"]["insight"]>
+  export type InsightInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+    submissions?: boolean | Insight$submissionsArgs<ExtArgs>
+    _count?: boolean | InsightCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type InsightIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type InsightIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+
+  export type $InsightPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Insight"
+    objects: {
+      funnel: Prisma.$FunnelPayload<ExtArgs>
+      submissions: Prisma.$InsightSubmissionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      type: $Enums.InsightType
+      name: string
+      description: string | null
+      content: Prisma.JsonValue
+      settings: Prisma.JsonValue | null
+      funnelId: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["insight"]>
+    composites: {}
+  }
+
+  type InsightGetPayload<S extends boolean | null | undefined | InsightDefaultArgs> = $Result.GetResult<Prisma.$InsightPayload, S>
+
+  type InsightCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InsightFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InsightCountAggregateInputType | true
+    }
+
+  export interface InsightDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Insight'], meta: { name: 'Insight' } }
+    /**
+     * Find zero or one Insight that matches the filter.
+     * @param {InsightFindUniqueArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InsightFindUniqueArgs>(args: SelectSubset<T, InsightFindUniqueArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Insight that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InsightFindUniqueOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InsightFindUniqueOrThrowArgs>(args: SelectSubset<T, InsightFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Insight that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InsightFindFirstArgs>(args?: SelectSubset<T, InsightFindFirstArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Insight that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InsightFindFirstOrThrowArgs>(args?: SelectSubset<T, InsightFindFirstOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Insights that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Insights
+     * const insights = await prisma.insight.findMany()
+     * 
+     * // Get first 10 Insights
+     * const insights = await prisma.insight.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const insightWithIdOnly = await prisma.insight.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InsightFindManyArgs>(args?: SelectSubset<T, InsightFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Insight.
+     * @param {InsightCreateArgs} args - Arguments to create a Insight.
+     * @example
+     * // Create one Insight
+     * const Insight = await prisma.insight.create({
+     *   data: {
+     *     // ... data to create a Insight
+     *   }
+     * })
+     * 
+     */
+    create<T extends InsightCreateArgs>(args: SelectSubset<T, InsightCreateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Insights.
+     * @param {InsightCreateManyArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InsightCreateManyArgs>(args?: SelectSubset<T, InsightCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Insights and returns the data saved in the database.
+     * @param {InsightCreateManyAndReturnArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Insights and only return the `id`
+     * const insightWithIdOnly = await prisma.insight.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InsightCreateManyAndReturnArgs>(args?: SelectSubset<T, InsightCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Insight.
+     * @param {InsightDeleteArgs} args - Arguments to delete one Insight.
+     * @example
+     * // Delete one Insight
+     * const Insight = await prisma.insight.delete({
+     *   where: {
+     *     // ... filter to delete one Insight
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InsightDeleteArgs>(args: SelectSubset<T, InsightDeleteArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Insight.
+     * @param {InsightUpdateArgs} args - Arguments to update one Insight.
+     * @example
+     * // Update one Insight
+     * const insight = await prisma.insight.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InsightUpdateArgs>(args: SelectSubset<T, InsightUpdateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Insights.
+     * @param {InsightDeleteManyArgs} args - Arguments to filter Insights to delete.
+     * @example
+     * // Delete a few Insights
+     * const { count } = await prisma.insight.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InsightDeleteManyArgs>(args?: SelectSubset<T, InsightDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Insights
+     * const insight = await prisma.insight.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InsightUpdateManyArgs>(args: SelectSubset<T, InsightUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Insights and returns the data updated in the database.
+     * @param {InsightUpdateManyAndReturnArgs} args - Arguments to update many Insights.
+     * @example
+     * // Update many Insights
+     * const insight = await prisma.insight.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Insights and only return the `id`
+     * const insightWithIdOnly = await prisma.insight.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InsightUpdateManyAndReturnArgs>(args: SelectSubset<T, InsightUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Insight.
+     * @param {InsightUpsertArgs} args - Arguments to update or create a Insight.
+     * @example
+     * // Update or create a Insight
+     * const insight = await prisma.insight.upsert({
+     *   create: {
+     *     // ... data to create a Insight
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Insight we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InsightUpsertArgs>(args: SelectSubset<T, InsightUpsertArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightCountArgs} args - Arguments to filter Insights to count.
+     * @example
+     * // Count the number of Insights
+     * const count = await prisma.insight.count({
+     *   where: {
+     *     // ... the filter for the Insights we want to count
+     *   }
+     * })
+    **/
+    count<T extends InsightCountArgs>(
+      args?: Subset<T, InsightCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InsightCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InsightAggregateArgs>(args: Subset<T, InsightAggregateArgs>): Prisma.PrismaPromise<GetInsightAggregateType<T>>
+
+    /**
+     * Group by Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InsightGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InsightGroupByArgs['orderBy'] }
+        : { orderBy?: InsightGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InsightGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInsightGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Insight model
+   */
+  readonly fields: InsightFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Insight.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InsightClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    submissions<T extends Insight$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, Insight$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Insight model
+   */
+  interface InsightFieldRefs {
+    readonly id: FieldRef<"Insight", 'Int'>
+    readonly type: FieldRef<"Insight", 'InsightType'>
+    readonly name: FieldRef<"Insight", 'String'>
+    readonly description: FieldRef<"Insight", 'String'>
+    readonly content: FieldRef<"Insight", 'Json'>
+    readonly settings: FieldRef<"Insight", 'Json'>
+    readonly funnelId: FieldRef<"Insight", 'Int'>
+    readonly createdAt: FieldRef<"Insight", 'DateTime'>
+    readonly updatedAt: FieldRef<"Insight", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Insight findUnique
+   */
+  export type InsightFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findUniqueOrThrow
+   */
+  export type InsightFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findFirst
+   */
+  export type InsightFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findFirstOrThrow
+   */
+  export type InsightFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findMany
+   */
+  export type InsightFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter, which Insights to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight create
+   */
+  export type InsightCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Insight.
+     */
+    data: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+  }
+
+  /**
+   * Insight createMany
+   */
+  export type InsightCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Insight createManyAndReturn
+   */
+  export type InsightCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Insight update
+   */
+  export type InsightUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Insight.
+     */
+    data: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+    /**
+     * Choose, which Insight to update.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight updateMany
+   */
+  export type InsightUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Insights.
+     */
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyInput>
+    /**
+     * Filter which Insights to update
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Insight updateManyAndReturn
+   */
+  export type InsightUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data used to update Insights.
+     */
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyInput>
+    /**
+     * Filter which Insights to update
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Insight upsert
+   */
+  export type InsightUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Insight to update in case it exists.
+     */
+    where: InsightWhereUniqueInput
+    /**
+     * In case the Insight found by the `where` argument doesn't exist, create a new Insight with this data.
+     */
+    create: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+    /**
+     * In case the Insight was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+  }
+
+  /**
+   * Insight delete
+   */
+  export type InsightDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+    /**
+     * Filter which Insight to delete.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight deleteMany
+   */
+  export type InsightDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insights to delete
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Insight.submissions
+   */
+  export type Insight$submissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    where?: InsightSubmissionWhereInput
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    cursor?: InsightSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InsightSubmissionScalarFieldEnum | InsightSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Insight without action
+   */
+  export type InsightDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InsightSubmission
+   */
+
+  export type AggregateInsightSubmission = {
+    _count: InsightSubmissionCountAggregateOutputType | null
+    _avg: InsightSubmissionAvgAggregateOutputType | null
+    _sum: InsightSubmissionSumAggregateOutputType | null
+    _min: InsightSubmissionMinAggregateOutputType | null
+    _max: InsightSubmissionMaxAggregateOutputType | null
+  }
+
+  export type InsightSubmissionAvgAggregateOutputType = {
+    id: number | null
+    insightId: number | null
+  }
+
+  export type InsightSubmissionSumAggregateOutputType = {
+    id: number | null
+    insightId: number | null
+  }
+
+  export type InsightSubmissionMinAggregateOutputType = {
+    id: number | null
+    insightId: number | null
+    sessionId: string | null
+    completedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightSubmissionMaxAggregateOutputType = {
+    id: number | null
+    insightId: number | null
+    sessionId: string | null
+    completedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InsightSubmissionCountAggregateOutputType = {
+    id: number
+    insightId: number
+    sessionId: number
+    answers: number
+    completedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type InsightSubmissionAvgAggregateInputType = {
+    id?: true
+    insightId?: true
+  }
+
+  export type InsightSubmissionSumAggregateInputType = {
+    id?: true
+    insightId?: true
+  }
+
+  export type InsightSubmissionMinAggregateInputType = {
+    id?: true
+    insightId?: true
+    sessionId?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightSubmissionMaxAggregateInputType = {
+    id?: true
+    insightId?: true
+    sessionId?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InsightSubmissionCountAggregateInputType = {
+    id?: true
+    insightId?: true
+    sessionId?: true
+    answers?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type InsightSubmissionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InsightSubmission to aggregate.
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InsightSubmissions to fetch.
+     */
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InsightSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InsightSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InsightSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InsightSubmissions
+    **/
+    _count?: true | InsightSubmissionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InsightSubmissionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InsightSubmissionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InsightSubmissionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InsightSubmissionMaxAggregateInputType
+  }
+
+  export type GetInsightSubmissionAggregateType<T extends InsightSubmissionAggregateArgs> = {
+        [P in keyof T & keyof AggregateInsightSubmission]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInsightSubmission[P]>
+      : GetScalarType<T[P], AggregateInsightSubmission[P]>
+  }
+
+
+
+
+  export type InsightSubmissionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightSubmissionWhereInput
+    orderBy?: InsightSubmissionOrderByWithAggregationInput | InsightSubmissionOrderByWithAggregationInput[]
+    by: InsightSubmissionScalarFieldEnum[] | InsightSubmissionScalarFieldEnum
+    having?: InsightSubmissionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InsightSubmissionCountAggregateInputType | true
+    _avg?: InsightSubmissionAvgAggregateInputType
+    _sum?: InsightSubmissionSumAggregateInputType
+    _min?: InsightSubmissionMinAggregateInputType
+    _max?: InsightSubmissionMaxAggregateInputType
+  }
+
+  export type InsightSubmissionGroupByOutputType = {
+    id: number
+    insightId: number
+    sessionId: string
+    answers: JsonValue | null
+    completedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: InsightSubmissionCountAggregateOutputType | null
+    _avg: InsightSubmissionAvgAggregateOutputType | null
+    _sum: InsightSubmissionSumAggregateOutputType | null
+    _min: InsightSubmissionMinAggregateOutputType | null
+    _max: InsightSubmissionMaxAggregateOutputType | null
+  }
+
+  type GetInsightSubmissionGroupByPayload<T extends InsightSubmissionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InsightSubmissionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InsightSubmissionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InsightSubmissionGroupByOutputType[P]>
+            : GetScalarType<T[P], InsightSubmissionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InsightSubmissionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    insightId?: boolean
+    sessionId?: boolean
+    answers?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insightSubmission"]>
+
+  export type InsightSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    insightId?: boolean
+    sessionId?: boolean
+    answers?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insightSubmission"]>
+
+  export type InsightSubmissionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    insightId?: boolean
+    sessionId?: boolean
+    answers?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["insightSubmission"]>
+
+  export type InsightSubmissionSelectScalar = {
+    id?: boolean
+    insightId?: boolean
+    sessionId?: boolean
+    answers?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type InsightSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "insightId" | "sessionId" | "answers" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["insightSubmission"]>
+  export type InsightSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }
+  export type InsightSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }
+  export type InsightSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    insight?: boolean | InsightDefaultArgs<ExtArgs>
+    session?: boolean | SessionDefaultArgs<ExtArgs>
+  }
+
+  export type $InsightSubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InsightSubmission"
+    objects: {
+      insight: Prisma.$InsightPayload<ExtArgs>
+      session: Prisma.$SessionPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      insightId: number
+      sessionId: string
+      answers: Prisma.JsonValue | null
+      completedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["insightSubmission"]>
+    composites: {}
+  }
+
+  type InsightSubmissionGetPayload<S extends boolean | null | undefined | InsightSubmissionDefaultArgs> = $Result.GetResult<Prisma.$InsightSubmissionPayload, S>
+
+  type InsightSubmissionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InsightSubmissionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InsightSubmissionCountAggregateInputType | true
+    }
+
+  export interface InsightSubmissionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InsightSubmission'], meta: { name: 'InsightSubmission' } }
+    /**
+     * Find zero or one InsightSubmission that matches the filter.
+     * @param {InsightSubmissionFindUniqueArgs} args - Arguments to find a InsightSubmission
+     * @example
+     * // Get one InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InsightSubmissionFindUniqueArgs>(args: SelectSubset<T, InsightSubmissionFindUniqueArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InsightSubmission that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InsightSubmissionFindUniqueOrThrowArgs} args - Arguments to find a InsightSubmission
+     * @example
+     * // Get one InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InsightSubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, InsightSubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InsightSubmission that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionFindFirstArgs} args - Arguments to find a InsightSubmission
+     * @example
+     * // Get one InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InsightSubmissionFindFirstArgs>(args?: SelectSubset<T, InsightSubmissionFindFirstArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InsightSubmission that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionFindFirstOrThrowArgs} args - Arguments to find a InsightSubmission
+     * @example
+     * // Get one InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InsightSubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, InsightSubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InsightSubmissions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InsightSubmissions
+     * const insightSubmissions = await prisma.insightSubmission.findMany()
+     * 
+     * // Get first 10 InsightSubmissions
+     * const insightSubmissions = await prisma.insightSubmission.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const insightSubmissionWithIdOnly = await prisma.insightSubmission.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InsightSubmissionFindManyArgs>(args?: SelectSubset<T, InsightSubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InsightSubmission.
+     * @param {InsightSubmissionCreateArgs} args - Arguments to create a InsightSubmission.
+     * @example
+     * // Create one InsightSubmission
+     * const InsightSubmission = await prisma.insightSubmission.create({
+     *   data: {
+     *     // ... data to create a InsightSubmission
+     *   }
+     * })
+     * 
+     */
+    create<T extends InsightSubmissionCreateArgs>(args: SelectSubset<T, InsightSubmissionCreateArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InsightSubmissions.
+     * @param {InsightSubmissionCreateManyArgs} args - Arguments to create many InsightSubmissions.
+     * @example
+     * // Create many InsightSubmissions
+     * const insightSubmission = await prisma.insightSubmission.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InsightSubmissionCreateManyArgs>(args?: SelectSubset<T, InsightSubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InsightSubmissions and returns the data saved in the database.
+     * @param {InsightSubmissionCreateManyAndReturnArgs} args - Arguments to create many InsightSubmissions.
+     * @example
+     * // Create many InsightSubmissions
+     * const insightSubmission = await prisma.insightSubmission.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InsightSubmissions and only return the `id`
+     * const insightSubmissionWithIdOnly = await prisma.insightSubmission.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InsightSubmissionCreateManyAndReturnArgs>(args?: SelectSubset<T, InsightSubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InsightSubmission.
+     * @param {InsightSubmissionDeleteArgs} args - Arguments to delete one InsightSubmission.
+     * @example
+     * // Delete one InsightSubmission
+     * const InsightSubmission = await prisma.insightSubmission.delete({
+     *   where: {
+     *     // ... filter to delete one InsightSubmission
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InsightSubmissionDeleteArgs>(args: SelectSubset<T, InsightSubmissionDeleteArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InsightSubmission.
+     * @param {InsightSubmissionUpdateArgs} args - Arguments to update one InsightSubmission.
+     * @example
+     * // Update one InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InsightSubmissionUpdateArgs>(args: SelectSubset<T, InsightSubmissionUpdateArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InsightSubmissions.
+     * @param {InsightSubmissionDeleteManyArgs} args - Arguments to filter InsightSubmissions to delete.
+     * @example
+     * // Delete a few InsightSubmissions
+     * const { count } = await prisma.insightSubmission.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InsightSubmissionDeleteManyArgs>(args?: SelectSubset<T, InsightSubmissionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InsightSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InsightSubmissions
+     * const insightSubmission = await prisma.insightSubmission.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InsightSubmissionUpdateManyArgs>(args: SelectSubset<T, InsightSubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InsightSubmissions and returns the data updated in the database.
+     * @param {InsightSubmissionUpdateManyAndReturnArgs} args - Arguments to update many InsightSubmissions.
+     * @example
+     * // Update many InsightSubmissions
+     * const insightSubmission = await prisma.insightSubmission.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InsightSubmissions and only return the `id`
+     * const insightSubmissionWithIdOnly = await prisma.insightSubmission.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InsightSubmissionUpdateManyAndReturnArgs>(args: SelectSubset<T, InsightSubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InsightSubmission.
+     * @param {InsightSubmissionUpsertArgs} args - Arguments to update or create a InsightSubmission.
+     * @example
+     * // Update or create a InsightSubmission
+     * const insightSubmission = await prisma.insightSubmission.upsert({
+     *   create: {
+     *     // ... data to create a InsightSubmission
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InsightSubmission we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InsightSubmissionUpsertArgs>(args: SelectSubset<T, InsightSubmissionUpsertArgs<ExtArgs>>): Prisma__InsightSubmissionClient<$Result.GetResult<Prisma.$InsightSubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InsightSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionCountArgs} args - Arguments to filter InsightSubmissions to count.
+     * @example
+     * // Count the number of InsightSubmissions
+     * const count = await prisma.insightSubmission.count({
+     *   where: {
+     *     // ... the filter for the InsightSubmissions we want to count
+     *   }
+     * })
+    **/
+    count<T extends InsightSubmissionCountArgs>(
+      args?: Subset<T, InsightSubmissionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InsightSubmissionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InsightSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InsightSubmissionAggregateArgs>(args: Subset<T, InsightSubmissionAggregateArgs>): Prisma.PrismaPromise<GetInsightSubmissionAggregateType<T>>
+
+    /**
+     * Group by InsightSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightSubmissionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InsightSubmissionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InsightSubmissionGroupByArgs['orderBy'] }
+        : { orderBy?: InsightSubmissionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InsightSubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInsightSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InsightSubmission model
+   */
+  readonly fields: InsightSubmissionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InsightSubmission.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InsightSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    insight<T extends InsightDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InsightDefaultArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    session<T extends SessionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SessionDefaultArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InsightSubmission model
+   */
+  interface InsightSubmissionFieldRefs {
+    readonly id: FieldRef<"InsightSubmission", 'Int'>
+    readonly insightId: FieldRef<"InsightSubmission", 'Int'>
+    readonly sessionId: FieldRef<"InsightSubmission", 'String'>
+    readonly answers: FieldRef<"InsightSubmission", 'Json'>
+    readonly completedAt: FieldRef<"InsightSubmission", 'DateTime'>
+    readonly createdAt: FieldRef<"InsightSubmission", 'DateTime'>
+    readonly updatedAt: FieldRef<"InsightSubmission", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InsightSubmission findUnique
+   */
+  export type InsightSubmissionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which InsightSubmission to fetch.
+     */
+    where: InsightSubmissionWhereUniqueInput
+  }
+
+  /**
+   * InsightSubmission findUniqueOrThrow
+   */
+  export type InsightSubmissionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which InsightSubmission to fetch.
+     */
+    where: InsightSubmissionWhereUniqueInput
+  }
+
+  /**
+   * InsightSubmission findFirst
+   */
+  export type InsightSubmissionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which InsightSubmission to fetch.
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InsightSubmissions to fetch.
+     */
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InsightSubmissions.
+     */
+    cursor?: InsightSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InsightSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InsightSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InsightSubmissions.
+     */
+    distinct?: InsightSubmissionScalarFieldEnum | InsightSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * InsightSubmission findFirstOrThrow
+   */
+  export type InsightSubmissionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which InsightSubmission to fetch.
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InsightSubmissions to fetch.
+     */
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InsightSubmissions.
+     */
+    cursor?: InsightSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InsightSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InsightSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InsightSubmissions.
+     */
+    distinct?: InsightSubmissionScalarFieldEnum | InsightSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * InsightSubmission findMany
+   */
+  export type InsightSubmissionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which InsightSubmissions to fetch.
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InsightSubmissions to fetch.
+     */
+    orderBy?: InsightSubmissionOrderByWithRelationInput | InsightSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InsightSubmissions.
+     */
+    cursor?: InsightSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InsightSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InsightSubmissions.
+     */
+    skip?: number
+    distinct?: InsightSubmissionScalarFieldEnum | InsightSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * InsightSubmission create
+   */
+  export type InsightSubmissionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InsightSubmission.
+     */
+    data: XOR<InsightSubmissionCreateInput, InsightSubmissionUncheckedCreateInput>
+  }
+
+  /**
+   * InsightSubmission createMany
+   */
+  export type InsightSubmissionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InsightSubmissions.
+     */
+    data: InsightSubmissionCreateManyInput | InsightSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InsightSubmission createManyAndReturn
+   */
+  export type InsightSubmissionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to create many InsightSubmissions.
+     */
+    data: InsightSubmissionCreateManyInput | InsightSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InsightSubmission update
+   */
+  export type InsightSubmissionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InsightSubmission.
+     */
+    data: XOR<InsightSubmissionUpdateInput, InsightSubmissionUncheckedUpdateInput>
+    /**
+     * Choose, which InsightSubmission to update.
+     */
+    where: InsightSubmissionWhereUniqueInput
+  }
+
+  /**
+   * InsightSubmission updateMany
+   */
+  export type InsightSubmissionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InsightSubmissions.
+     */
+    data: XOR<InsightSubmissionUpdateManyMutationInput, InsightSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which InsightSubmissions to update
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * Limit how many InsightSubmissions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InsightSubmission updateManyAndReturn
+   */
+  export type InsightSubmissionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to update InsightSubmissions.
+     */
+    data: XOR<InsightSubmissionUpdateManyMutationInput, InsightSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which InsightSubmissions to update
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * Limit how many InsightSubmissions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InsightSubmission upsert
+   */
+  export type InsightSubmissionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InsightSubmission to update in case it exists.
+     */
+    where: InsightSubmissionWhereUniqueInput
+    /**
+     * In case the InsightSubmission found by the `where` argument doesn't exist, create a new InsightSubmission with this data.
+     */
+    create: XOR<InsightSubmissionCreateInput, InsightSubmissionUncheckedCreateInput>
+    /**
+     * In case the InsightSubmission was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InsightSubmissionUpdateInput, InsightSubmissionUncheckedUpdateInput>
+  }
+
+  /**
+   * InsightSubmission delete
+   */
+  export type InsightSubmissionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter which InsightSubmission to delete.
+     */
+    where: InsightSubmissionWhereUniqueInput
+  }
+
+  /**
+   * InsightSubmission deleteMany
+   */
+  export type InsightSubmissionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InsightSubmissions to delete
+     */
+    where?: InsightSubmissionWhereInput
+    /**
+     * Limit how many InsightSubmissions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InsightSubmission without action
+   */
+  export type InsightSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InsightSubmission
+     */
+    select?: InsightSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InsightSubmission
+     */
+    omit?: InsightSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InsightSubmissionInclude<ExtArgs> | null
   }
 
 
@@ -20813,11 +23562,15 @@ export namespace Prisma {
   export type FormAvgAggregateOutputType = {
     id: number | null
     funnelId: number | null
+    webhookSuccessCount: number | null
+    webhookFailureCount: number | null
   }
 
   export type FormSumAggregateOutputType = {
     id: number | null
     funnelId: number | null
+    webhookSuccessCount: number | null
+    webhookFailureCount: number | null
   }
 
   export type FormMinAggregateOutputType = {
@@ -20826,6 +23579,12 @@ export namespace Prisma {
     description: string | null
     isActive: boolean | null
     funnelId: number | null
+    webhookUrl: string | null
+    webhookEnabled: boolean | null
+    webhookSecret: string | null
+    webhookSuccessCount: number | null
+    webhookFailureCount: number | null
+    lastWebhookAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -20836,6 +23595,12 @@ export namespace Prisma {
     description: string | null
     isActive: boolean | null
     funnelId: number | null
+    webhookUrl: string | null
+    webhookEnabled: boolean | null
+    webhookSecret: string | null
+    webhookSuccessCount: number | null
+    webhookFailureCount: number | null
+    lastWebhookAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -20847,6 +23612,13 @@ export namespace Prisma {
     formContent: number
     isActive: number
     funnelId: number
+    webhookUrl: number
+    webhookEnabled: number
+    webhookHeaders: number
+    webhookSecret: number
+    webhookSuccessCount: number
+    webhookFailureCount: number
+    lastWebhookAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -20856,11 +23628,15 @@ export namespace Prisma {
   export type FormAvgAggregateInputType = {
     id?: true
     funnelId?: true
+    webhookSuccessCount?: true
+    webhookFailureCount?: true
   }
 
   export type FormSumAggregateInputType = {
     id?: true
     funnelId?: true
+    webhookSuccessCount?: true
+    webhookFailureCount?: true
   }
 
   export type FormMinAggregateInputType = {
@@ -20869,6 +23645,12 @@ export namespace Prisma {
     description?: true
     isActive?: true
     funnelId?: true
+    webhookUrl?: true
+    webhookEnabled?: true
+    webhookSecret?: true
+    webhookSuccessCount?: true
+    webhookFailureCount?: true
+    lastWebhookAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -20879,6 +23661,12 @@ export namespace Prisma {
     description?: true
     isActive?: true
     funnelId?: true
+    webhookUrl?: true
+    webhookEnabled?: true
+    webhookSecret?: true
+    webhookSuccessCount?: true
+    webhookFailureCount?: true
+    lastWebhookAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -20890,6 +23678,13 @@ export namespace Prisma {
     formContent?: true
     isActive?: true
     funnelId?: true
+    webhookUrl?: true
+    webhookEnabled?: true
+    webhookHeaders?: true
+    webhookSecret?: true
+    webhookSuccessCount?: true
+    webhookFailureCount?: true
+    lastWebhookAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -20988,6 +23783,13 @@ export namespace Prisma {
     formContent: JsonValue
     isActive: boolean
     funnelId: number | null
+    webhookUrl: string | null
+    webhookEnabled: boolean
+    webhookHeaders: JsonValue | null
+    webhookSecret: string | null
+    webhookSuccessCount: number
+    webhookFailureCount: number
+    lastWebhookAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: FormCountAggregateOutputType | null
@@ -21018,6 +23820,13 @@ export namespace Prisma {
     formContent?: boolean
     isActive?: boolean
     funnelId?: boolean
+    webhookUrl?: boolean
+    webhookEnabled?: boolean
+    webhookHeaders?: boolean
+    webhookSecret?: boolean
+    webhookSuccessCount?: boolean
+    webhookFailureCount?: boolean
+    lastWebhookAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     submissions?: boolean | Form$submissionsArgs<ExtArgs>
@@ -21031,6 +23840,13 @@ export namespace Prisma {
     formContent?: boolean
     isActive?: boolean
     funnelId?: boolean
+    webhookUrl?: boolean
+    webhookEnabled?: boolean
+    webhookHeaders?: boolean
+    webhookSecret?: boolean
+    webhookSuccessCount?: boolean
+    webhookFailureCount?: boolean
+    lastWebhookAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["form"]>
@@ -21042,6 +23858,13 @@ export namespace Prisma {
     formContent?: boolean
     isActive?: boolean
     funnelId?: boolean
+    webhookUrl?: boolean
+    webhookEnabled?: boolean
+    webhookHeaders?: boolean
+    webhookSecret?: boolean
+    webhookSuccessCount?: boolean
+    webhookFailureCount?: boolean
+    lastWebhookAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["form"]>
@@ -21053,11 +23876,18 @@ export namespace Prisma {
     formContent?: boolean
     isActive?: boolean
     funnelId?: boolean
+    webhookUrl?: boolean
+    webhookEnabled?: boolean
+    webhookHeaders?: boolean
+    webhookSecret?: boolean
+    webhookSuccessCount?: boolean
+    webhookFailureCount?: boolean
+    lastWebhookAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FormOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "formContent" | "isActive" | "funnelId" | "createdAt" | "updatedAt", ExtArgs["result"]["form"]>
+  export type FormOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "formContent" | "isActive" | "funnelId" | "webhookUrl" | "webhookEnabled" | "webhookHeaders" | "webhookSecret" | "webhookSuccessCount" | "webhookFailureCount" | "lastWebhookAt" | "createdAt" | "updatedAt", ExtArgs["result"]["form"]>
   export type FormInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     submissions?: boolean | Form$submissionsArgs<ExtArgs>
     _count?: boolean | FormCountOutputTypeDefaultArgs<ExtArgs>
@@ -21077,6 +23907,13 @@ export namespace Prisma {
       formContent: Prisma.JsonValue
       isActive: boolean
       funnelId: number | null
+      webhookUrl: string | null
+      webhookEnabled: boolean
+      webhookHeaders: Prisma.JsonValue | null
+      webhookSecret: string | null
+      webhookSuccessCount: number
+      webhookFailureCount: number
+      lastWebhookAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["form"]>
@@ -21509,6 +24346,13 @@ export namespace Prisma {
     readonly formContent: FieldRef<"Form", 'Json'>
     readonly isActive: FieldRef<"Form", 'Boolean'>
     readonly funnelId: FieldRef<"Form", 'Int'>
+    readonly webhookUrl: FieldRef<"Form", 'String'>
+    readonly webhookEnabled: FieldRef<"Form", 'Boolean'>
+    readonly webhookHeaders: FieldRef<"Form", 'Json'>
+    readonly webhookSecret: FieldRef<"Form", 'String'>
+    readonly webhookSuccessCount: FieldRef<"Form", 'Int'>
+    readonly webhookFailureCount: FieldRef<"Form", 'Int'>
+    readonly lastWebhookAt: FieldRef<"Form", 'DateTime'>
     readonly createdAt: FieldRef<"Form", 'DateTime'>
     readonly updatedAt: FieldRef<"Form", 'DateTime'>
   }
@@ -23081,6 +25925,1280 @@ export namespace Prisma {
 
 
   /**
+   * Model FunnelSettings
+   */
+
+  export type AggregateFunnelSettings = {
+    _count: FunnelSettingsCountAggregateOutputType | null
+    _avg: FunnelSettingsAvgAggregateOutputType | null
+    _sum: FunnelSettingsSumAggregateOutputType | null
+    _min: FunnelSettingsMinAggregateOutputType | null
+    _max: FunnelSettingsMaxAggregateOutputType | null
+  }
+
+  export type FunnelSettingsAvgAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+  }
+
+  export type FunnelSettingsSumAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+  }
+
+  export type FunnelSettingsMinAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+    defaultSeoTitle: string | null
+    defaultSeoDescription: string | null
+    defaultSeoKeywords: string | null
+    favicon: string | null
+    ogImage: string | null
+    googleAnalyticsId: string | null
+    facebookPixelId: string | null
+    enableCookieConsent: boolean | null
+    cookieConsentText: string | null
+    privacyPolicyUrl: string | null
+    termsOfServiceUrl: string | null
+    language: string | null
+    timezone: string | null
+    dateFormat: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FunnelSettingsMaxAggregateOutputType = {
+    id: number | null
+    funnelId: number | null
+    defaultSeoTitle: string | null
+    defaultSeoDescription: string | null
+    defaultSeoKeywords: string | null
+    favicon: string | null
+    ogImage: string | null
+    googleAnalyticsId: string | null
+    facebookPixelId: string | null
+    enableCookieConsent: boolean | null
+    cookieConsentText: string | null
+    privacyPolicyUrl: string | null
+    termsOfServiceUrl: string | null
+    language: string | null
+    timezone: string | null
+    dateFormat: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FunnelSettingsCountAggregateOutputType = {
+    id: number
+    funnelId: number
+    defaultSeoTitle: number
+    defaultSeoDescription: number
+    defaultSeoKeywords: number
+    favicon: number
+    ogImage: number
+    googleAnalyticsId: number
+    facebookPixelId: number
+    customTrackingScripts: number
+    enableCookieConsent: number
+    cookieConsentText: number
+    privacyPolicyUrl: number
+    termsOfServiceUrl: number
+    language: number
+    timezone: number
+    dateFormat: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FunnelSettingsAvgAggregateInputType = {
+    id?: true
+    funnelId?: true
+  }
+
+  export type FunnelSettingsSumAggregateInputType = {
+    id?: true
+    funnelId?: true
+  }
+
+  export type FunnelSettingsMinAggregateInputType = {
+    id?: true
+    funnelId?: true
+    defaultSeoTitle?: true
+    defaultSeoDescription?: true
+    defaultSeoKeywords?: true
+    favicon?: true
+    ogImage?: true
+    googleAnalyticsId?: true
+    facebookPixelId?: true
+    enableCookieConsent?: true
+    cookieConsentText?: true
+    privacyPolicyUrl?: true
+    termsOfServiceUrl?: true
+    language?: true
+    timezone?: true
+    dateFormat?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FunnelSettingsMaxAggregateInputType = {
+    id?: true
+    funnelId?: true
+    defaultSeoTitle?: true
+    defaultSeoDescription?: true
+    defaultSeoKeywords?: true
+    favicon?: true
+    ogImage?: true
+    googleAnalyticsId?: true
+    facebookPixelId?: true
+    enableCookieConsent?: true
+    cookieConsentText?: true
+    privacyPolicyUrl?: true
+    termsOfServiceUrl?: true
+    language?: true
+    timezone?: true
+    dateFormat?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FunnelSettingsCountAggregateInputType = {
+    id?: true
+    funnelId?: true
+    defaultSeoTitle?: true
+    defaultSeoDescription?: true
+    defaultSeoKeywords?: true
+    favicon?: true
+    ogImage?: true
+    googleAnalyticsId?: true
+    facebookPixelId?: true
+    customTrackingScripts?: true
+    enableCookieConsent?: true
+    cookieConsentText?: true
+    privacyPolicyUrl?: true
+    termsOfServiceUrl?: true
+    language?: true
+    timezone?: true
+    dateFormat?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FunnelSettingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FunnelSettings to aggregate.
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FunnelSettings to fetch.
+     */
+    orderBy?: FunnelSettingsOrderByWithRelationInput | FunnelSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FunnelSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FunnelSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FunnelSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FunnelSettings
+    **/
+    _count?: true | FunnelSettingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FunnelSettingsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FunnelSettingsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FunnelSettingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FunnelSettingsMaxAggregateInputType
+  }
+
+  export type GetFunnelSettingsAggregateType<T extends FunnelSettingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateFunnelSettings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFunnelSettings[P]>
+      : GetScalarType<T[P], AggregateFunnelSettings[P]>
+  }
+
+
+
+
+  export type FunnelSettingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FunnelSettingsWhereInput
+    orderBy?: FunnelSettingsOrderByWithAggregationInput | FunnelSettingsOrderByWithAggregationInput[]
+    by: FunnelSettingsScalarFieldEnum[] | FunnelSettingsScalarFieldEnum
+    having?: FunnelSettingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FunnelSettingsCountAggregateInputType | true
+    _avg?: FunnelSettingsAvgAggregateInputType
+    _sum?: FunnelSettingsSumAggregateInputType
+    _min?: FunnelSettingsMinAggregateInputType
+    _max?: FunnelSettingsMaxAggregateInputType
+  }
+
+  export type FunnelSettingsGroupByOutputType = {
+    id: number
+    funnelId: number
+    defaultSeoTitle: string | null
+    defaultSeoDescription: string | null
+    defaultSeoKeywords: string | null
+    favicon: string | null
+    ogImage: string | null
+    googleAnalyticsId: string | null
+    facebookPixelId: string | null
+    customTrackingScripts: JsonValue | null
+    enableCookieConsent: boolean
+    cookieConsentText: string | null
+    privacyPolicyUrl: string | null
+    termsOfServiceUrl: string | null
+    language: string | null
+    timezone: string | null
+    dateFormat: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FunnelSettingsCountAggregateOutputType | null
+    _avg: FunnelSettingsAvgAggregateOutputType | null
+    _sum: FunnelSettingsSumAggregateOutputType | null
+    _min: FunnelSettingsMinAggregateOutputType | null
+    _max: FunnelSettingsMaxAggregateOutputType | null
+  }
+
+  type GetFunnelSettingsGroupByPayload<T extends FunnelSettingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FunnelSettingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FunnelSettingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FunnelSettingsGroupByOutputType[P]>
+            : GetScalarType<T[P], FunnelSettingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FunnelSettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    funnelId?: boolean
+    defaultSeoTitle?: boolean
+    defaultSeoDescription?: boolean
+    defaultSeoKeywords?: boolean
+    favicon?: boolean
+    ogImage?: boolean
+    googleAnalyticsId?: boolean
+    facebookPixelId?: boolean
+    customTrackingScripts?: boolean
+    enableCookieConsent?: boolean
+    cookieConsentText?: boolean
+    privacyPolicyUrl?: boolean
+    termsOfServiceUrl?: boolean
+    language?: boolean
+    timezone?: boolean
+    dateFormat?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["funnelSettings"]>
+
+  export type FunnelSettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    funnelId?: boolean
+    defaultSeoTitle?: boolean
+    defaultSeoDescription?: boolean
+    defaultSeoKeywords?: boolean
+    favicon?: boolean
+    ogImage?: boolean
+    googleAnalyticsId?: boolean
+    facebookPixelId?: boolean
+    customTrackingScripts?: boolean
+    enableCookieConsent?: boolean
+    cookieConsentText?: boolean
+    privacyPolicyUrl?: boolean
+    termsOfServiceUrl?: boolean
+    language?: boolean
+    timezone?: boolean
+    dateFormat?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["funnelSettings"]>
+
+  export type FunnelSettingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    funnelId?: boolean
+    defaultSeoTitle?: boolean
+    defaultSeoDescription?: boolean
+    defaultSeoKeywords?: boolean
+    favicon?: boolean
+    ogImage?: boolean
+    googleAnalyticsId?: boolean
+    facebookPixelId?: boolean
+    customTrackingScripts?: boolean
+    enableCookieConsent?: boolean
+    cookieConsentText?: boolean
+    privacyPolicyUrl?: boolean
+    termsOfServiceUrl?: boolean
+    language?: boolean
+    timezone?: boolean
+    dateFormat?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["funnelSettings"]>
+
+  export type FunnelSettingsSelectScalar = {
+    id?: boolean
+    funnelId?: boolean
+    defaultSeoTitle?: boolean
+    defaultSeoDescription?: boolean
+    defaultSeoKeywords?: boolean
+    favicon?: boolean
+    ogImage?: boolean
+    googleAnalyticsId?: boolean
+    facebookPixelId?: boolean
+    customTrackingScripts?: boolean
+    enableCookieConsent?: boolean
+    cookieConsentText?: boolean
+    privacyPolicyUrl?: boolean
+    termsOfServiceUrl?: boolean
+    language?: boolean
+    timezone?: boolean
+    dateFormat?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FunnelSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "funnelId" | "defaultSeoTitle" | "defaultSeoDescription" | "defaultSeoKeywords" | "favicon" | "ogImage" | "googleAnalyticsId" | "facebookPixelId" | "customTrackingScripts" | "enableCookieConsent" | "cookieConsentText" | "privacyPolicyUrl" | "termsOfServiceUrl" | "language" | "timezone" | "dateFormat" | "createdAt" | "updatedAt", ExtArgs["result"]["funnelSettings"]>
+  export type FunnelSettingsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type FunnelSettingsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type FunnelSettingsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+
+  export type $FunnelSettingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FunnelSettings"
+    objects: {
+      funnel: Prisma.$FunnelPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      funnelId: number
+      defaultSeoTitle: string | null
+      defaultSeoDescription: string | null
+      defaultSeoKeywords: string | null
+      favicon: string | null
+      ogImage: string | null
+      googleAnalyticsId: string | null
+      facebookPixelId: string | null
+      customTrackingScripts: Prisma.JsonValue | null
+      enableCookieConsent: boolean
+      cookieConsentText: string | null
+      privacyPolicyUrl: string | null
+      termsOfServiceUrl: string | null
+      language: string | null
+      timezone: string | null
+      dateFormat: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["funnelSettings"]>
+    composites: {}
+  }
+
+  type FunnelSettingsGetPayload<S extends boolean | null | undefined | FunnelSettingsDefaultArgs> = $Result.GetResult<Prisma.$FunnelSettingsPayload, S>
+
+  type FunnelSettingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FunnelSettingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FunnelSettingsCountAggregateInputType | true
+    }
+
+  export interface FunnelSettingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FunnelSettings'], meta: { name: 'FunnelSettings' } }
+    /**
+     * Find zero or one FunnelSettings that matches the filter.
+     * @param {FunnelSettingsFindUniqueArgs} args - Arguments to find a FunnelSettings
+     * @example
+     * // Get one FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FunnelSettingsFindUniqueArgs>(args: SelectSubset<T, FunnelSettingsFindUniqueArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FunnelSettings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FunnelSettingsFindUniqueOrThrowArgs} args - Arguments to find a FunnelSettings
+     * @example
+     * // Get one FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FunnelSettingsFindUniqueOrThrowArgs>(args: SelectSubset<T, FunnelSettingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FunnelSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsFindFirstArgs} args - Arguments to find a FunnelSettings
+     * @example
+     * // Get one FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FunnelSettingsFindFirstArgs>(args?: SelectSubset<T, FunnelSettingsFindFirstArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FunnelSettings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsFindFirstOrThrowArgs} args - Arguments to find a FunnelSettings
+     * @example
+     * // Get one FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FunnelSettingsFindFirstOrThrowArgs>(args?: SelectSubset<T, FunnelSettingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FunnelSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findMany()
+     * 
+     * // Get first 10 FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const funnelSettingsWithIdOnly = await prisma.funnelSettings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FunnelSettingsFindManyArgs>(args?: SelectSubset<T, FunnelSettingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FunnelSettings.
+     * @param {FunnelSettingsCreateArgs} args - Arguments to create a FunnelSettings.
+     * @example
+     * // Create one FunnelSettings
+     * const FunnelSettings = await prisma.funnelSettings.create({
+     *   data: {
+     *     // ... data to create a FunnelSettings
+     *   }
+     * })
+     * 
+     */
+    create<T extends FunnelSettingsCreateArgs>(args: SelectSubset<T, FunnelSettingsCreateArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FunnelSettings.
+     * @param {FunnelSettingsCreateManyArgs} args - Arguments to create many FunnelSettings.
+     * @example
+     * // Create many FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FunnelSettingsCreateManyArgs>(args?: SelectSubset<T, FunnelSettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FunnelSettings and returns the data saved in the database.
+     * @param {FunnelSettingsCreateManyAndReturnArgs} args - Arguments to create many FunnelSettings.
+     * @example
+     * // Create many FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FunnelSettings and only return the `id`
+     * const funnelSettingsWithIdOnly = await prisma.funnelSettings.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FunnelSettingsCreateManyAndReturnArgs>(args?: SelectSubset<T, FunnelSettingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FunnelSettings.
+     * @param {FunnelSettingsDeleteArgs} args - Arguments to delete one FunnelSettings.
+     * @example
+     * // Delete one FunnelSettings
+     * const FunnelSettings = await prisma.funnelSettings.delete({
+     *   where: {
+     *     // ... filter to delete one FunnelSettings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FunnelSettingsDeleteArgs>(args: SelectSubset<T, FunnelSettingsDeleteArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FunnelSettings.
+     * @param {FunnelSettingsUpdateArgs} args - Arguments to update one FunnelSettings.
+     * @example
+     * // Update one FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FunnelSettingsUpdateArgs>(args: SelectSubset<T, FunnelSettingsUpdateArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FunnelSettings.
+     * @param {FunnelSettingsDeleteManyArgs} args - Arguments to filter FunnelSettings to delete.
+     * @example
+     * // Delete a few FunnelSettings
+     * const { count } = await prisma.funnelSettings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FunnelSettingsDeleteManyArgs>(args?: SelectSubset<T, FunnelSettingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FunnelSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FunnelSettingsUpdateManyArgs>(args: SelectSubset<T, FunnelSettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FunnelSettings and returns the data updated in the database.
+     * @param {FunnelSettingsUpdateManyAndReturnArgs} args - Arguments to update many FunnelSettings.
+     * @example
+     * // Update many FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FunnelSettings and only return the `id`
+     * const funnelSettingsWithIdOnly = await prisma.funnelSettings.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FunnelSettingsUpdateManyAndReturnArgs>(args: SelectSubset<T, FunnelSettingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FunnelSettings.
+     * @param {FunnelSettingsUpsertArgs} args - Arguments to update or create a FunnelSettings.
+     * @example
+     * // Update or create a FunnelSettings
+     * const funnelSettings = await prisma.funnelSettings.upsert({
+     *   create: {
+     *     // ... data to create a FunnelSettings
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FunnelSettings we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FunnelSettingsUpsertArgs>(args: SelectSubset<T, FunnelSettingsUpsertArgs<ExtArgs>>): Prisma__FunnelSettingsClient<$Result.GetResult<Prisma.$FunnelSettingsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FunnelSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsCountArgs} args - Arguments to filter FunnelSettings to count.
+     * @example
+     * // Count the number of FunnelSettings
+     * const count = await prisma.funnelSettings.count({
+     *   where: {
+     *     // ... the filter for the FunnelSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends FunnelSettingsCountArgs>(
+      args?: Subset<T, FunnelSettingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FunnelSettingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FunnelSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FunnelSettingsAggregateArgs>(args: Subset<T, FunnelSettingsAggregateArgs>): Prisma.PrismaPromise<GetFunnelSettingsAggregateType<T>>
+
+    /**
+     * Group by FunnelSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FunnelSettingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FunnelSettingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FunnelSettingsGroupByArgs['orderBy'] }
+        : { orderBy?: FunnelSettingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FunnelSettingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFunnelSettingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FunnelSettings model
+   */
+  readonly fields: FunnelSettingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FunnelSettings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FunnelSettingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FunnelSettings model
+   */
+  interface FunnelSettingsFieldRefs {
+    readonly id: FieldRef<"FunnelSettings", 'Int'>
+    readonly funnelId: FieldRef<"FunnelSettings", 'Int'>
+    readonly defaultSeoTitle: FieldRef<"FunnelSettings", 'String'>
+    readonly defaultSeoDescription: FieldRef<"FunnelSettings", 'String'>
+    readonly defaultSeoKeywords: FieldRef<"FunnelSettings", 'String'>
+    readonly favicon: FieldRef<"FunnelSettings", 'String'>
+    readonly ogImage: FieldRef<"FunnelSettings", 'String'>
+    readonly googleAnalyticsId: FieldRef<"FunnelSettings", 'String'>
+    readonly facebookPixelId: FieldRef<"FunnelSettings", 'String'>
+    readonly customTrackingScripts: FieldRef<"FunnelSettings", 'Json'>
+    readonly enableCookieConsent: FieldRef<"FunnelSettings", 'Boolean'>
+    readonly cookieConsentText: FieldRef<"FunnelSettings", 'String'>
+    readonly privacyPolicyUrl: FieldRef<"FunnelSettings", 'String'>
+    readonly termsOfServiceUrl: FieldRef<"FunnelSettings", 'String'>
+    readonly language: FieldRef<"FunnelSettings", 'String'>
+    readonly timezone: FieldRef<"FunnelSettings", 'String'>
+    readonly dateFormat: FieldRef<"FunnelSettings", 'String'>
+    readonly createdAt: FieldRef<"FunnelSettings", 'DateTime'>
+    readonly updatedAt: FieldRef<"FunnelSettings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FunnelSettings findUnique
+   */
+  export type FunnelSettingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which FunnelSettings to fetch.
+     */
+    where: FunnelSettingsWhereUniqueInput
+  }
+
+  /**
+   * FunnelSettings findUniqueOrThrow
+   */
+  export type FunnelSettingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which FunnelSettings to fetch.
+     */
+    where: FunnelSettingsWhereUniqueInput
+  }
+
+  /**
+   * FunnelSettings findFirst
+   */
+  export type FunnelSettingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which FunnelSettings to fetch.
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FunnelSettings to fetch.
+     */
+    orderBy?: FunnelSettingsOrderByWithRelationInput | FunnelSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FunnelSettings.
+     */
+    cursor?: FunnelSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FunnelSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FunnelSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FunnelSettings.
+     */
+    distinct?: FunnelSettingsScalarFieldEnum | FunnelSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * FunnelSettings findFirstOrThrow
+   */
+  export type FunnelSettingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which FunnelSettings to fetch.
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FunnelSettings to fetch.
+     */
+    orderBy?: FunnelSettingsOrderByWithRelationInput | FunnelSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FunnelSettings.
+     */
+    cursor?: FunnelSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FunnelSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FunnelSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FunnelSettings.
+     */
+    distinct?: FunnelSettingsScalarFieldEnum | FunnelSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * FunnelSettings findMany
+   */
+  export type FunnelSettingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which FunnelSettings to fetch.
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FunnelSettings to fetch.
+     */
+    orderBy?: FunnelSettingsOrderByWithRelationInput | FunnelSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FunnelSettings.
+     */
+    cursor?: FunnelSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FunnelSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FunnelSettings.
+     */
+    skip?: number
+    distinct?: FunnelSettingsScalarFieldEnum | FunnelSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * FunnelSettings create
+   */
+  export type FunnelSettingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FunnelSettings.
+     */
+    data: XOR<FunnelSettingsCreateInput, FunnelSettingsUncheckedCreateInput>
+  }
+
+  /**
+   * FunnelSettings createMany
+   */
+  export type FunnelSettingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FunnelSettings.
+     */
+    data: FunnelSettingsCreateManyInput | FunnelSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FunnelSettings createManyAndReturn
+   */
+  export type FunnelSettingsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to create many FunnelSettings.
+     */
+    data: FunnelSettingsCreateManyInput | FunnelSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FunnelSettings update
+   */
+  export type FunnelSettingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FunnelSettings.
+     */
+    data: XOR<FunnelSettingsUpdateInput, FunnelSettingsUncheckedUpdateInput>
+    /**
+     * Choose, which FunnelSettings to update.
+     */
+    where: FunnelSettingsWhereUniqueInput
+  }
+
+  /**
+   * FunnelSettings updateMany
+   */
+  export type FunnelSettingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FunnelSettings.
+     */
+    data: XOR<FunnelSettingsUpdateManyMutationInput, FunnelSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which FunnelSettings to update
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * Limit how many FunnelSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FunnelSettings updateManyAndReturn
+   */
+  export type FunnelSettingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to update FunnelSettings.
+     */
+    data: XOR<FunnelSettingsUpdateManyMutationInput, FunnelSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which FunnelSettings to update
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * Limit how many FunnelSettings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FunnelSettings upsert
+   */
+  export type FunnelSettingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FunnelSettings to update in case it exists.
+     */
+    where: FunnelSettingsWhereUniqueInput
+    /**
+     * In case the FunnelSettings found by the `where` argument doesn't exist, create a new FunnelSettings with this data.
+     */
+    create: XOR<FunnelSettingsCreateInput, FunnelSettingsUncheckedCreateInput>
+    /**
+     * In case the FunnelSettings was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FunnelSettingsUpdateInput, FunnelSettingsUncheckedUpdateInput>
+  }
+
+  /**
+   * FunnelSettings delete
+   */
+  export type FunnelSettingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+    /**
+     * Filter which FunnelSettings to delete.
+     */
+    where: FunnelSettingsWhereUniqueInput
+  }
+
+  /**
+   * FunnelSettings deleteMany
+   */
+  export type FunnelSettingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FunnelSettings to delete
+     */
+    where?: FunnelSettingsWhereInput
+    /**
+     * Limit how many FunnelSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FunnelSettings without action
+   */
+  export type FunnelSettingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FunnelSettings
+     */
+    select?: FunnelSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FunnelSettings
+     */
+    omit?: FunnelSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FunnelSettingsInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -23101,6 +27219,9 @@ export namespace Prisma {
     firstName: 'firstName',
     lastName: 'lastName',
     password: 'password',
+    verified: 'verified',
+    verificationToken: 'verificationToken',
+    verificationTokenExpiresAt: 'verificationTokenExpiresAt',
     passwordResetToken: 'passwordResetToken',
     passwordResetExpiresAt: 'passwordResetExpiresAt',
     isAdmin: 'isAdmin',
@@ -23247,6 +27368,34 @@ export namespace Prisma {
   export type ThemeScalarFieldEnum = (typeof ThemeScalarFieldEnum)[keyof typeof ThemeScalarFieldEnum]
 
 
+  export const InsightScalarFieldEnum: {
+    id: 'id',
+    type: 'type',
+    name: 'name',
+    description: 'description',
+    content: 'content',
+    settings: 'settings',
+    funnelId: 'funnelId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type InsightScalarFieldEnum = (typeof InsightScalarFieldEnum)[keyof typeof InsightScalarFieldEnum]
+
+
+  export const InsightSubmissionScalarFieldEnum: {
+    id: 'id',
+    insightId: 'insightId',
+    sessionId: 'sessionId',
+    answers: 'answers',
+    completedAt: 'completedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type InsightSubmissionScalarFieldEnum = (typeof InsightSubmissionScalarFieldEnum)[keyof typeof InsightSubmissionScalarFieldEnum]
+
+
   export const TemplateCategoryScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -23341,6 +27490,13 @@ export namespace Prisma {
     formContent: 'formContent',
     isActive: 'isActive',
     funnelId: 'funnelId',
+    webhookUrl: 'webhookUrl',
+    webhookEnabled: 'webhookEnabled',
+    webhookHeaders: 'webhookHeaders',
+    webhookSecret: 'webhookSecret',
+    webhookSuccessCount: 'webhookSuccessCount',
+    webhookFailureCount: 'webhookFailureCount',
+    lastWebhookAt: 'lastWebhookAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -23360,6 +27516,31 @@ export namespace Prisma {
   };
 
   export type FormSubmissionScalarFieldEnum = (typeof FormSubmissionScalarFieldEnum)[keyof typeof FormSubmissionScalarFieldEnum]
+
+
+  export const FunnelSettingsScalarFieldEnum: {
+    id: 'id',
+    funnelId: 'funnelId',
+    defaultSeoTitle: 'defaultSeoTitle',
+    defaultSeoDescription: 'defaultSeoDescription',
+    defaultSeoKeywords: 'defaultSeoKeywords',
+    favicon: 'favicon',
+    ogImage: 'ogImage',
+    googleAnalyticsId: 'googleAnalyticsId',
+    facebookPixelId: 'facebookPixelId',
+    customTrackingScripts: 'customTrackingScripts',
+    enableCookieConsent: 'enableCookieConsent',
+    cookieConsentText: 'cookieConsentText',
+    privacyPolicyUrl: 'privacyPolicyUrl',
+    termsOfServiceUrl: 'termsOfServiceUrl',
+    language: 'language',
+    timezone: 'timezone',
+    dateFormat: 'dateFormat',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FunnelSettingsScalarFieldEnum = (typeof FunnelSettingsScalarFieldEnum)[keyof typeof FunnelSettingsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -23444,6 +27625,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -23454,13 +27642,6 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -23591,6 +27772,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'InsightType'
+   */
+  export type EnumInsightTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InsightType'>
+    
+
+
+  /**
+   * Reference to a field of type 'InsightType[]'
+   */
+  export type ListEnumInsightTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InsightType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'TemplateImageType'
    */
   export type EnumTemplateImageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TemplateImageType'>
@@ -23631,6 +27826,9 @@ export namespace Prisma {
     firstName?: StringFilter<"User"> | string
     lastName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    verified?: BoolFilter<"User"> | boolean
+    verificationToken?: StringNullableFilter<"User"> | string | null
+    verificationTokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     passwordResetToken?: StringNullableFilter<"User"> | string | null
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
@@ -23655,6 +27853,9 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     password?: SortOrder
+    verified?: SortOrder
+    verificationToken?: SortOrderInput | SortOrder
+    verificationTokenExpiresAt?: SortOrderInput | SortOrder
     passwordResetToken?: SortOrderInput | SortOrder
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
@@ -23676,6 +27877,7 @@ export namespace Prisma {
     id?: number
     email?: string
     username?: string
+    verificationToken?: string
     passwordResetToken?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
@@ -23683,6 +27885,8 @@ export namespace Prisma {
     firstName?: StringFilter<"User"> | string
     lastName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    verified?: BoolFilter<"User"> | boolean
+    verificationTokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
     plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
@@ -23697,7 +27901,7 @@ export namespace Prisma {
     createdDomains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
     imageFolders?: ImageFolderListRelationFilter
-  }, "id" | "email" | "username" | "passwordResetToken">
+  }, "id" | "email" | "username" | "verificationToken" | "passwordResetToken">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -23706,6 +27910,9 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     password?: SortOrder
+    verified?: SortOrder
+    verificationToken?: SortOrderInput | SortOrder
+    verificationTokenExpiresAt?: SortOrderInput | SortOrder
     passwordResetToken?: SortOrderInput | SortOrder
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
@@ -23732,6 +27939,9 @@ export namespace Prisma {
     firstName?: StringWithAggregatesFilter<"User"> | string
     lastName?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
+    verified?: BoolWithAggregatesFilter<"User"> | boolean
+    verificationToken?: StringNullableWithAggregatesFilter<"User"> | string | null
+    verificationTokenExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     passwordResetToken?: StringNullableWithAggregatesFilter<"User"> | string | null
     passwordResetExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
@@ -23928,6 +28138,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainListRelationFilter
     theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
     pages?: PageListRelationFilter
+    settings?: XOR<FunnelSettingsNullableScalarRelationFilter, FunnelSettingsWhereInput> | null
+    insights?: InsightListRelationFilter
   }
 
   export type FunnelOrderByWithRelationInput = {
@@ -23945,6 +28157,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainOrderByRelationAggregateInput
     theme?: ThemeOrderByWithRelationInput
     pages?: PageOrderByRelationAggregateInput
+    settings?: FunnelSettingsOrderByWithRelationInput
+    insights?: InsightOrderByRelationAggregateInput
   }
 
   export type FunnelWhereUniqueInput = Prisma.AtLeast<{
@@ -23967,6 +28181,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainListRelationFilter
     theme?: XOR<ThemeNullableScalarRelationFilter, ThemeWhereInput> | null
     pages?: PageListRelationFilter
+    settings?: XOR<FunnelSettingsNullableScalarRelationFilter, FunnelSettingsWhereInput> | null
+    insights?: InsightListRelationFilter
   }, "id" | "themeId" | "workspaceId_name" | "workspaceId_slug">
 
   export type FunnelOrderByWithAggregationInput = {
@@ -24310,6 +28526,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
     formSubmissions?: FormSubmissionListRelationFilter
+    insightSubmissions?: InsightSubmissionListRelationFilter
   }
 
   export type SessionOrderByWithRelationInput = {
@@ -24321,6 +28538,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     formSubmissions?: FormSubmissionOrderByRelationAggregateInput
+    insightSubmissions?: InsightSubmissionOrderByRelationAggregateInput
   }
 
   export type SessionWhereUniqueInput = Prisma.AtLeast<{
@@ -24335,6 +28553,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
     formSubmissions?: FormSubmissionListRelationFilter
+    insightSubmissions?: InsightSubmissionListRelationFilter
   }, "id" | "sessionId">
 
   export type SessionOrderByWithAggregationInput = {
@@ -24455,6 +28674,157 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusWithAggregatesFilter<"Theme"> | $Enums.BorderRadius
     createdAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
+  }
+
+  export type InsightWhereInput = {
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    id?: IntFilter<"Insight"> | number
+    type?: EnumInsightTypeFilter<"Insight"> | $Enums.InsightType
+    name?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    content?: JsonFilter<"Insight">
+    settings?: JsonNullableFilter<"Insight">
+    funnelId?: IntFilter<"Insight"> | number
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+    submissions?: InsightSubmissionListRelationFilter
+  }
+
+  export type InsightOrderByWithRelationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    content?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    funnel?: FunnelOrderByWithRelationInput
+    submissions?: InsightSubmissionOrderByRelationAggregateInput
+  }
+
+  export type InsightWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    type?: EnumInsightTypeFilter<"Insight"> | $Enums.InsightType
+    name?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    content?: JsonFilter<"Insight">
+    settings?: JsonNullableFilter<"Insight">
+    funnelId?: IntFilter<"Insight"> | number
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+    submissions?: InsightSubmissionListRelationFilter
+  }, "id">
+
+  export type InsightOrderByWithAggregationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    content?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: InsightCountOrderByAggregateInput
+    _avg?: InsightAvgOrderByAggregateInput
+    _max?: InsightMaxOrderByAggregateInput
+    _min?: InsightMinOrderByAggregateInput
+    _sum?: InsightSumOrderByAggregateInput
+  }
+
+  export type InsightScalarWhereWithAggregatesInput = {
+    AND?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    OR?: InsightScalarWhereWithAggregatesInput[]
+    NOT?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Insight"> | number
+    type?: EnumInsightTypeWithAggregatesFilter<"Insight"> | $Enums.InsightType
+    name?: StringWithAggregatesFilter<"Insight"> | string
+    description?: StringNullableWithAggregatesFilter<"Insight"> | string | null
+    content?: JsonWithAggregatesFilter<"Insight">
+    settings?: JsonNullableWithAggregatesFilter<"Insight">
+    funnelId?: IntWithAggregatesFilter<"Insight"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Insight"> | Date | string
+  }
+
+  export type InsightSubmissionWhereInput = {
+    AND?: InsightSubmissionWhereInput | InsightSubmissionWhereInput[]
+    OR?: InsightSubmissionWhereInput[]
+    NOT?: InsightSubmissionWhereInput | InsightSubmissionWhereInput[]
+    id?: IntFilter<"InsightSubmission"> | number
+    insightId?: IntFilter<"InsightSubmission"> | number
+    sessionId?: StringFilter<"InsightSubmission"> | string
+    answers?: JsonNullableFilter<"InsightSubmission">
+    completedAt?: DateTimeNullableFilter<"InsightSubmission"> | Date | string | null
+    createdAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+    insight?: XOR<InsightScalarRelationFilter, InsightWhereInput>
+    session?: XOR<SessionScalarRelationFilter, SessionWhereInput>
+  }
+
+  export type InsightSubmissionOrderByWithRelationInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+    sessionId?: SortOrder
+    answers?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    insight?: InsightOrderByWithRelationInput
+    session?: SessionOrderByWithRelationInput
+  }
+
+  export type InsightSubmissionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    insightId_sessionId?: InsightSubmissionInsightIdSessionIdCompoundUniqueInput
+    AND?: InsightSubmissionWhereInput | InsightSubmissionWhereInput[]
+    OR?: InsightSubmissionWhereInput[]
+    NOT?: InsightSubmissionWhereInput | InsightSubmissionWhereInput[]
+    insightId?: IntFilter<"InsightSubmission"> | number
+    sessionId?: StringFilter<"InsightSubmission"> | string
+    answers?: JsonNullableFilter<"InsightSubmission">
+    completedAt?: DateTimeNullableFilter<"InsightSubmission"> | Date | string | null
+    createdAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+    insight?: XOR<InsightScalarRelationFilter, InsightWhereInput>
+    session?: XOR<SessionScalarRelationFilter, SessionWhereInput>
+  }, "id" | "insightId_sessionId">
+
+  export type InsightSubmissionOrderByWithAggregationInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+    sessionId?: SortOrder
+    answers?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: InsightSubmissionCountOrderByAggregateInput
+    _avg?: InsightSubmissionAvgOrderByAggregateInput
+    _max?: InsightSubmissionMaxOrderByAggregateInput
+    _min?: InsightSubmissionMinOrderByAggregateInput
+    _sum?: InsightSubmissionSumOrderByAggregateInput
+  }
+
+  export type InsightSubmissionScalarWhereWithAggregatesInput = {
+    AND?: InsightSubmissionScalarWhereWithAggregatesInput | InsightSubmissionScalarWhereWithAggregatesInput[]
+    OR?: InsightSubmissionScalarWhereWithAggregatesInput[]
+    NOT?: InsightSubmissionScalarWhereWithAggregatesInput | InsightSubmissionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"InsightSubmission"> | number
+    insightId?: IntWithAggregatesFilter<"InsightSubmission"> | number
+    sessionId?: StringWithAggregatesFilter<"InsightSubmission"> | string
+    answers?: JsonNullableWithAggregatesFilter<"InsightSubmission">
+    completedAt?: DateTimeNullableWithAggregatesFilter<"InsightSubmission"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"InsightSubmission"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"InsightSubmission"> | Date | string
   }
 
   export type TemplateCategoryWhereInput = {
@@ -24927,6 +29297,13 @@ export namespace Prisma {
     formContent?: JsonFilter<"Form">
     isActive?: BoolFilter<"Form"> | boolean
     funnelId?: IntNullableFilter<"Form"> | number | null
+    webhookUrl?: StringNullableFilter<"Form"> | string | null
+    webhookEnabled?: BoolFilter<"Form"> | boolean
+    webhookHeaders?: JsonNullableFilter<"Form">
+    webhookSecret?: StringNullableFilter<"Form"> | string | null
+    webhookSuccessCount?: IntFilter<"Form"> | number
+    webhookFailureCount?: IntFilter<"Form"> | number
+    lastWebhookAt?: DateTimeNullableFilter<"Form"> | Date | string | null
     createdAt?: DateTimeFilter<"Form"> | Date | string
     updatedAt?: DateTimeFilter<"Form"> | Date | string
     submissions?: FormSubmissionListRelationFilter
@@ -24939,6 +29316,13 @@ export namespace Prisma {
     formContent?: SortOrder
     isActive?: SortOrder
     funnelId?: SortOrderInput | SortOrder
+    webhookUrl?: SortOrderInput | SortOrder
+    webhookEnabled?: SortOrder
+    webhookHeaders?: SortOrderInput | SortOrder
+    webhookSecret?: SortOrderInput | SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
+    lastWebhookAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     submissions?: FormSubmissionOrderByRelationAggregateInput
@@ -24954,6 +29338,13 @@ export namespace Prisma {
     formContent?: JsonFilter<"Form">
     isActive?: BoolFilter<"Form"> | boolean
     funnelId?: IntNullableFilter<"Form"> | number | null
+    webhookUrl?: StringNullableFilter<"Form"> | string | null
+    webhookEnabled?: BoolFilter<"Form"> | boolean
+    webhookHeaders?: JsonNullableFilter<"Form">
+    webhookSecret?: StringNullableFilter<"Form"> | string | null
+    webhookSuccessCount?: IntFilter<"Form"> | number
+    webhookFailureCount?: IntFilter<"Form"> | number
+    lastWebhookAt?: DateTimeNullableFilter<"Form"> | Date | string | null
     createdAt?: DateTimeFilter<"Form"> | Date | string
     updatedAt?: DateTimeFilter<"Form"> | Date | string
     submissions?: FormSubmissionListRelationFilter
@@ -24966,6 +29357,13 @@ export namespace Prisma {
     formContent?: SortOrder
     isActive?: SortOrder
     funnelId?: SortOrderInput | SortOrder
+    webhookUrl?: SortOrderInput | SortOrder
+    webhookEnabled?: SortOrder
+    webhookHeaders?: SortOrderInput | SortOrder
+    webhookSecret?: SortOrderInput | SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
+    lastWebhookAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: FormCountOrderByAggregateInput
@@ -24985,6 +29383,13 @@ export namespace Prisma {
     formContent?: JsonWithAggregatesFilter<"Form">
     isActive?: BoolWithAggregatesFilter<"Form"> | boolean
     funnelId?: IntNullableWithAggregatesFilter<"Form"> | number | null
+    webhookUrl?: StringNullableWithAggregatesFilter<"Form"> | string | null
+    webhookEnabled?: BoolWithAggregatesFilter<"Form"> | boolean
+    webhookHeaders?: JsonNullableWithAggregatesFilter<"Form">
+    webhookSecret?: StringNullableWithAggregatesFilter<"Form"> | string | null
+    webhookSuccessCount?: IntWithAggregatesFilter<"Form"> | number
+    webhookFailureCount?: IntWithAggregatesFilter<"Form"> | number
+    lastWebhookAt?: DateTimeNullableWithAggregatesFilter<"Form"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Form"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Form"> | Date | string
   }
@@ -25065,12 +29470,142 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"FormSubmission"> | Date | string
   }
 
+  export type FunnelSettingsWhereInput = {
+    AND?: FunnelSettingsWhereInput | FunnelSettingsWhereInput[]
+    OR?: FunnelSettingsWhereInput[]
+    NOT?: FunnelSettingsWhereInput | FunnelSettingsWhereInput[]
+    id?: IntFilter<"FunnelSettings"> | number
+    funnelId?: IntFilter<"FunnelSettings"> | number
+    defaultSeoTitle?: StringNullableFilter<"FunnelSettings"> | string | null
+    defaultSeoDescription?: StringNullableFilter<"FunnelSettings"> | string | null
+    defaultSeoKeywords?: StringNullableFilter<"FunnelSettings"> | string | null
+    favicon?: StringNullableFilter<"FunnelSettings"> | string | null
+    ogImage?: StringNullableFilter<"FunnelSettings"> | string | null
+    googleAnalyticsId?: StringNullableFilter<"FunnelSettings"> | string | null
+    facebookPixelId?: StringNullableFilter<"FunnelSettings"> | string | null
+    customTrackingScripts?: JsonNullableFilter<"FunnelSettings">
+    enableCookieConsent?: BoolFilter<"FunnelSettings"> | boolean
+    cookieConsentText?: StringNullableFilter<"FunnelSettings"> | string | null
+    privacyPolicyUrl?: StringNullableFilter<"FunnelSettings"> | string | null
+    termsOfServiceUrl?: StringNullableFilter<"FunnelSettings"> | string | null
+    language?: StringNullableFilter<"FunnelSettings"> | string | null
+    timezone?: StringNullableFilter<"FunnelSettings"> | string | null
+    dateFormat?: StringNullableFilter<"FunnelSettings"> | string | null
+    createdAt?: DateTimeFilter<"FunnelSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"FunnelSettings"> | Date | string
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+  }
+
+  export type FunnelSettingsOrderByWithRelationInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+    defaultSeoTitle?: SortOrderInput | SortOrder
+    defaultSeoDescription?: SortOrderInput | SortOrder
+    defaultSeoKeywords?: SortOrderInput | SortOrder
+    favicon?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
+    googleAnalyticsId?: SortOrderInput | SortOrder
+    facebookPixelId?: SortOrderInput | SortOrder
+    customTrackingScripts?: SortOrderInput | SortOrder
+    enableCookieConsent?: SortOrder
+    cookieConsentText?: SortOrderInput | SortOrder
+    privacyPolicyUrl?: SortOrderInput | SortOrder
+    termsOfServiceUrl?: SortOrderInput | SortOrder
+    language?: SortOrderInput | SortOrder
+    timezone?: SortOrderInput | SortOrder
+    dateFormat?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    funnel?: FunnelOrderByWithRelationInput
+  }
+
+  export type FunnelSettingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    funnelId?: number
+    AND?: FunnelSettingsWhereInput | FunnelSettingsWhereInput[]
+    OR?: FunnelSettingsWhereInput[]
+    NOT?: FunnelSettingsWhereInput | FunnelSettingsWhereInput[]
+    defaultSeoTitle?: StringNullableFilter<"FunnelSettings"> | string | null
+    defaultSeoDescription?: StringNullableFilter<"FunnelSettings"> | string | null
+    defaultSeoKeywords?: StringNullableFilter<"FunnelSettings"> | string | null
+    favicon?: StringNullableFilter<"FunnelSettings"> | string | null
+    ogImage?: StringNullableFilter<"FunnelSettings"> | string | null
+    googleAnalyticsId?: StringNullableFilter<"FunnelSettings"> | string | null
+    facebookPixelId?: StringNullableFilter<"FunnelSettings"> | string | null
+    customTrackingScripts?: JsonNullableFilter<"FunnelSettings">
+    enableCookieConsent?: BoolFilter<"FunnelSettings"> | boolean
+    cookieConsentText?: StringNullableFilter<"FunnelSettings"> | string | null
+    privacyPolicyUrl?: StringNullableFilter<"FunnelSettings"> | string | null
+    termsOfServiceUrl?: StringNullableFilter<"FunnelSettings"> | string | null
+    language?: StringNullableFilter<"FunnelSettings"> | string | null
+    timezone?: StringNullableFilter<"FunnelSettings"> | string | null
+    dateFormat?: StringNullableFilter<"FunnelSettings"> | string | null
+    createdAt?: DateTimeFilter<"FunnelSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"FunnelSettings"> | Date | string
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+  }, "id" | "funnelId">
+
+  export type FunnelSettingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+    defaultSeoTitle?: SortOrderInput | SortOrder
+    defaultSeoDescription?: SortOrderInput | SortOrder
+    defaultSeoKeywords?: SortOrderInput | SortOrder
+    favicon?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
+    googleAnalyticsId?: SortOrderInput | SortOrder
+    facebookPixelId?: SortOrderInput | SortOrder
+    customTrackingScripts?: SortOrderInput | SortOrder
+    enableCookieConsent?: SortOrder
+    cookieConsentText?: SortOrderInput | SortOrder
+    privacyPolicyUrl?: SortOrderInput | SortOrder
+    termsOfServiceUrl?: SortOrderInput | SortOrder
+    language?: SortOrderInput | SortOrder
+    timezone?: SortOrderInput | SortOrder
+    dateFormat?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FunnelSettingsCountOrderByAggregateInput
+    _avg?: FunnelSettingsAvgOrderByAggregateInput
+    _max?: FunnelSettingsMaxOrderByAggregateInput
+    _min?: FunnelSettingsMinOrderByAggregateInput
+    _sum?: FunnelSettingsSumOrderByAggregateInput
+  }
+
+  export type FunnelSettingsScalarWhereWithAggregatesInput = {
+    AND?: FunnelSettingsScalarWhereWithAggregatesInput | FunnelSettingsScalarWhereWithAggregatesInput[]
+    OR?: FunnelSettingsScalarWhereWithAggregatesInput[]
+    NOT?: FunnelSettingsScalarWhereWithAggregatesInput | FunnelSettingsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"FunnelSettings"> | number
+    funnelId?: IntWithAggregatesFilter<"FunnelSettings"> | number
+    defaultSeoTitle?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    defaultSeoDescription?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    defaultSeoKeywords?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    favicon?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    ogImage?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    googleAnalyticsId?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    facebookPixelId?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    customTrackingScripts?: JsonNullableWithAggregatesFilter<"FunnelSettings">
+    enableCookieConsent?: BoolWithAggregatesFilter<"FunnelSettings"> | boolean
+    cookieConsentText?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    privacyPolicyUrl?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    termsOfServiceUrl?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    language?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    timezone?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    dateFormat?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FunnelSettings"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FunnelSettings"> | Date | string
+  }
+
   export type UserCreateInput = {
     email: string
     username: string
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -25095,6 +29630,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -25118,6 +29656,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -25142,6 +29683,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -25166,6 +29710,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -25183,6 +29730,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -25201,6 +29751,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -25394,6 +29947,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateInput = {
@@ -25408,6 +29963,8 @@ export namespace Prisma {
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUpdateInput = {
@@ -25421,6 +29978,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateInput = {
@@ -25435,6 +29994,8 @@ export namespace Prisma {
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelCreateManyInput = {
@@ -25797,6 +30358,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     formSubmissions?: FormSubmissionCreateNestedManyWithoutSessionInput
+    insightSubmissions?: InsightSubmissionCreateNestedManyWithoutSessionInput
   }
 
   export type SessionUncheckedCreateInput = {
@@ -25808,6 +30370,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutSessionInput
+    insightSubmissions?: InsightSubmissionUncheckedCreateNestedManyWithoutSessionInput
   }
 
   export type SessionUpdateInput = {
@@ -25819,6 +30382,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     formSubmissions?: FormSubmissionUpdateManyWithoutSessionNestedInput
+    insightSubmissions?: InsightSubmissionUpdateManyWithoutSessionNestedInput
   }
 
   export type SessionUncheckedUpdateInput = {
@@ -25830,6 +30394,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutSessionNestedInput
+    insightSubmissions?: InsightSubmissionUncheckedUpdateManyWithoutSessionNestedInput
   }
 
   export type SessionCreateManyInput = {
@@ -25964,6 +30529,155 @@ export namespace Prisma {
     optionColor?: StringFieldUpdateOperationsInput | string
     fontFamily?: StringFieldUpdateOperationsInput | string
     borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightCreateInput = {
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnel: FunnelCreateNestedOneWithoutInsightsInput
+    submissions?: InsightSubmissionCreateNestedManyWithoutInsightInput
+  }
+
+  export type InsightUncheckedCreateInput = {
+    id?: number
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submissions?: InsightSubmissionUncheckedCreateNestedManyWithoutInsightInput
+  }
+
+  export type InsightUpdateInput = {
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnel?: FunnelUpdateOneRequiredWithoutInsightsNestedInput
+    submissions?: InsightSubmissionUpdateManyWithoutInsightNestedInput
+  }
+
+  export type InsightUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submissions?: InsightSubmissionUncheckedUpdateManyWithoutInsightNestedInput
+  }
+
+  export type InsightCreateManyInput = {
+    id?: number
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightUpdateManyMutationInput = {
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionCreateInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    insight: InsightCreateNestedOneWithoutSubmissionsInput
+    session: SessionCreateNestedOneWithoutInsightSubmissionsInput
+  }
+
+  export type InsightSubmissionUncheckedCreateInput = {
+    id?: number
+    insightId: number
+    sessionId: string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightSubmissionUpdateInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    insight?: InsightUpdateOneRequiredWithoutSubmissionsNestedInput
+    session?: SessionUpdateOneRequiredWithoutInsightSubmissionsNestedInput
+  }
+
+  export type InsightSubmissionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    insightId?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionCreateManyInput = {
+    id?: number
+    insightId: number
+    sessionId: string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightSubmissionUpdateManyMutationInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    insightId?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26449,6 +31163,13 @@ export namespace Prisma {
     formContent: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     funnelId?: number | null
+    webhookUrl?: string | null
+    webhookEnabled?: boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: string | null
+    webhookSuccessCount?: number
+    webhookFailureCount?: number
+    lastWebhookAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     submissions?: FormSubmissionCreateNestedManyWithoutFormInput
@@ -26461,6 +31182,13 @@ export namespace Prisma {
     formContent: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     funnelId?: number | null
+    webhookUrl?: string | null
+    webhookEnabled?: boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: string | null
+    webhookSuccessCount?: number
+    webhookFailureCount?: number
+    lastWebhookAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     submissions?: FormSubmissionUncheckedCreateNestedManyWithoutFormInput
@@ -26472,6 +31200,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: FormSubmissionUpdateManyWithoutFormNestedInput
@@ -26484,6 +31219,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: FormSubmissionUncheckedUpdateManyWithoutFormNestedInput
@@ -26496,6 +31238,13 @@ export namespace Prisma {
     formContent: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     funnelId?: number | null
+    webhookUrl?: string | null
+    webhookEnabled?: boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: string | null
+    webhookSuccessCount?: number
+    webhookFailureCount?: number
+    lastWebhookAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -26506,6 +31255,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26517,6 +31273,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26593,6 +31356,156 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FunnelSettingsCreateInput = {
+    defaultSeoTitle?: string | null
+    defaultSeoDescription?: string | null
+    defaultSeoKeywords?: string | null
+    favicon?: string | null
+    ogImage?: string | null
+    googleAnalyticsId?: string | null
+    facebookPixelId?: string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: boolean
+    cookieConsentText?: string | null
+    privacyPolicyUrl?: string | null
+    termsOfServiceUrl?: string | null
+    language?: string | null
+    timezone?: string | null
+    dateFormat?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnel: FunnelCreateNestedOneWithoutSettingsInput
+  }
+
+  export type FunnelSettingsUncheckedCreateInput = {
+    id?: number
+    funnelId: number
+    defaultSeoTitle?: string | null
+    defaultSeoDescription?: string | null
+    defaultSeoKeywords?: string | null
+    favicon?: string | null
+    ogImage?: string | null
+    googleAnalyticsId?: string | null
+    facebookPixelId?: string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: boolean
+    cookieConsentText?: string | null
+    privacyPolicyUrl?: string | null
+    termsOfServiceUrl?: string | null
+    language?: string | null
+    timezone?: string | null
+    dateFormat?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FunnelSettingsUpdateInput = {
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnel?: FunnelUpdateOneRequiredWithoutSettingsNestedInput
+  }
+
+  export type FunnelSettingsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    funnelId?: IntFieldUpdateOperationsInput | number
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FunnelSettingsCreateManyInput = {
+    id?: number
+    funnelId: number
+    defaultSeoTitle?: string | null
+    defaultSeoDescription?: string | null
+    defaultSeoKeywords?: string | null
+    favicon?: string | null
+    ogImage?: string | null
+    googleAnalyticsId?: string | null
+    facebookPixelId?: string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: boolean
+    cookieConsentText?: string | null
+    privacyPolicyUrl?: string | null
+    termsOfServiceUrl?: string | null
+    language?: string | null
+    timezone?: string | null
+    dateFormat?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FunnelSettingsUpdateManyMutationInput = {
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FunnelSettingsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    funnelId?: IntFieldUpdateOperationsInput | number
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -26619,6 +31532,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -26643,11 +31561,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type EnumUserPlanFilter<$PrismaModel = never> = {
@@ -26740,6 +31653,9 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     password?: SortOrder
+    verified?: SortOrder
+    verificationToken?: SortOrder
+    verificationTokenExpiresAt?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
@@ -26765,6 +31681,9 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     password?: SortOrder
+    verified?: SortOrder
+    verificationToken?: SortOrder
+    verificationTokenExpiresAt?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
@@ -26783,6 +31702,9 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     password?: SortOrder
+    verified?: SortOrder
+    verificationToken?: SortOrder
+    verificationTokenExpiresAt?: SortOrder
     passwordResetToken?: SortOrder
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
@@ -26835,6 +31757,14 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -26865,14 +31795,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumUserPlanWithAggregatesFilter<$PrismaModel = never> = {
@@ -27119,11 +32041,26 @@ export namespace Prisma {
     none?: PageWhereInput
   }
 
+  export type FunnelSettingsNullableScalarRelationFilter = {
+    is?: FunnelSettingsWhereInput | null
+    isNot?: FunnelSettingsWhereInput | null
+  }
+
+  export type InsightListRelationFilter = {
+    every?: InsightWhereInput
+    some?: InsightWhereInput
+    none?: InsightWhereInput
+  }
+
   export type FunnelDomainOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type PageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InsightOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27494,7 +32431,17 @@ export namespace Prisma {
     none?: FormSubmissionWhereInput
   }
 
+  export type InsightSubmissionListRelationFilter = {
+    every?: InsightSubmissionWhereInput
+    some?: InsightSubmissionWhereInput
+    none?: InsightSubmissionWhereInput
+  }
+
   export type FormSubmissionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InsightSubmissionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27633,6 +32580,118 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBorderRadiusFilter<$PrismaModel>
     _max?: NestedEnumBorderRadiusFilter<$PrismaModel>
+  }
+
+  export type EnumInsightTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.InsightType | EnumInsightTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInsightTypeFilter<$PrismaModel> | $Enums.InsightType
+  }
+
+  export type InsightCountOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    content?: SortOrder
+    settings?: SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightAvgOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+  }
+
+  export type InsightMaxOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightMinOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    funnelId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightSumOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+  }
+
+  export type EnumInsightTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InsightType | EnumInsightTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInsightTypeWithAggregatesFilter<$PrismaModel> | $Enums.InsightType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInsightTypeFilter<$PrismaModel>
+    _max?: NestedEnumInsightTypeFilter<$PrismaModel>
+  }
+
+  export type InsightScalarRelationFilter = {
+    is?: InsightWhereInput
+    isNot?: InsightWhereInput
+  }
+
+  export type SessionScalarRelationFilter = {
+    is?: SessionWhereInput
+    isNot?: SessionWhereInput
+  }
+
+  export type InsightSubmissionInsightIdSessionIdCompoundUniqueInput = {
+    insightId: number
+    sessionId: string
+  }
+
+  export type InsightSubmissionCountOrderByAggregateInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+    sessionId?: SortOrder
+    answers?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightSubmissionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+  }
+
+  export type InsightSubmissionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+    sessionId?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightSubmissionMinOrderByAggregateInput = {
+    id?: SortOrder
+    insightId?: SortOrder
+    sessionId?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InsightSubmissionSumOrderByAggregateInput = {
+    id?: SortOrder
+    insightId?: SortOrder
   }
 
   export type TemplateCategoryCountOrderByAggregateInput = {
@@ -27988,6 +33047,13 @@ export namespace Prisma {
     formContent?: SortOrder
     isActive?: SortOrder
     funnelId?: SortOrder
+    webhookUrl?: SortOrder
+    webhookEnabled?: SortOrder
+    webhookHeaders?: SortOrder
+    webhookSecret?: SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
+    lastWebhookAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -27995,6 +33061,8 @@ export namespace Prisma {
   export type FormAvgOrderByAggregateInput = {
     id?: SortOrder
     funnelId?: SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
   }
 
   export type FormMaxOrderByAggregateInput = {
@@ -28003,6 +33071,12 @@ export namespace Prisma {
     description?: SortOrder
     isActive?: SortOrder
     funnelId?: SortOrder
+    webhookUrl?: SortOrder
+    webhookEnabled?: SortOrder
+    webhookSecret?: SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
+    lastWebhookAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28013,6 +33087,12 @@ export namespace Prisma {
     description?: SortOrder
     isActive?: SortOrder
     funnelId?: SortOrder
+    webhookUrl?: SortOrder
+    webhookEnabled?: SortOrder
+    webhookSecret?: SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
+    lastWebhookAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28020,16 +33100,13 @@ export namespace Prisma {
   export type FormSumOrderByAggregateInput = {
     id?: SortOrder
     funnelId?: SortOrder
+    webhookSuccessCount?: SortOrder
+    webhookFailureCount?: SortOrder
   }
 
   export type FormScalarRelationFilter = {
     is?: FormWhereInput
     isNot?: FormWhereInput
-  }
-
-  export type SessionScalarRelationFilter = {
-    is?: SessionWhereInput
-    isNot?: SessionWhereInput
   }
 
   export type FormSubmissionFormIdSessionIdCompoundUniqueInput = {
@@ -28076,6 +33153,80 @@ export namespace Prisma {
   export type FormSubmissionSumOrderByAggregateInput = {
     id?: SortOrder
     formId?: SortOrder
+  }
+
+  export type FunnelSettingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+    defaultSeoTitle?: SortOrder
+    defaultSeoDescription?: SortOrder
+    defaultSeoKeywords?: SortOrder
+    favicon?: SortOrder
+    ogImage?: SortOrder
+    googleAnalyticsId?: SortOrder
+    facebookPixelId?: SortOrder
+    customTrackingScripts?: SortOrder
+    enableCookieConsent?: SortOrder
+    cookieConsentText?: SortOrder
+    privacyPolicyUrl?: SortOrder
+    termsOfServiceUrl?: SortOrder
+    language?: SortOrder
+    timezone?: SortOrder
+    dateFormat?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FunnelSettingsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+  }
+
+  export type FunnelSettingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+    defaultSeoTitle?: SortOrder
+    defaultSeoDescription?: SortOrder
+    defaultSeoKeywords?: SortOrder
+    favicon?: SortOrder
+    ogImage?: SortOrder
+    googleAnalyticsId?: SortOrder
+    facebookPixelId?: SortOrder
+    enableCookieConsent?: SortOrder
+    cookieConsentText?: SortOrder
+    privacyPolicyUrl?: SortOrder
+    termsOfServiceUrl?: SortOrder
+    language?: SortOrder
+    timezone?: SortOrder
+    dateFormat?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FunnelSettingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
+    defaultSeoTitle?: SortOrder
+    defaultSeoDescription?: SortOrder
+    defaultSeoKeywords?: SortOrder
+    favicon?: SortOrder
+    ogImage?: SortOrder
+    googleAnalyticsId?: SortOrder
+    facebookPixelId?: SortOrder
+    enableCookieConsent?: SortOrder
+    cookieConsentText?: SortOrder
+    privacyPolicyUrl?: SortOrder
+    termsOfServiceUrl?: SortOrder
+    language?: SortOrder
+    timezone?: SortOrder
+    dateFormat?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FunnelSettingsSumOrderByAggregateInput = {
+    id?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type WorkspaceMemberCreateNestedManyWithoutUserInput = {
@@ -28166,16 +33317,16 @@ export namespace Prisma {
     set?: string
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type EnumUserPlanFieldUpdateOperationsInput = {
@@ -28575,6 +33726,19 @@ export namespace Prisma {
     connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
   }
 
+  export type FunnelSettingsCreateNestedOneWithoutFunnelInput = {
+    create?: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: FunnelSettingsCreateOrConnectWithoutFunnelInput
+    connect?: FunnelSettingsWhereUniqueInput
+  }
+
+  export type InsightCreateNestedManyWithoutFunnelInput = {
+    create?: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput> | InsightCreateWithoutFunnelInput[] | InsightUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutFunnelInput | InsightCreateOrConnectWithoutFunnelInput[]
+    createMany?: InsightCreateManyFunnelInputEnvelope
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+  }
+
   export type FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput = {
     create?: XOR<FunnelDomainCreateWithoutFunnelInput, FunnelDomainUncheckedCreateWithoutFunnelInput> | FunnelDomainCreateWithoutFunnelInput[] | FunnelDomainUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: FunnelDomainCreateOrConnectWithoutFunnelInput | FunnelDomainCreateOrConnectWithoutFunnelInput[]
@@ -28587,6 +33751,19 @@ export namespace Prisma {
     connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
     createMany?: PageCreateManyFunnelInputEnvelope
     connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+  }
+
+  export type FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput = {
+    create?: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: FunnelSettingsCreateOrConnectWithoutFunnelInput
+    connect?: FunnelSettingsWhereUniqueInput
+  }
+
+  export type InsightUncheckedCreateNestedManyWithoutFunnelInput = {
+    create?: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput> | InsightCreateWithoutFunnelInput[] | InsightUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutFunnelInput | InsightCreateOrConnectWithoutFunnelInput[]
+    createMany?: InsightCreateManyFunnelInputEnvelope
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
   }
 
   export type EnumFunnelStatusFieldUpdateOperationsInput = {
@@ -28647,6 +33824,30 @@ export namespace Prisma {
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
   }
 
+  export type FunnelSettingsUpdateOneWithoutFunnelNestedInput = {
+    create?: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: FunnelSettingsCreateOrConnectWithoutFunnelInput
+    upsert?: FunnelSettingsUpsertWithoutFunnelInput
+    disconnect?: FunnelSettingsWhereInput | boolean
+    delete?: FunnelSettingsWhereInput | boolean
+    connect?: FunnelSettingsWhereUniqueInput
+    update?: XOR<XOR<FunnelSettingsUpdateToOneWithWhereWithoutFunnelInput, FunnelSettingsUpdateWithoutFunnelInput>, FunnelSettingsUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type InsightUpdateManyWithoutFunnelNestedInput = {
+    create?: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput> | InsightCreateWithoutFunnelInput[] | InsightUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutFunnelInput | InsightCreateOrConnectWithoutFunnelInput[]
+    upsert?: InsightUpsertWithWhereUniqueWithoutFunnelInput | InsightUpsertWithWhereUniqueWithoutFunnelInput[]
+    createMany?: InsightCreateManyFunnelInputEnvelope
+    set?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    disconnect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    delete?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    update?: InsightUpdateWithWhereUniqueWithoutFunnelInput | InsightUpdateWithWhereUniqueWithoutFunnelInput[]
+    updateMany?: InsightUpdateManyWithWhereWithoutFunnelInput | InsightUpdateManyWithWhereWithoutFunnelInput[]
+    deleteMany?: InsightScalarWhereInput | InsightScalarWhereInput[]
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -28681,6 +33882,30 @@ export namespace Prisma {
     update?: PageUpdateWithWhereUniqueWithoutFunnelInput | PageUpdateWithWhereUniqueWithoutFunnelInput[]
     updateMany?: PageUpdateManyWithWhereWithoutFunnelInput | PageUpdateManyWithWhereWithoutFunnelInput[]
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
+  }
+
+  export type FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput = {
+    create?: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: FunnelSettingsCreateOrConnectWithoutFunnelInput
+    upsert?: FunnelSettingsUpsertWithoutFunnelInput
+    disconnect?: FunnelSettingsWhereInput | boolean
+    delete?: FunnelSettingsWhereInput | boolean
+    connect?: FunnelSettingsWhereUniqueInput
+    update?: XOR<XOR<FunnelSettingsUpdateToOneWithWhereWithoutFunnelInput, FunnelSettingsUpdateWithoutFunnelInput>, FunnelSettingsUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type InsightUncheckedUpdateManyWithoutFunnelNestedInput = {
+    create?: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput> | InsightCreateWithoutFunnelInput[] | InsightUncheckedCreateWithoutFunnelInput[]
+    connectOrCreate?: InsightCreateOrConnectWithoutFunnelInput | InsightCreateOrConnectWithoutFunnelInput[]
+    upsert?: InsightUpsertWithWhereUniqueWithoutFunnelInput | InsightUpsertWithWhereUniqueWithoutFunnelInput[]
+    createMany?: InsightCreateManyFunnelInputEnvelope
+    set?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    disconnect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    delete?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    connect?: InsightWhereUniqueInput | InsightWhereUniqueInput[]
+    update?: InsightUpdateWithWhereUniqueWithoutFunnelInput | InsightUpdateWithWhereUniqueWithoutFunnelInput[]
+    updateMany?: InsightUpdateManyWithWhereWithoutFunnelInput | InsightUpdateManyWithWhereWithoutFunnelInput[]
+    deleteMany?: InsightScalarWhereInput | InsightScalarWhereInput[]
   }
 
   export type WorkspaceCreateNestedOneWithoutDomainsInput = {
@@ -28818,11 +34043,25 @@ export namespace Prisma {
     connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
   }
 
+  export type InsightSubmissionCreateNestedManyWithoutSessionInput = {
+    create?: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput> | InsightSubmissionCreateWithoutSessionInput[] | InsightSubmissionUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutSessionInput | InsightSubmissionCreateOrConnectWithoutSessionInput[]
+    createMany?: InsightSubmissionCreateManySessionInputEnvelope
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+  }
+
   export type FormSubmissionUncheckedCreateNestedManyWithoutSessionInput = {
     create?: XOR<FormSubmissionCreateWithoutSessionInput, FormSubmissionUncheckedCreateWithoutSessionInput> | FormSubmissionCreateWithoutSessionInput[] | FormSubmissionUncheckedCreateWithoutSessionInput[]
     connectOrCreate?: FormSubmissionCreateOrConnectWithoutSessionInput | FormSubmissionCreateOrConnectWithoutSessionInput[]
     createMany?: FormSubmissionCreateManySessionInputEnvelope
     connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+  }
+
+  export type InsightSubmissionUncheckedCreateNestedManyWithoutSessionInput = {
+    create?: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput> | InsightSubmissionCreateWithoutSessionInput[] | InsightSubmissionUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutSessionInput | InsightSubmissionCreateOrConnectWithoutSessionInput[]
+    createMany?: InsightSubmissionCreateManySessionInputEnvelope
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
   }
 
   export type SessionUpdatevisitedPagesInput = {
@@ -28844,6 +34083,20 @@ export namespace Prisma {
     deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
   }
 
+  export type InsightSubmissionUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput> | InsightSubmissionCreateWithoutSessionInput[] | InsightSubmissionUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutSessionInput | InsightSubmissionCreateOrConnectWithoutSessionInput[]
+    upsert?: InsightSubmissionUpsertWithWhereUniqueWithoutSessionInput | InsightSubmissionUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: InsightSubmissionCreateManySessionInputEnvelope
+    set?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    disconnect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    delete?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    update?: InsightSubmissionUpdateWithWhereUniqueWithoutSessionInput | InsightSubmissionUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: InsightSubmissionUpdateManyWithWhereWithoutSessionInput | InsightSubmissionUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
+  }
+
   export type FormSubmissionUncheckedUpdateManyWithoutSessionNestedInput = {
     create?: XOR<FormSubmissionCreateWithoutSessionInput, FormSubmissionUncheckedCreateWithoutSessionInput> | FormSubmissionCreateWithoutSessionInput[] | FormSubmissionUncheckedCreateWithoutSessionInput[]
     connectOrCreate?: FormSubmissionCreateOrConnectWithoutSessionInput | FormSubmissionCreateOrConnectWithoutSessionInput[]
@@ -28856,6 +34109,20 @@ export namespace Prisma {
     update?: FormSubmissionUpdateWithWhereUniqueWithoutSessionInput | FormSubmissionUpdateWithWhereUniqueWithoutSessionInput[]
     updateMany?: FormSubmissionUpdateManyWithWhereWithoutSessionInput | FormSubmissionUpdateManyWithWhereWithoutSessionInput[]
     deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+  }
+
+  export type InsightSubmissionUncheckedUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput> | InsightSubmissionCreateWithoutSessionInput[] | InsightSubmissionUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutSessionInput | InsightSubmissionCreateOrConnectWithoutSessionInput[]
+    upsert?: InsightSubmissionUpsertWithWhereUniqueWithoutSessionInput | InsightSubmissionUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: InsightSubmissionCreateManySessionInputEnvelope
+    set?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    disconnect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    delete?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    update?: InsightSubmissionUpdateWithWhereUniqueWithoutSessionInput | InsightSubmissionUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: InsightSubmissionUpdateManyWithWhereWithoutSessionInput | InsightSubmissionUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
   }
 
   export type FunnelCreateNestedOneWithoutThemeInput = {
@@ -28892,6 +34159,94 @@ export namespace Prisma {
     delete?: FunnelWhereInput | boolean
     connect?: FunnelWhereUniqueInput
     update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutThemeInput, FunnelUpdateWithoutThemeInput>, FunnelUncheckedUpdateWithoutThemeInput>
+  }
+
+  export type FunnelCreateNestedOneWithoutInsightsInput = {
+    create?: XOR<FunnelCreateWithoutInsightsInput, FunnelUncheckedCreateWithoutInsightsInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutInsightsInput
+    connect?: FunnelWhereUniqueInput
+  }
+
+  export type InsightSubmissionCreateNestedManyWithoutInsightInput = {
+    create?: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput> | InsightSubmissionCreateWithoutInsightInput[] | InsightSubmissionUncheckedCreateWithoutInsightInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutInsightInput | InsightSubmissionCreateOrConnectWithoutInsightInput[]
+    createMany?: InsightSubmissionCreateManyInsightInputEnvelope
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+  }
+
+  export type InsightSubmissionUncheckedCreateNestedManyWithoutInsightInput = {
+    create?: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput> | InsightSubmissionCreateWithoutInsightInput[] | InsightSubmissionUncheckedCreateWithoutInsightInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutInsightInput | InsightSubmissionCreateOrConnectWithoutInsightInput[]
+    createMany?: InsightSubmissionCreateManyInsightInputEnvelope
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+  }
+
+  export type EnumInsightTypeFieldUpdateOperationsInput = {
+    set?: $Enums.InsightType
+  }
+
+  export type FunnelUpdateOneRequiredWithoutInsightsNestedInput = {
+    create?: XOR<FunnelCreateWithoutInsightsInput, FunnelUncheckedCreateWithoutInsightsInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutInsightsInput
+    upsert?: FunnelUpsertWithoutInsightsInput
+    connect?: FunnelWhereUniqueInput
+    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutInsightsInput, FunnelUpdateWithoutInsightsInput>, FunnelUncheckedUpdateWithoutInsightsInput>
+  }
+
+  export type InsightSubmissionUpdateManyWithoutInsightNestedInput = {
+    create?: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput> | InsightSubmissionCreateWithoutInsightInput[] | InsightSubmissionUncheckedCreateWithoutInsightInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutInsightInput | InsightSubmissionCreateOrConnectWithoutInsightInput[]
+    upsert?: InsightSubmissionUpsertWithWhereUniqueWithoutInsightInput | InsightSubmissionUpsertWithWhereUniqueWithoutInsightInput[]
+    createMany?: InsightSubmissionCreateManyInsightInputEnvelope
+    set?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    disconnect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    delete?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    update?: InsightSubmissionUpdateWithWhereUniqueWithoutInsightInput | InsightSubmissionUpdateWithWhereUniqueWithoutInsightInput[]
+    updateMany?: InsightSubmissionUpdateManyWithWhereWithoutInsightInput | InsightSubmissionUpdateManyWithWhereWithoutInsightInput[]
+    deleteMany?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
+  }
+
+  export type InsightSubmissionUncheckedUpdateManyWithoutInsightNestedInput = {
+    create?: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput> | InsightSubmissionCreateWithoutInsightInput[] | InsightSubmissionUncheckedCreateWithoutInsightInput[]
+    connectOrCreate?: InsightSubmissionCreateOrConnectWithoutInsightInput | InsightSubmissionCreateOrConnectWithoutInsightInput[]
+    upsert?: InsightSubmissionUpsertWithWhereUniqueWithoutInsightInput | InsightSubmissionUpsertWithWhereUniqueWithoutInsightInput[]
+    createMany?: InsightSubmissionCreateManyInsightInputEnvelope
+    set?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    disconnect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    delete?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    connect?: InsightSubmissionWhereUniqueInput | InsightSubmissionWhereUniqueInput[]
+    update?: InsightSubmissionUpdateWithWhereUniqueWithoutInsightInput | InsightSubmissionUpdateWithWhereUniqueWithoutInsightInput[]
+    updateMany?: InsightSubmissionUpdateManyWithWhereWithoutInsightInput | InsightSubmissionUpdateManyWithWhereWithoutInsightInput[]
+    deleteMany?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
+  }
+
+  export type InsightCreateNestedOneWithoutSubmissionsInput = {
+    create?: XOR<InsightCreateWithoutSubmissionsInput, InsightUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: InsightCreateOrConnectWithoutSubmissionsInput
+    connect?: InsightWhereUniqueInput
+  }
+
+  export type SessionCreateNestedOneWithoutInsightSubmissionsInput = {
+    create?: XOR<SessionCreateWithoutInsightSubmissionsInput, SessionUncheckedCreateWithoutInsightSubmissionsInput>
+    connectOrCreate?: SessionCreateOrConnectWithoutInsightSubmissionsInput
+    connect?: SessionWhereUniqueInput
+  }
+
+  export type InsightUpdateOneRequiredWithoutSubmissionsNestedInput = {
+    create?: XOR<InsightCreateWithoutSubmissionsInput, InsightUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: InsightCreateOrConnectWithoutSubmissionsInput
+    upsert?: InsightUpsertWithoutSubmissionsInput
+    connect?: InsightWhereUniqueInput
+    update?: XOR<XOR<InsightUpdateToOneWithWhereWithoutSubmissionsInput, InsightUpdateWithoutSubmissionsInput>, InsightUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type SessionUpdateOneRequiredWithoutInsightSubmissionsNestedInput = {
+    create?: XOR<SessionCreateWithoutInsightSubmissionsInput, SessionUncheckedCreateWithoutInsightSubmissionsInput>
+    connectOrCreate?: SessionCreateOrConnectWithoutInsightSubmissionsInput
+    upsert?: SessionUpsertWithoutInsightSubmissionsInput
+    connect?: SessionWhereUniqueInput
+    update?: XOR<XOR<SessionUpdateToOneWithWhereWithoutInsightSubmissionsInput, SessionUpdateWithoutInsightSubmissionsInput>, SessionUncheckedUpdateWithoutInsightSubmissionsInput>
   }
 
   export type TemplateCreateNestedManyWithoutCategoryInput = {
@@ -29231,6 +34586,20 @@ export namespace Prisma {
     update?: XOR<XOR<SessionUpdateToOneWithWhereWithoutFormSubmissionsInput, SessionUpdateWithoutFormSubmissionsInput>, SessionUncheckedUpdateWithoutFormSubmissionsInput>
   }
 
+  export type FunnelCreateNestedOneWithoutSettingsInput = {
+    create?: XOR<FunnelCreateWithoutSettingsInput, FunnelUncheckedCreateWithoutSettingsInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutSettingsInput
+    connect?: FunnelWhereUniqueInput
+  }
+
+  export type FunnelUpdateOneRequiredWithoutSettingsNestedInput = {
+    create?: XOR<FunnelCreateWithoutSettingsInput, FunnelUncheckedCreateWithoutSettingsInput>
+    connectOrCreate?: FunnelCreateOrConnectWithoutSettingsInput
+    upsert?: FunnelUpsertWithoutSettingsInput
+    connect?: FunnelWhereUniqueInput
+    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutSettingsInput, FunnelUpdateWithoutSettingsInput>, FunnelUncheckedUpdateWithoutSettingsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -29256,6 +34625,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -29279,11 +34653,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedEnumUserPlanFilter<$PrismaModel = never> = {
@@ -29348,6 +34717,14 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -29388,14 +34765,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumUserPlanWithAggregatesFilter<$PrismaModel = never> = {
@@ -29597,6 +34966,23 @@ export namespace Prisma {
     _max?: NestedEnumBorderRadiusFilter<$PrismaModel>
   }
 
+  export type NestedEnumInsightTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.InsightType | EnumInsightTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInsightTypeFilter<$PrismaModel> | $Enums.InsightType
+  }
+
+  export type NestedEnumInsightTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InsightType | EnumInsightTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InsightType[] | ListEnumInsightTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInsightTypeWithAggregatesFilter<$PrismaModel> | $Enums.InsightType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInsightTypeFilter<$PrismaModel>
+    _max?: NestedEnumInsightTypeFilter<$PrismaModel>
+  }
+
   export type NestedEnumTemplateImageTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.TemplateImageType | EnumTemplateImageTypeFieldRefInput<$PrismaModel>
     in?: $Enums.TemplateImageType[] | ListEnumTemplateImageTypeFieldRefInput<$PrismaModel>
@@ -29692,6 +35078,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutCreatorInput = {
@@ -29705,6 +35093,8 @@ export namespace Prisma {
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutCreatorInput = {
@@ -30040,6 +35430,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30063,6 +35456,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30121,6 +35517,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutWorkspaceInput = {
@@ -30134,6 +35532,8 @@ export namespace Prisma {
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutWorkspaceInput = {
@@ -30218,6 +35618,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30241,6 +35644,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30311,6 +35717,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30334,6 +35743,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30408,6 +35820,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30431,6 +35846,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30531,6 +35949,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30554,6 +35975,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30671,6 +36095,85 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FunnelSettingsCreateWithoutFunnelInput = {
+    defaultSeoTitle?: string | null
+    defaultSeoDescription?: string | null
+    defaultSeoKeywords?: string | null
+    favicon?: string | null
+    ogImage?: string | null
+    googleAnalyticsId?: string | null
+    facebookPixelId?: string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: boolean
+    cookieConsentText?: string | null
+    privacyPolicyUrl?: string | null
+    termsOfServiceUrl?: string | null
+    language?: string | null
+    timezone?: string | null
+    dateFormat?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FunnelSettingsUncheckedCreateWithoutFunnelInput = {
+    id?: number
+    defaultSeoTitle?: string | null
+    defaultSeoDescription?: string | null
+    defaultSeoKeywords?: string | null
+    favicon?: string | null
+    ogImage?: string | null
+    googleAnalyticsId?: string | null
+    facebookPixelId?: string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: boolean
+    cookieConsentText?: string | null
+    privacyPolicyUrl?: string | null
+    termsOfServiceUrl?: string | null
+    language?: string | null
+    timezone?: string | null
+    dateFormat?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FunnelSettingsCreateOrConnectWithoutFunnelInput = {
+    where: FunnelSettingsWhereUniqueInput
+    create: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type InsightCreateWithoutFunnelInput = {
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submissions?: InsightSubmissionCreateNestedManyWithoutInsightInput
+  }
+
+  export type InsightUncheckedCreateWithoutFunnelInput = {
+    id?: number
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submissions?: InsightSubmissionUncheckedCreateNestedManyWithoutInsightInput
+  }
+
+  export type InsightCreateOrConnectWithoutFunnelInput = {
+    where: InsightWhereUniqueInput
+    create: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type InsightCreateManyFunnelInputEnvelope = {
+    data: InsightCreateManyFunnelInput | InsightCreateManyFunnelInput[]
+    skipDuplicates?: boolean
+  }
+
   export type WorkspaceUpsertWithoutFunnelsInput = {
     update: XOR<WorkspaceUpdateWithoutFunnelsInput, WorkspaceUncheckedUpdateWithoutFunnelsInput>
     create: XOR<WorkspaceCreateWithoutFunnelsInput, WorkspaceUncheckedCreateWithoutFunnelsInput>
@@ -30730,6 +36233,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30753,6 +36259,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -30871,6 +36380,89 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Page"> | Date | string
   }
 
+  export type FunnelSettingsUpsertWithoutFunnelInput = {
+    update: XOR<FunnelSettingsUpdateWithoutFunnelInput, FunnelSettingsUncheckedUpdateWithoutFunnelInput>
+    create: XOR<FunnelSettingsCreateWithoutFunnelInput, FunnelSettingsUncheckedCreateWithoutFunnelInput>
+    where?: FunnelSettingsWhereInput
+  }
+
+  export type FunnelSettingsUpdateToOneWithWhereWithoutFunnelInput = {
+    where?: FunnelSettingsWhereInput
+    data: XOR<FunnelSettingsUpdateWithoutFunnelInput, FunnelSettingsUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type FunnelSettingsUpdateWithoutFunnelInput = {
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FunnelSettingsUncheckedUpdateWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    defaultSeoTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultSeoKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    favicon?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    googleAnalyticsId?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookPixelId?: NullableStringFieldUpdateOperationsInput | string | null
+    customTrackingScripts?: NullableJsonNullValueInput | InputJsonValue
+    enableCookieConsent?: BoolFieldUpdateOperationsInput | boolean
+    cookieConsentText?: NullableStringFieldUpdateOperationsInput | string | null
+    privacyPolicyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    termsOfServiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: NullableStringFieldUpdateOperationsInput | string | null
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUpsertWithWhereUniqueWithoutFunnelInput = {
+    where: InsightWhereUniqueInput
+    update: XOR<InsightUpdateWithoutFunnelInput, InsightUncheckedUpdateWithoutFunnelInput>
+    create: XOR<InsightCreateWithoutFunnelInput, InsightUncheckedCreateWithoutFunnelInput>
+  }
+
+  export type InsightUpdateWithWhereUniqueWithoutFunnelInput = {
+    where: InsightWhereUniqueInput
+    data: XOR<InsightUpdateWithoutFunnelInput, InsightUncheckedUpdateWithoutFunnelInput>
+  }
+
+  export type InsightUpdateManyWithWhereWithoutFunnelInput = {
+    where: InsightScalarWhereInput
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyWithoutFunnelInput>
+  }
+
+  export type InsightScalarWhereInput = {
+    AND?: InsightScalarWhereInput | InsightScalarWhereInput[]
+    OR?: InsightScalarWhereInput[]
+    NOT?: InsightScalarWhereInput | InsightScalarWhereInput[]
+    id?: IntFilter<"Insight"> | number
+    type?: EnumInsightTypeFilter<"Insight"> | $Enums.InsightType
+    name?: StringFilter<"Insight"> | string
+    description?: StringNullableFilter<"Insight"> | string | null
+    content?: JsonFilter<"Insight">
+    settings?: JsonNullableFilter<"Insight">
+    funnelId?: IntFilter<"Insight"> | number
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+    updatedAt?: DateTimeFilter<"Insight"> | Date | string
+  }
+
   export type WorkspaceCreateWithoutDomainsInput = {
     name: string
     slug: string
@@ -30913,6 +36505,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -30936,6 +36531,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -31041,6 +36639,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -31064,6 +36665,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -31156,6 +36760,8 @@ export namespace Prisma {
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutDomainConnectionsInput = {
@@ -31169,6 +36775,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutDomainConnectionsInput = {
@@ -31253,6 +36861,8 @@ export namespace Prisma {
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutDomainConnectionsInput = {
@@ -31266,6 +36876,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelCreateWithoutPagesInput = {
@@ -31278,6 +36890,8 @@ export namespace Prisma {
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutPagesInput = {
@@ -31291,6 +36905,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutPagesInput = {
@@ -31319,6 +36935,8 @@ export namespace Prisma {
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutPagesInput = {
@@ -31332,6 +36950,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FormSubmissionCreateWithoutSessionInput = {
@@ -31360,6 +36980,33 @@ export namespace Prisma {
 
   export type FormSubmissionCreateManySessionInputEnvelope = {
     data: FormSubmissionCreateManySessionInput | FormSubmissionCreateManySessionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InsightSubmissionCreateWithoutSessionInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    insight: InsightCreateNestedOneWithoutSubmissionsInput
+  }
+
+  export type InsightSubmissionUncheckedCreateWithoutSessionInput = {
+    id?: number
+    insightId: number
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightSubmissionCreateOrConnectWithoutSessionInput = {
+    where: InsightSubmissionWhereUniqueInput
+    create: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput>
+  }
+
+  export type InsightSubmissionCreateManySessionInputEnvelope = {
+    data: InsightSubmissionCreateManySessionInput | InsightSubmissionCreateManySessionInput[]
     skipDuplicates?: boolean
   }
 
@@ -31393,6 +37040,35 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"FormSubmission"> | Date | string
   }
 
+  export type InsightSubmissionUpsertWithWhereUniqueWithoutSessionInput = {
+    where: InsightSubmissionWhereUniqueInput
+    update: XOR<InsightSubmissionUpdateWithoutSessionInput, InsightSubmissionUncheckedUpdateWithoutSessionInput>
+    create: XOR<InsightSubmissionCreateWithoutSessionInput, InsightSubmissionUncheckedCreateWithoutSessionInput>
+  }
+
+  export type InsightSubmissionUpdateWithWhereUniqueWithoutSessionInput = {
+    where: InsightSubmissionWhereUniqueInput
+    data: XOR<InsightSubmissionUpdateWithoutSessionInput, InsightSubmissionUncheckedUpdateWithoutSessionInput>
+  }
+
+  export type InsightSubmissionUpdateManyWithWhereWithoutSessionInput = {
+    where: InsightSubmissionScalarWhereInput
+    data: XOR<InsightSubmissionUpdateManyMutationInput, InsightSubmissionUncheckedUpdateManyWithoutSessionInput>
+  }
+
+  export type InsightSubmissionScalarWhereInput = {
+    AND?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
+    OR?: InsightSubmissionScalarWhereInput[]
+    NOT?: InsightSubmissionScalarWhereInput | InsightSubmissionScalarWhereInput[]
+    id?: IntFilter<"InsightSubmission"> | number
+    insightId?: IntFilter<"InsightSubmission"> | number
+    sessionId?: StringFilter<"InsightSubmission"> | string
+    answers?: JsonNullableFilter<"InsightSubmission">
+    completedAt?: DateTimeNullableFilter<"InsightSubmission"> | Date | string | null
+    createdAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"InsightSubmission"> | Date | string
+  }
+
   export type FunnelCreateWithoutThemeInput = {
     name: string
     slug: string
@@ -31403,6 +37079,8 @@ export namespace Prisma {
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelUncheckedCreateWithoutThemeInput = {
@@ -31416,6 +37094,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
 
   export type FunnelCreateOrConnectWithoutThemeInput = {
@@ -31444,6 +37124,8 @@ export namespace Prisma {
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutThemeInput = {
@@ -31457,6 +37139,247 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
+  }
+
+  export type FunnelCreateWithoutInsightsInput = {
+    name: string
+    slug: string
+    status?: $Enums.FunnelStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
+    creator: UserCreateNestedOneWithoutCreatedFunnelsInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsCreateNestedOneWithoutFunnelInput
+  }
+
+  export type FunnelUncheckedCreateWithoutInsightsInput = {
+    id?: number
+    name: string
+    slug: string
+    status?: $Enums.FunnelStatus
+    workspaceId: number
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    themeId?: number | null
+    domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
+  }
+
+  export type FunnelCreateOrConnectWithoutInsightsInput = {
+    where: FunnelWhereUniqueInput
+    create: XOR<FunnelCreateWithoutInsightsInput, FunnelUncheckedCreateWithoutInsightsInput>
+  }
+
+  export type InsightSubmissionCreateWithoutInsightInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    session: SessionCreateNestedOneWithoutInsightSubmissionsInput
+  }
+
+  export type InsightSubmissionUncheckedCreateWithoutInsightInput = {
+    id?: number
+    sessionId: string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightSubmissionCreateOrConnectWithoutInsightInput = {
+    where: InsightSubmissionWhereUniqueInput
+    create: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput>
+  }
+
+  export type InsightSubmissionCreateManyInsightInputEnvelope = {
+    data: InsightSubmissionCreateManyInsightInput | InsightSubmissionCreateManyInsightInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FunnelUpsertWithoutInsightsInput = {
+    update: XOR<FunnelUpdateWithoutInsightsInput, FunnelUncheckedUpdateWithoutInsightsInput>
+    create: XOR<FunnelCreateWithoutInsightsInput, FunnelUncheckedCreateWithoutInsightsInput>
+    where?: FunnelWhereInput
+  }
+
+  export type FunnelUpdateToOneWithWhereWithoutInsightsInput = {
+    where?: FunnelWhereInput
+    data: XOR<FunnelUpdateWithoutInsightsInput, FunnelUncheckedUpdateWithoutInsightsInput>
+  }
+
+  export type FunnelUpdateWithoutInsightsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
+    creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+  }
+
+  export type FunnelUncheckedUpdateWithoutInsightsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    workspaceId?: IntFieldUpdateOperationsInput | number
+    createdBy?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
+    domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+  }
+
+  export type InsightSubmissionUpsertWithWhereUniqueWithoutInsightInput = {
+    where: InsightSubmissionWhereUniqueInput
+    update: XOR<InsightSubmissionUpdateWithoutInsightInput, InsightSubmissionUncheckedUpdateWithoutInsightInput>
+    create: XOR<InsightSubmissionCreateWithoutInsightInput, InsightSubmissionUncheckedCreateWithoutInsightInput>
+  }
+
+  export type InsightSubmissionUpdateWithWhereUniqueWithoutInsightInput = {
+    where: InsightSubmissionWhereUniqueInput
+    data: XOR<InsightSubmissionUpdateWithoutInsightInput, InsightSubmissionUncheckedUpdateWithoutInsightInput>
+  }
+
+  export type InsightSubmissionUpdateManyWithWhereWithoutInsightInput = {
+    where: InsightSubmissionScalarWhereInput
+    data: XOR<InsightSubmissionUpdateManyMutationInput, InsightSubmissionUncheckedUpdateManyWithoutInsightInput>
+  }
+
+  export type InsightCreateWithoutSubmissionsInput = {
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    funnel: FunnelCreateNestedOneWithoutInsightsInput
+  }
+
+  export type InsightUncheckedCreateWithoutSubmissionsInput = {
+    id?: number
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightCreateOrConnectWithoutSubmissionsInput = {
+    where: InsightWhereUniqueInput
+    create: XOR<InsightCreateWithoutSubmissionsInput, InsightUncheckedCreateWithoutSubmissionsInput>
+  }
+
+  export type SessionCreateWithoutInsightSubmissionsInput = {
+    id?: string
+    sessionId: string
+    funnelId: number
+    visitedPages?: SessionCreatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutSessionInput
+  }
+
+  export type SessionUncheckedCreateWithoutInsightSubmissionsInput = {
+    id?: string
+    sessionId: string
+    funnelId: number
+    visitedPages?: SessionCreatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutSessionInput
+  }
+
+  export type SessionCreateOrConnectWithoutInsightSubmissionsInput = {
+    where: SessionWhereUniqueInput
+    create: XOR<SessionCreateWithoutInsightSubmissionsInput, SessionUncheckedCreateWithoutInsightSubmissionsInput>
+  }
+
+  export type InsightUpsertWithoutSubmissionsInput = {
+    update: XOR<InsightUpdateWithoutSubmissionsInput, InsightUncheckedUpdateWithoutSubmissionsInput>
+    create: XOR<InsightCreateWithoutSubmissionsInput, InsightUncheckedCreateWithoutSubmissionsInput>
+    where?: InsightWhereInput
+  }
+
+  export type InsightUpdateToOneWithWhereWithoutSubmissionsInput = {
+    where?: InsightWhereInput
+    data: XOR<InsightUpdateWithoutSubmissionsInput, InsightUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type InsightUpdateWithoutSubmissionsInput = {
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnel?: FunnelUpdateOneRequiredWithoutInsightsNestedInput
+  }
+
+  export type InsightUncheckedUpdateWithoutSubmissionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    funnelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUpsertWithoutInsightSubmissionsInput = {
+    update: XOR<SessionUpdateWithoutInsightSubmissionsInput, SessionUncheckedUpdateWithoutInsightSubmissionsInput>
+    create: XOR<SessionCreateWithoutInsightSubmissionsInput, SessionUncheckedCreateWithoutInsightSubmissionsInput>
+    where?: SessionWhereInput
+  }
+
+  export type SessionUpdateToOneWithWhereWithoutInsightSubmissionsInput = {
+    where?: SessionWhereInput
+    data: XOR<SessionUpdateWithoutInsightSubmissionsInput, SessionUncheckedUpdateWithoutInsightSubmissionsInput>
+  }
+
+  export type SessionUpdateWithoutInsightSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    formSubmissions?: FormSubmissionUpdateManyWithoutSessionNestedInput
+  }
+
+  export type SessionUncheckedUpdateWithoutInsightSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    funnelId?: IntFieldUpdateOperationsInput | number
+    visitedPages?: SessionUpdatevisitedPagesInput | number[]
+    interactions?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutSessionNestedInput
   }
 
   export type TemplateCreateWithoutCategoryInput = {
@@ -31610,6 +37533,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -31633,6 +37559,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -31763,6 +37692,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -31786,6 +37718,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -32010,6 +37945,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -32033,6 +37971,9 @@ export namespace Prisma {
     firstName: string
     lastName: string
     password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
     passwordResetToken?: string | null
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
@@ -32100,6 +38041,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -32123,6 +38067,9 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
@@ -32220,6 +38167,13 @@ export namespace Prisma {
     formContent: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     funnelId?: number | null
+    webhookUrl?: string | null
+    webhookEnabled?: boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: string | null
+    webhookSuccessCount?: number
+    webhookFailureCount?: number
+    lastWebhookAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32231,6 +38185,13 @@ export namespace Prisma {
     formContent: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     funnelId?: number | null
+    webhookUrl?: string | null
+    webhookEnabled?: boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: string | null
+    webhookSuccessCount?: number
+    webhookFailureCount?: number
+    lastWebhookAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32248,6 +38209,7 @@ export namespace Prisma {
     interactions?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    insightSubmissions?: InsightSubmissionCreateNestedManyWithoutSessionInput
   }
 
   export type SessionUncheckedCreateWithoutFormSubmissionsInput = {
@@ -32258,6 +38220,7 @@ export namespace Prisma {
     interactions?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    insightSubmissions?: InsightSubmissionUncheckedCreateNestedManyWithoutSessionInput
   }
 
   export type SessionCreateOrConnectWithoutFormSubmissionsInput = {
@@ -32282,6 +38245,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32293,6 +38263,13 @@ export namespace Prisma {
     formContent?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     funnelId?: NullableIntFieldUpdateOperationsInput | number | null
+    webhookUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookEnabled?: BoolFieldUpdateOperationsInput | boolean
+    webhookHeaders?: NullableJsonNullValueInput | InputJsonValue
+    webhookSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    webhookSuccessCount?: IntFieldUpdateOperationsInput | number
+    webhookFailureCount?: IntFieldUpdateOperationsInput | number
+    lastWebhookAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32316,6 +38293,7 @@ export namespace Prisma {
     interactions?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    insightSubmissions?: InsightSubmissionUpdateManyWithoutSessionNestedInput
   }
 
   export type SessionUncheckedUpdateWithoutFormSubmissionsInput = {
@@ -32326,6 +38304,81 @@ export namespace Prisma {
     interactions?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    insightSubmissions?: InsightSubmissionUncheckedUpdateManyWithoutSessionNestedInput
+  }
+
+  export type FunnelCreateWithoutSettingsInput = {
+    name: string
+    slug: string
+    status?: $Enums.FunnelStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
+    creator: UserCreateNestedOneWithoutCreatedFunnelsInput
+    domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
+    theme?: ThemeCreateNestedOneWithoutFunnelInput
+    pages?: PageCreateNestedManyWithoutFunnelInput
+    insights?: InsightCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelUncheckedCreateWithoutSettingsInput = {
+    id?: number
+    name: string
+    slug: string
+    status?: $Enums.FunnelStatus
+    workspaceId: number
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    themeId?: number | null
+    domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
+    insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
+  }
+
+  export type FunnelCreateOrConnectWithoutSettingsInput = {
+    where: FunnelWhereUniqueInput
+    create: XOR<FunnelCreateWithoutSettingsInput, FunnelUncheckedCreateWithoutSettingsInput>
+  }
+
+  export type FunnelUpsertWithoutSettingsInput = {
+    update: XOR<FunnelUpdateWithoutSettingsInput, FunnelUncheckedUpdateWithoutSettingsInput>
+    create: XOR<FunnelCreateWithoutSettingsInput, FunnelUncheckedCreateWithoutSettingsInput>
+    where?: FunnelWhereInput
+  }
+
+  export type FunnelUpdateToOneWithWhereWithoutSettingsInput = {
+    where?: FunnelWhereInput
+    data: XOR<FunnelUpdateWithoutSettingsInput, FunnelUncheckedUpdateWithoutSettingsInput>
+  }
+
+  export type FunnelUpdateWithoutSettingsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
+    creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
+    domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUpdateOneWithoutFunnelNestedInput
+    pages?: PageUpdateManyWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
+  }
+
+  export type FunnelUncheckedUpdateWithoutSettingsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
+    workspaceId?: IntFieldUpdateOperationsInput | number
+    createdBy?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
+    domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type WorkspaceMemberCreateManyUserInput = {
@@ -32484,6 +38537,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutCreatorInput = {
@@ -32497,6 +38552,8 @@ export namespace Prisma {
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateManyWithoutCreatorInput = {
@@ -32722,6 +38779,8 @@ export namespace Prisma {
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
     pages?: PageUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateWithoutWorkspaceInput = {
@@ -32735,6 +38794,8 @@ export namespace Prisma {
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
+    settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
+    insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
 
   export type FunnelUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -32837,6 +38898,17 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type InsightCreateManyFunnelInput = {
+    id?: number
+    type: $Enums.InsightType
+    name: string
+    description?: string | null
+    content: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type FunnelDomainUpdateWithoutFunnelInput = {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -32901,6 +38973,40 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type InsightUpdateWithoutFunnelInput = {
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submissions?: InsightSubmissionUpdateManyWithoutInsightNestedInput
+  }
+
+  export type InsightUncheckedUpdateWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submissions?: InsightSubmissionUncheckedUpdateManyWithoutInsightNestedInput
+  }
+
+  export type InsightUncheckedUpdateManyWithoutFunnelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumInsightTypeFieldUpdateOperationsInput | $Enums.InsightType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: JsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FunnelDomainCreateManyDomainInput = {
     id?: number
     funnelId: number
@@ -32942,6 +39048,15 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type InsightSubmissionCreateManySessionInput = {
+    id?: number
+    insightId: number
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type FormSubmissionUpdateWithoutSessionInput = {
     submittedData?: NullableJsonNullValueInput | InputJsonValue
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
@@ -32966,6 +39081,67 @@ export namespace Prisma {
     formId?: IntFieldUpdateOperationsInput | number
     submittedData?: NullableJsonNullValueInput | InputJsonValue
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionUpdateWithoutSessionInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    insight?: InsightUpdateOneRequiredWithoutSubmissionsNestedInput
+  }
+
+  export type InsightSubmissionUncheckedUpdateWithoutSessionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    insightId?: IntFieldUpdateOperationsInput | number
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionUncheckedUpdateManyWithoutSessionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    insightId?: IntFieldUpdateOperationsInput | number
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionCreateManyInsightInput = {
+    id?: number
+    sessionId: string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InsightSubmissionUpdateWithoutInsightInput = {
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    session?: SessionUpdateOneRequiredWithoutInsightSubmissionsNestedInput
+  }
+
+  export type InsightSubmissionUncheckedUpdateWithoutInsightInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    answers?: NullableJsonNullValueInput | InputJsonValue
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightSubmissionUncheckedUpdateManyWithoutInsightInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    answers?: NullableJsonNullValueInput | InputJsonValue
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

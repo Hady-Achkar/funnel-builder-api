@@ -3,24 +3,35 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
+import cookieParser from "cookie-parser";
 import { redisService } from "./services/cache/redis.service";
 import { authRoutes } from "./auth/routes";
 import funnelRoutes from "./funnel/routes/funnels";
 import pageRoutes from "./page/routes/pages";
-import domainRoutes from "./routes/domains";
+import { domainRoutes } from "./domain";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";
 import imageRoutes from "./image/routes";
 import formRoutes from "./form/routes";
 import formSubmissionRoutes from "./form-submission/routes";
+import funnelSettingsRoutes from "./funnel-settings/routes/funnel-settings";
+import { workspacesRouter } from "./workspace/routes";
+import insightRoutes from "./insight/routes";
+import insightSubmissionRoutes from "./insight-submission/routes";
 
 export function createServer(): Express {
   const app = express();
 
   // Security middleware
   app.use(helmet());
-  app.use(cors());
+  app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  }));
+  
+  // Cookie parsing middleware
+  app.use(cookieParser());
 
   // Rate limiting
   const limiter = rateLimit({
@@ -54,6 +65,10 @@ export function createServer(): Express {
   app.use("/api/images", imageRoutes);
   app.use("/api/forms", formRoutes);
   app.use("/api/form-submissions", formSubmissionRoutes);
+  app.use("/api/funnel-settings", funnelSettingsRoutes);
+  app.use("/api/workspaces", workspacesRouter);
+  app.use("/api/insights", insightRoutes);
+  app.use("/api/insight-submissions", insightSubmissionRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {
@@ -87,10 +102,16 @@ export function createServer(): Express {
         funnels: "/api/funnels",
         pages: "/api/pages",
         domains: "/api/domains",
+        "domains/create-custom-domain": "/api/domains/create-custom-domain",
+        "domains/verify": "/api/domains/verify",
+        "domains/dns-instructions": "/api/domains/dns-instructions",
         health: "/health",
         themes: "/api/themes",
         forms: "/api/forms",
         formSubmissions: "/api/form-submissions",
+        workspaces: "/api/workspaces",
+        insights: "/api/insights",
+        insightSubmissions: "/api/insight-submissions",
       },
     });
   });
@@ -108,9 +129,9 @@ export function createServer(): Express {
   app.use(
     (
       err: any,
-      req: express.Request,
+      _req: express.Request,
       res: express.Response,
-      next: express.NextFunction
+      _next: express.NextFunction
     ) => {
       console.error("Global error handler:", err);
 

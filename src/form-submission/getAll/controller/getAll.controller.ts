@@ -1,0 +1,38 @@
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../../../middleware/auth";
+import { getAllFormSubmissions } from "../service/getAll.service";
+import { getAllFormSubmissionsRequest } from "../types/getAll.types";
+
+export const getAllFormSubmissionsController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.userId as number;
+    const funnelId = parseInt(req.params.funnelId);
+    
+    // Build request data with proper validation
+    const rawRequestData = {
+      funnelId,
+      ...(req.query.formId && { formId: req.query.formId }),
+      ...(req.query.sessionId && { sessionId: req.query.sessionId }),
+      ...(req.query.dateFrom && { dateFrom: req.query.dateFrom }),
+      ...(req.query.dateTo && { dateTo: req.query.dateTo }),
+      ...(req.query.completedOnly && { completedOnly: req.query.completedOnly }),
+      ...(req.query.sortBy && { sortBy: req.query.sortBy }),
+      ...(req.query.sortOrder && { sortOrder: req.query.sortOrder }),
+      ...(req.query.page && { page: req.query.page }),
+      ...(req.query.limit && { limit: req.query.limit }),
+    };
+
+    // Validate and transform request data using Zod
+    const requestData = getAllFormSubmissionsRequest.parse(rawRequestData);
+
+    const result = await getAllFormSubmissions(userId, requestData);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

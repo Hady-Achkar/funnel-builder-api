@@ -1,0 +1,1 @@
+export { default as updateInsightRoute } from "./update.route";

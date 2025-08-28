@@ -14,27 +14,30 @@ enum UserPlan {
 }
 
 model User {
-  id                     Int                @id @default(autoincrement())
-  email                  String             @unique
-  username               String             @unique
-  firstName              String
-  lastName               String
-  password               String
-  passwordResetToken     String?            @unique
-  passwordResetExpiresAt DateTime?
-  isAdmin                Boolean            @default(false)
-  plan                   UserPlan           
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
-  maximumFunnels         Int                @default(5) // Total funnel budget for the user
-  maximumCustomDomains   Int                @default(1) // Total custom domain budget
-  maximumSubdomains      Int                @default(3) // Total subdomain budget
-  workspaceMembers       WorkspaceMember[]
-  ownedWorkspaces        Workspace[]        @relation("WorkspaceOwner")
-  createdFunnels         Funnel[]           @relation("FunnelCreator")
-  createdDomains         Domain[]           @relation("DomainCreator")
-  templates              Template[]
-  imageFolders           ImageFolder[]
+  id                        Int                @id @default(autoincrement())
+  email                     String             @unique
+  username                  String             @unique
+  firstName                 String
+  lastName                  String
+  password                  String
+  verified                  Boolean            @default(false)
+  verificationToken         String?            @unique
+  verificationTokenExpiresAt DateTime?
+  passwordResetToken        String?            @unique
+  passwordResetExpiresAt    DateTime?
+  isAdmin                   Boolean            @default(false)
+  plan                      UserPlan           
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  maximumFunnels            Int                @default(5) // Total funnel budget for the user
+  maximumCustomDomains      Int                @default(1) // Total custom domain budget
+  maximumSubdomains         Int                @default(3) // Total subdomain budget
+  workspaceMembers          WorkspaceMember[]
+  ownedWorkspaces           Workspace[]        @relation("WorkspaceOwner")
+  createdFunnels            Funnel[]           @relation("FunnelCreator")
+  createdDomains            Domain[]           @relation("DomainCreator")
+  templates                 Template[]
+  imageFolders              ImageFolder[]
 
   @@map("users")
 }
@@ -51,8 +54,8 @@ model Workspace {
   allocatedSubdomains    Int      @default(0) // Subdomains allocated from user's budget
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
-  
-  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members     WorkspaceMember[]
   funnels     Funnel[]
   domains     Domain[]
@@ -115,6 +118,8 @@ model Funnel {
   domainConnections FunnelDomain[]
   theme             Theme?         @relation(fields: [themeId], references: [id])
   pages             Page[]
+  settings          FunnelSettings?
+  insights          Insight[]
 
   @@unique([workspaceId, name])
   @@unique([workspaceId, slug])
@@ -207,7 +212,8 @@ model Session {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   
-  formSubmissions FormSubmission[]
+  formSubmissions    FormSubmission[]
+  insightSubmissions InsightSubmission[]
   
   @@index([sessionId])
   @@index([funnelId])
@@ -258,6 +264,48 @@ enum BorderRadius {
   NONE
   SOFT
   ROUNDED
+}
+
+enum InsightType {
+  QUIZ
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+model Insight {
+  id          Int         @id @default(autoincrement())
+  type        InsightType
+  name        String
+  description String?
+  content     Json        // Questions and options
+  settings    Json?       @default("{}")
+  funnelId    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  funnel      Funnel              @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  submissions InsightSubmission[]
+  
+  @@index([funnelId])
+  @@index([type])
+  @@map("insights")
+}
+
+model InsightSubmission {
+  id          Int       @id @default(autoincrement())
+  insightId   Int
+  sessionId   String
+  answers     Json?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  insight Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  
+  @@unique([insightId, sessionId])
+  @@index([sessionId])
+  @@map("insight_submissions")
 }
 
 // Template System Models
@@ -374,7 +422,14 @@ model Form {
   description String?
   formContent Json     
   isActive    Boolean  @default(true)
-  funnelId    Int?     
+  funnelId    Int?
+  webhookUrl        String?   
+  webhookEnabled    Boolean   @default(false)
+  webhookHeaders    Json?     @default("{}") 
+  webhookSecret     String?   
+  webhookSuccessCount Int @default(0)
+  webhookFailureCount Int @default(0)
+  lastWebhookAt      DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -382,6 +437,7 @@ model Form {
   
   @@index([isActive])
   @@index([funnelId])
+  @@index([webhookEnabled])
   @@map("forms")
 }
 
@@ -402,4 +458,30 @@ model FormSubmission {
   @@index([sessionId])
   @@index([isCompleted])
   @@map("form_submissions")
+}
+
+model FunnelSettings {
+  id                    Int      @id @default(autoincrement())
+  funnelId              Int      @unique
+  defaultSeoTitle       String?
+  defaultSeoDescription String?
+  defaultSeoKeywords    String?
+  favicon               String?
+  ogImage               String?
+  googleAnalyticsId     String?
+  facebookPixelId       String?
+  customTrackingScripts Json?    @default("[]")
+  enableCookieConsent   Boolean  @default(false)
+  cookieConsentText     String?
+  privacyPolicyUrl      String?
+  termsOfServiceUrl     String?
+  language              String?  @default("en")
+  timezone              String?  @default("UTC")
+  dateFormat            String?  @default("DD.MM.YYYY")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  funnel                Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  
+  @@index([funnelId])
+  @@map("funnel_settings")
 }

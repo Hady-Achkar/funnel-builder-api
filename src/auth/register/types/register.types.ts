@@ -71,7 +71,6 @@ export type RegisterRequest = z.infer<typeof registerRequest>;
 
 export const registerResponse = z.object({
   message: z.string(),
-  token: z.string(),
   user: z.object({
     id: z.number(),
     email: z.string(),
@@ -80,6 +79,7 @@ export const registerResponse = z.object({
     lastName: z.string(),
     isAdmin: z.boolean().default(false),
     plan: z.nativeEnum($Enums.UserPlan),
+    verified: z.boolean(),
   }),
 });
 

@@ -1,0 +1,1 @@
+export { default as createInsightRoute } from "./create.route";

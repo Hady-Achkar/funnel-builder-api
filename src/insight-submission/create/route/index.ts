@@ -1,0 +1,1 @@
+export { default as createInsightSubmissionRoute } from "./create.route";

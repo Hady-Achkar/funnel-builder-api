@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { LoginService } from "../service/login.service";
+import { setAuthCookie } from "../../../lib/cookies";
 
 export class LoginController {
   static async login(
@@ -9,7 +10,13 @@ export class LoginController {
   ): Promise<void> {
     try {
       const result = await LoginService.login(req.body);
-      res.status(200).json(result);
+      
+      // Set HTTP-only cookie
+      setAuthCookie(res, result.token);
+      
+      // Return response without token
+      const { token, ...responseWithoutToken } = result;
+      res.status(200).json(responseWithoutToken);
     } catch (error) {
       next(error);
     }

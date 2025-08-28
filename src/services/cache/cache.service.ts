@@ -7,7 +7,7 @@ export interface CacheOptions {
 
 export class CacheService {
   private static instance: CacheService;
-  private defaultTTL = 3600; // 1 hour
+  private defaultTTL = 0; // No expiration
 
   static getInstance(): CacheService {
     if (!CacheService.instance) {
@@ -258,7 +258,10 @@ export class CacheService {
     key: string,
     options?: CacheOptions
   ): Promise<T | null> {
-    return await this.get<T>(key, { ...options, prefix: `template:${templateId}` });
+    return await this.get<T>(key, {
+      ...options,
+      prefix: `template:${templateId}`,
+    });
   }
 
   async setTemplateCache(
@@ -267,7 +270,10 @@ export class CacheService {
     value: any,
     options?: CacheOptions
   ): Promise<void> {
-    await this.set(key, value, { ...options, prefix: `template:${templateId}` });
+    await this.set(key, value, {
+      ...options,
+      prefix: `template:${templateId}`,
+    });
   }
 
   async invalidateTemplateCache(templateId: number): Promise<void> {

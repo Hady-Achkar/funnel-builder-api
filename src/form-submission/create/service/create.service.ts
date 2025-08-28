@@ -7,6 +7,7 @@ import {
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError, NotFoundError } from "../../../errors";
 import { ZodError } from "zod";
+import { triggerFormSubmissionWebhook } from "../../../form/webhook/service";
 
 export const createFormSubmission = async (
   request: CreateFormSubmissionRequest
@@ -89,9 +90,9 @@ export const createFormSubmission = async (
 
       const currentInteractions =
         (session.interactions as Record<string, any>) || {};
-      
+
       const newInteraction = {
-        type: isUpdate ? "form_submission_update" : "form_submission",
+        type: "form_submission",
         formId: validatedRequest.formId,
         formName: form.name,
         submissionId: formSubmission.id,
@@ -103,7 +104,8 @@ export const createFormSubmission = async (
       let updatedInteractions;
       if (isUpdate) {
         // Update existing interaction for the same form
-        const formSubmissions = (currentInteractions.form_submissions || []) as any[];
+        const formSubmissions = (currentInteractions.form_submissions ||
+          []) as any[];
         const existingIndex = formSubmissions.findIndex(
           (interaction: any) => interaction.formId === validatedRequest.formId
         );
@@ -144,9 +146,42 @@ export const createFormSubmission = async (
       return formSubmission;
     });
 
+    if (validatedRequest.isCompleted) {
+      try {
+        const webhookPayload = {
+          formId: validatedRequest.formId,
+          submissionId: result.id,
+          formName: form.name,
+          data: (validatedRequest.submittedData as Record<string, any>) || {},
+          submittedAt:
+            result.completedAt?.toISOString() || new Date().toISOString(),
+          metadata: {
+            sessionId: validatedRequest.sessionId,
+            userAgent: undefined,
+            ipAddress: undefined,
+          },
+        };
+
+        triggerFormSubmissionWebhook(
+          validatedRequest.formId,
+          webhookPayload
+        ).catch((error) => {
+          console.error(
+            `Failed to trigger webhook for form ${validatedRequest.formId}:`,
+            error
+          );
+        });
+      } catch (error) {
+        console.error(
+          `Error preparing webhook for form ${validatedRequest.formId}:`,
+          error
+        );
+      }
+    }
+
     const response = {
-      message: existingSubmission 
-        ? "Form submission updated successfully" 
+      message: existingSubmission
+        ? "Form submission updated successfully"
         : "Form submission created successfully",
       submissionId: result.id,
     };

@@ -28,6 +28,21 @@ export const updateFormRequest = z.object({
       message: "isActive must be a boolean",
     })
     .optional(),
+  
+  // Webhook fields
+  webhookUrl: z
+    .string()
+    .url("Webhook URL must be a valid URL")
+    .refine((url) => url.startsWith("https://"), {
+      message: "Webhook URL must use HTTPS for security",
+    })
+    .optional(),
+  
+  webhookEnabled: z.boolean().optional(),
+  
+  webhookHeaders: z.record(z.string(), z.string()).optional(),
+  
+  webhookSecret: z.string().optional(),
 });
 
 export type UpdateFormRequest = z.infer<typeof updateFormRequest>;

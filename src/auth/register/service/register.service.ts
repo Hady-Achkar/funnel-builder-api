@@ -1,26 +1,26 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { registerRequest, RegisterResponse } from "../types/register.types";
 import { PlanLimitsHelper } from "../helpers/plan-limits.helper";
+import { sendVerificationEmail } from "../emails";
 
 export class RegisterService {
   static async register(userData: unknown): Promise<RegisterResponse> {
     try {
       const validatedData = registerRequest.parse(userData);
 
-      const { 
-        email, 
-        username, 
-        firstName, 
-        lastName, 
-        password, 
-        isAdmin, 
+      const {
+        email,
+        username,
+        firstName,
+        lastName,
+        password,
+        isAdmin,
         plan,
         maximumFunnels,
         maximumCustomDomains,
-        maximumSubdomains
+        maximumSubdomains,
       } = validatedData;
 
       const prisma = getPrisma();
@@ -43,7 +43,19 @@ export class RegisterService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Calculate final limits using the helper
+      const tokenData = {
+        email,
+        password: hashedPassword,
+        timestamp: Date.now(),
+      };
+      const verificationToken = Buffer.from(JSON.stringify(tokenData)).toString(
+        "base64"
+      );
+      const verificationTokenExpiresAt = new Date();
+      verificationTokenExpiresAt.setHours(
+        verificationTokenExpiresAt.getHours() + 24
+      );
+
       const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {
         maximumFunnels,
         maximumCustomDomains,
@@ -58,6 +70,9 @@ export class RegisterService {
             firstName,
             lastName,
             password: hashedPassword,
+            verified: false,
+            verificationToken,
+            verificationTokenExpiresAt,
             isAdmin,
             plan,
             maximumFunnels: finalLimits.maximumFunnels,
@@ -72,7 +87,6 @@ export class RegisterService {
             slug: `${username}-personal`,
             ownerId: user.id,
             description: "Your personal workspace for creating funnels",
-            // Allocate all limits to the personal workspace initially
             allocatedFunnels: finalLimits.maximumFunnels,
             allocatedCustomDomains: finalLimits.maximumCustomDomains,
             allocatedSubdomains: finalLimits.maximumSubdomains,
@@ -101,7 +115,6 @@ export class RegisterService {
           },
         });
 
-        // Create default image folder for the new user
         await tx.imageFolder.create({
           data: {
             name: "Default Folder",
@@ -112,11 +125,19 @@ export class RegisterService {
         return user;
       });
 
-      const token = this.generateToken(result.id);
+      try {
+        await sendVerificationEmail(
+          result.email,
+          result.firstName,
+          verificationToken
+        );
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+      }
 
       return {
-        message: "User created successfully",
-        token,
+        message:
+          "User created successfully. Please check your email to verify your account.",
         user: {
           id: result.id,
           email: result.email,
@@ -125,6 +146,7 @@ export class RegisterService {
           lastName: result.lastName,
           isAdmin: result.isAdmin || false,
           plan: result.plan,
+          verified: result.verified,
         },
       };
     } catch (error) {
@@ -134,14 +156,5 @@ export class RegisterService {
       }
       throw error;
     }
-  }
-
-  private static generateToken(userId: number): string {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("JWT secret not configured");
-    }
-
-    return jwt.sign({ userId }, jwtSecret, { expiresIn: "180d" });
   }
 }

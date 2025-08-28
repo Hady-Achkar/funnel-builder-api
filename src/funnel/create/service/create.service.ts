@@ -122,6 +122,22 @@ export const createFunnel = async (
 
       const theme = await tx.theme.create({ data: {} });
 
+      await tx.funnelSettings.create({
+        data: {
+          funnelId: funnel.id,
+          defaultSeoTitle: null,
+          defaultSeoDescription: null,
+          defaultSeoKeywords: null,
+          favicon: null,
+          ogImage: null,
+          googleAnalyticsId: null,
+          facebookPixelId: null,
+          cookieConsentText: null,
+          privacyPolicyUrl: null,
+          termsOfServiceUrl: null,
+        },
+      });
+
       const funnelWithTheme = await tx.funnel.update({
         where: { id: funnel.id },
         data: { themeId: theme.id },

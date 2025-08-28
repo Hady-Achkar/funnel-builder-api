@@ -19,7 +19,6 @@ export type LoginRequest = z.infer<typeof loginRequest>;
 
 export const loginResponse = z.object({
   message: z.string(),
-  token: z.string(),
   user: z.object({
     id: z.number(),
     email: z.string(),

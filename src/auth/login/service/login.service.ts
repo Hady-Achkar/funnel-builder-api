@@ -4,8 +4,13 @@ import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { loginRequest, LoginResponse } from "../types/login.types";
 
+// Internal service response includes token
+interface LoginServiceResponse extends LoginResponse {
+  token: string;
+}
+
 export class LoginService {
-  static async login(userData: unknown): Promise<LoginResponse> {
+  static async login(userData: unknown): Promise<LoginServiceResponse> {
     try {
       const validatedData = loginRequest.parse(userData);
       const { identifier, password } = validatedData;
@@ -25,6 +30,7 @@ export class LoginService {
           lastName: true,
           password: true,
           isAdmin: true,
+          verified: true,
         },
       });
 
@@ -38,11 +44,16 @@ export class LoginService {
         throw new Error("Invalid credentials");
       }
 
+      // Check if user email is verified
+      if (!user.verified) {
+        throw new Error("Please verify your email address before logging in. Check your inbox for a verification link.");
+      }
+
       const token = this.generateToken(user.id);
 
       return {
         message: "Login successful",
-        token,
+        token, // Keep token for setting cookie in controller
         user: {
           id: user.id,
           email: user.email,

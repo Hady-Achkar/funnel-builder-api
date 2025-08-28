@@ -127,6 +127,9 @@ exports.Prisma.UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   password: 'password',
+  verified: 'verified',
+  verificationToken: 'verificationToken',
+  verificationTokenExpiresAt: 'verificationTokenExpiresAt',
   passwordResetToken: 'passwordResetToken',
   passwordResetExpiresAt: 'passwordResetExpiresAt',
   isAdmin: 'isAdmin',
@@ -246,6 +249,28 @@ exports.Prisma.ThemeScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.InsightScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  name: 'name',
+  description: 'description',
+  content: 'content',
+  settings: 'settings',
+  funnelId: 'funnelId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InsightSubmissionScalarFieldEnum = {
+  id: 'id',
+  insightId: 'insightId',
+  sessionId: 'sessionId',
+  answers: 'answers',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.TemplateCategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -322,6 +347,13 @@ exports.Prisma.FormScalarFieldEnum = {
   formContent: 'formContent',
   isActive: 'isActive',
   funnelId: 'funnelId',
+  webhookUrl: 'webhookUrl',
+  webhookEnabled: 'webhookEnabled',
+  webhookHeaders: 'webhookHeaders',
+  webhookSecret: 'webhookSecret',
+  webhookSuccessCount: 'webhookSuccessCount',
+  webhookFailureCount: 'webhookFailureCount',
+  lastWebhookAt: 'lastWebhookAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -333,6 +365,28 @@ exports.Prisma.FormSubmissionScalarFieldEnum = {
   submittedData: 'submittedData',
   isCompleted: 'isCompleted',
   completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FunnelSettingsScalarFieldEnum = {
+  id: 'id',
+  funnelId: 'funnelId',
+  defaultSeoTitle: 'defaultSeoTitle',
+  defaultSeoDescription: 'defaultSeoDescription',
+  defaultSeoKeywords: 'defaultSeoKeywords',
+  favicon: 'favicon',
+  ogImage: 'ogImage',
+  googleAnalyticsId: 'googleAnalyticsId',
+  facebookPixelId: 'facebookPixelId',
+  customTrackingScripts: 'customTrackingScripts',
+  enableCookieConsent: 'enableCookieConsent',
+  cookieConsentText: 'cookieConsentText',
+  privacyPolicyUrl: 'privacyPolicyUrl',
+  termsOfServiceUrl: 'termsOfServiceUrl',
+  language: 'language',
+  timezone: 'timezone',
+  dateFormat: 'dateFormat',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -426,6 +480,12 @@ exports.BorderRadius = exports.$Enums.BorderRadius = {
   ROUNDED: 'ROUNDED'
 };
 
+exports.InsightType = exports.$Enums.InsightType = {
+  QUIZ: 'QUIZ',
+  SINGLE_CHOICE: 'SINGLE_CHOICE',
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE'
+};
+
 exports.TemplateImageType = exports.$Enums.TemplateImageType = {
   THUMBNAIL: 'THUMBNAIL',
   PREVIEW: 'PREVIEW'
@@ -441,6 +501,8 @@ exports.Prisma.ModelName = {
   Page: 'Page',
   Session: 'Session',
   Theme: 'Theme',
+  Insight: 'Insight',
+  InsightSubmission: 'InsightSubmission',
   TemplateCategory: 'TemplateCategory',
   Template: 'Template',
   TemplateImage: 'TemplateImage',
@@ -448,7 +510,8 @@ exports.Prisma.ModelName = {
   Image: 'Image',
   ImageFolder: 'ImageFolder',
   Form: 'Form',
-  FormSubmission: 'FormSubmission'
+  FormSubmission: 'FormSubmission',
+  FunnelSettings: 'FunnelSettings'
 };
 
 /**
