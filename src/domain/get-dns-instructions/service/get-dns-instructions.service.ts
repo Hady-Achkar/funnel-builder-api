@@ -151,10 +151,12 @@ export class GetDNSInstructionsService {
     // Traffic routing record (CNAME)
     if (domainRecord.dnsInstructions) {
       const trafficStatus = this.getRecordStatus(domainRecord.status, 'traffic');
+      const cloudflareHelper = getCloudFlareAPIHelper();
+      const config = cloudflareHelper.getConfig();
       dnsRecords.traffic = {
         type: domainRecord.dnsInstructions.type || "CNAME",
         name: domainRecord.dnsInstructions.name,
-        value: domainRecord.dnsInstructions.value,
+        value: `fallback.${config.cfDomain}`,
         purpose: domainRecord.dnsInstructions.purpose || "Live Traffic",
         status: trafficStatus,
         required: true,
