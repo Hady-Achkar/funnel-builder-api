@@ -12,28 +12,39 @@ export const createSubdomainRequest = z.object({
     .refine((val) => !val.includes("--"), {
       message: "Subdomain cannot contain consecutive hyphens",
     }),
-  workspaceId: z.number().int().positive(),
+  workspaceId: z
+    .number({
+      message: "Workspace ID must be a valid number",
+    })
+    .int({ message: "Workspace ID must be an integer" })
+    .positive({ message: "Workspace ID must be positive" }),
 });
 
 export type CreateSubdomainRequest = z.infer<typeof createSubdomainRequest>;
 
 export const subdomainData = z.object({
-  id: z.number(),
-  hostname: z.string(),
-  type: z.nativeEnum(DomainType),
-  status: z.nativeEnum(DomainStatus),
-  sslStatus: z.nativeEnum(SslStatus),
-  isVerified: z.boolean(),
-  isActive: z.boolean(),
+  id: z.number({ message: "Domain ID must be a number" }),
+  hostname: z.string({ message: "Hostname must be a string" }),
+  type: z.nativeEnum(DomainType, {
+    message: `Domain type must be one of: ${Object.values(DomainType).join(", ")}`,
+  }),
+  status: z.nativeEnum(DomainStatus, {
+    message: `Domain status must be one of: ${Object.values(DomainStatus).join(", ")}`,
+  }),
+  sslStatus: z.nativeEnum(SslStatus, {
+    message: `SSL status must be one of: ${Object.values(SslStatus).join(", ")}`,
+  }),
+  isVerified: z.boolean({ message: "Is verified must be a boolean" }),
+  isActive: z.boolean({ message: "Is active must be a boolean" }),
   cloudflareRecordId: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.date({ message: "Created at must be a date" }),
+  updatedAt: z.date({ message: "Updated at must be a date" }),
 });
 
 export type SubdomainData = z.infer<typeof subdomainData>;
 
 export const createSubdomainResponse = z.object({
-  message: z.string(),
+  message: z.string({ message: "Message must be a string" }),
   domain: subdomainData,
 });
 

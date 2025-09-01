@@ -4,6 +4,7 @@ import { createSubdomainRouter } from "./create-subdomain";
 import { deleteDomainRouter } from "./delete";
 import { verifyDomainRouter } from "./verify";
 import { getDNSInstructionsRouter } from "./get-dns-instructions";
+import getAllDomainsRouter from "./get-all-domains/route";
 
 const router: Router = express.Router();
 
@@ -12,5 +13,6 @@ router.use("/create-subdomain", createSubdomainRouter);
 router.use("/", deleteDomainRouter);
 router.use("/verify", verifyDomainRouter);
 router.use("/dns-instructions", getDNSInstructionsRouter);
+router.use("/", getAllDomainsRouter);
 
 export default router;

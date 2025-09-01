@@ -68,7 +68,7 @@ export const validateWorkspaceAccess = async (
   }
 
   if (requiredPermissions.length > 0 && !isWorkspaceOwner) {
-    const hasRequiredPermissions = requiredPermissions.every((permission) => {
+    const hasRequiredPermissions = requiredPermissions.some((permission) => {
       if (
         userRole === $Enums.WorkspaceRole.OWNER ||
         userRole === $Enums.WorkspaceRole.ADMIN

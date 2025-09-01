@@ -1,9 +1,15 @@
 import { z } from "zod";
 import { HostnameSchema } from "../../shared/types";
+import { $Enums } from "../../../generated/prisma-client";
 
 export const CreateCustomDomainRequestSchema = z.object({
   hostname: HostnameSchema,
-  workspaceId: z.number().int().positive(),
+  workspaceId: z
+    .number({
+      message: "Workspace ID must be a valid number",
+    })
+    .int({ message: "Workspace ID must be an integer" })
+    .positive({ message: "Workspace ID must be positive" }),
 });
 
 export type CreateCustomDomainRequest = z.infer<
@@ -11,10 +17,18 @@ export type CreateCustomDomainRequest = z.infer<
 >;
 
 export const DNSSetupRecordSchema = z.object({
-  type: z.enum(["TXT", "CNAME"]),
-  name: z.string(),
-  value: z.string(),
-  purpose: z.string(),
+  type: z.enum(["TXT", "CNAME"], {
+    message: "DNS record type must be either TXT or CNAME",
+  }),
+  name: z.string({
+    message: "DNS record name must be a string",
+  }),
+  value: z.string({
+    message: "DNS record value must be a string",
+  }),
+  purpose: z.string({
+    message: "DNS record purpose must be a string",
+  }),
 });
 
 export type DNSSetupRecord = z.infer<typeof DNSSetupRecordSchema>;
@@ -26,25 +40,29 @@ export const SetupInstructionsSchema = z.object({
 export type SetupInstructions = z.infer<typeof SetupInstructionsSchema>;
 
 export const CreatedDomainSchema = z.object({
-  id: z.number(),
-  hostname: z.string(),
-  type: z.string(),
-  status: z.string(),
-  sslStatus: z.string().nullable(),
-  isVerified: z.boolean(),
-  isActive: z.boolean(),
+  id: z.number({ message: "Domain ID must be a number" }),
+  hostname: z.string({ message: "Hostname must be a string" }),
+  type: z.nativeEnum($Enums.DomainType, {
+    message: `Domain type must be one of: ${Object.values($Enums.DomainType).join(", ")}`,
+  }),
+  status: z.nativeEnum($Enums.DomainStatus, {
+    message: `Domain status must be one of: ${Object.values($Enums.DomainStatus).join(", ")}`,
+  }),
+  sslStatus: z.nativeEnum($Enums.SslStatus).nullable(),
+  isVerified: z.boolean({ message: "Is verified must be a boolean" }),
+  isActive: z.boolean({ message: "Is active must be a boolean" }),
   verificationToken: z.string().nullable(),
   customHostnameId: z.string().nullable(),
   ownershipVerification: z.any().nullable(),
   cnameVerificationInstructions: z.any().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.date({ message: "Created at must be a date" }),
+  updatedAt: z.date({ message: "Updated at must be a date" }),
 });
 
 export type CreatedDomain = z.infer<typeof CreatedDomainSchema>;
 
 export const CreateCustomDomainResponseSchema = z.object({
-  message: z.string(),
+  message: z.string({ message: "Message must be a string" }),
   domain: CreatedDomainSchema,
   setupInstructions: SetupInstructionsSchema,
 });

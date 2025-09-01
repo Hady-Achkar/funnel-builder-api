@@ -1,7 +1,13 @@
 import { z } from "zod";
+import { $Enums } from "../../../generated/prisma-client";
 
 export const VerifyDomainRequestSchema = z.object({
-  id: z.number().int().positive(),
+  id: z
+    .number({
+      message: "Domain ID must be a valid number",
+    })
+    .int({ message: "Domain ID must be an integer" })
+    .positive({ message: "Domain ID must be positive" }),
 });
 
 export type VerifyDomainRequest = z.infer<typeof VerifyDomainRequestSchema>;
@@ -39,18 +45,22 @@ export const SslValidationRecordSchema = z.object({
 export type SslValidationRecord = z.infer<typeof SslValidationRecordSchema>;
 
 export const DomainVerificationStatusSchema = z.object({
-  id: z.number(),
-  hostname: z.string(),
-  type: z.string(),
-  status: z.string(),
-  sslStatus: z.string().nullable(),
-  isVerified: z.boolean(),
-  isActive: z.boolean(),
+  id: z.number({ message: "Domain ID must be a number" }),
+  hostname: z.string({ message: "Hostname must be a string" }),
+  type: z.nativeEnum($Enums.DomainType, {
+    message: `Domain type must be one of: ${Object.values($Enums.DomainType).join(", ")}`,
+  }),
+  status: z.nativeEnum($Enums.DomainStatus, {
+    message: `Domain status must be one of: ${Object.values($Enums.DomainStatus).join(", ")}`,
+  }),
+  sslStatus: z.nativeEnum($Enums.SslStatus).nullable(),
+  isVerified: z.boolean({ message: "Is verified must be a boolean" }),
+  isActive: z.boolean({ message: "Is active must be a boolean" }),
   verificationToken: z.string().nullable(),
   customHostnameId: z.string().nullable(),
   overallStatus: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.date({ message: "Created at must be a date" }),
+  updatedAt: z.date({ message: "Updated at must be a date" }),
 });
 
 export type DomainVerificationStatus = z.infer<
