@@ -1,54 +1,44 @@
 import {
-  PrismaClient,
   DomainType,
   DomainStatus,
   SslStatus,
+  $Enums,
 } from "../../../generated/prisma-client";
+import { getPrisma } from "../../../lib/prisma";
 import {
   validateHostname,
   parseDomain,
   getCloudFlareAPIHelper,
 } from "../../shared/helpers";
-import { addCustomHostname, getCustomHostnameDetails } from "../helpers";
 import {
-  CreateCustomDomainRequest,
+  addCustomHostname,
+  getCustomHostnameDetails,
+  validateWorkspaceAccess,
+  checkWorkspaceDomainLimits,
+} from "../helpers";
+import {
   CreateCustomDomainResponse,
-  UserDomainLimits,
-  UserDomainLimitsSchema,
   CreateCustomDomainRequestSchema,
   CreateCustomDomainResponseSchema,
   DNSSetupRecord,
 } from "../types";
-
-let prisma = new PrismaClient();
-
-const getPrisma = (): PrismaClient => {
-  if (!prisma) {
-    if (process.env.NODE_ENV !== "test") {
-      prisma = new PrismaClient();
-    } else {
-      throw new Error(
-        "PrismaClient not set for test environment. Call setPrismaClient() first."
-      );
-    }
-  }
-  return prisma;
-};
-
-export const setPrismaClient = (client: PrismaClient) => {
-  prisma = client;
-};
+import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
+import { ZodError } from "zod";
 
 export class CreateCustomDomainService {
   static async create(
     userId: number,
-    requestData: CreateCustomDomainRequest
+    requestData: unknown
   ): Promise<CreateCustomDomainResponse> {
-    const validatedData = CreateCustomDomainRequestSchema.parse(requestData);
-    const { hostname } = validatedData;
-
     try {
-      await this.checkUserDomainLimits(userId);
+      // Validate request data
+      const validatedData = CreateCustomDomainRequestSchema.parse(requestData);
+      const { hostname, workspaceId } = validatedData;
+
+      await validateWorkspaceAccess(userId, workspaceId, [
+        $Enums.WorkspacePermission.CREATE_DOMAINS,
+      ]);
+      await checkWorkspaceDomainLimits(workspaceId);
 
       const validatedHostname = validateHostname(hostname);
       const parsedDomain = parseDomain(validatedHostname);
@@ -57,7 +47,9 @@ export class CreateCustomDomainService {
         console.warn(
           "[Domain Create] Apex domain detected; a subdomain is required"
         );
-        throw new Error("Please provide a subdomain (e.g. www.example.com)");
+        throw new BadRequestError(
+          "Please provide a subdomain (e.g. www.example.com)"
+        );
       }
 
       const existingDomain = await getPrisma().domain.findUnique({
@@ -65,35 +57,38 @@ export class CreateCustomDomainService {
       });
 
       if (existingDomain) {
-        throw new Error(
+        throw new BadRequestError(
           "This domain name is taken, please choose another one."
         );
       }
 
-      const workspace = await getPrisma().workspace.findFirst({
-        where: { ownerId: userId },
-        select: { id: true },
-      });
-
-      if (!workspace) {
-        throw new Error("User has no workspace");
-      }
+      // workspaceId is already validated in validateWorkspaceAccess
+      const workspace = { id: workspaceId };
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();
       const zoneId = config.cfZoneId;
 
-      const initialHostname = await addCustomHostname(
-        validatedHostname,
-        zoneId
-      );
+      let initialHostname: any, detailedHostname: any;
+      try {
+        initialHostname = await addCustomHostname(validatedHostname, zoneId);
 
-      const detailedHostname = await getCustomHostnameDetails(
-        initialHostname.id,
-        zoneId
-      );
+        detailedHostname = await getCustomHostnameDetails(
+          initialHostname.id,
+          zoneId
+        );
+      } catch (error: any) {
+        const errMsg =
+          error.response?.data?.errors?.[0]?.message || error.message;
+        console.error(`[Domain Create] CloudFlare API Error: ${errMsg}`, {
+          stack: error.stack,
+        });
+        throw new BadGatewayError(
+          "External service error. Please try again later."
+        );
+      }
 
-      const { id, status, ssl } = detailedHostname;
+      const { id, ssl } = detailedHostname;
       const ownershipVerificationRecord =
         initialHostname.ownership_verification;
 
@@ -165,52 +160,12 @@ export class CreateCustomDomainService {
       };
 
       return CreateCustomDomainResponseSchema.parse(response);
-    } catch (error: any) {
-      const errMsg =
-        error.response?.data?.errors?.[0]?.message || error.message;
-      console.error(`[Domain Create] Error: ${errMsg}`, { stack: error.stack });
-      throw new Error(errMsg || "Failed to create domain.");
-    }
-  }
-
-  private static async checkUserDomainLimits(userId: number): Promise<void> {
-    const user = await getPrisma().user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        maximumCustomDomains: true,
-      },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const currentCustomDomainCount = await getPrisma().domain.count({
-      where: {
-        createdBy: userId,
-        type: DomainType.CUSTOM_DOMAIN,
-      },
-    });
-
-    const domainLimits: UserDomainLimits = {
-      userId,
-      maxCustomDomainsAllowed: user.maximumCustomDomains || 0,
-      currentCustomDomainCount,
-    };
-
-    const validatedLimits = UserDomainLimitsSchema.parse(domainLimits);
-
-    if (
-      validatedLimits.currentCustomDomainCount >=
-      validatedLimits.maxCustomDomainsAllowed
-    ) {
-      console.warn(
-        `[Domain Create] User has reached maximum custom domains limit: ${validatedLimits.maxCustomDomainsAllowed}`
-      );
-      throw new Error(
-        `You have reached your limit of ${validatedLimits.maxCustomDomainsAllowed} custom domain(s).`
-      );
+    } catch (error: unknown) {
+      if (error instanceof ZodError) {
+        const message = error.issues[0]?.message || "Invalid request data";
+        throw new BadRequestError(message);
+      }
+      throw error;
     }
   }
 }

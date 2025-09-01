@@ -3,6 +3,7 @@ import { HostnameSchema } from "../../shared/types";
 
 export const CreateCustomDomainRequestSchema = z.object({
   hostname: HostnameSchema,
+  workspaceId: z.number().int().positive(),
 });
 
 export type CreateCustomDomainRequest = z.infer<

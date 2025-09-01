@@ -38,3 +38,9 @@ export class InternalServerError extends HttpError {
     super(message, 500);
   }
 }
+
+export class BadGatewayError extends HttpError {
+  constructor(message: string = "Bad Gateway") {
+    super(message, 502);
+  }
+}
