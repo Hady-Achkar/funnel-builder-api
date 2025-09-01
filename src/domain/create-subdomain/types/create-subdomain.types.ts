@@ -12,6 +12,7 @@ export const createSubdomainRequest = z.object({
     .refine((val) => !val.includes("--"), {
       message: "Subdomain cannot contain consecutive hyphens",
     }),
+  workspaceId: z.number().int().positive(),
 });
 
 export type CreateSubdomainRequest = z.infer<typeof createSubdomainRequest>;
@@ -38,10 +39,3 @@ export const createSubdomainResponse = z.object({
 
 export type CreateSubdomainResponse = z.infer<typeof createSubdomainResponse>;
 
-export const userSubdomainLimits = z.object({
-  userId: z.number(),
-  maxSubdomainsAllowed: z.number().min(0),
-  currentSubdomainCount: z.number().min(0),
-});
-
-export type UserSubdomainLimits = z.infer<typeof userSubdomainLimits>;

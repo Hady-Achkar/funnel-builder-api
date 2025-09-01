@@ -1,8 +1,7 @@
 import { Response, NextFunction } from "express";
-import { ZodError } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
 import { CreateSubdomainService } from "../service/create-subdomain.service";
-import { createSubdomainRequest } from "../types/create-subdomain.types";
+import { UnauthorizedError } from "../../../errors/http-errors";
 
 export class CreateSubdomainController {
   static async create(
@@ -11,23 +10,20 @@ export class CreateSubdomainController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const userId = req.userId as number;
-      
-      // Validate request data using Zod
-      const requestData = createSubdomainRequest.parse(req.body);
+      const userId = req.userId;
 
-      const result = await CreateSubdomainService.create(userId, requestData);
+      if (!userId) {
+        throw new UnauthorizedError("Authentication is required");
+      }
+
+      console.log(
+        `[Subdomain Create] Processing subdomain creation for user ${userId}`
+      );
+
+      const result = await CreateSubdomainService.create(userId, req.body);
 
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof ZodError) {
-        const firstError = error.issues[0];
-        res.status(400).json({
-          error: firstError.message || "Invalid request data",
-          field: firstError.path.join('.') || 'unknown'
-        });
-        return;
-      }
       next(error);
     }
   }
