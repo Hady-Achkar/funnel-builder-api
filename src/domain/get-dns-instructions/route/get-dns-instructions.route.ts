@@ -4,10 +4,7 @@ import { GetDNSInstructionsController } from "../controller";
 
 const router: Router = express.Router();
 
-// GET /api/domains/:id/dns-instructions
+// GET /api/domains/dns-instructions/:id
 router.get("/:id", authenticateToken, GetDNSInstructionsController.getByDomainId);
-
-// POST /api/domains/dns-instructions/by-hostname
-router.post("/by-hostname", authenticateToken, GetDNSInstructionsController.getByHostname);
 
 export default router;
