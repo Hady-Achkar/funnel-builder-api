@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
 import { DeleteDomainService } from "../service/delete.service";
+import { UnauthorizedError } from "../../../errors/http-errors";
 
 export class DeleteDomainController {
   static async delete(
@@ -9,18 +10,13 @@ export class DeleteDomainController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const userId = req.userId as number;
-      const domainId = parseInt(req.params.id);
-      
-      if (isNaN(domainId)) {
-        res.status(400).json({
-          error: "Invalid domain ID",
-          field: "id"
-        });
-        return;
+      const userId = req.userId;
+
+      if (!userId) {
+        throw new UnauthorizedError("Authentication is required");
       }
 
-      const result = await DeleteDomainService.delete(userId, { id: domainId });
+      const result = await DeleteDomainService.delete(userId, req.params);
 
       res.status(200).json(result);
     } catch (error) {
