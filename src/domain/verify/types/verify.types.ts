@@ -1,35 +1,32 @@
 import { z } from "zod";
-import { HostnameSchema } from "../../shared/types";
 
-// Verify Domain Request Schema
 export const VerifyDomainRequestSchema = z.object({
-  hostname: HostnameSchema,
+  id: z.number().int().positive(),
 });
 
 export type VerifyDomainRequest = z.infer<typeof VerifyDomainRequestSchema>;
 
-// CloudFlare SSL Status Schema
 export const CloudFlareSslStatusSchema = z.enum([
   "initializing",
   "pending_validation",
   "active",
   "failed",
-  "expired"
+  "expired",
 ]);
 
 export type CloudFlareSslStatus = z.infer<typeof CloudFlareSslStatusSchema>;
 
-// CloudFlare Hostname Status Schema
 export const CloudFlareHostnameStatusSchema = z.enum([
   "pending",
   "active",
   "moved",
-  "blocked"
+  "blocked",
 ]);
 
-export type CloudFlareHostnameStatus = z.infer<typeof CloudFlareHostnameStatusSchema>;
+export type CloudFlareHostnameStatus = z.infer<
+  typeof CloudFlareHostnameStatusSchema
+>;
 
-// SSL Validation Record Schema
 export const SslValidationRecordSchema = z.object({
   txt_name: z.string().optional(),
   txt_value: z.string().optional(),
@@ -41,7 +38,6 @@ export const SslValidationRecordSchema = z.object({
 
 export type SslValidationRecord = z.infer<typeof SslValidationRecordSchema>;
 
-// Domain Verification Status Schema
 export const DomainVerificationStatusSchema = z.object({
   id: z.number(),
   hostname: z.string(),
@@ -57,9 +53,10 @@ export const DomainVerificationStatusSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type DomainVerificationStatus = z.infer<typeof DomainVerificationStatusSchema>;
+export type DomainVerificationStatus = z.infer<
+  typeof DomainVerificationStatusSchema
+>;
 
-// Verify Domain Response Schema
 export const VerifyDomainResponseSchema = z.object({
   message: z.string(),
   domain: DomainVerificationStatusSchema,

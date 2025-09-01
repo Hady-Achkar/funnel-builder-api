@@ -1,7 +1,7 @@
 import { DomainType, $Enums } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
 import { deleteCustomHostname, deleteARecord } from "../helpers";
-import { validateWorkspaceAccess } from "../../create-custom-domain/helpers";
+import { validateWorkspaceAccess } from "../../shared/helpers";
 import {
   DeleteDomainResponse,
   deleteDomainResponse,

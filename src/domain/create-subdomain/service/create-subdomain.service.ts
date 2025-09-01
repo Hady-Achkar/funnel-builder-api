@@ -6,7 +6,7 @@ import {
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
 import { getCloudFlareAPIHelper } from "../../shared/helpers";
-import { validateWorkspaceAccess } from "../../create-custom-domain/helpers";
+import { validateWorkspaceAccess } from "../../shared/helpers";
 import { checkWorkspaceSubdomainLimits, createARecord } from "../helpers";
 import {
   CreateSubdomainResponse,

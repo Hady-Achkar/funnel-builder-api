@@ -108,7 +108,6 @@ export class RegisterService {
               "VIEW_ANALYTICS",
               "MANAGE_DOMAINS",
               "CREATE_DOMAINS",
-              "EDIT_DOMAINS",
               "DELETE_DOMAINS",
               "CONNECT_DOMAINS",
             ],

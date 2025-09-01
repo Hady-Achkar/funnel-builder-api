@@ -4,7 +4,6 @@ import { VerifyDomainController } from "../controller";
 
 const router: Router = express.Router();
 
-// POST /api/domains/verify
-router.post("/", authenticateToken, VerifyDomainController.verify);
+router.post("/:id", authenticateToken, VerifyDomainController.verify);
 
 export default router;

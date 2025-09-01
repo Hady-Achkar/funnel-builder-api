@@ -1,7 +1,7 @@
-import { 
-  CloudFlareHostnameStatus, 
+import {
+  CloudFlareHostnameStatus,
   CloudFlareSslStatus,
-  SslValidationRecord 
+  SslValidationRecord,
 } from "../types";
 
 export interface VerificationStatusResult {
@@ -17,35 +17,29 @@ export function determineVerificationStatus(
   sslStatus: CloudFlareSslStatus,
   sslValidationRecords?: any[]
 ): VerificationStatusResult {
-  
   let message: string;
   let isFullyActive = false;
   let shouldUpdateVerified = false;
   let shouldUpdateActive = false;
   let nextStep: SslValidationRecord | null = null;
 
-  // Check if domain is fully active (both hostname and SSL are active)
-  if (hostnameStatus === 'active' && sslStatus === 'active') {
-    message = 'Congratulations! Your domain is fully configured and active.';
+  if (hostnameStatus === "active" && sslStatus === "active") {
+    message = "Congratulations! Your domain is fully configured and active.";
     isFullyActive = true;
     shouldUpdateVerified = true;
     shouldUpdateActive = true;
-  } 
-  // Domain ownership verified but SSL pending
-  else if (hostnameStatus === 'active' && sslStatus !== 'active') {
+  } else if (hostnameStatus === "active" && sslStatus !== "active") {
     if (sslValidationRecords && sslValidationRecords.length > 0) {
       nextStep = parseSslValidationRecord(sslValidationRecords[0]);
-      message = 'Domain ownership verified. Please add the SSL validation records to complete setup.';
+      message =
+        "Domain ownership verified. Please add the SSL validation records to complete setup.";
     } else {
       message = `Domain ownership verified. SSL certificate is being processed. Status: "${sslStatus}".`;
     }
     shouldUpdateVerified = true;
-  }
-  // Still pending verification
-  else {
+  } else {
     message = `Verification is still in progress. Status: "${hostnameStatus}", SSL: "${sslStatus}".`;
-    
-    // If SSL validation records are available, provide them as next step
+
     if (sslValidationRecords && sslValidationRecords.length > 0) {
       nextStep = parseSslValidationRecord(sslValidationRecords[0]);
     }
@@ -56,7 +50,7 @@ export function determineVerificationStatus(
     isFullyActive,
     shouldUpdateVerified,
     shouldUpdateActive,
-    nextStep
+    nextStep,
   };
 }
 
@@ -84,13 +78,13 @@ export function getStatusUpdateData(
   verificationResult: VerificationStatusResult
 ) {
   const updateData: any = {
-    status: hostnameStatus === 'active' ? 'VERIFIED' : 'PENDING',
-    sslStatus: sslStatus === 'active' ? 'ACTIVE' : 'PENDING',
+    status: hostnameStatus === "active" ? "VERIFIED" : "PENDING",
+    sslStatus: sslStatus === "active" ? "ACTIVE" : "PENDING",
     lastVerifiedAt: new Date(),
   };
 
   if (verificationResult.shouldUpdateActive) {
-    updateData.status = 'ACTIVE';
+    updateData.status = "ACTIVE";
   }
 
   return updateData;

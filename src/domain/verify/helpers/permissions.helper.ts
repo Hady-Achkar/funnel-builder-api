@@ -1,7 +1,7 @@
 import { $Enums } from "../../../generated/prisma-client";
 import { validateWorkspaceAccess } from "../../shared/helpers";
 
-export const validateDNSInstructionsAccess = async (
+export const validateVerifyAccess = async (
   userId: number,
   workspaceId: number
 ) => {

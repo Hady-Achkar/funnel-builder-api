@@ -1,6 +1,6 @@
 import { getPrisma } from "../../../lib/prisma";
 import { getCloudFlareAPIHelper } from "../../shared/helpers";
-import { getCustomHostnameDetails } from "../../create-custom-domain/helpers";
+import { getCustomHostnameDetails } from "../../shared/helpers";
 import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import {

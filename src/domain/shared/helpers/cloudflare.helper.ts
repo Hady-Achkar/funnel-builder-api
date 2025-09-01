@@ -1,8 +1,8 @@
-import { getCloudFlareAPIHelper } from "../../shared/helpers/cloudflare-api.helper";
+import { getCloudFlareAPIHelper } from "../helpers/cloudflare-api.helper";
 import {
   CustomHostnamePayload,
   CustomHostnamePayloadSchema,
-} from "../../shared/types";
+} from "../types";
 
 export async function addCustomHostname(
   hostname: string,
