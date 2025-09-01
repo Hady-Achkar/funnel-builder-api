@@ -1,5 +1,5 @@
 import { $Enums } from "../../../generated/prisma-client";
-import { validateWorkspaceAccess } from "../../shared/helpers";
+import { validateWorkspaceAccess } from "../../../domain/shared/helpers";
 
 export const validateConnectFunnelDomainAccess = async (
   userId: number,

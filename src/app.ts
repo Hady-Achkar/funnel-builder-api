@@ -9,6 +9,7 @@ import { authRoutes } from "./auth/routes";
 import funnelRoutes from "./funnel/routes/funnels";
 import pageRoutes from "./page/routes/pages";
 import { domainRoutes } from "./domain";
+import domainFunnelRoutes from "./domain-funnel/routes";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";
@@ -59,6 +60,7 @@ export function createServer(): Express {
   app.use("/api/funnels", funnelRoutes);
   app.use("/api/pages", pageRoutes);
   app.use("/api/domains", domainRoutes);
+  app.use("/api/domain-funnel", domainFunnelRoutes);
   app.use("/api/themes", themeRoutes);
   app.use("/api/image-folders", imageFolderRoutes);
   app.use("/api/templates", templateRoutes);
@@ -105,6 +107,8 @@ export function createServer(): Express {
         "domains/create-custom-domain": "/api/domains/create-custom-domain",
         "domains/verify": "/api/domains/verify",
         "domains/dns-instructions": "/api/domains/dns-instructions",
+        "domain-funnel/connect": "/api/domain-funnel/connect",
+        "domain-funnel/connections": "/api/domain-funnel/connections",
         health: "/health",
         themes: "/api/themes",
         forms: "/api/forms",

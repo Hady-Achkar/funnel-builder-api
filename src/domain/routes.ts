@@ -5,7 +5,6 @@ import { deleteDomainRouter } from "./delete";
 import { verifyDomainRouter } from "./verify";
 import { getDNSInstructionsRouter } from "./get-dns-instructions";
 import getAllDomainsRouter from "./get-all-domains/route";
-import { connectFunnelDomainRouter } from "./connect-funnel-domain";
 
 const router: Router = express.Router();
 
@@ -15,6 +14,5 @@ router.use("/", deleteDomainRouter);
 router.use("/verify", verifyDomainRouter);
 router.use("/dns-instructions", getDNSInstructionsRouter);
 router.use("/", getAllDomainsRouter);
-router.use("/connect-funnel-domain", connectFunnelDomainRouter);
 
 export default router;

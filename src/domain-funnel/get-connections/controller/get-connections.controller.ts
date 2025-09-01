@@ -1,10 +1,10 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { ConnectFunnelDomainService } from "../service";
+import { GetConnectionsService } from "../service";
 import { UnauthorizedError } from "../../../errors/http-errors";
 
-export class ConnectFunnelDomainController {
-  static async connect(
+export class GetConnectionsController {
+  static async getConnections(
     req: AuthRequest,
     res: Response,
     next: NextFunction
@@ -16,9 +16,10 @@ export class ConnectFunnelDomainController {
         throw new UnauthorizedError("Authentication is required");
       }
 
-      const result = await ConnectFunnelDomainService.connect(userId, req.body);
+      const workspaceId = parseInt(req.params.workspaceId);
+      const result = await GetConnectionsService.getConnections(userId, { workspaceId });
 
-      res.status(201).json(result);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }

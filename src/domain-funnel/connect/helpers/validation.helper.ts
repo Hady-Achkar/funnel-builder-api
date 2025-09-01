@@ -26,6 +26,12 @@ export const validateFunnelExists = async (
     );
   }
 
+  if (funnel.status !== $Enums.FunnelStatus.LIVE) {
+    throw new BadRequestError(
+      "Funnel must be LIVE before connecting to a domain"
+    );
+  }
+
   return funnel;
 };
 
