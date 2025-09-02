@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import { authenticateToken } from "../../middleware/auth";
+import { checkFunnelAccess } from "../../middleware/funnelAccess";
 import { updatePageController } from "../update";
 import { createPageController } from "../create";
 import { getPageController } from "../get";
@@ -28,6 +29,7 @@ router.post("/:pageId/duplicate", authenticateToken, duplicatePageController);
 // Public routes
 router.get(
   "/funnel/:funnelSlug([a-z0-9-]+)/page/:linkingId",
+  checkFunnelAccess,
   getPublicPageController
 );
 router.post("/:pageId/visit", createPageVisitController);

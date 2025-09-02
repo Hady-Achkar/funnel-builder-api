@@ -26000,6 +26000,8 @@ export namespace Prisma {
     language: string | null
     timezone: string | null
     dateFormat: string | null
+    isPasswordProtected: boolean | null
+    passwordHash: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26021,6 +26023,8 @@ export namespace Prisma {
     language: string | null
     timezone: string | null
     dateFormat: string | null
+    isPasswordProtected: boolean | null
+    passwordHash: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26043,6 +26047,8 @@ export namespace Prisma {
     language: number
     timezone: number
     dateFormat: number
+    isPasswordProtected: number
+    passwordHash: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -26076,6 +26082,8 @@ export namespace Prisma {
     language?: true
     timezone?: true
     dateFormat?: true
+    isPasswordProtected?: true
+    passwordHash?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26097,6 +26105,8 @@ export namespace Prisma {
     language?: true
     timezone?: true
     dateFormat?: true
+    isPasswordProtected?: true
+    passwordHash?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26119,6 +26129,8 @@ export namespace Prisma {
     language?: true
     timezone?: true
     dateFormat?: true
+    isPasswordProtected?: true
+    passwordHash?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -26228,6 +26240,8 @@ export namespace Prisma {
     language: string | null
     timezone: string | null
     dateFormat: string | null
+    isPasswordProtected: boolean
+    passwordHash: string | null
     createdAt: Date
     updatedAt: Date
     _count: FunnelSettingsCountAggregateOutputType | null
@@ -26269,6 +26283,8 @@ export namespace Prisma {
     language?: boolean
     timezone?: boolean
     dateFormat?: boolean
+    isPasswordProtected?: boolean
+    passwordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
@@ -26292,6 +26308,8 @@ export namespace Prisma {
     language?: boolean
     timezone?: boolean
     dateFormat?: boolean
+    isPasswordProtected?: boolean
+    passwordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
@@ -26315,6 +26333,8 @@ export namespace Prisma {
     language?: boolean
     timezone?: boolean
     dateFormat?: boolean
+    isPasswordProtected?: boolean
+    passwordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
@@ -26338,11 +26358,13 @@ export namespace Prisma {
     language?: boolean
     timezone?: boolean
     dateFormat?: boolean
+    isPasswordProtected?: boolean
+    passwordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FunnelSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "funnelId" | "defaultSeoTitle" | "defaultSeoDescription" | "defaultSeoKeywords" | "favicon" | "ogImage" | "googleAnalyticsId" | "facebookPixelId" | "customTrackingScripts" | "enableCookieConsent" | "cookieConsentText" | "privacyPolicyUrl" | "termsOfServiceUrl" | "language" | "timezone" | "dateFormat" | "createdAt" | "updatedAt", ExtArgs["result"]["funnelSettings"]>
+  export type FunnelSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "funnelId" | "defaultSeoTitle" | "defaultSeoDescription" | "defaultSeoKeywords" | "favicon" | "ogImage" | "googleAnalyticsId" | "facebookPixelId" | "customTrackingScripts" | "enableCookieConsent" | "cookieConsentText" | "privacyPolicyUrl" | "termsOfServiceUrl" | "language" | "timezone" | "dateFormat" | "isPasswordProtected" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["funnelSettings"]>
   export type FunnelSettingsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
@@ -26376,6 +26398,8 @@ export namespace Prisma {
       language: string | null
       timezone: string | null
       dateFormat: string | null
+      isPasswordProtected: boolean
+      passwordHash: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["funnelSettings"]>
@@ -26819,6 +26843,8 @@ export namespace Prisma {
     readonly language: FieldRef<"FunnelSettings", 'String'>
     readonly timezone: FieldRef<"FunnelSettings", 'String'>
     readonly dateFormat: FieldRef<"FunnelSettings", 'String'>
+    readonly isPasswordProtected: FieldRef<"FunnelSettings", 'Boolean'>
+    readonly passwordHash: FieldRef<"FunnelSettings", 'String'>
     readonly createdAt: FieldRef<"FunnelSettings", 'DateTime'>
     readonly updatedAt: FieldRef<"FunnelSettings", 'DateTime'>
   }
@@ -27575,6 +27601,8 @@ export namespace Prisma {
     language: 'language',
     timezone: 'timezone',
     dateFormat: 'dateFormat',
+    isPasswordProtected: 'isPasswordProtected',
+    passwordHash: 'passwordHash',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -29554,6 +29582,8 @@ export namespace Prisma {
     language?: StringNullableFilter<"FunnelSettings"> | string | null
     timezone?: StringNullableFilter<"FunnelSettings"> | string | null
     dateFormat?: StringNullableFilter<"FunnelSettings"> | string | null
+    isPasswordProtected?: BoolFilter<"FunnelSettings"> | boolean
+    passwordHash?: StringNullableFilter<"FunnelSettings"> | string | null
     createdAt?: DateTimeFilter<"FunnelSettings"> | Date | string
     updatedAt?: DateTimeFilter<"FunnelSettings"> | Date | string
     funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
@@ -29577,6 +29607,8 @@ export namespace Prisma {
     language?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     dateFormat?: SortOrderInput | SortOrder
+    isPasswordProtected?: SortOrder
+    passwordHash?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     funnel?: FunnelOrderByWithRelationInput
@@ -29603,6 +29635,8 @@ export namespace Prisma {
     language?: StringNullableFilter<"FunnelSettings"> | string | null
     timezone?: StringNullableFilter<"FunnelSettings"> | string | null
     dateFormat?: StringNullableFilter<"FunnelSettings"> | string | null
+    isPasswordProtected?: BoolFilter<"FunnelSettings"> | boolean
+    passwordHash?: StringNullableFilter<"FunnelSettings"> | string | null
     createdAt?: DateTimeFilter<"FunnelSettings"> | Date | string
     updatedAt?: DateTimeFilter<"FunnelSettings"> | Date | string
     funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
@@ -29626,6 +29660,8 @@ export namespace Prisma {
     language?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     dateFormat?: SortOrderInput | SortOrder
+    isPasswordProtected?: SortOrder
+    passwordHash?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: FunnelSettingsCountOrderByAggregateInput
@@ -29656,6 +29692,8 @@ export namespace Prisma {
     language?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
     timezone?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
     dateFormat?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
+    isPasswordProtected?: BoolWithAggregatesFilter<"FunnelSettings"> | boolean
+    passwordHash?: StringNullableWithAggregatesFilter<"FunnelSettings"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FunnelSettings"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FunnelSettings"> | Date | string
   }
@@ -31449,6 +31487,8 @@ export namespace Prisma {
     language?: string | null
     timezone?: string | null
     dateFormat?: string | null
+    isPasswordProtected?: boolean
+    passwordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     funnel: FunnelCreateNestedOneWithoutSettingsInput
@@ -31472,6 +31512,8 @@ export namespace Prisma {
     language?: string | null
     timezone?: string | null
     dateFormat?: string | null
+    isPasswordProtected?: boolean
+    passwordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31492,6 +31534,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     funnel?: FunnelUpdateOneRequiredWithoutSettingsNestedInput
@@ -31515,6 +31559,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31537,6 +31583,8 @@ export namespace Prisma {
     language?: string | null
     timezone?: string | null
     dateFormat?: string | null
+    isPasswordProtected?: boolean
+    passwordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31557,6 +31605,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31579,6 +31629,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33273,6 +33325,8 @@ export namespace Prisma {
     language?: SortOrder
     timezone?: SortOrder
     dateFormat?: SortOrder
+    isPasswordProtected?: SortOrder
+    passwordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33299,6 +33353,8 @@ export namespace Prisma {
     language?: SortOrder
     timezone?: SortOrder
     dateFormat?: SortOrder
+    isPasswordProtected?: SortOrder
+    passwordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33320,6 +33376,8 @@ export namespace Prisma {
     language?: SortOrder
     timezone?: SortOrder
     dateFormat?: SortOrder
+    isPasswordProtected?: SortOrder
+    passwordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -36234,6 +36292,8 @@ export namespace Prisma {
     language?: string | null
     timezone?: string | null
     dateFormat?: string | null
+    isPasswordProtected?: boolean
+    passwordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -36255,6 +36315,8 @@ export namespace Prisma {
     language?: string | null
     timezone?: string | null
     dateFormat?: string | null
+    isPasswordProtected?: boolean
+    passwordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -36531,6 +36593,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -36552,6 +36616,8 @@ export namespace Prisma {
     language?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     dateFormat?: NullableStringFieldUpdateOperationsInput | string | null
+    isPasswordProtected?: BoolFieldUpdateOperationsInput | boolean
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

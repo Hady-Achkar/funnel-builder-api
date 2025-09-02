@@ -484,6 +484,8 @@ model FunnelSettings {
   language              String?  @default("en")
   timezone              String?  @default("UTC")
   dateFormat            String?  @default("DD.MM.YYYY")
+  isPasswordProtected   Boolean  @default(false)
+  passwordHash          String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   funnel                Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)

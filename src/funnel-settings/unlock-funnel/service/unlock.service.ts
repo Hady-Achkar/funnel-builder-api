@@ -1,0 +1,46 @@
+import { getPrisma } from '../../../lib/prisma';
+import { BadRequestError } from '../../../errors';
+import { checkFunnelSettingsPermissions } from '../helpers';
+import {
+  UnlockFunnelRequest,
+  UnlockFunnelResponse,
+  unlockFunnelRequest,
+  unlockFunnelResponse,
+} from '../types';
+import { ZodError } from 'zod';
+
+export const unlockFunnel = async (
+  userId: number,
+  data: Partial<UnlockFunnelRequest>
+): Promise<UnlockFunnelResponse> => {
+  try {
+    if (!userId) throw new Error("User ID is required");
+
+    const validatedRequest = unlockFunnelRequest.parse(data);
+
+    await checkFunnelSettingsPermissions(userId, validatedRequest.funnelId);
+
+    const prisma = getPrisma();
+
+    await prisma.funnelSettings.update({
+      where: { funnelId: validatedRequest.funnelId },
+      data: {
+        isPasswordProtected: false,
+        passwordHash: null,
+      },
+    });
+
+    const response = {
+      message: 'Funnel unlocked successfully',
+      success: true,
+    };
+
+    return unlockFunnelResponse.parse(response);
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      const message = error.issues[0]?.message || 'Invalid data provided';
+      throw new BadRequestError(message);
+    }
+    throw error;
+  }
+};

@@ -389,6 +389,8 @@ exports.Prisma.FunnelSettingsScalarFieldEnum = {
   language: 'language',
   timezone: 'timezone',
   dateFormat: 'dateFormat',
+  isPasswordProtected: 'isPasswordProtected',
+  passwordHash: 'passwordHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
