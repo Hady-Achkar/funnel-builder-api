@@ -164,6 +164,7 @@ export const createTemplateFromFunnel = async (
           name: page.name,
           content: updatedContent,
           order: page.order,
+          type: page.type, // Preserve the original page type
           linkingId: newLinkingId,
           seoTitle: page.seoTitle,
           seoDescription: page.seoDescription,

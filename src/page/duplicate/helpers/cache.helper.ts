@@ -1,10 +1,12 @@
 import { cacheService } from "../../../services/cache/cache.service";
+import { PageType } from "../../../generated/prisma-client";
 
 interface PageCacheData {
   id: number;
   name: string;
   content: string;
   order: number;
+  type: PageType;
   linkingId: string;
   seoTitle: string | null;
   seoDescription: string | null;
@@ -43,6 +45,7 @@ export const updateCacheAfterDuplicate = async ({
         id: newPage.id,
         name: newPage.name,
         order: newPage.order,
+        type: newPage.type,
         linkingId: newPage.linkingId,
         seoTitle: newPage.seoTitle,
         seoDescription: newPage.seoDescription,

@@ -188,6 +188,7 @@ model Page {
   name      String
   content   String?
   order     Int
+  type      PageType @default(PAGE)
   linkingId String?
   seoTitle       String?
   seoDescription String?
@@ -200,6 +201,11 @@ model Page {
 
   @@unique([funnelId, linkingId])
   @@map("pages")
+}
+
+enum PageType {
+  PAGE
+  RESULT
 }
 
 model Session {
@@ -373,6 +379,7 @@ model TemplatePage {
   name            String
   content         String?
   order           Int
+  type            PageType @default(PAGE)
   settings        Json?
   linkingId       String? @unique
   seoTitle        String?

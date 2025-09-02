@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PageType } from "../../../generated/prisma-client";
 
 export const updatePageParams = z.object({
   id: z.coerce.number({ message: "Page ID must be a number" }),
@@ -12,6 +13,9 @@ export const updatePageRequest = z.object({
     .optional(),
   content: z
     .string({ message: "Page content must be a string" })
+    .optional(),
+  type: z
+    .nativeEnum(PageType)
     .optional(),
   linkingId: z
     .string({ message: "Linking ID must be a string" })
@@ -45,6 +49,7 @@ export const updatePageResponse = z.object({
     name: z.string({ message: "Page name must be a string" }),
     content: z.string({ message: "Page content must be a string" }),
     order: z.number({ message: "Page order must be a number" }),
+    type: z.nativeEnum(PageType),
     linkingId: z.string({ message: "Linking ID must be a string" }),
     seoTitle: z.string({ message: "SEO title must be a string" }).nullable(),
     seoDescription: z.string({ message: "SEO description must be a string" }).nullable(),

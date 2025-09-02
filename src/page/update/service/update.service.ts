@@ -71,6 +71,10 @@ export const updatePage = async (
     updateData.seoKeywords = validatedData.seoKeywords;
   }
 
+  if (validatedData.type !== undefined) {
+    updateData.type = validatedData.type;
+  }
+
   if (Object.keys(updateData).length === 0) {
     return {
       message: "No changes provided",
@@ -79,6 +83,7 @@ export const updatePage = async (
         name: existingPage.name,
         content: existingPage.content,
         order: existingPage.order,
+        type: existingPage.type,
         linkingId: existingPage.linkingId,
         seoTitle: existingPage.seoTitle,
         seoDescription: existingPage.seoDescription,
@@ -126,6 +131,7 @@ export const updatePage = async (
       name: updatedPage.name,
       content: updatedPage.content,
       order: updatedPage.order,
+      type: updatedPage.type,
       linkingId: updatedPage.linkingId,
       seoTitle: updatedPage.seoTitle,
       seoDescription: updatedPage.seoDescription,

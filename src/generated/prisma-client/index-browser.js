@@ -214,6 +214,7 @@ exports.Prisma.PageScalarFieldEnum = {
   name: 'name',
   content: 'content',
   order: 'order',
+  type: 'type',
   linkingId: 'linkingId',
   seoTitle: 'seoTitle',
   seoDescription: 'seoDescription',
@@ -312,6 +313,7 @@ exports.Prisma.TemplatePageScalarFieldEnum = {
   name: 'name',
   content: 'content',
   order: 'order',
+  type: 'type',
   settings: 'settings',
   linkingId: 'linkingId',
   seoTitle: 'seoTitle',
@@ -471,6 +473,11 @@ exports.SslStatus = exports.$Enums.SslStatus = {
   ACTIVE: 'ACTIVE',
   ERROR: 'ERROR',
   EXPIRED: 'EXPIRED'
+};
+
+exports.PageType = exports.$Enums.PageType = {
+  PAGE: 'PAGE',
+  RESULT: 'RESULT'
 };
 
 exports.BorderRadius = exports.$Enums.BorderRadius = {

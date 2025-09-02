@@ -27,11 +27,8 @@ export const checkWorkspaceDomainLimits = async (
   });
 
   if (currentCustomDomainCount >= workspace.allocatedCustomDomains) {
-    console.warn(
-      `[Domain Create] Workspace has reached maximum custom domains limit: ${workspace.allocatedCustomDomains}`
-    );
     throw new BadRequestError(
-      `This workspace has reached its limit of ${workspace.allocatedCustomDomains} custom domain(s).`
+      "This workspace has reached its maximum number of custom domains."
     );
   }
 };

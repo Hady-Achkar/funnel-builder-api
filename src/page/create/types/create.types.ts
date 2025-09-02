@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PageType } from "../../../generated/prisma-client";
 
 export const createPageRequest = z.object({
   name: z
@@ -13,6 +14,10 @@ export const createPageRequest = z.object({
       message: "Page content must be a string",
     })
     .default("")
+    .optional(),
+  type: z
+    .nativeEnum(PageType)
+    .default(PageType.PAGE)
     .optional(),
   funnelId: z.coerce
     .number({

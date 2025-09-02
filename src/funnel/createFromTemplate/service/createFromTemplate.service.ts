@@ -166,6 +166,7 @@ export const createFromTemplate = async (
             name: templatePage.name,
             content: updatedContent,
             order: templatePage.order,
+            type: templatePage.type, // Preserve the type from template
             funnelId: funnel.id,
             linkingId: newLinkingId,
             seoTitle: templatePage.seoTitle,

@@ -8,10 +8,7 @@ import {
   replaceLinkingIdsInContent,
   getNewLinkingIdForPage,
 } from "../helpers";
-import { 
-  generateSlug, 
-  generateUniqueSlug 
-} from "../../shared/helpers";
+import { generateSlug, generateUniqueSlug } from "../../shared/helpers";
 import {
   duplicateFunnelParams,
   DuplicateFunnelParams,
@@ -157,6 +154,28 @@ export const duplicateFunnel = async (
       };
     }
 
+    // Check if target workspace has reached its funnel allocation limit
+    const targetWorkspaceWithAllocations = await prisma.workspace.findUnique({
+      where: { id: targetWorkspaceId },
+      select: {
+        allocatedFunnels: true,
+      },
+    });
+
+    if (!targetWorkspaceWithAllocations) {
+      throw new Error("Target workspace not found");
+    }
+
+    const currentFunnelCount = await prisma.funnel.count({
+      where: { workspaceId: targetWorkspaceId },
+    });
+
+    if (currentFunnelCount >= targetWorkspaceWithAllocations.allocatedFunnels) {
+      throw new Error(
+        "This workspace has reached its maximum number of funnels."
+      );
+    }
+
     // Generate unique funnel name
     finalFunnelName = validatedData.name || `Copy of ${originalFunnel.name}`;
 
@@ -246,6 +265,7 @@ export const duplicateFunnel = async (
             name: originalPage.name,
             content: updatedContent,
             order: originalPage.order,
+            type: originalPage.type, // Preserve the original type
             funnelId: newFunnel.id,
             linkingId: newLinkingId,
             seoTitle: originalPage.seoTitle,
@@ -344,7 +364,7 @@ export const duplicateFunnel = async (
     }
 
     const response = {
-      message: `Funnel duplicated successfully to workspace ${targetWorkspace.name}`,
+      message: "Funnel duplicated successfully",
       funnelId: result.funnel.id,
     };
 

@@ -163,6 +163,14 @@ export const FunnelStatus: {
 export type FunnelStatus = (typeof FunnelStatus)[keyof typeof FunnelStatus]
 
 
+export const PageType: {
+  PAGE: 'PAGE',
+  RESULT: 'RESULT'
+};
+
+export type PageType = (typeof PageType)[keyof typeof PageType]
+
+
 export const DomainType: {
   CUSTOM_DOMAIN: 'CUSTOM_DOMAIN',
   SUBDOMAIN: 'SUBDOMAIN'
@@ -234,6 +242,10 @@ export const WorkspacePermission: typeof $Enums.WorkspacePermission
 export type FunnelStatus = $Enums.FunnelStatus
 
 export const FunnelStatus: typeof $Enums.FunnelStatus
+
+export type PageType = $Enums.PageType
+
+export const PageType: typeof $Enums.PageType
 
 export type DomainType = $Enums.DomainType
 
@@ -10760,6 +10772,7 @@ export namespace Prisma {
     name: string | null
     content: string | null
     order: number | null
+    type: $Enums.PageType | null
     linkingId: string | null
     seoTitle: string | null
     seoDescription: string | null
@@ -10775,6 +10788,7 @@ export namespace Prisma {
     name: string | null
     content: string | null
     order: number | null
+    type: $Enums.PageType | null
     linkingId: string | null
     seoTitle: string | null
     seoDescription: string | null
@@ -10790,6 +10804,7 @@ export namespace Prisma {
     name: number
     content: number
     order: number
+    type: number
     linkingId: number
     seoTitle: number
     seoDescription: number
@@ -10821,6 +10836,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     linkingId?: true
     seoTitle?: true
     seoDescription?: true
@@ -10836,6 +10852,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     linkingId?: true
     seoTitle?: true
     seoDescription?: true
@@ -10851,6 +10868,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     linkingId?: true
     seoTitle?: true
     seoDescription?: true
@@ -10953,6 +10971,7 @@ export namespace Prisma {
     name: string
     content: string | null
     order: number
+    type: $Enums.PageType
     linkingId: string | null
     seoTitle: string | null
     seoDescription: string | null
@@ -10987,6 +11006,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     linkingId?: boolean
     seoTitle?: boolean
     seoDescription?: boolean
@@ -11003,6 +11023,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     linkingId?: boolean
     seoTitle?: boolean
     seoDescription?: boolean
@@ -11019,6 +11040,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     linkingId?: boolean
     seoTitle?: boolean
     seoDescription?: boolean
@@ -11035,6 +11057,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     linkingId?: boolean
     seoTitle?: boolean
     seoDescription?: boolean
@@ -11045,7 +11068,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "content" | "order" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "visits" | "funnelId" | "createdAt" | "updatedAt", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "content" | "order" | "type" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "visits" | "funnelId" | "createdAt" | "updatedAt", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
@@ -11066,6 +11089,7 @@ export namespace Prisma {
       name: string
       content: string | null
       order: number
+      type: $Enums.PageType
       linkingId: string | null
       seoTitle: string | null
       seoDescription: string | null
@@ -11502,6 +11526,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'String'>
     readonly order: FieldRef<"Page", 'Int'>
+    readonly type: FieldRef<"Page", 'PageType'>
     readonly linkingId: FieldRef<"Page", 'String'>
     readonly seoTitle: FieldRef<"Page", 'String'>
     readonly seoDescription: FieldRef<"Page", 'String'>
@@ -20105,6 +20130,7 @@ export namespace Prisma {
     name: string | null
     content: string | null
     order: number | null
+    type: $Enums.PageType | null
     linkingId: string | null
     seoTitle: string | null
     seoDescription: string | null
@@ -20119,6 +20145,7 @@ export namespace Prisma {
     name: string | null
     content: string | null
     order: number | null
+    type: $Enums.PageType | null
     linkingId: string | null
     seoTitle: string | null
     seoDescription: string | null
@@ -20133,6 +20160,7 @@ export namespace Prisma {
     name: number
     content: number
     order: number
+    type: number
     settings: number
     linkingId: number
     seoTitle: number
@@ -20162,6 +20190,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     linkingId?: true
     seoTitle?: true
     seoDescription?: true
@@ -20176,6 +20205,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     linkingId?: true
     seoTitle?: true
     seoDescription?: true
@@ -20190,6 +20220,7 @@ export namespace Prisma {
     name?: true
     content?: true
     order?: true
+    type?: true
     settings?: true
     linkingId?: true
     seoTitle?: true
@@ -20292,6 +20323,7 @@ export namespace Prisma {
     name: string
     content: string | null
     order: number
+    type: $Enums.PageType
     settings: JsonValue | null
     linkingId: string | null
     seoTitle: string | null
@@ -20326,6 +20358,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     settings?: boolean
     linkingId?: boolean
     seoTitle?: boolean
@@ -20342,6 +20375,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     settings?: boolean
     linkingId?: boolean
     seoTitle?: boolean
@@ -20358,6 +20392,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     settings?: boolean
     linkingId?: boolean
     seoTitle?: boolean
@@ -20374,6 +20409,7 @@ export namespace Prisma {
     name?: boolean
     content?: boolean
     order?: boolean
+    type?: boolean
     settings?: boolean
     linkingId?: boolean
     seoTitle?: boolean
@@ -20383,7 +20419,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TemplatePageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "name" | "content" | "order" | "settings" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "createdAt" | "updatedAt", ExtArgs["result"]["templatePage"]>
+  export type TemplatePageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "name" | "content" | "order" | "type" | "settings" | "linkingId" | "seoTitle" | "seoDescription" | "seoKeywords" | "createdAt" | "updatedAt", ExtArgs["result"]["templatePage"]>
   export type TemplatePageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | TemplateDefaultArgs<ExtArgs>
   }
@@ -20405,6 +20441,7 @@ export namespace Prisma {
       name: string
       content: string | null
       order: number
+      type: $Enums.PageType
       settings: Prisma.JsonValue | null
       linkingId: string | null
       seoTitle: string | null
@@ -20841,6 +20878,7 @@ export namespace Prisma {
     readonly name: FieldRef<"TemplatePage", 'String'>
     readonly content: FieldRef<"TemplatePage", 'String'>
     readonly order: FieldRef<"TemplatePage", 'Int'>
+    readonly type: FieldRef<"TemplatePage", 'PageType'>
     readonly settings: FieldRef<"TemplatePage", 'Json'>
     readonly linkingId: FieldRef<"TemplatePage", 'String'>
     readonly seoTitle: FieldRef<"TemplatePage", 'String'>
@@ -27323,6 +27361,7 @@ export namespace Prisma {
     name: 'name',
     content: 'content',
     order: 'order',
+    type: 'type',
     linkingId: 'linkingId',
     seoTitle: 'seoTitle',
     seoDescription: 'seoDescription',
@@ -27445,6 +27484,7 @@ export namespace Prisma {
     name: 'name',
     content: 'content',
     order: 'order',
+    type: 'type',
     settings: 'settings',
     linkingId: 'linkingId',
     seoTitle: 'seoTitle',
@@ -27753,6 +27793,20 @@ export namespace Prisma {
    * Reference to a field of type 'SslStatus[]'
    */
   export type ListEnumSslStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SslStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PageType'
+   */
+  export type EnumPageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PageType'>
+    
+
+
+  /**
+   * Reference to a field of type 'PageType[]'
+   */
+  export type ListEnumPageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PageType[]'>
     
 
 
@@ -28428,6 +28482,7 @@ export namespace Prisma {
     name?: StringFilter<"Page"> | string
     content?: StringNullableFilter<"Page"> | string | null
     order?: IntFilter<"Page"> | number
+    type?: EnumPageTypeFilter<"Page"> | $Enums.PageType
     linkingId?: StringNullableFilter<"Page"> | string | null
     seoTitle?: StringNullableFilter<"Page"> | string | null
     seoDescription?: StringNullableFilter<"Page"> | string | null
@@ -28444,6 +28499,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrderInput | SortOrder
     seoTitle?: SortOrderInput | SortOrder
     seoDescription?: SortOrderInput | SortOrder
@@ -28464,6 +28520,7 @@ export namespace Prisma {
     name?: StringFilter<"Page"> | string
     content?: StringNullableFilter<"Page"> | string | null
     order?: IntFilter<"Page"> | number
+    type?: EnumPageTypeFilter<"Page"> | $Enums.PageType
     linkingId?: StringNullableFilter<"Page"> | string | null
     seoTitle?: StringNullableFilter<"Page"> | string | null
     seoDescription?: StringNullableFilter<"Page"> | string | null
@@ -28480,6 +28537,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrderInput | SortOrder
     seoTitle?: SortOrderInput | SortOrder
     seoDescription?: SortOrderInput | SortOrder
@@ -28503,6 +28561,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Page"> | string
     content?: StringNullableWithAggregatesFilter<"Page"> | string | null
     order?: IntWithAggregatesFilter<"Page"> | number
+    type?: EnumPageTypeWithAggregatesFilter<"Page"> | $Enums.PageType
     linkingId?: StringNullableWithAggregatesFilter<"Page"> | string | null
     seoTitle?: StringNullableWithAggregatesFilter<"Page"> | string | null
     seoDescription?: StringNullableWithAggregatesFilter<"Page"> | string | null
@@ -29070,6 +29129,7 @@ export namespace Prisma {
     name?: StringFilter<"TemplatePage"> | string
     content?: StringNullableFilter<"TemplatePage"> | string | null
     order?: IntFilter<"TemplatePage"> | number
+    type?: EnumPageTypeFilter<"TemplatePage"> | $Enums.PageType
     settings?: JsonNullableFilter<"TemplatePage">
     linkingId?: StringNullableFilter<"TemplatePage"> | string | null
     seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
@@ -29086,6 +29146,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
+    type?: SortOrder
     settings?: SortOrderInput | SortOrder
     linkingId?: SortOrderInput | SortOrder
     seoTitle?: SortOrderInput | SortOrder
@@ -29106,6 +29167,7 @@ export namespace Prisma {
     name?: StringFilter<"TemplatePage"> | string
     content?: StringNullableFilter<"TemplatePage"> | string | null
     order?: IntFilter<"TemplatePage"> | number
+    type?: EnumPageTypeFilter<"TemplatePage"> | $Enums.PageType
     settings?: JsonNullableFilter<"TemplatePage">
     seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
     seoDescription?: StringNullableFilter<"TemplatePage"> | string | null
@@ -29121,6 +29183,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrderInput | SortOrder
     order?: SortOrder
+    type?: SortOrder
     settings?: SortOrderInput | SortOrder
     linkingId?: SortOrderInput | SortOrder
     seoTitle?: SortOrderInput | SortOrder
@@ -29144,6 +29207,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"TemplatePage"> | string
     content?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
     order?: IntWithAggregatesFilter<"TemplatePage"> | number
+    type?: EnumPageTypeWithAggregatesFilter<"TemplatePage"> | $Enums.PageType
     settings?: JsonNullableWithAggregatesFilter<"TemplatePage">
     linkingId?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
     seoTitle?: StringNullableWithAggregatesFilter<"TemplatePage"> | string | null
@@ -30251,6 +30315,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -30266,6 +30331,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -30280,6 +30346,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30295,6 +30362,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30310,6 +30378,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -30324,6 +30393,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30338,6 +30408,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30930,6 +31001,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -30946,6 +31018,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -30959,6 +31032,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30975,6 +31049,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30990,6 +31065,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -31003,6 +31079,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31018,6 +31095,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32329,6 +32407,13 @@ export namespace Prisma {
     domainId?: SortOrder
   }
 
+  export type EnumPageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PageType | EnumPageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPageTypeFilter<$PrismaModel> | $Enums.PageType
+  }
+
   export type PageFunnelIdLinkingIdCompoundUniqueInput = {
     funnelId: number
     linkingId: string
@@ -32339,6 +32424,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
     seoDescription?: SortOrder
@@ -32361,6 +32447,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
     seoDescription?: SortOrder
@@ -32376,6 +32463,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
     seoDescription?: SortOrder
@@ -32391,6 +32479,16 @@ export namespace Prisma {
     order?: SortOrder
     visits?: SortOrder
     funnelId?: SortOrder
+  }
+
+  export type EnumPageTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PageType | EnumPageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPageTypeWithAggregatesFilter<$PrismaModel> | $Enums.PageType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPageTypeFilter<$PrismaModel>
+    _max?: NestedEnumPageTypeFilter<$PrismaModel>
   }
 
   export type IntNullableListFilter<$PrismaModel = never> = {
@@ -32891,6 +32989,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     settings?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
@@ -32912,6 +33011,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
     seoDescription?: SortOrder
@@ -32926,6 +33026,7 @@ export namespace Prisma {
     name?: SortOrder
     content?: SortOrder
     order?: SortOrder
+    type?: SortOrder
     linkingId?: SortOrder
     seoTitle?: SortOrder
     seoDescription?: SortOrder
@@ -34023,6 +34124,10 @@ export namespace Prisma {
     connect?: FunnelWhereUniqueInput
   }
 
+  export type EnumPageTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PageType
+  }
+
   export type FunnelUpdateOneRequiredWithoutPagesNestedInput = {
     create?: XOR<FunnelCreateWithoutPagesInput, FunnelUncheckedCreateWithoutPagesInput>
     connectOrCreate?: FunnelCreateOrConnectWithoutPagesInput
@@ -34923,6 +35028,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSslStatusFilter<$PrismaModel>
     _max?: NestedEnumSslStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PageType | EnumPageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPageTypeFilter<$PrismaModel> | $Enums.PageType
+  }
+
+  export type NestedEnumPageTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PageType | EnumPageTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PageType[] | ListEnumPageTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPageTypeWithAggregatesFilter<$PrismaModel> | $Enums.PageType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPageTypeFilter<$PrismaModel>
+    _max?: NestedEnumPageTypeFilter<$PrismaModel>
   }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -36061,6 +36183,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -36075,6 +36198,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -36369,6 +36493,7 @@ export namespace Prisma {
     name?: StringFilter<"Page"> | string
     content?: StringNullableFilter<"Page"> | string | null
     order?: IntFilter<"Page"> | number
+    type?: EnumPageTypeFilter<"Page"> | $Enums.PageType
     linkingId?: StringNullableFilter<"Page"> | string | null
     seoTitle?: StringNullableFilter<"Page"> | string | null
     seoDescription?: StringNullableFilter<"Page"> | string | null
@@ -37493,6 +37618,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -37507,6 +37633,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -37665,6 +37792,7 @@ export namespace Prisma {
     name?: StringFilter<"TemplatePage"> | string
     content?: StringNullableFilter<"TemplatePage"> | string | null
     order?: IntFilter<"TemplatePage"> | number
+    type?: EnumPageTypeFilter<"TemplatePage"> | $Enums.PageType
     settings?: JsonNullableFilter<"TemplatePage">
     linkingId?: StringNullableFilter<"TemplatePage"> | string | null
     seoTitle?: StringNullableFilter<"TemplatePage"> | string | null
@@ -38888,6 +39016,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     linkingId?: string | null
     seoTitle?: string | null
     seoDescription?: string | null
@@ -38935,6 +39064,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -38949,6 +39079,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -38963,6 +39094,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
     seoDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39220,6 +39352,7 @@ export namespace Prisma {
     name: string
     content?: string | null
     order: number
+    type?: $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: string | null
     seoTitle?: string | null
@@ -39262,6 +39395,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39276,6 +39410,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39290,6 +39425,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    type?: EnumPageTypeFieldUpdateOperationsInput | $Enums.PageType
     settings?: NullableJsonNullValueInput | InputJsonValue
     linkingId?: NullableStringFieldUpdateOperationsInput | string | null
     seoTitle?: NullableStringFieldUpdateOperationsInput | string | null

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PageType } from "../../../generated/prisma-client";
 
 export const getPageRequest = z.object({
   pageId: z.coerce
@@ -15,6 +16,7 @@ export const getPageResponse = z.object({
   name: z.string(),
   content: z.string(),
   order: z.number(),
+  type: z.nativeEnum(PageType),
   linkingId: z.string(),
   seoTitle: z.string().nullable(),
   seoDescription: z.string().nullable(),

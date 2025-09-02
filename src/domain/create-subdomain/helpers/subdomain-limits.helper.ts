@@ -27,11 +27,8 @@ export const checkWorkspaceSubdomainLimits = async (
   });
 
   if (currentSubdomainCount >= workspace.allocatedSubdomains) {
-    console.warn(
-      `[Subdomain Create] Workspace has reached maximum subdomains limit: ${workspace.allocatedSubdomains}`
-    );
     throw new BadRequestError(
-      `This workspace has reached its limit of ${workspace.allocatedSubdomains} subdomain(s).`
+      "This workspace has reached its maximum number of subdomains."
     );
   }
 };

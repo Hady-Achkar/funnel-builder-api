@@ -1,12 +1,13 @@
 import { getPrisma } from "../../../lib/prisma";
 import { ForbiddenError, NotFoundError } from "../../../errors";
-import { $Enums } from "../../../generated/prisma-client";
+import { $Enums, PageType } from "../../../generated/prisma-client";
 
 interface PageInfo {
   id: number;
   name: string;
   content: string;
   order: number;
+  type: PageType;
   linkingId: string;
   funnelId: number;
   workspaceId: number;
@@ -173,6 +174,7 @@ export const checkDuplicatePermissions = async (
       name: sourcePage.name,
       content: sourcePage.content,
       order: sourcePage.order,
+      type: sourcePage.type,
       linkingId: sourcePage.linkingId,
       funnelId: sourcePage.funnelId,
       workspaceId: sourcePage.funnel.workspaceId,

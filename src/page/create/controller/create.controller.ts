@@ -15,7 +15,7 @@ export const createPageController = async (
     }
 
     const requestData = {
-      body: req.body,
+      ...req.body,
       funnelId: req.params.funnelId,
     };
 

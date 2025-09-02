@@ -48,6 +48,7 @@ export const createPage = async (
         data: {
           name: pageName,
           content: validatedRequest.content || "",
+          type: validatedRequest.type || "PAGE",
           funnelId: validatedRequest.funnelId,
           linkingId: linkingId,
           order: newOrder,
@@ -63,6 +64,7 @@ export const createPage = async (
         name: result.name,
         content: result.content,
         order: result.order,
+        type: result.type,
         linkingId: result.linkingId,
         seoTitle: result.seoTitle,
         seoDescription: result.seoDescription,
@@ -86,6 +88,7 @@ export const createPage = async (
           id: result.id,
           name: result.name,
           order: result.order,
+          type: result.type,
           linkingId: result.linkingId,
           seoTitle: result.seoTitle,
           seoDescription: result.seoDescription,
