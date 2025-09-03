@@ -1,1 +1,0 @@
-export { default as createFunnelRoute } from "./create.route";

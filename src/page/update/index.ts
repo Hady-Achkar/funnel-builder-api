@@ -1,1 +1,0 @@
-export { updatePageController } from "./controller/update.controller";

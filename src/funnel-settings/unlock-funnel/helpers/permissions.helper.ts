@@ -1,1 +1,0 @@
-export * from '../../lock-funnel/helpers/permissions.helper';

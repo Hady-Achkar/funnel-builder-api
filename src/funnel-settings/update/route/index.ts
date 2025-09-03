@@ -1,1 +1,0 @@
-export { default as updateFunnelSettingsRoute } from "./update.route";
