@@ -1,1 +1,0 @@
-export { default as updateFormRoute } from "./update.route";

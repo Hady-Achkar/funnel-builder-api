@@ -1,1 +1,0 @@
-export { default as deleteFormRoute } from "./delete.route";

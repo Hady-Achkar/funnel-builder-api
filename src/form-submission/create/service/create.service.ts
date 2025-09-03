@@ -7,7 +7,7 @@ import {
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError, NotFoundError } from "../../../errors";
 import { ZodError } from "zod";
-import { triggerFormSubmissionWebhook } from "../../../form/webhook/service";
+import { triggerFormSubmissionWebhook } from "../../../services/form/webhook";
 
 export const createFormSubmission = async (
   request: CreateFormSubmissionRequest
