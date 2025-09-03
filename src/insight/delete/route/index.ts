@@ -1,1 +1,0 @@
-export { default as deleteInsightRoute } from "./delete.route";
