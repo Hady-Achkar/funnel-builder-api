@@ -1,7 +1,7 @@
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
-import { validateWorkspaceAccess } from "../../../domain/shared/helpers";
+import { validateWorkspaceAccess } from "../../../helpers/domain/shared";
 import {
   GetConnectionsRequestSchema,
   GetConnectionsResponse,

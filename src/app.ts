@@ -8,7 +8,7 @@ import { redisService } from "./services/cache/redis.service";
 import authRoutes from "./routes/auth";
 import funnelRoutes from "./routes/funnel";
 import pageRoutes from "./routes/page";
-import { domainRoutes } from "./domain";
+import domainRoutes from "./routes/domain";
 import domainFunnelRoutes from "./domain-funnel/routes";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
