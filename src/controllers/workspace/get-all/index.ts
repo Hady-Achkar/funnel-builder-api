@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { getAllWorkspaces } from "../service";
+import { getAllWorkspaces } from "../../../services/workspace/get-all";
 import { UnauthorizedError } from "../../../errors/http-errors";
 
 export const getAllWorkspacesController = async (

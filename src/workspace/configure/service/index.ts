@@ -1,1 +1,0 @@
-export { configureWorkspace } from "./configure.service";

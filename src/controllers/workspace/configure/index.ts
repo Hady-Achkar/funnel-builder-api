@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { configureWorkspace } from "../service";
+import { configureWorkspace } from "../../../services/workspace/configure";
 import { HttpError } from "../../../errors/http-errors";
 
 export class ConfigureWorkspaceController {

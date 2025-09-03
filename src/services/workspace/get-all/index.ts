@@ -3,7 +3,7 @@ import { $Enums } from "../../../generated/prisma-client";
 import {
   getAllWorkspacesResponse,
   GetAllWorkspacesResponse,
-} from "../types/getAll.types";
+} from "../../../types/workspace/get-all";
 
 export const getAllWorkspaces = async (
   userId: number

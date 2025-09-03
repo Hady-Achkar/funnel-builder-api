@@ -5,15 +5,15 @@ import {
   configureWorkspaceRequest,
   RoleChangeAttempt,
   PermissionChangeAttempt,
-} from "../types";
+} from "../../../types/workspace/configure";
 import {
   canUserModifyRole,
   canUserAssignPermissions,
   canUserManageAllocations,
   validateRoleHierarchy,
   getPermissionError,
-} from "../helpers";
-import { validateAllocationRequest } from "../helpers/allocation.helper";
+  validateAllocationRequest,
+} from "../../../helpers/workspace/configure";
 import {
   BadRequestError,
   ForbiddenError,
