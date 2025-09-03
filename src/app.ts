@@ -10,7 +10,7 @@ import funnelRoutes from "./routes/funnel";
 import pageRoutes from "./routes/page";
 import domainRoutes from "./routes/domain";
 import domainFunnelRoutes from "./routes/domain-funnel";
-import themeRoutes from "./theme/routes/themes";
+import themeRoutes from "./routes/theme";
 import imageFolderRoutes from "./routes/image-folder";
 import templateRoutes from "./routes/template";
 import imageRoutes from "./routes/image";

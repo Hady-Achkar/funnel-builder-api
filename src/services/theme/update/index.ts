@@ -8,11 +8,11 @@ import {
   updateThemeParams,
   updateThemeRequest,
   updateThemeResponse,
-} from "../types";
+} from "../../../types/theme/update";
 import {
   checkThemeUpdatePermissions,
   updateThemeInCache,
-} from "../helpers";
+} from "../../../helpers/theme/update";
 import { BadRequestError, UnauthorizedError } from "../../../errors";
 
 export const updateTheme = async (

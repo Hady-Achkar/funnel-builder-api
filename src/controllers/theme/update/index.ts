@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { updateTheme } from "../service";
+import { updateTheme } from "../../../services/theme/update";
 import { AuthRequest } from "../../../middleware/auth";
 
 export const updateThemeController = async (

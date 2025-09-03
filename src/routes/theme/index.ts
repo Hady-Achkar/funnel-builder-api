@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { authenticateToken } from "../../../middleware/auth";
-import { updateThemeController } from "../controller";
+import { authenticateToken } from "../../middleware/auth";
+import { updateThemeController } from "../../controllers/theme/update";
 
 const router: Router = express.Router();
 

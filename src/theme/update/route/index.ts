@@ -1,1 +1,0 @@
-export { default as updateThemeRoute } from './update.route';
