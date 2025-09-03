@@ -6,7 +6,7 @@ export interface CookieOptions {
   maxAge?: number;
   httpOnly?: boolean;
   secure?: boolean;
-  sameSite?: 'strict' | 'lax' | 'none';
+  sameSite?: "strict" | "lax" | "none";
   path?: string;
 }
 
@@ -15,16 +15,16 @@ export const setAuthCookie = (
   token: string,
   options: Partial<CookieOptions> = {}
 ): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
+  const isProduction = process.env.NODE_ENV === "production";
+
   const defaultOptions: CookieOptions = {
-    name: 'authToken',
+    name: "authToken",
     value: token,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'strict',
-    path: '/',
+    sameSite: "strict",
+    path: "/",
   };
 
   const finalOptions = { ...defaultOptions, ...options };
@@ -39,34 +39,31 @@ export const setAuthCookie = (
 };
 
 export const clearAuthCookie = (res: Response): void => {
-  res.clearCookie('authToken', {
+  res.clearCookie("authToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
   });
 };
 
-export const setRefreshCookie = (
-  res: Response,
-  refreshToken: string
-): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  res.cookie('refreshToken', refreshToken, {
+export const setRefreshCookie = (res: Response, refreshToken: string): void => {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  res.cookie("refreshToken", refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'strict',
-    path: '/api/auth/refresh',
+    sameSite: "strict",
+    path: "/api/auth/refresh",
   });
 };
 
 export const clearRefreshCookie = (res: Response): void => {
-  res.clearCookie('refreshToken', {
+  res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/api/auth/refresh',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/api/auth/refresh",
   });
 };
