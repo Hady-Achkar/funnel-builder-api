@@ -12,7 +12,7 @@ import domainRoutes from "./routes/domain";
 import domainFunnelRoutes from "./routes/domain-funnel";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./routes/image-folder";
-import templateRoutes from "./template/routes";
+import templateRoutes from "./routes/template";
 import imageRoutes from "./routes/image";
 import formRoutes from "./routes/form";
 import formSubmissionRoutes from "./routes/form-submission";

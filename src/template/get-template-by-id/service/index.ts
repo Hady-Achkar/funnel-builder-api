@@ -1,1 +1,0 @@
-export * from "./get-template-by-id.service";
