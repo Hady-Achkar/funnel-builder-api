@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { createFormSubmission } from "../service";
+import { createFormSubmission } from "../../../services/form-submission/create";
 
 export const createFormSubmissionController = async (
   req: Request,

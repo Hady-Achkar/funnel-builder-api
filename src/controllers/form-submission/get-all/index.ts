@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { getAllFormSubmissions } from "../service/getAll.service";
-import { getAllFormSubmissionsRequest } from "../types/getAll.types";
+import { getAllFormSubmissions } from "../../../services/form-submission/get-all";
+import { getAllFormSubmissionsRequest } from "../../../types/form-submission/get-all";
 
 export const getAllFormSubmissionsController = async (
   req: AuthRequest,

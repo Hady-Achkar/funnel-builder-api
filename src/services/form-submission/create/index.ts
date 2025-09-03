@@ -3,7 +3,7 @@ import {
   CreateFormSubmissionResponse,
   createFormSubmissionRequest,
   createFormSubmissionResponse,
-} from "../types";
+} from "../../../types/form-submission/create";
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError, NotFoundError } from "../../../errors";
 import { ZodError } from "zod";

@@ -10,8 +10,8 @@ import {
   GetAllFormSubmissionsRequest,
   getAllFormSubmissionsResponse,
   GetAllFormSubmissionsResponse,
-} from "../types/getAll.types";
-import { checkFormSubmissionsViewPermission } from "../helpers/permissions.helper";
+} from "../../../types/form-submission/get-all";
+import { checkFormSubmissionsViewPermission } from "../../../helpers/form-submission/get-all";
 
 export const getAllFormSubmissions = async (
   userId: number,

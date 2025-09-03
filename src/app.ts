@@ -15,7 +15,7 @@ import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";
 import imageRoutes from "./image/routes";
 import formRoutes from "./routes/form";
-import formSubmissionRoutes from "./form-submission/routes";
+import formSubmissionRoutes from "./routes/form-submission";
 import funnelSettingsRoutes from "./routes/funnel-settings";
 import { workspacesRouter } from "./workspace/routes";
 import insightRoutes from "./insight/routes";

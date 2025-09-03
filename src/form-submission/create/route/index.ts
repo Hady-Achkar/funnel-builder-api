@@ -1,1 +1,0 @@
-export { default as createFormSubmissionRoute } from "./create.route";

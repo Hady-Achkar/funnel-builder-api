@@ -1,1 +1,0 @@
-export { default as getAllFormSubmissionsRoute } from "./getAll.route";
