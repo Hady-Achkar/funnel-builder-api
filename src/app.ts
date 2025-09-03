@@ -19,7 +19,7 @@ import formSubmissionRoutes from "./routes/form-submission";
 import funnelSettingsRoutes from "./routes/funnel-settings";
 import { workspacesRouter } from "./workspace/routes";
 import insightRoutes from "./routes/insight";
-import insightSubmissionRoutes from "./insight-submission/routes";
+import insightSubmissionRoutes from "./routes/insight-submission";
 
 export function createServer(): Express {
   const app = express();

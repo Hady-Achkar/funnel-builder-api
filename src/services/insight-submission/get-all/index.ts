@@ -10,8 +10,8 @@ import {
   GetAllInsightSubmissionsRequest,
   getAllInsightSubmissionsResponse,
   GetAllInsightSubmissionsResponse,
-} from "../types/getAll.types";
-import { checkInsightSubmissionsViewPermission } from "../helpers/permissions.helper";
+} from "../../../types/insight-submission/get-all";
+import { checkInsightSubmissionsViewPermission } from "../../../helpers/insight-submission/get-all";
 
 export const getAllInsightSubmissions = async (
   userId: number,

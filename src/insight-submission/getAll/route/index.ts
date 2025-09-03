@@ -1,1 +1,0 @@
-export { default as getAllInsightSubmissionsRoute } from "./getAll.route";

@@ -9,7 +9,7 @@ import {
   CreateInsightSubmissionRequest,
   createInsightSubmissionResponse,
   CreateInsightSubmissionResponse,
-} from "../types/create.types";
+} from "../../../types/insight-submission/create";
 
 export const createInsightSubmission = async (
   request: CreateInsightSubmissionRequest
@@ -101,7 +101,7 @@ export const createInsightSubmission = async (
     };
 
     const existingIndex = insightSubmissions.findIndex(
-      (sub) => sub.quizId === validatedRequest.insightId
+      (sub: any) => sub.quizId === validatedRequest.insightId
     );
 
     if (existingIndex !== -1) {

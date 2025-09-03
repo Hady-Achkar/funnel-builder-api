@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { createInsightSubmission } from "../service/create.service";
-import { CreateInsightSubmissionRequest } from "../types/create.types";
+import { createInsightSubmission } from "../../../services/insight-submission/create";
+import { CreateInsightSubmissionRequest } from "../../../types/insight-submission/create";
 
 export const createInsightSubmissionController = async (
   req: Request,

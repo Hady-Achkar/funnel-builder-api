@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { getAllInsightSubmissions } from "../service/getAll.service";
-import { getAllInsightSubmissionsRequest } from "../types/getAll.types";
+import { getAllInsightSubmissions } from "../../../services/insight-submission/get-all";
+import { getAllInsightSubmissionsRequest } from "../../../types/insight-submission/get-all";
 
 export const getAllInsightSubmissionsController = async (
   req: AuthRequest,
