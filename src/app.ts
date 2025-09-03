@@ -9,7 +9,7 @@ import authRoutes from "./routes/auth";
 import funnelRoutes from "./routes/funnel";
 import pageRoutes from "./routes/page";
 import domainRoutes from "./routes/domain";
-import domainFunnelRoutes from "./domain-funnel/routes";
+import domainFunnelRoutes from "./routes/domain-funnel";
 import themeRoutes from "./theme/routes/themes";
 import imageFolderRoutes from "./image-folder/routes";
 import templateRoutes from "./template/routes";

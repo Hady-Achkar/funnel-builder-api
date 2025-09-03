@@ -6,7 +6,7 @@ import {
   GetConnectionsRequestSchema,
   GetConnectionsResponse,
   GetConnectionsResponseSchema,
-} from "../types";
+} from "../../../types/domain-funnel/get-connections";
 
 export class GetConnectionsService {
   static async getConnections(

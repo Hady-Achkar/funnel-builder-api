@@ -1,18 +1,20 @@
 import express, { Router } from "express";
-import { createCustomDomainRouter } from "./create-custom-domain";
-import { createSubdomainRouter } from "./create-subdomain";
-import { deleteDomainRouter } from "./delete";
-import { verifyDomainRouter } from "./verify";
-import { getDNSInstructionsRouter } from "./get-dns-instructions";
-import getAllDomainsRouter from "./get-all-domains";
+import { authenticateToken } from "../../middleware/auth";
+import { CreateCustomDomainController } from "../../controllers/domain/create-custom-domain";
+import { CreateSubdomainController } from "../../controllers/domain/create-subdomain";
+import { DeleteDomainController } from "../../controllers/domain/delete";
+import { VerifyDomainController } from "../../controllers/domain/verify";
+import { GetDNSInstructionsController } from "../../controllers/domain/get-dns-instructions";
+import { GetAllDomainsController } from "../../controllers/domain/get-all-domains";
 
 const router: Router = express.Router();
 
-router.use("/create-custom-domain", createCustomDomainRouter);
-router.use("/create-subdomain", createSubdomainRouter);
-router.use("/", deleteDomainRouter);
-router.use("/verify", verifyDomainRouter);
-router.use("/dns-instructions", getDNSInstructionsRouter);
-router.use("/", getAllDomainsRouter);
+// Domain management routes
+router.post("/create-custom-domain", authenticateToken, CreateCustomDomainController.create);
+router.post("/create-subdomain", authenticateToken, CreateSubdomainController.create);
+router.delete("/:id", authenticateToken, DeleteDomainController.delete);
+router.post("/verify/:id", authenticateToken, VerifyDomainController.verify);
+router.get("/dns-instructions/:id", authenticateToken, GetDNSInstructionsController.getByDomainId);
+router.get("/:workspaceId", authenticateToken, GetAllDomainsController.getAllDomains);
 
 export default router;

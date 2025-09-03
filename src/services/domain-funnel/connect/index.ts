@@ -5,12 +5,12 @@ import {
   ConnectFunnelDomainRequestSchema,
   ConnectFunnelDomainResponse,
   ConnectFunnelDomainResponseSchema,
-} from "../types";
+} from "../../../types/domain-funnel/connect";
 import {
   validateConnectFunnelDomainAccess,
   validateFunnelExists,
   validateDomainExists,
-} from "../helpers";
+} from "../../../helpers/domain-funnel/connect";
 
 export class ConnectFunnelDomainService {
   static async connect(

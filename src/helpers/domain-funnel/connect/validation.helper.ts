@@ -75,4 +75,3 @@ export const validateDomainExists = async (
 
   return domain;
 };
-
