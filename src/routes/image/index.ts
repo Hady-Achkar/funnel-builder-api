@@ -1,0 +1,32 @@
+import express, { Router } from "express";
+import multer from "multer";
+import { authenticateToken } from "../../middleware/auth";
+import { uploadImagesController } from "../../controllers/image/upload";
+import { deleteImageController } from "../../controllers/image/delete";
+import { bulkDeleteImagesController } from "../../controllers/image/bulk-delete";
+import { updateImageController } from "../../controllers/image/update";
+import { moveImageController } from "../../controllers/image/move";
+
+const router: Router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
+
+router.use(authenticateToken);
+
+router.post(
+  "/folder/:folderId",
+  upload.array("images"),
+  uploadImagesController
+);
+
+router.delete("/:imageId", deleteImageController);
+
+router.delete("/bulk", bulkDeleteImagesController);
+
+router.put("/:imageId", upload.fields([{ name: "image", maxCount: 1 }]), updateImageController);
+
+router.patch("/:imageId/move", moveImageController);
+
+export default router;
