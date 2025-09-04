@@ -45,9 +45,10 @@ RUN pnpm install --prod --frozen-lockfile
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 
-# Copy and ensure Prisma client is available
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# Generate Prisma client in production stage
+RUN pnpm exec prisma generate
+
+# Copy generated TypeScript files if they exist
 COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./src/generated
 
 # Create logs directory
