@@ -9,7 +9,8 @@
       "Bash(npm run build:*)",
       "Bash(ls:*)",
       "Bash(pnpm test:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(az postgres flexible-server db create:*)"
     ],
     "deny": []
   }

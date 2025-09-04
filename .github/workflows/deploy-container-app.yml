@@ -1,0 +1,241 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  AZURE_CONTAINER_APP_NAME: digitalsite-api
+  AZURE_RESOURCE_GROUP: digitalsite-container-apps-rg
+  AZURE_CONTAINER_REGISTRY: digitalsiteacr
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '10.14.0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: funnel_builder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Generate Prisma client
+      run: pnpm exec prisma generate
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+
+    - name: Run database migrations
+      run: pnpm exec prisma migrate deploy
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+
+    - name: Run tests
+      run: pnpm test run
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+        REDIS_URL: redis://localhost:6379
+        JWT_SECRET: test-secret-key
+        NODE_ENV: test
+
+    - name: Build application
+      run: pnpm run build
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set environment-specific variables
+      run: |
+        if [ "${{ github.event.inputs.environment }}" == "production" ] || [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          echo "DEPLOYMENT_ENV=production" >> $GITHUB_ENV
+          echo "CONTAINER_APP_ENV=digitalsite-prod-env" >> $GITHUB_ENV
+          echo "CONTAINER_APP_NAME=digitalsite-api-prod" >> $GITHUB_ENV
+        else
+          echo "DEPLOYMENT_ENV=staging" >> $GITHUB_ENV
+          echo "CONTAINER_APP_ENV=digitalsite-staging-env" >> $GITHUB_ENV
+          echo "CONTAINER_APP_NAME=digitalsite-api-staging" >> $GITHUB_ENV
+        fi
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      run: |
+        az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+
+    - name: Build and push container image
+      run: |
+        IMAGE_TAG=${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_CONTAINER_APP_NAME }}:${{ github.sha }}
+        docker build -t $IMAGE_TAG .
+        docker push $IMAGE_TAG
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Deploy to Azure Container Apps
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        containerAppName: ${{ env.CONTAINER_APP_NAME }}
+        resourceGroup: ${{ env.AZURE_RESOURCE_GROUP }}
+        containerAppEnvironment: ${{ env.CONTAINER_APP_ENV }}
+        imageToDeploy: ${{ env.IMAGE_TAG }}
+        acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        environmentVariables: |
+          DATABASE_URL=secretref:database-url
+          REDIS_URL=secretref:redis-url
+          JWT_SECRET=secretref:jwt-secret
+          NODE_ENV=${{ env.DEPLOYMENT_ENV }}
+          PORT=3000
+          AZURE_STORAGE_CONNECTION_STRING=secretref:azure-storage-connection-string
+          AZURE_STORAGE_CONTAINER_NAME=secretref:azure-storage-container-name
+          STORAGE_URL=secretref:storage-url
+          SENDGRID_API_KEY=secretref:sendgrid-api-key
+          SENDGRID_FROM_EMAIL=secretref:sendgrid-from-email
+          FRONTEND_URL=secretref:frontend-url
+          CF_API_TOKEN=secretref:cf-api-token
+          CF_ACCOUNT_ID=secretref:cf-account-id
+          CF_VERIFICATION_DOMAIN=secretref:cf-verification-domain
+          CF_DOMAIN=secretref:cf-domain
+          CF_ZONE_ID=secretref:cf-zone-id
+          WORKSPACE_DOMAIN=secretref:workspace-domain
+          WORKSPACE_ZONE_ID=secretref:workspace-zone-id
+          WORKSPACE_IP=secretref:workspace-ip
+          MAMOPAY_API_KEY=secretref:mamopay-api-key
+          MAMOPAY_API_URL=secretref:mamopay-api-url
+
+    - name: Configure performance and scaling
+      run: |
+        # Update container resources for better performance
+        if [ "${{ env.DEPLOYMENT_ENV }}" == "production" ]; then
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --cpu 2.0 \
+            --memory 4.0Gi \
+            --min-replicas 3 \
+            --max-replicas 20
+        else
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --cpu 1.0 \
+            --memory 2.0Gi \
+            --min-replicas 2 \
+            --max-replicas 10
+        fi
+        
+        # Configure advanced scaling rules for faster response
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --scale-rule-name http-rule \
+          --scale-rule-type http \
+          --scale-rule-http-concurrency 50 \
+          --scale-rule-name cpu-rule \
+          --scale-rule-type cpu \
+          --scale-rule-metadata type=Utilization value=60
+
+    - name: Health check
+      run: |
+        sleep 60
+        CONTAINER_APP_URL=$(az containerapp show \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --query properties.configuration.ingress.fqdn \
+          -o tsv)
+        
+        if curl -f -m 30 "https://$CONTAINER_APP_URL/health"; then
+          echo "✅ Health check passed"
+          echo "Container App URL: https://$CONTAINER_APP_URL"
+        else
+          echo "❌ Health check failed"
+          exit 1
+        fi
+
+    - name: Update traffic distribution
+      if: success()
+      run: |
+        # For production, implement blue-green deployment
+        if [ "${{ env.DEPLOYMENT_ENV }}" == "production" ]; then
+          az containerapp ingress traffic set \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --revision-weight latest=100
+        fi
+
+    - name: Notify deployment success
+      run: |
+        CONTAINER_APP_URL=$(az containerapp show \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --query properties.configuration.ingress.fqdn \
+          -o tsv)
+        
+        echo "✅ Deployment to ${{ env.DEPLOYMENT_ENV }} completed"
+        echo "Container App URL: https://$CONTAINER_APP_URL"
+        echo "Revision: ${{ github.sha }}"

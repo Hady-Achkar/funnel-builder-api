@@ -1,0 +1,169 @@
+name: digitalsite-api
+location: East US
+resourcegroup: digitalsite-container-apps-rg
+type: Microsoft.App/containerApps
+properties:
+  managedEnvironmentId: /subscriptions/{subscription-id}/resourceGroups/digitalsite-container-apps-rg/providers/Microsoft.App/managedEnvironments/digitalsite-staging-env
+  configuration:
+    activeRevisionsMode: Multiple
+    ingress:
+      external: true
+      targetPort: 3000
+      transport: Http
+      traffic:
+        - weight: 100
+          latestRevision: true
+      cors:
+        allowedOrigins:
+          - "*"
+        allowedMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+          - "PATCH"
+        allowedHeaders:
+          - "*"
+        exposeHeaders:
+          - "*"
+    registries:
+      - server: digitalsiteacr.azurecr.io
+        username: digitalsiteacr
+    secrets:
+      - name: database-url
+        value: "${DATABASE_URL}"
+      - name: redis-url
+        value: "${REDIS_URL}"
+      - name: jwt-secret
+        value: "${JWT_SECRET}"
+      - name: azure-storage-connection-string
+        value: "${AZURE_STORAGE_CONNECTION_STRING}"
+      - name: azure-storage-container-name
+        value: "${AZURE_STORAGE_CONTAINER_NAME}"
+      - name: storage-url
+        value: "${STORAGE_URL}"
+      - name: sendgrid-api-key
+        value: "${SENDGRID_API_KEY}"
+      - name: sendgrid-from-email
+        value: "${SENDGRID_FROM_EMAIL}"
+      - name: frontend-url
+        value: "${FRONTEND_URL}"
+      - name: cf-api-token
+        value: "${CF_API_TOKEN}"
+      - name: cf-account-id
+        value: "${CF_ACCOUNT_ID}"
+      - name: cf-verification-domain
+        value: "${CF_VERIFICATION_DOMAIN}"
+      - name: cf-domain
+        value: "${CF_DOMAIN}"
+      - name: cf-zone-id
+        value: "${CF_ZONE_ID}"
+      - name: workspace-domain
+        value: "${WORKSPACE_DOMAIN}"
+      - name: workspace-zone-id
+        value: "${WORKSPACE_ZONE_ID}"
+      - name: workspace-ip
+        value: "${WORKSPACE_IP}"
+      - name: mamopay-api-key
+        value: "${MAMOPAY_API_KEY}"
+      - name: mamopay-api-url
+        value: "${MAMOPAY_API_URL}"
+    dapr:
+      enabled: false
+  template:
+    revisionSuffix: v1
+    containers:
+      - name: digitalsite-api
+        image: digitalsiteacr.azurecr.io/digitalsite-api:latest
+        resources:
+          cpu: 2.0
+          memory: 4Gi
+        env:
+          - name: DATABASE_URL
+            secretRef: database-url
+          - name: REDIS_URL
+            secretRef: redis-url
+          - name: JWT_SECRET
+            secretRef: jwt-secret
+          - name: NODE_ENV
+            value: staging
+          - name: PORT
+            value: "3000"
+          - name: AZURE_STORAGE_CONNECTION_STRING
+            secretRef: azure-storage-connection-string
+          - name: AZURE_STORAGE_CONTAINER_NAME
+            secretRef: azure-storage-container-name
+          - name: STORAGE_URL
+            secretRef: storage-url
+          - name: SENDGRID_API_KEY
+            secretRef: sendgrid-api-key
+          - name: SENDGRID_FROM_EMAIL
+            secretRef: sendgrid-from-email
+          - name: FRONTEND_URL
+            secretRef: frontend-url
+          - name: CF_API_TOKEN
+            secretRef: cf-api-token
+          - name: CF_ACCOUNT_ID
+            secretRef: cf-account-id
+          - name: CF_VERIFICATION_DOMAIN
+            secretRef: cf-verification-domain
+          - name: CF_DOMAIN
+            secretRef: cf-domain
+          - name: CF_ZONE_ID
+            secretRef: cf-zone-id
+          - name: WORKSPACE_DOMAIN
+            secretRef: workspace-domain
+          - name: WORKSPACE_ZONE_ID
+            secretRef: workspace-zone-id
+          - name: WORKSPACE_IP
+            secretRef: workspace-ip
+          - name: MAMOPAY_API_KEY
+            secretRef: mamopay-api-key
+          - name: MAMOPAY_API_URL
+            secretRef: mamopay-api-url
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+          - type: Readiness
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+          - type: Startup
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 30
+            successThreshold: 1
+    scale:
+      minReplicas: 3
+      maxReplicas: 30
+      rules:
+        - name: http-scaling
+          http:
+            metadata:
+              concurrentRequests: "50"
+        - name: cpu-scaling
+          custom:
+            type: cpu
+            metadata:
+              type: Utilization
+              value: "60"
+        - name: memory-scaling
+          custom:
+            type: memory
+            metadata:
+              type: Utilization
+              value: "70"
