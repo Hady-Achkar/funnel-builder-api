@@ -1,19 +1,29 @@
 # Multi-stage build for Azure Container Apps
-# Stage 1: Build stage
-FROM node:20-alpine AS builder
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
 # Install pnpm
 RUN npm install -g pnpm@10.14.0
 
-WORKDIR /app
-
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma/
 
 # Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm@10.14.0
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
@@ -22,42 +32,46 @@ RUN pnpm exec prisma generate
 # Build the application
 RUN pnpm run build
 
-# Stage 2: Production stage
-FROM node:20-alpine AS production
+# Stage 3: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-# Install pnpm and dumb-init for proper signal handling
-RUN npm install -g pnpm@10.14.0 && \
-    apk add --no-cache dumb-init
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init && \
+    npm install -g pnpm@10.14.0
 
 # Create non-root user
-RUN addgroup -g 1001 nodejs && \
-    adduser -S -u 1001 -G nodejs nodejs
-
-WORKDIR /app
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+# Install production dependencies and Prisma CLI
+RUN pnpm install --prod --frozen-lockfile && \
+    pnpm add prisma@latest && \
+    pnpm store prune
 
-# Copy built application from builder stage
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
+# Copy Prisma schema
+COPY --chown=nodejs:nodejs prisma ./prisma
 
-# Generate Prisma client in production stage
+# Generate Prisma client
 RUN pnpm exec prisma generate
 
-# Copy generated TypeScript files if they exist
+# Copy built application
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Copy generated Prisma client from builder if it exists in a custom location
 COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./src/generated
 
-# Create logs directory
-RUN mkdir -p /app/logs && chown -R nodejs:nodejs /app/logs
+# Create necessary directories
+RUN mkdir -p /app/logs && \
+    chown -R nodejs:nodejs /app/logs
 
 # Switch to non-root user
 USER nodejs
 
-# Expose port (Container Apps will configure this)
+# Expose port
 EXPOSE 3000
 
 # Health check
