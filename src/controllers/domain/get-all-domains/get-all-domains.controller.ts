@@ -17,7 +17,7 @@ export class GetAllDomainsController {
       }
 
       const result = await GetAllDomainsService.getAllDomains(userId, {
-        workspaceId: parseInt(req.params.workspaceId),
+        workspaceSlug: req.params.workspaceSlug,
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
         limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
         filters: {

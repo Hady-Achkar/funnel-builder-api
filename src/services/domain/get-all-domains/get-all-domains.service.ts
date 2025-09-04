@@ -22,12 +22,21 @@ export class GetAllDomainsService {
   ): Promise<GetAllDomainsResponse> {
     try {
       const validatedData = GetAllDomainsRequestSchema.parse(requestData);
-      const { workspaceId, page, limit, filters, sortBy, sortOrder } = validatedData;
+      const { workspaceSlug, page, limit, filters, sortBy, sortOrder } = validatedData;
 
-      await validateGetAllDomainsAccess(userId, workspaceId);
+      // Get workspace by slug
+      const workspace = await getPrisma().workspace.findUnique({
+        where: { slug: workspaceSlug },
+      });
+
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
+
+      await validateGetAllDomainsAccess(userId, workspace.id);
 
       const whereClause = {
-        workspaceId,
+        workspaceId: workspace.id,
         ...buildDomainFilters(filters),
       };
 

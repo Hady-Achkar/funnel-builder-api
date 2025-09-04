@@ -7,6 +7,6 @@ const router: Router = express.Router();
 
 // Domain-funnel routes
 router.post("/connect", authenticateToken, ConnectController.connect);
-router.get("/connections/:workspaceId", authenticateToken, GetConnectionsController.getConnections);
+router.get("/connections/:workspaceSlug", authenticateToken, GetConnectionsController.getConnections);
 
 export default router;

@@ -12,12 +12,7 @@ export const createSubdomainRequest = z.object({
     .refine((val) => !val.includes("--"), {
       message: "Subdomain cannot contain consecutive hyphens",
     }),
-  workspaceId: z
-    .number({
-      message: "Workspace ID must be a valid number",
-    })
-    .int({ message: "Workspace ID must be an integer" })
-    .positive({ message: "Workspace ID must be positive" }),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
 export type CreateSubdomainRequest = z.infer<typeof createSubdomainRequest>;

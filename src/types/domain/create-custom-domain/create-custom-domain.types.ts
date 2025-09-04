@@ -4,12 +4,7 @@ import { $Enums } from "../../../generated/prisma-client";
 
 export const CreateCustomDomainRequestSchema = z.object({
   hostname: HostnameSchema,
-  workspaceId: z
-    .number({
-      message: "Workspace ID must be a valid number",
-    })
-    .int({ message: "Workspace ID must be an integer" })
-    .positive({ message: "Workspace ID must be positive" }),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
 export type CreateCustomDomainRequest = z.infer<
@@ -43,10 +38,14 @@ export const CreatedDomainSchema = z.object({
   id: z.number({ message: "Domain ID must be a number" }),
   hostname: z.string({ message: "Hostname must be a string" }),
   type: z.nativeEnum($Enums.DomainType, {
-    message: `Domain type must be one of: ${Object.values($Enums.DomainType).join(", ")}`,
+    message: `Domain type must be one of: ${Object.values(
+      $Enums.DomainType
+    ).join(", ")}`,
   }),
   status: z.nativeEnum($Enums.DomainStatus, {
-    message: `Domain status must be one of: ${Object.values($Enums.DomainStatus).join(", ")}`,
+    message: `Domain status must be one of: ${Object.values(
+      $Enums.DomainStatus
+    ).join(", ")}`,
   }),
   sslStatus: z.nativeEnum($Enums.SslStatus).nullable(),
   isVerified: z.boolean({ message: "Is verified must be a boolean" }),

@@ -14,10 +14,10 @@ export const getAllFunnelsController = async (
       throw new UnauthorizedError("Please log in to view funnels");
     }
     
-    const workspaceId = parseInt(req.params.workspaceId);
+    const workspaceSlug = req.params.workspaceSlug;
     const query = req.query;
 
-    const result = await getAllFunnels(workspaceId, userId, query);
+    const result = await getAllFunnels(workspaceSlug, userId, query);
 
     return res.status(200).json(result);
   } catch (error) {

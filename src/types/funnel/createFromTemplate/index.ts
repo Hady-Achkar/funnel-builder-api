@@ -12,7 +12,7 @@ export const createFromTemplateRequest = z.object({
     .min(1, "Funnel slug cannot be empty")
     .max(100, "Funnel slug must be less than 100 characters")
     .optional(),
-  workspaceId: z.number().int().positive(),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
 export const createFromTemplateResponse = z.object({

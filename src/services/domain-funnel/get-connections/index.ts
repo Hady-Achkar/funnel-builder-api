@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { BadRequestError } from "../../../errors/http-errors";
+import { BadRequestError, NotFoundError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import { validateWorkspaceAccess } from "../../../helpers/domain/shared";
 import {
@@ -15,16 +15,25 @@ export class GetConnectionsService {
   ): Promise<GetConnectionsResponse> {
     try {
       const validatedData = GetConnectionsRequestSchema.parse(requestData);
-      const { workspaceId } = validatedData;
-
-      await validateWorkspaceAccess(userId, workspaceId, []);
+      const { workspaceSlug } = validatedData;
 
       const prisma = getPrisma();
+
+      // Get workspace by slug
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: workspaceSlug },
+      });
+
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
+
+      await validateWorkspaceAccess(userId, workspace.id, []);
 
       const connections = await prisma.funnelDomain.findMany({
         where: {
           funnel: {
-            workspaceId,
+            workspaceId: workspace.id,
           },
         },
         select: {

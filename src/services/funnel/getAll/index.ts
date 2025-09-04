@@ -12,7 +12,7 @@ import {
 } from "../../../types/funnel/getAll";
 
 export const getAllFunnels = async (
-  workspaceId: number,
+  workspaceSlug: string,
   userId: number,
   query: Partial<GetAllFunnelsRequest>
 ): Promise<GetAllFunnelsResponse> => {
@@ -22,7 +22,7 @@ export const getAllFunnels = async (
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = getAllFunnelsParams.parse({ workspaceId });
+    validatedParams = getAllFunnelsParams.parse({ workspaceSlug });
 
     const parsedQuery = {
       page: query.page ? parseInt(String(query.page), 10) : undefined,
@@ -37,7 +37,7 @@ export const getAllFunnels = async (
     const prisma = getPrisma();
 
     const workspace = await prisma.workspace.findUnique({
-      where: { id: validatedParams.workspaceId },
+      where: { slug: validatedParams.workspaceSlug },
       select: {
         id: true,
         name: true,
@@ -56,7 +56,7 @@ export const getAllFunnels = async (
         where: {
           userId_workspaceId: {
             userId: userId,
-            workspaceId: validatedParams.workspaceId,
+            workspaceId: workspace.id,
           },
         },
         select: {
@@ -80,12 +80,12 @@ export const getAllFunnels = async (
       }
     }
 
-    const allFunnelsCacheKey = `workspace:${validatedParams.workspaceId}:funnels:all`;
+    const allFunnelsCacheKey = `workspace:${workspace.id}:funnels:all`;
     let allFunnels = await cacheService.get<any[]>(allFunnelsCacheKey);
 
     if (!allFunnels) {
       const funnelsFromDb = await prisma.funnel.findMany({
-        where: { workspaceId: validatedParams.workspaceId },
+        where: { workspaceId: workspace.id },
         include: {
           theme: true,
         },

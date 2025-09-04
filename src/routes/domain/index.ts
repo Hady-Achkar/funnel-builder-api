@@ -15,6 +15,6 @@ router.post("/create-subdomain", authenticateToken, CreateSubdomainController.cr
 router.delete("/:id", authenticateToken, DeleteDomainController.delete);
 router.post("/verify/:id", authenticateToken, VerifyDomainController.verify);
 router.get("/dns-instructions/:id", authenticateToken, GetDNSInstructionsController.getByDomainId);
-router.get("/:workspaceId", authenticateToken, GetAllDomainsController.getAllDomains);
+router.get("/:workspaceSlug", authenticateToken, GetAllDomainsController.getAllDomains);
 
 export default router;

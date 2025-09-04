@@ -2,15 +2,9 @@ import { getPrisma } from "../../../lib/prisma";
 import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
 import { $Enums } from "../../../generated/prisma-client";
 
-export const validateFunnelExists = async (
-  funnelId: number,
-  workspaceId: number
-) => {
-  const funnel = await getPrisma().funnel.findFirst({
-    where: {
-      id: funnelId,
-      workspaceId,
-    },
+export const validateFunnelExists = async (funnelId: number) => {
+  const funnel = await getPrisma().funnel.findUnique({
+    where: { id: funnelId },
     select: {
       id: true,
       name: true,
@@ -21,9 +15,7 @@ export const validateFunnelExists = async (
   });
 
   if (!funnel) {
-    throw new NotFoundError(
-      "Funnel not found or you don't have access to it"
-    );
+    throw new NotFoundError("Funnel not found");
   }
 
   if (funnel.status !== $Enums.FunnelStatus.LIVE) {
@@ -35,15 +27,9 @@ export const validateFunnelExists = async (
   return funnel;
 };
 
-export const validateDomainExists = async (
-  domainId: number,
-  workspaceId: number
-) => {
-  const domain = await getPrisma().domain.findFirst({
-    where: {
-      id: domainId,
-      workspaceId,
-    },
+export const validateDomainExists = async (domainId: number) => {
+  const domain = await getPrisma().domain.findUnique({
+    where: { id: domainId },
     select: {
       id: true,
       hostname: true,
@@ -55,9 +41,7 @@ export const validateDomainExists = async (
   });
 
   if (!domain) {
-    throw new NotFoundError(
-      "Domain not found or you don't have access to it"
-    );
+    throw new NotFoundError("Domain not found");
   }
 
   const isVerified = domain.status !== $Enums.DomainStatus.PENDING;
@@ -74,4 +58,15 @@ export const validateDomainExists = async (
   }
 
   return domain;
+};
+
+export const validateSameWorkspace = (
+  funnel: { workspaceId: number },
+  domain: { workspaceId: number }
+) => {
+  if (funnel.workspaceId !== domain.workspaceId) {
+    throw new BadRequestError(
+      "Funnel and domain must belong to the same workspace"
+    );
+  }
 };

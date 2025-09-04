@@ -13,11 +13,7 @@ export const duplicateFunnelRequest = z.object({
     .min(1, { message: "Funnel name cannot be empty" })
     .max(255, { message: "Funnel name cannot exceed 255 characters" })
     .optional(),
-  workspaceId: z
-    .number()
-    .int({ message: "Workspace ID must be an integer" })
-    .positive({ message: "Workspace ID must be positive" })
-    .optional(),
+  workspaceSlug: z.string().min(1, "Workspace slug is required").optional(),
 });
 
 // Helper function to generate default name with timestamp

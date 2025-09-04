@@ -24,12 +24,21 @@ export class CreateSubdomainService {
   ): Promise<CreateSubdomainResponse> {
     try {
       const validatedData = createSubdomainRequest.parse(requestData);
-      const { subdomain, workspaceId } = validatedData;
+      const { subdomain, workspaceSlug } = validatedData;
 
-      await validateWorkspaceAccess(userId, workspaceId, [
+      // Get workspace by slug
+      const workspace = await getPrisma().workspace.findUnique({
+        where: { slug: workspaceSlug },
+      });
+
+      if (!workspace) {
+        throw new BadRequestError("Workspace not found");
+      }
+
+      await validateWorkspaceAccess(userId, workspace.id, [
         $Enums.WorkspacePermission.CREATE_DOMAINS,
       ]);
-      await checkWorkspaceSubdomainLimits(workspaceId);
+      await checkWorkspaceSubdomainLimits(workspace.id);
 
       // Use provided domain config or default to mydigitalsite.io
       const baseDomain = domainConfig?.baseDomain || "mydigitalsite.io";
@@ -45,7 +54,6 @@ export class CreateSubdomainService {
         );
       }
 
-      const workspace = { id: workspaceId };
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();

@@ -10,6 +10,7 @@ import {
   validateConnectFunnelDomainAccess,
   validateFunnelExists,
   validateDomainExists,
+  validateSameWorkspace,
 } from "../../../helpers/domain-funnel/connect";
 
 export class ConnectFunnelDomainService {
@@ -19,12 +20,14 @@ export class ConnectFunnelDomainService {
   ): Promise<ConnectFunnelDomainResponse> {
     try {
       const validatedData = ConnectFunnelDomainRequestSchema.parse(requestData);
-      const { funnelId, domainId, workspaceId } = validatedData;
+      const { funnelId, domainId } = validatedData;
 
-      await validateConnectFunnelDomainAccess(userId, workspaceId);
+      const funnel = await validateFunnelExists(funnelId);
+      const domain = await validateDomainExists(domainId);
+      
+      validateSameWorkspace(funnel, domain);
 
-      await validateFunnelExists(funnelId, workspaceId);
-      await validateDomainExists(domainId, workspaceId);
+      await validateConnectFunnelDomainAccess(userId, funnel.workspaceId);
 
       const prisma = getPrisma();
 

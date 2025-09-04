@@ -13,12 +13,6 @@ export const ConnectFunnelDomainRequestSchema = z.object({
     })
     .int({ message: "Domain ID must be an integer" })
     .positive({ message: "Domain ID must be positive" }),
-  workspaceId: z
-    .number({
-      message: "Workspace ID must be a valid number",
-    })
-    .int({ message: "Workspace ID must be an integer" })
-    .positive({ message: "Workspace ID must be positive" }),
 });
 
 export type ConnectFunnelDomainRequest = z.infer<

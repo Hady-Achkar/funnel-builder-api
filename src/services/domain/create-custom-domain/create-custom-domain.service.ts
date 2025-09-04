@@ -31,12 +31,21 @@ export class CreateCustomDomainService {
     try {
       // Validate request data
       const validatedData = CreateCustomDomainRequestSchema.parse(requestData);
-      const { hostname, workspaceId } = validatedData;
+      const { hostname, workspaceSlug } = validatedData;
 
-      await validateWorkspaceAccess(userId, workspaceId, [
+      // Get workspace by slug
+      const workspace = await getPrisma().workspace.findUnique({
+        where: { slug: workspaceSlug },
+      });
+
+      if (!workspace) {
+        throw new BadRequestError("Workspace not found");
+      }
+
+      await validateWorkspaceAccess(userId, workspace.id, [
         $Enums.WorkspacePermission.CREATE_DOMAINS,
       ]);
-      await checkWorkspaceDomainLimits(workspaceId);
+      await checkWorkspaceDomainLimits(workspace.id);
 
       const validatedHostname = validateHostname(hostname);
       const parsedDomain = parseDomain(validatedHostname);
@@ -60,8 +69,6 @@ export class CreateCustomDomainService {
         );
       }
 
-      // workspaceId is already validated in validateWorkspaceAccess
-      const workspace = { id: workspaceId };
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();

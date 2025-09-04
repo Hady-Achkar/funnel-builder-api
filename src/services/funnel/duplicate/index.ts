@@ -58,8 +58,20 @@ export const duplicateFunnel = async (
     }
 
     // Determine target workspace (same workspace if not provided)
-    const targetWorkspaceId =
-      validatedData.workspaceId || originalFunnel.workspaceId;
+    let targetWorkspaceId = originalFunnel.workspaceId;
+    
+    if (validatedData.workspaceSlug) {
+      const targetWorkspaceBySlug = await prisma.workspace.findUnique({
+        where: { slug: validatedData.workspaceSlug },
+        select: { id: true },
+      });
+      
+      if (!targetWorkspaceBySlug) {
+        throw new Error("Target workspace not found");
+      }
+      
+      targetWorkspaceId = targetWorkspaceBySlug.id;
+    }
 
     // Check permission to view original funnel
     const isOriginalOwner = originalFunnel.workspace.ownerId === userId;

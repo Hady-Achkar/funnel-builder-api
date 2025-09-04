@@ -22,10 +22,7 @@ export const createFunnelRequest = z.object({
     })
     .optional()
     .default($Enums.FunnelStatus.DRAFT),
-  workspaceId: z
-    .number({ message: "Workspace ID must be a number" })
-    .int()
-    .positive("Workspace ID must be a positive integer"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
 export type CreateFunnelRequest = z.infer<typeof createFunnelRequest>;

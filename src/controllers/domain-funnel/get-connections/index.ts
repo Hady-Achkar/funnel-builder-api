@@ -16,8 +16,8 @@ export class GetConnectionsController {
         throw new UnauthorizedError("Authentication is required");
       }
 
-      const workspaceId = parseInt(req.params.workspaceId);
-      const result = await GetConnectionsService.getConnections(userId, { workspaceId });
+      const workspaceSlug = req.params.workspaceSlug;
+      const result = await GetConnectionsService.getConnections(userId, { workspaceSlug });
 
       res.status(200).json(result);
     } catch (error) {

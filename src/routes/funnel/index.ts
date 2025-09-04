@@ -15,7 +15,7 @@ router.use(authenticateToken);
 router.post("/", createFunnelController);
 router.post("/from-template/:templateId", createFromTemplateController);
 router.post("/:id/duplicate", duplicateFunnelController);
-router.get("/workspace/:workspaceId", getAllFunnelsController);
+router.get("/workspace/:workspaceSlug", getAllFunnelsController);
 router.get("/:id", getFunnelController);
 router.put("/:id", updateFunnelController);
 router.delete("/:id", deleteFunnelController);

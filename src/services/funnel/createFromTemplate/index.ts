@@ -34,7 +34,7 @@ export const createFromTemplate = async (
     validatedParams = createFromTemplateParams.parse({ templateId });
     validatedData = createFromTemplateRequest.parse(data);
 
-    if (!validatedData.workspaceId) {
+    if (!validatedData.workspaceSlug) {
       throw new Error("Please select a workspace to create the funnel in");
     }
 
@@ -42,7 +42,7 @@ export const createFromTemplate = async (
 
     // Check workspace exists
     const workspace = await prisma.workspace.findUnique({
-      where: { id: validatedData.workspaceId },
+      where: { slug: validatedData.workspaceSlug },
       select: {
         id: true,
         name: true,
@@ -62,7 +62,7 @@ export const createFromTemplate = async (
         where: {
           userId_workspaceId: {
             userId: userId,
-            workspaceId: validatedData.workspaceId,
+            workspaceId: workspace.id,
           },
         },
         select: {
@@ -115,12 +115,12 @@ export const createFromTemplate = async (
     
     if (validatedData.slug) {
       // User provided a slug, make it unique
-      slug = await generateUniqueSlug(validatedData.slug, validatedData.workspaceId);
+      slug = await generateUniqueSlug(validatedData.slug, workspace.id);
     } else {
       // Auto-generate slug from name
       try {
         const baseSlug = generateSlug(validatedData.name);
-        slug = await generateUniqueSlug(baseSlug, validatedData.workspaceId);
+        slug = await generateUniqueSlug(baseSlug, workspace.id);
       } catch (slugError) {
         // If slug generation fails due to invalid characters, throw user-friendly error
         if (slugError instanceof Error && slugError.message.includes("invalid characters")) {
@@ -138,7 +138,7 @@ export const createFromTemplate = async (
           name: validatedData.name,
           slug: slug,
           status: "DRAFT",
-          workspaceId: validatedData.workspaceId,
+          workspaceId: workspace.id,
           createdBy: userId,
         },
       });
@@ -198,7 +198,7 @@ export const createFromTemplate = async (
     // Cache management
     try {
       // Cache the individual funnel with full data including pages (without content)
-      const fullFunnelCacheKey = `workspace:${validatedData.workspaceId}:funnel:${result.funnel.id}:full`;
+      const fullFunnelCacheKey = `workspace:${workspace.id}:funnel:${result.funnel.id}:full`;
       const pagesWithoutContent = result.pages.map(page => ({
         id: page.id,
         name: page.name,
@@ -225,7 +225,7 @@ export const createFromTemplate = async (
       await cacheService.set(fullFunnelCacheKey, fullFunnelData, { ttl: 0 });
 
       // Update the workspace's all funnels cache
-      const allFunnelsCacheKey = `workspace:${validatedData.workspaceId}:funnels:all`;
+      const allFunnelsCacheKey = `workspace:${workspace.id}:funnels:all`;
       const existingFunnels = await cacheService.get<any[]>(allFunnelsCacheKey) || [];
       
       // Add new funnel summary to the list
@@ -266,11 +266,11 @@ export const createFromTemplate = async (
 
       // Invalidate old list caches
       await cacheService.del(
-        `workspace:${validatedData.workspaceId}:funnels:list`
+        `workspace:${workspace.id}:funnels:list`
       );
 
       await cacheService.del(
-        `user:${userId}:workspace:${validatedData.workspaceId}:funnels`
+        `user:${userId}:workspace:${workspace.id}:funnels`
       );
 
       // Update template cache with new usage count

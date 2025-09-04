@@ -2,12 +2,7 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const GetAllDomainsRequestSchema = z.object({
-  workspaceId: z
-    .number({
-      message: "Workspace ID must be a valid number",
-    })
-    .int({ message: "Workspace ID must be an integer" })
-    .positive({ message: "Workspace ID must be positive" }),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
   page: z
     .number({
       message: "Page must be a number",
