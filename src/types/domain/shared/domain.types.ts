@@ -71,3 +71,11 @@ export const VerificationInstructionsSchema = z.object({
 export type VerificationInstructions = z.infer<
   typeof VerificationInstructionsSchema
 >;
+
+export const DomainConfigSchema = z.object({
+  baseDomain: z.string(),
+  zoneId: z.string(),
+  targetIp: z.string(),
+});
+
+export type DomainConfig = z.infer<typeof DomainConfigSchema>;

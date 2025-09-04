@@ -29,7 +29,7 @@ export const configureWorkspace = async (
 
     const validatedData = configureWorkspaceRequest.parse(data);
     const {
-      workspaceId,
+      workspaceSlug,
       memberId,
       newRole,
       addPermissions,
@@ -40,7 +40,7 @@ export const configureWorkspace = async (
     const prisma = getPrisma();
 
     const workspace = await prisma.workspace.findUnique({
-      where: { id: workspaceId },
+      where: { slug: workspaceSlug },
       select: {
         id: true,
         name: true,
@@ -73,7 +73,7 @@ export const configureWorkspace = async (
         where: {
           userId_workspaceId: {
             userId: requesterId,
-            workspaceId: workspaceId,
+            workspaceId: workspace.id,
           },
         },
         select: {
@@ -90,34 +90,37 @@ export const configureWorkspace = async (
       requesterPermissions = requesterMember.permissions;
     }
 
-    // Get target member
-    const targetMember = await prisma.workspaceMember.findUnique({
-      where: {
-        userId_workspaceId: {
-          userId: memberId,
-          workspaceId: workspaceId,
-        },
-      },
-      select: {
-        id: true,
-        userId: true,
-        role: true,
-        permissions: true,
-        joinedAt: true,
-        updatedAt: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    // Get target member (only if memberId is provided)
+    let targetMember = null;
+    if (memberId) {
+      targetMember = await prisma.workspaceMember.findUnique({
+        where: {
+          userId_workspaceId: {
+            userId: memberId,
+            workspaceId: workspace.id,
           },
         },
-      },
-    });
+        select: {
+          id: true,
+          userId: true,
+          role: true,
+          permissions: true,
+          joinedAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
 
-    if (!targetMember) {
-      throw new NotFoundError("Target member not found in workspace");
+      if (!targetMember) {
+        throw new NotFoundError("Target member not found in workspace");
+      }
     }
 
     let updatedMember = { ...targetMember };
@@ -128,8 +131,8 @@ export const configureWorkspace = async (
       allocationsUpdated: false,
     };
 
-    // Handle role change
-    if (newRole && newRole !== targetMember.role) {
+    // Handle role change (only if targetMember exists)
+    if (targetMember && newRole && newRole !== targetMember.role) {
       const roleChangeAttempt: RoleChangeAttempt = {
         requesterId,
         requesterRole,
@@ -167,8 +170,8 @@ export const configureWorkspace = async (
       changes.roleChanged = true;
     }
 
-    // Handle permission changes
-    if (addPermissions?.length || removePermissions?.length) {
+    // Handle permission changes (only if targetMember exists)
+    if (targetMember && (addPermissions?.length || removePermissions?.length)) {
       const permissionChangeAttempt: PermissionChangeAttempt = {
         requesterId,
         requesterRole,
@@ -246,7 +249,7 @@ export const configureWorkspace = async (
 
       const validationError = await validateAllocationRequest(
         workspace.ownerId,
-        workspaceId,
+        workspace.id,
         newAllocations,
         currentAllocations
       );
@@ -257,7 +260,7 @@ export const configureWorkspace = async (
 
       // Update allocations
       await prisma.workspace.update({
-        where: { id: workspaceId },
+        where: { id: workspace.id },
         data: {
           allocatedFunnels:
             newAllocations.allocatedFunnels ?? workspace.allocatedFunnels,
@@ -277,13 +280,10 @@ export const configureWorkspace = async (
     };
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ZodError) {
-      const firstError = error.issues[0];
-      const fieldName = firstError.path.join(".");
-      throw new BadRequestError(
-        `${firstError.message} for field '${fieldName}'`
-      );
+      const message = error.issues[0]?.message || "Invalid data provided";
+      throw new BadRequestError(message);
     }
     throw error;
   }

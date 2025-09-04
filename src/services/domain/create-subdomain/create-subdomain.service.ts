@@ -12,13 +12,15 @@ import {
   createSubdomainRequest,
   createSubdomainResponse,
 } from "../../../types/domain/create-subdomain";
+import { DomainConfig } from "../../../types/domain/shared/domain.types";
 import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 
 export class CreateSubdomainService {
   static async create(
     userId: number,
-    requestData: unknown
+    requestData: unknown,
+    domainConfig?: DomainConfig
   ): Promise<CreateSubdomainResponse> {
     try {
       const validatedData = createSubdomainRequest.parse(requestData);
@@ -29,7 +31,9 @@ export class CreateSubdomainService {
       ]);
       await checkWorkspaceSubdomainLimits(workspaceId);
 
-      const fullHostname = `${subdomain}.mydigitalsite.io`;
+      // Use provided domain config or default to mydigitalsite.io
+      const baseDomain = domainConfig?.baseDomain || "mydigitalsite.io";
+      const fullHostname = `${subdomain}.${baseDomain}`;
 
       const existingDomain = await getPrisma().domain.findUnique({
         where: { hostname: fullHostname },
@@ -46,12 +50,16 @@ export class CreateSubdomainService {
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();
 
+      // Use provided config or default values
+      const zoneId = domainConfig?.zoneId || config.cfZoneId;
+      const targetIp = domainConfig?.targetIp || "74.234.194.84";
+
       let aRecord: any;
       try {
         aRecord = await createARecord(
           subdomain,
-          config.cfZoneId,
-          "74.234.194.84"
+          zoneId,
+          targetIp
         );
       } catch (error: any) {
         const errMsg =
@@ -73,7 +81,7 @@ export class CreateSubdomainService {
           workspaceId: workspace.id,
           createdBy: userId,
           cloudflareRecordId: aRecord.id,
-          cloudflareZoneId: config.cfZoneId,
+          cloudflareZoneId: zoneId,
           lastVerifiedAt: new Date(),
         },
       });

@@ -62,72 +62,28 @@ export class RegisterService {
         maximumSubdomains,
       });
 
-      const result = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email,
-            username,
-            firstName,
-            lastName,
-            password: hashedPassword,
-            verified: false,
-            verificationToken,
-            verificationTokenExpiresAt,
-            isAdmin,
-            plan,
-            maximumFunnels: finalLimits.maximumFunnels,
-            maximumCustomDomains: finalLimits.maximumCustomDomains,
-            maximumSubdomains: finalLimits.maximumSubdomains,
-          },
-        });
-
-        const workspace = await tx.workspace.create({
-          data: {
-            name: "Personal Workspace",
-            slug: `${username}-personal`,
-            ownerId: user.id,
-            description: "Your personal workspace for creating funnels",
-            allocatedFunnels: finalLimits.maximumFunnels,
-            allocatedCustomDomains: finalLimits.maximumCustomDomains,
-            allocatedSubdomains: finalLimits.maximumSubdomains,
-          },
-        });
-
-        await tx.workspaceMember.create({
-          data: {
-            userId: user.id,
-            workspaceId: workspace.id,
-            role: "OWNER",
-            permissions: [
-              "MANAGE_WORKSPACE",
-              "MANAGE_MEMBERS",
-              "CREATE_FUNNELS",
-              "EDIT_FUNNELS",
-              "EDIT_PAGES",
-              "DELETE_FUNNELS",
-              "VIEW_ANALYTICS",
-              "MANAGE_DOMAINS",
-              "CREATE_DOMAINS",
-              "DELETE_DOMAINS",
-              "CONNECT_DOMAINS",
-            ],
-          },
-        });
-
-        await tx.imageFolder.create({
-          data: {
-            name: "Default Folder",
-            userId: user.id,
-          },
-        });
-
-        return user;
+      const user = await prisma.user.create({
+        data: {
+          email,
+          username,
+          firstName,
+          lastName,
+          password: hashedPassword,
+          verified: false,
+          verificationToken,
+          verificationTokenExpiresAt,
+          isAdmin,
+          plan,
+          maximumFunnels: finalLimits.maximumFunnels,
+          maximumCustomDomains: finalLimits.maximumCustomDomains,
+          maximumSubdomains: finalLimits.maximumSubdomains,
+        },
       });
 
       try {
         await sendVerificationEmail(
-          result.email,
-          result.firstName,
+          user.email,
+          user.firstName,
           verificationToken
         );
       } catch (emailError) {
@@ -138,14 +94,14 @@ export class RegisterService {
         message:
           "User created successfully. Please check your email to verify your account.",
         user: {
-          id: result.id,
-          email: result.email,
-          username: result.username,
-          firstName: result.firstName,
-          lastName: result.lastName,
-          isAdmin: result.isAdmin || false,
-          plan: result.plan,
-          verified: result.verified,
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isAdmin: user.isAdmin || false,
+          plan: user.plan,
+          verified: user.verified,
         },
       };
     } catch (error) {

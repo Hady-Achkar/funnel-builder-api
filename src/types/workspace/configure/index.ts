@@ -3,8 +3,8 @@ import { $Enums } from "../../../generated/prisma-client";
 
 export const configureWorkspaceRequest = z
   .object({
-    workspaceId: z.number().int().positive(),
-    memberId: z.number().int().positive(),
+    workspaceSlug: z.string().min(3, "Workspace slug must be at least 3 characters"),
+    memberId: z.number().int().positive().optional(),
 
     newRole: z.nativeEnum($Enums.WorkspaceRole).optional(),
 
@@ -29,6 +29,20 @@ export const configureWorkspaceRequest = z
       message:
         "At least one change (role, permissions, or allocations) must be specified",
       path: ["changes"],
+    }
+  )
+  .refine(
+    (data) => {
+      // If member-related changes are requested, memberId is required
+      const memberChanges = data.newRole || data.addPermissions || data.removePermissions;
+      if (memberChanges && !data.memberId) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "memberId is required when modifying roles or permissions",
+      path: ["memberId"],
     }
   );
 
@@ -63,7 +77,7 @@ export type WorkspaceAllocations = z.infer<typeof workspaceAllocations>;
 
 export const configureWorkspaceResponse = z.object({
   message: z.string(),
-  member: memberInfo,
+  member: memberInfo.optional(),
   allocations: workspaceAllocations.optional(),
   changes: z.object({
     roleChanged: z.boolean(),

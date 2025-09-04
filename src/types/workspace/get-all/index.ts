@@ -5,6 +5,7 @@ export const getAllWorkspacesResponse = z.array(
   z.object({
     id: z.number(),
     name: z.string(),
+    slug: z.string(),
     role: z.nativeEnum($Enums.WorkspaceRole),
   })
 );

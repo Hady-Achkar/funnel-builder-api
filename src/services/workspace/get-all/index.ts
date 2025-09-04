@@ -4,6 +4,8 @@ import {
   getAllWorkspacesResponse,
   GetAllWorkspacesResponse,
 } from "../../../types/workspace/get-all";
+import { BadRequestError } from "../../../errors/http-errors";
+import { ZodError } from "zod";
 
 export const getAllWorkspaces = async (
   userId: number
@@ -22,6 +24,7 @@ export const getAllWorkspaces = async (
       select: {
         id: true,
         name: true,
+        slug: true,
         ownerId: true,
         members: {
           where: { userId: userId },
@@ -35,6 +38,7 @@ export const getAllWorkspaces = async (
         return {
           id: workspace.id,
           name: workspace.name,
+          slug: workspace.slug,
           role: $Enums.WorkspaceRole.OWNER,
         };
       }
@@ -44,15 +48,17 @@ export const getAllWorkspaces = async (
       return {
         id: workspace.id,
         name: workspace.name,
+        slug: workspace.slug,
         role: memberRole,
       };
     });
 
     return getAllWorkspacesResponse.parse(result);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to get workspaces: ${error.message}`);
+    if (error instanceof ZodError) {
+      const message = error.issues[0]?.message || "Invalid data provided";
+      throw new BadRequestError(message);
     }
-    throw new Error("Couldn't retrieve workspaces. Please try again.");
+    throw error;
   }
 };
