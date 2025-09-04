@@ -145,6 +145,7 @@ jobs:
           containerAppEnvironment: ${{ env.CONTAINER_APP_ENV }}
           imageToDeploy: ${{ env.IMAGE_TAG }}
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
+          targetPort: 3000
           environmentVariables: |
             DATABASE_URL=secretref:database-url
             REDIS_URL=secretref:redis-url
