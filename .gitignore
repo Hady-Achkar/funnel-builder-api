@@ -113,3 +113,24 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Azure and credentials
+azure-creds.json
+azure-credentials.json
+*.credentials.json
+service-principal.json
+
+# Environment files
+.env*
+!.env.example
+.env.local
+.env.staging
+.env.production
+.env.development
+
+# Secrets
+**/secrets/
+**/credentials/
+*.pem
+*.key
+*.cert
