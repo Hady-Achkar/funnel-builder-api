@@ -100,7 +100,7 @@ jobs:
       - name: Build application
         run: pnpm run build
 
-  build-and-deploy:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'test' }}
@@ -169,67 +169,7 @@ jobs:
             MAMOPAY_API_KEY=secretref:mamopay-api-key
             MAMOPAY_API_URL=secretref:mamopay-api-url
 
-      - name: Configure performance and scaling
-        run: |
-          # Update container resources for better performance
-          if [ "${{ env.DEPLOYMENT_ENV }}" == "production" ]; then
-            az containerapp update \
-              --name ${{ env.CONTAINER_APP_NAME }} \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --cpu 2.0 \
-              --memory 4.0Gi \
-              --min-replicas 3 \
-              --max-replicas 20
-          else
-            az containerapp update \
-              --name ${{ env.CONTAINER_APP_NAME }} \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --cpu 1.0 \
-              --memory 2.0Gi \
-              --min-replicas 2 \
-              --max-replicas 10
-          fi
-
-          # Configure advanced scaling rules for faster response
-          az containerapp update \
-            --name ${{ env.CONTAINER_APP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --scale-rule-name http-rule \
-            --scale-rule-type http \
-            --scale-rule-http-concurrency 50 \
-            --scale-rule-name cpu-rule \
-            --scale-rule-type cpu \
-            --scale-rule-metadata type=Utilization value=60
-
-      - name: Health check
-        run: |
-          sleep 60
-          CONTAINER_APP_URL=$(az containerapp show \
-            --name ${{ env.CONTAINER_APP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn \
-            -o tsv)
-
-          if curl -f -m 30 "https://$CONTAINER_APP_URL/health"; then
-            echo "✅ Health check passed"
-            echo "Container App URL: https://$CONTAINER_APP_URL"
-          else
-            echo "❌ Health check failed"
-            exit 1
-          fi
-
-      - name: Update traffic distribution
-        if: success()
-        run: |
-          # For production, implement blue-green deployment
-          if [ "${{ env.DEPLOYMENT_ENV }}" == "production" ]; then
-            az containerapp ingress traffic set \
-              --name ${{ env.CONTAINER_APP_NAME }} \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --revision-weight latest=100
-          fi
-
-      - name: Notify deployment success
+      - name: Show deployment URL
         run: |
           CONTAINER_APP_URL=$(az containerapp show \
             --name ${{ env.CONTAINER_APP_NAME }} \
