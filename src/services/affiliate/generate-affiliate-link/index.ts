@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import { getPrisma } from "../../lib/prisma";
-import { BadRequestError } from "../../errors/http-errors";
 import { ZodError } from "zod";
 import {
   GenerateAffiliateLinkRequest,
   GenerateAffiliateLinkResponse,
-} from "../../types/affiliate";
+} from "../../../types/affiliate/generate-affiliate-link";
+import { getPrisma } from "../../../lib/prisma";
+import { BadRequestError } from "../../../errors";
 
 export class AffiliateLinkService {
   static async generateLink(

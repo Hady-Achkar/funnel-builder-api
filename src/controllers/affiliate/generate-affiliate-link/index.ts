@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
-import { AuthRequest } from "../../middleware/auth";
-import { AffiliateLinkService } from "../../services/affiliate";
-import { UnauthorizedError } from "../../errors/http-errors";
+import { AuthRequest } from "../../../middleware/auth";
+import { AffiliateLinkService } from "../../../services/affiliate/generate-affiliate-link";
+import { UnauthorizedError } from "../../../errors/http-errors";
 
 export class AffiliateLinkController {
   static async generateLink(

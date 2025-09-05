@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { $Enums } from "../../generated/prisma-client";
+import { $Enums } from "../../../generated/prisma-client";
 
 export const GenerateAffiliateLinkRequest = z.object({
   name: z.string().min(1, "Name is required"),
