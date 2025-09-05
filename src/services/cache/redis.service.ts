@@ -18,7 +18,6 @@ export class RedisService {
       url: this.config.url,
       password: this.config.password || undefined,
       database: this.config.database || 0,
-      lazyConnect: true, // Prevent auto-connection
     });
 
     this.setupEventHandlers();
