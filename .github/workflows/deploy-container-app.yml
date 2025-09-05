@@ -145,13 +145,13 @@ jobs:
           containerAppEnvironment: ${{ env.CONTAINER_APP_ENV }}
           imageToDeploy: ${{ env.IMAGE_TAG }}
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
-          targetPort: 3000
+          targetPort: 4444
           environmentVariables: |
             DATABASE_URL=secretref:database-url
             REDIS_URL=secretref:redis-url
             JWT_SECRET=secretref:jwt-secret
             NODE_ENV=${{ env.DEPLOYMENT_ENV }}
-            PORT=3000
+            PORT=4444
             AZURE_STORAGE_CONNECTION_STRING=secretref:azure-storage-connection-string
             AZURE_STORAGE_CONTAINER_NAME=secretref:azure-storage-container-name
             STORAGE_URL=secretref:storage-url
