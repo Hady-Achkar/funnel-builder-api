@@ -80,17 +80,9 @@ export function createServer(): Express {
       status: "OK",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      redis: false,
+      redis: await redisService.ping(),
     };
 
-    // Check Redis health (non-blocking, quick check)
-    try {
-      healthStatus.redis = await redisService.ping();
-    } catch (error) {
-      healthStatus.redis = false;
-    }
-
-    // Always return 200 - app is healthy even if Redis is down
     res.status(200).json(healthStatus);
   });
 

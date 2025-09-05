@@ -4,37 +4,15 @@ export interface CacheConfig {
   url: string;
   password?: string;
   database?: number;
-  ttl: number; // default TTL in seconds
+  ttl: number;
 }
 
 export class RedisService {
-  private client: RedisClientType;
-  private isConnected = false;
+  private client: RedisClientType | null = null;
   private config: CacheConfig;
 
   constructor() {
-    this.config = this.loadConfig();
-    this.client = createClient({
-      url: this.config.url,
-      password: this.config.password || undefined,
-      database: this.config.database || 0,
-      socket: {
-        connectTimeout: 5000,
-        reconnectStrategy: (retries) => {
-          if (retries > 3) {
-            console.log("Redis: Max reconnection attempts reached");
-            return null;
-          }
-          return Math.min(retries * 1000, 3000);
-        },
-      },
-    });
-
-    this.setupEventHandlers();
-  }
-
-  private loadConfig(): CacheConfig {
-    return {
+    this.config = {
       url: process.env.REDIS_URL || "redis://localhost:6379",
       password: process.env.REDIS_PASSWORD || undefined,
       database: parseInt(process.env.REDIS_DB || "0"),
@@ -42,158 +20,128 @@ export class RedisService {
     };
   }
 
-  private setupEventHandlers(): void {
-    this.client.on("error", (err: any) => {
-      console.error("Redis Client Error:", err.message || err);
-      this.isConnected = false;
-    });
-
-    this.client.on("connect", () => {
-      console.log("Redis Client Connected");
-      this.isConnected = true;
-    });
-
-    this.client.on("ready", () => {
-      console.log("Redis Client Ready");
-      this.isConnected = true;
-    });
-
-    this.client.on("end", () => {
-      console.log("Redis Client Disconnected");
-      this.isConnected = false;
-    });
-  }
-
   async connect(): Promise<void> {
-    if (this.isConnected) {
-      return;
-    }
-
     try {
+      this.client = createClient({
+        url: this.config.url,
+        password: this.config.password,
+        database: this.config.database,
+      });
+
+      this.client.on("error", (err) => {
+        console.error("Redis Client Error:", err);
+      });
+
       await this.client.connect();
-      this.isConnected = true;
+      console.log("Redis connected successfully");
     } catch (error) {
       console.error("Failed to connect to Redis:", error);
-      // Don't throw - allow app to run without Redis
+      this.client = null;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (this.isConnected) {
+    if (this.client) {
       try {
-        await this.client.disconnect();
-        this.isConnected = false;
+        await this.client.quit();
+        this.client = null;
+        console.log("Redis disconnected");
       } catch (error) {
-        console.error("Redis disconnect error:", error);
+        console.error("Error disconnecting Redis:", error);
       }
     }
   }
 
-  async set(key: string, value: any, ttl?: number): Promise<void> {
-    if (!this.isConnected) {
-      return; // Skip if not connected
-    }
+  get isConnected(): boolean {
+    return this.client?.isOpen || false;
+  }
 
+  async set(key: string, value: any, ttl?: number): Promise<void> {
+    if (!this.client?.isOpen) return;
+    
     try {
-      const serializedValue = JSON.stringify(value);
+      const serialized = JSON.stringify(value);
       const expiry = ttl !== undefined ? ttl : this.config.ttl;
       
-      if (expiry === 0) {
-        await this.client.set(key, serializedValue);
+      if (expiry > 0) {
+        await this.client.setEx(key, expiry, serialized);
       } else {
-        await this.client.setEx(key, expiry, serializedValue);
+        await this.client.set(key, serialized);
       }
     } catch (error) {
-      console.error(`Redis set error for key ${key}:`, error);
-      // Don't throw - graceful degradation
+      console.error(`Redis set error [${key}]:`, error);
     }
   }
 
   async get<T = any>(key: string): Promise<T | null> {
-    if (!this.isConnected) {
-      return null; // Return null if not connected
-    }
-
+    if (!this.client?.isOpen) return null;
+    
     try {
       const value = await this.client.get(key);
-      if (!value) return null;
-
-      return JSON.parse(value) as T;
+      return value ? JSON.parse(value) : null;
     } catch (error) {
-      console.error(`Redis get error for key ${key}:`, error);
-      return null; // Return null on error
+      console.error(`Redis get error [${key}]:`, error);
+      return null;
     }
   }
 
   async del(key: string): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
-
+    if (!this.client?.isOpen) return;
+    
     try {
       await this.client.del(key);
     } catch (error) {
-      console.error(`Redis delete error for key ${key}:`, error);
+      console.error(`Redis delete error [${key}]:`, error);
     }
   }
 
   async exists(key: string): Promise<boolean> {
-    if (!this.isConnected) {
-      return false;
-    }
-
+    if (!this.client?.isOpen) return false;
+    
     try {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error(`Redis exists error for key ${key}:`, error);
+      console.error(`Redis exists error [${key}]:`, error);
       return false;
     }
   }
 
   async ttl(key: string): Promise<number> {
-    if (!this.isConnected) {
-      return -2;
-    }
-
+    if (!this.client?.isOpen) return -2;
+    
     try {
       return await this.client.ttl(key);
     } catch (error) {
-      console.error(`Redis TTL error for key ${key}:`, error);
+      console.error(`Redis TTL error [${key}]:`, error);
       return -2;
     }
   }
 
   async expire(key: string, seconds: number): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
-
+    if (!this.client?.isOpen) return;
+    
     try {
       await this.client.expire(key, seconds);
     } catch (error) {
-      console.error(`Redis expire error for key ${key}:`, error);
+      console.error(`Redis expire error [${key}]:`, error);
     }
   }
 
   async keys(pattern: string): Promise<string[]> {
-    if (!this.isConnected) {
-      return [];
-    }
-
+    if (!this.client?.isOpen) return [];
+    
     try {
       return await this.client.keys(pattern);
     } catch (error) {
-      console.error(`Redis keys error for pattern ${pattern}:`, error);
+      console.error(`Redis keys error [${pattern}]:`, error);
       return [];
     }
   }
 
   async flush(): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
-
+    if (!this.client?.isOpen) return;
+    
     try {
       await this.client.flushDb();
     } catch (error) {
@@ -202,21 +150,19 @@ export class RedisService {
   }
 
   async invalidatePattern(pattern: string): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
-
+    if (!this.client?.isOpen) return;
+    
     try {
       const keys = await this.keys(pattern);
       if (keys.length > 0) {
         await this.client.del(keys);
       }
     } catch (error) {
-      console.error(`Redis invalidate pattern error for ${pattern}:`, error);
+      console.error(`Redis invalidate pattern error [${pattern}]:`, error);
     }
   }
 
-  // Session-specific methods
+  // Session methods
   async setSession(sessionId: string, data: any, ttl = 86400): Promise<void> {
     await this.set(`session:${sessionId}`, data, ttl);
   }
@@ -231,8 +177,8 @@ export class RedisService {
 
   // Rate limiting methods
   async incrementCounter(key: string, ttl = 3600): Promise<number> {
-    if (!this.isConnected) {
-      throw new Error("Redis is not connected - rate limiting unavailable");
+    if (!this.client?.isOpen) {
+      throw new Error("Redis not connected - rate limiting unavailable");
     }
 
     try {
@@ -242,31 +188,29 @@ export class RedisService {
       const results = await multi.exec();
       return (results?.[0] as number) || 0;
     } catch (error) {
-      console.error(`Redis increment counter error for key ${key}:`, error);
-      throw error; // Rate limiting should fail if Redis is down
+      console.error(`Redis increment error [${key}]:`, error);
+      throw error;
     }
   }
 
   async getCounter(key: string): Promise<number> {
-    if (!this.isConnected) {
-      throw new Error("Redis is not connected - rate limiting unavailable");
+    if (!this.client?.isOpen) {
+      throw new Error("Redis not connected - rate limiting unavailable");
     }
 
     try {
       const value = await this.client.get(key);
       return value ? parseInt(value, 10) : 0;
     } catch (error) {
-      console.error(`Redis get counter error for key ${key}:`, error);
-      throw error; // Rate limiting should fail if Redis is down
+      console.error(`Redis get counter error [${key}]:`, error);
+      throw error;
     }
   }
 
   // Health check
   async ping(): Promise<boolean> {
-    if (!this.isConnected) {
-      return false;
-    }
-
+    if (!this.client?.isOpen) return false;
+    
     try {
       const response = await this.client.ping();
       return response === "PONG";
@@ -280,7 +224,7 @@ export class RedisService {
     return this.isConnected;
   }
 
-  // Get current database info
+  // Get database info
   getDatabaseInfo(): { url: string; database: number; isConnected: boolean } {
     return {
       url: this.config.url,
