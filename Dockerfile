@@ -26,7 +26,7 @@ RUN npm install -g pnpm@10.14.0
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client (will be generated in src/generated/prisma-client)
 RUN pnpm exec prisma generate
 
 # Build the application
@@ -47,22 +47,18 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install production dependencies and Prisma CLI
+# Install production dependencies only (without prisma CLI)
 RUN pnpm install --prod --frozen-lockfile && \
-    pnpm add prisma@latest && \
     pnpm store prune
-
-# Copy Prisma schema
-COPY --chown=nodejs:nodejs prisma ./prisma
-
-# Generate Prisma client
-RUN pnpm exec prisma generate
 
 # Copy built application
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
-# Copy generated Prisma client from builder if it exists in a custom location
+# Copy generated Prisma client from builder stage to the correct location
 COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./src/generated
+
+# Copy Prisma schema (for reference, not for generation)
+COPY --chown=nodejs:nodejs prisma ./prisma
 
 # Create necessary directories
 RUN mkdir -p /app/logs && \
