@@ -16,14 +16,15 @@ const startServer = async () => {
       `Database URL: ${process.env.DATABASE_URL?.split("@")[1] || "Not set"}`
     );
 
-    // Connect to Redis
-    try {
-      await redisService.connect();
-      console.log("Connected to Redis");
-    } catch (error) {
-      console.warn("Redis connection failed:", error);
-      console.log("Continuing without Redis...");
-    }
+    // Connect to Redis (non-blocking to prevent startup hang)
+    redisService.connect()
+      .then(() => {
+        console.log("Connected to Redis");
+      })
+      .catch((error) => {
+        console.warn("Redis connection failed:", error);
+        console.log("Continuing without Redis...");
+      });
 
     // Create and start server
     const app = createServer();
