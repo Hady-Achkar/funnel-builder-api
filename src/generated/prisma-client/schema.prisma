@@ -11,6 +11,7 @@ datasource db {
 enum UserPlan {
   BUSINESS
   AGENCY
+  FREE
 }
 
 model User {
@@ -27,6 +28,8 @@ model User {
   passwordResetExpiresAt     DateTime?
   isAdmin                    Boolean           @default(false)
   plan                       UserPlan
+  referralLinkUsedId         Int? // Reference to affiliate link that was used for signup
+  balance                    Float             @default(0) // Affiliate balance
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
   maximumFunnels             Int               @default(5) // Total funnel budget for the user
@@ -38,8 +41,61 @@ model User {
   createdDomains             Domain[]          @relation("DomainCreator")
   templates                  Template[]
   imageFolders               ImageFolder[]
+  affiliateLinks             AffiliateLink[]   @relation("AffiliateOwner")
+  referralLinkUsed           AffiliateLink?    @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
+  payments                   Payment[]         @relation("UserPayments")
 
   @@map("users")
+}
+
+model AffiliateLink {
+  id          Int      @id @default(autoincrement())
+  name        String
+  token       String   @unique
+  itemType    UserPlan // BUSINESS, AGENCY, or FREE
+  userId      Int // Owner of the affiliate link
+  clickCount  Int      @default(0)
+  totalAmount Float    @default(0)
+  settings    Json?    @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user            User      @relation("AffiliateOwner", fields: [userId], references: [id], onDelete: Cascade)
+  subscribedUsers User[]    @relation("ReferralUsers")
+  payments        Payment[]
+
+  @@index([token])
+  @@index([userId])
+  @@index([itemType])
+  @@map("affiliate_links")
+}
+
+model Payment {
+  id                    Int      @id @default(autoincrement())
+  transactionId         String   @unique
+  amount                Float?
+  currency              String
+  status                String
+  itemType              UserPlan // BUSINESS, AGENCY, or FREE
+  buyerId               Int? // User who made the payment
+  affiliateLinkId       Int?
+  level1AffiliateAmount Float?
+  level2AffiliateAmount Float?
+  affiliatePaid         Boolean  @default(false)
+  rawData               Json?    @default("{}")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  buyer         User?          @relation("UserPayments", fields: [buyerId], references: [id])
+  affiliateLink AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
+
+  @@index([buyerId])
+  @@index([affiliateLinkId])
+  @@index([status])
+  @@index([transactionId])
+  @@map("payments")
 }
 
 model Workspace {

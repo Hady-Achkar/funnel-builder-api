@@ -134,11 +134,43 @@ exports.Prisma.UserScalarFieldEnum = {
   passwordResetExpiresAt: 'passwordResetExpiresAt',
   isAdmin: 'isAdmin',
   plan: 'plan',
+  referralLinkUsedId: 'referralLinkUsedId',
+  balance: 'balance',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   maximumFunnels: 'maximumFunnels',
   maximumCustomDomains: 'maximumCustomDomains',
   maximumSubdomains: 'maximumSubdomains'
+};
+
+exports.Prisma.AffiliateLinkScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  token: 'token',
+  itemType: 'itemType',
+  userId: 'userId',
+  clickCount: 'clickCount',
+  totalAmount: 'totalAmount',
+  settings: 'settings',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  transactionId: 'transactionId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  itemType: 'itemType',
+  buyerId: 'buyerId',
+  affiliateLinkId: 'affiliateLinkId',
+  level1AffiliateAmount: 'level1AffiliateAmount',
+  level2AffiliateAmount: 'level2AffiliateAmount',
+  affiliatePaid: 'affiliatePaid',
+  rawData: 'rawData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.WorkspaceScalarFieldEnum = {
@@ -426,7 +458,8 @@ exports.Prisma.JsonNullValueFilter = {
 };
 exports.UserPlan = exports.$Enums.UserPlan = {
   BUSINESS: 'BUSINESS',
-  AGENCY: 'AGENCY'
+  AGENCY: 'AGENCY',
+  FREE: 'FREE'
 };
 
 exports.WorkspaceRole = exports.$Enums.WorkspaceRole = {
@@ -501,6 +534,8 @@ exports.TemplateImageType = exports.$Enums.TemplateImageType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  AffiliateLink: 'AffiliateLink',
+  Payment: 'Payment',
   Workspace: 'Workspace',
   WorkspaceMember: 'WorkspaceMember',
   Funnel: 'Funnel',

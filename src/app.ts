@@ -20,6 +20,7 @@ import funnelSettingsRoutes from "./routes/funnel-settings";
 import workspacesRouter from "./routes/workspace";
 import insightRoutes from "./routes/insight";
 import insightSubmissionRoutes from "./routes/insight-submission";
+import affiliateRoutes from "./routes/affiliate";
 
 export function createServer(): Express {
   const app = express();
@@ -71,6 +72,7 @@ export function createServer(): Express {
   app.use("/api/workspaces", workspacesRouter);
   app.use("/api/insights", insightRoutes);
   app.use("/api/insight-submissions", insightSubmissionRoutes);
+  app.use("/api/affiliate", affiliateRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {
@@ -116,6 +118,8 @@ export function createServer(): Express {
         workspaces: "/api/workspaces",
         insights: "/api/insights",
         insightSubmissions: "/api/insight-submissions",
+        affiliate: "/api/affiliate",
+        "affiliate/generate-link": "/api/affiliate/generate-link",
       },
     });
   });

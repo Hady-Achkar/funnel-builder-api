@@ -19,6 +19,16 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model AffiliateLink
+ * 
+ */
+export type AffiliateLink = $Result.DefaultSelection<Prisma.$AffiliateLinkPayload>
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
+/**
  * Model Workspace
  * 
  */
@@ -120,7 +130,8 @@ export type FunnelSettings = $Result.DefaultSelection<Prisma.$FunnelSettingsPayl
 export namespace $Enums {
   export const UserPlan: {
   BUSINESS: 'BUSINESS',
-  AGENCY: 'AGENCY'
+  AGENCY: 'AGENCY',
+  FREE: 'FREE'
 };
 
 export type UserPlan = (typeof UserPlan)[keyof typeof UserPlan]
@@ -405,6 +416,26 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.affiliateLink`: Exposes CRUD operations for the **AffiliateLink** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AffiliateLinks
+    * const affiliateLinks = await prisma.affiliateLink.findMany()
+    * ```
+    */
+  get affiliateLink(): Prisma.AffiliateLinkDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.payment`: Exposes CRUD operations for the **Payment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Payments
+    * const payments = await prisma.payment.findMany()
+    * ```
+    */
+  get payment(): Prisma.PaymentDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.workspace`: Exposes CRUD operations for the **Workspace** model.
@@ -1036,6 +1067,8 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    AffiliateLink: 'AffiliateLink',
+    Payment: 'Payment',
     Workspace: 'Workspace',
     WorkspaceMember: 'WorkspaceMember',
     Funnel: 'Funnel',
@@ -1073,7 +1106,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "workspace" | "workspaceMember" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "insight" | "insightSubmission" | "templateCategory" | "template" | "templateImage" | "templatePage" | "image" | "imageFolder" | "form" | "formSubmission" | "funnelSettings"
+      modelProps: "user" | "affiliateLink" | "payment" | "workspace" | "workspaceMember" | "funnel" | "domain" | "funnelDomain" | "page" | "session" | "theme" | "insight" | "insightSubmission" | "templateCategory" | "template" | "templateImage" | "templatePage" | "image" | "imageFolder" | "form" | "formSubmission" | "funnelSettings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1148,6 +1181,154 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      AffiliateLink: {
+        payload: Prisma.$AffiliateLinkPayload<ExtArgs>
+        fields: Prisma.AffiliateLinkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AffiliateLinkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AffiliateLinkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          findFirst: {
+            args: Prisma.AffiliateLinkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AffiliateLinkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          findMany: {
+            args: Prisma.AffiliateLinkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>[]
+          }
+          create: {
+            args: Prisma.AffiliateLinkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          createMany: {
+            args: Prisma.AffiliateLinkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AffiliateLinkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>[]
+          }
+          delete: {
+            args: Prisma.AffiliateLinkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          update: {
+            args: Prisma.AffiliateLinkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          deleteMany: {
+            args: Prisma.AffiliateLinkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AffiliateLinkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AffiliateLinkUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>[]
+          }
+          upsert: {
+            args: Prisma.AffiliateLinkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AffiliateLinkPayload>
+          }
+          aggregate: {
+            args: Prisma.AffiliateLinkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAffiliateLink>
+          }
+          groupBy: {
+            args: Prisma.AffiliateLinkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AffiliateLinkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AffiliateLinkCountArgs<ExtArgs>
+            result: $Utils.Optional<AffiliateLinkCountAggregateOutputType> | number
+          }
+        }
+      }
+      Payment: {
+        payload: Prisma.$PaymentPayload<ExtArgs>
+        fields: Prisma.PaymentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PaymentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PaymentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          findFirst: {
+            args: Prisma.PaymentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PaymentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          findMany: {
+            args: Prisma.PaymentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+          }
+          create: {
+            args: Prisma.PaymentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          createMany: {
+            args: Prisma.PaymentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PaymentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+          }
+          delete: {
+            args: Prisma.PaymentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          update: {
+            args: Prisma.PaymentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          deleteMany: {
+            args: Prisma.PaymentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PaymentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PaymentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+          }
+          upsert: {
+            args: Prisma.PaymentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentPayload>
+          }
+          aggregate: {
+            args: Prisma.PaymentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePayment>
+          }
+          groupBy: {
+            args: Prisma.PaymentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PaymentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PaymentCountArgs<ExtArgs>
+            result: $Utils.Optional<PaymentCountAggregateOutputType> | number
           }
         }
       }
@@ -2650,6 +2831,8 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    affiliateLink?: AffiliateLinkOmit
+    payment?: PaymentOmit
     workspace?: WorkspaceOmit
     workspaceMember?: WorkspaceMemberOmit
     funnel?: FunnelOmit
@@ -2774,6 +2957,8 @@ export namespace Prisma {
     createdDomains: number
     templates: number
     imageFolders: number
+    affiliateLinks: number
+    payments: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2783,6 +2968,8 @@ export namespace Prisma {
     createdDomains?: boolean | UserCountOutputTypeCountCreatedDomainsArgs
     templates?: boolean | UserCountOutputTypeCountTemplatesArgs
     imageFolders?: boolean | UserCountOutputTypeCountImageFoldersArgs
+    affiliateLinks?: boolean | UserCountOutputTypeCountAffiliateLinksArgs
+    payments?: boolean | UserCountOutputTypeCountPaymentsArgs
   }
 
   // Custom InputTypes
@@ -2836,6 +3023,60 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountImageFoldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ImageFolderWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAffiliateLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AffiliateLinkWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentWhereInput
+  }
+
+
+  /**
+   * Count Type AffiliateLinkCountOutputType
+   */
+
+  export type AffiliateLinkCountOutputType = {
+    subscribedUsers: number
+    payments: number
+  }
+
+  export type AffiliateLinkCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    subscribedUsers?: boolean | AffiliateLinkCountOutputTypeCountSubscribedUsersArgs
+    payments?: boolean | AffiliateLinkCountOutputTypeCountPaymentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AffiliateLinkCountOutputType without action
+   */
+  export type AffiliateLinkCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLinkCountOutputType
+     */
+    select?: AffiliateLinkCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AffiliateLinkCountOutputType without action
+   */
+  export type AffiliateLinkCountOutputTypeCountSubscribedUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * AffiliateLinkCountOutputType without action
+   */
+  export type AffiliateLinkCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentWhereInput
   }
 
 
@@ -3190,6 +3431,8 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     id: number | null
+    referralLinkUsedId: number | null
+    balance: number | null
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
@@ -3197,6 +3440,8 @@ export namespace Prisma {
 
   export type UserSumAggregateOutputType = {
     id: number | null
+    referralLinkUsedId: number | null
+    balance: number | null
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
@@ -3216,6 +3461,8 @@ export namespace Prisma {
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
     plan: $Enums.UserPlan | null
+    referralLinkUsedId: number | null
+    balance: number | null
     createdAt: Date | null
     updatedAt: Date | null
     maximumFunnels: number | null
@@ -3237,6 +3484,8 @@ export namespace Prisma {
     passwordResetExpiresAt: Date | null
     isAdmin: boolean | null
     plan: $Enums.UserPlan | null
+    referralLinkUsedId: number | null
+    balance: number | null
     createdAt: Date | null
     updatedAt: Date | null
     maximumFunnels: number | null
@@ -3258,6 +3507,8 @@ export namespace Prisma {
     passwordResetExpiresAt: number
     isAdmin: number
     plan: number
+    referralLinkUsedId: number
+    balance: number
     createdAt: number
     updatedAt: number
     maximumFunnels: number
@@ -3269,6 +3520,8 @@ export namespace Prisma {
 
   export type UserAvgAggregateInputType = {
     id?: true
+    referralLinkUsedId?: true
+    balance?: true
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
@@ -3276,6 +3529,8 @@ export namespace Prisma {
 
   export type UserSumAggregateInputType = {
     id?: true
+    referralLinkUsedId?: true
+    balance?: true
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
@@ -3295,6 +3550,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: true
     isAdmin?: true
     plan?: true
+    referralLinkUsedId?: true
+    balance?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
@@ -3316,6 +3573,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: true
     isAdmin?: true
     plan?: true
+    referralLinkUsedId?: true
+    balance?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
@@ -3337,6 +3596,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: true
     isAdmin?: true
     plan?: true
+    referralLinkUsedId?: true
+    balance?: true
     createdAt?: true
     updatedAt?: true
     maximumFunnels?: true
@@ -3445,6 +3706,8 @@ export namespace Prisma {
     passwordResetExpiresAt: Date | null
     isAdmin: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId: number | null
+    balance: number
     createdAt: Date
     updatedAt: Date
     maximumFunnels: number
@@ -3485,6 +3748,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
     plan?: boolean
+    referralLinkUsedId?: boolean
+    balance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
@@ -3496,6 +3761,9 @@ export namespace Prisma {
     createdDomains?: boolean | User$createdDomainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
     imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
+    affiliateLinks?: boolean | User$affiliateLinksArgs<ExtArgs>
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
+    payments?: boolean | User$paymentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3513,11 +3781,14 @@ export namespace Prisma {
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
     plan?: boolean
+    referralLinkUsedId?: boolean
+    balance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3534,11 +3805,14 @@ export namespace Prisma {
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
     plan?: boolean
+    referralLinkUsedId?: boolean
+    balance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -3555,6 +3829,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: boolean
     isAdmin?: boolean
     plan?: boolean
+    referralLinkUsedId?: boolean
+    balance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     maximumFunnels?: boolean
@@ -3562,7 +3838,7 @@ export namespace Prisma {
     maximumSubdomains?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "verified" | "verificationToken" | "verificationTokenExpiresAt" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "verified" | "verificationToken" | "verificationTokenExpiresAt" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "referralLinkUsedId" | "balance" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
@@ -3570,10 +3846,17 @@ export namespace Prisma {
     createdDomains?: boolean | User$createdDomainsArgs<ExtArgs>
     templates?: boolean | User$templatesArgs<ExtArgs>
     imageFolders?: boolean | User$imageFoldersArgs<ExtArgs>
+    affiliateLinks?: boolean | User$affiliateLinksArgs<ExtArgs>
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
+    payments?: boolean | User$paymentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
+  }
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
+  }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
@@ -3584,6 +3867,9 @@ export namespace Prisma {
       createdDomains: Prisma.$DomainPayload<ExtArgs>[]
       templates: Prisma.$TemplatePayload<ExtArgs>[]
       imageFolders: Prisma.$ImageFolderPayload<ExtArgs>[]
+      affiliateLinks: Prisma.$AffiliateLinkPayload<ExtArgs>[]
+      referralLinkUsed: Prisma.$AffiliateLinkPayload<ExtArgs> | null
+      payments: Prisma.$PaymentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3599,6 +3885,8 @@ export namespace Prisma {
       passwordResetExpiresAt: Date | null
       isAdmin: boolean
       plan: $Enums.UserPlan
+      referralLinkUsedId: number | null
+      balance: number
       createdAt: Date
       updatedAt: Date
       maximumFunnels: number
@@ -4004,6 +4292,9 @@ export namespace Prisma {
     createdDomains<T extends User$createdDomainsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdDomainsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DomainPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     templates<T extends User$templatesArgs<ExtArgs> = {}>(args?: Subset<T, User$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     imageFolders<T extends User$imageFoldersArgs<ExtArgs> = {}>(args?: Subset<T, User$imageFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    affiliateLinks<T extends User$affiliateLinksArgs<ExtArgs> = {}>(args?: Subset<T, User$affiliateLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    referralLinkUsed<T extends User$referralLinkUsedArgs<ExtArgs> = {}>(args?: Subset<T, User$referralLinkUsedArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4046,6 +4337,8 @@ export namespace Prisma {
     readonly passwordResetExpiresAt: FieldRef<"User", 'DateTime'>
     readonly isAdmin: FieldRef<"User", 'Boolean'>
     readonly plan: FieldRef<"User", 'UserPlan'>
+    readonly referralLinkUsedId: FieldRef<"User", 'Int'>
+    readonly balance: FieldRef<"User", 'Float'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly maximumFunnels: FieldRef<"User", 'Int'>
@@ -4300,6 +4593,10 @@ export namespace Prisma {
      */
     data: UserCreateManyInput | UserCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4370,6 +4667,10 @@ export namespace Prisma {
      * Limit how many Users to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4583,6 +4884,73 @@ export namespace Prisma {
   }
 
   /**
+   * User.affiliateLinks
+   */
+  export type User$affiliateLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    where?: AffiliateLinkWhereInput
+    orderBy?: AffiliateLinkOrderByWithRelationInput | AffiliateLinkOrderByWithRelationInput[]
+    cursor?: AffiliateLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AffiliateLinkScalarFieldEnum | AffiliateLinkScalarFieldEnum[]
+  }
+
+  /**
+   * User.referralLinkUsed
+   */
+  export type User$referralLinkUsedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    where?: AffiliateLinkWhereInput
+  }
+
+  /**
+   * User.payments
+   */
+  export type User$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    where?: PaymentWhereInput
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    cursor?: PaymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4598,6 +4966,2500 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AffiliateLink
+   */
+
+  export type AggregateAffiliateLink = {
+    _count: AffiliateLinkCountAggregateOutputType | null
+    _avg: AffiliateLinkAvgAggregateOutputType | null
+    _sum: AffiliateLinkSumAggregateOutputType | null
+    _min: AffiliateLinkMinAggregateOutputType | null
+    _max: AffiliateLinkMaxAggregateOutputType | null
+  }
+
+  export type AffiliateLinkAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    clickCount: number | null
+    totalAmount: number | null
+  }
+
+  export type AffiliateLinkSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    clickCount: number | null
+    totalAmount: number | null
+  }
+
+  export type AffiliateLinkMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    token: string | null
+    itemType: $Enums.UserPlan | null
+    userId: number | null
+    clickCount: number | null
+    totalAmount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AffiliateLinkMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    token: string | null
+    itemType: $Enums.UserPlan | null
+    userId: number | null
+    clickCount: number | null
+    totalAmount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AffiliateLinkCountAggregateOutputType = {
+    id: number
+    name: number
+    token: number
+    itemType: number
+    userId: number
+    clickCount: number
+    totalAmount: number
+    settings: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AffiliateLinkAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    clickCount?: true
+    totalAmount?: true
+  }
+
+  export type AffiliateLinkSumAggregateInputType = {
+    id?: true
+    userId?: true
+    clickCount?: true
+    totalAmount?: true
+  }
+
+  export type AffiliateLinkMinAggregateInputType = {
+    id?: true
+    name?: true
+    token?: true
+    itemType?: true
+    userId?: true
+    clickCount?: true
+    totalAmount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AffiliateLinkMaxAggregateInputType = {
+    id?: true
+    name?: true
+    token?: true
+    itemType?: true
+    userId?: true
+    clickCount?: true
+    totalAmount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AffiliateLinkCountAggregateInputType = {
+    id?: true
+    name?: true
+    token?: true
+    itemType?: true
+    userId?: true
+    clickCount?: true
+    totalAmount?: true
+    settings?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AffiliateLinkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AffiliateLink to aggregate.
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AffiliateLinks to fetch.
+     */
+    orderBy?: AffiliateLinkOrderByWithRelationInput | AffiliateLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AffiliateLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AffiliateLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AffiliateLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AffiliateLinks
+    **/
+    _count?: true | AffiliateLinkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AffiliateLinkAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AffiliateLinkSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AffiliateLinkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AffiliateLinkMaxAggregateInputType
+  }
+
+  export type GetAffiliateLinkAggregateType<T extends AffiliateLinkAggregateArgs> = {
+        [P in keyof T & keyof AggregateAffiliateLink]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAffiliateLink[P]>
+      : GetScalarType<T[P], AggregateAffiliateLink[P]>
+  }
+
+
+
+
+  export type AffiliateLinkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AffiliateLinkWhereInput
+    orderBy?: AffiliateLinkOrderByWithAggregationInput | AffiliateLinkOrderByWithAggregationInput[]
+    by: AffiliateLinkScalarFieldEnum[] | AffiliateLinkScalarFieldEnum
+    having?: AffiliateLinkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AffiliateLinkCountAggregateInputType | true
+    _avg?: AffiliateLinkAvgAggregateInputType
+    _sum?: AffiliateLinkSumAggregateInputType
+    _min?: AffiliateLinkMinAggregateInputType
+    _max?: AffiliateLinkMaxAggregateInputType
+  }
+
+  export type AffiliateLinkGroupByOutputType = {
+    id: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    userId: number
+    clickCount: number
+    totalAmount: number
+    settings: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AffiliateLinkCountAggregateOutputType | null
+    _avg: AffiliateLinkAvgAggregateOutputType | null
+    _sum: AffiliateLinkSumAggregateOutputType | null
+    _min: AffiliateLinkMinAggregateOutputType | null
+    _max: AffiliateLinkMaxAggregateOutputType | null
+  }
+
+  type GetAffiliateLinkGroupByPayload<T extends AffiliateLinkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AffiliateLinkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AffiliateLinkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AffiliateLinkGroupByOutputType[P]>
+            : GetScalarType<T[P], AffiliateLinkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AffiliateLinkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    token?: boolean
+    itemType?: boolean
+    userId?: boolean
+    clickCount?: boolean
+    totalAmount?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    subscribedUsers?: boolean | AffiliateLink$subscribedUsersArgs<ExtArgs>
+    payments?: boolean | AffiliateLink$paymentsArgs<ExtArgs>
+    _count?: boolean | AffiliateLinkCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["affiliateLink"]>
+
+  export type AffiliateLinkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    token?: boolean
+    itemType?: boolean
+    userId?: boolean
+    clickCount?: boolean
+    totalAmount?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["affiliateLink"]>
+
+  export type AffiliateLinkSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    token?: boolean
+    itemType?: boolean
+    userId?: boolean
+    clickCount?: boolean
+    totalAmount?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["affiliateLink"]>
+
+  export type AffiliateLinkSelectScalar = {
+    id?: boolean
+    name?: boolean
+    token?: boolean
+    itemType?: boolean
+    userId?: boolean
+    clickCount?: boolean
+    totalAmount?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AffiliateLinkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "token" | "itemType" | "userId" | "clickCount" | "totalAmount" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["affiliateLink"]>
+  export type AffiliateLinkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    subscribedUsers?: boolean | AffiliateLink$subscribedUsersArgs<ExtArgs>
+    payments?: boolean | AffiliateLink$paymentsArgs<ExtArgs>
+    _count?: boolean | AffiliateLinkCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AffiliateLinkIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AffiliateLinkIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AffiliateLinkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AffiliateLink"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      subscribedUsers: Prisma.$UserPayload<ExtArgs>[]
+      payments: Prisma.$PaymentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      token: string
+      itemType: $Enums.UserPlan
+      userId: number
+      clickCount: number
+      totalAmount: number
+      settings: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["affiliateLink"]>
+    composites: {}
+  }
+
+  type AffiliateLinkGetPayload<S extends boolean | null | undefined | AffiliateLinkDefaultArgs> = $Result.GetResult<Prisma.$AffiliateLinkPayload, S>
+
+  type AffiliateLinkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AffiliateLinkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AffiliateLinkCountAggregateInputType | true
+    }
+
+  export interface AffiliateLinkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AffiliateLink'], meta: { name: 'AffiliateLink' } }
+    /**
+     * Find zero or one AffiliateLink that matches the filter.
+     * @param {AffiliateLinkFindUniqueArgs} args - Arguments to find a AffiliateLink
+     * @example
+     * // Get one AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AffiliateLinkFindUniqueArgs>(args: SelectSubset<T, AffiliateLinkFindUniqueArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AffiliateLink that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AffiliateLinkFindUniqueOrThrowArgs} args - Arguments to find a AffiliateLink
+     * @example
+     * // Get one AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AffiliateLinkFindUniqueOrThrowArgs>(args: SelectSubset<T, AffiliateLinkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AffiliateLink that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkFindFirstArgs} args - Arguments to find a AffiliateLink
+     * @example
+     * // Get one AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AffiliateLinkFindFirstArgs>(args?: SelectSubset<T, AffiliateLinkFindFirstArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AffiliateLink that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkFindFirstOrThrowArgs} args - Arguments to find a AffiliateLink
+     * @example
+     * // Get one AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AffiliateLinkFindFirstOrThrowArgs>(args?: SelectSubset<T, AffiliateLinkFindFirstOrThrowArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AffiliateLinks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AffiliateLinks
+     * const affiliateLinks = await prisma.affiliateLink.findMany()
+     * 
+     * // Get first 10 AffiliateLinks
+     * const affiliateLinks = await prisma.affiliateLink.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const affiliateLinkWithIdOnly = await prisma.affiliateLink.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AffiliateLinkFindManyArgs>(args?: SelectSubset<T, AffiliateLinkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AffiliateLink.
+     * @param {AffiliateLinkCreateArgs} args - Arguments to create a AffiliateLink.
+     * @example
+     * // Create one AffiliateLink
+     * const AffiliateLink = await prisma.affiliateLink.create({
+     *   data: {
+     *     // ... data to create a AffiliateLink
+     *   }
+     * })
+     * 
+     */
+    create<T extends AffiliateLinkCreateArgs>(args: SelectSubset<T, AffiliateLinkCreateArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AffiliateLinks.
+     * @param {AffiliateLinkCreateManyArgs} args - Arguments to create many AffiliateLinks.
+     * @example
+     * // Create many AffiliateLinks
+     * const affiliateLink = await prisma.affiliateLink.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AffiliateLinkCreateManyArgs>(args?: SelectSubset<T, AffiliateLinkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AffiliateLinks and returns the data saved in the database.
+     * @param {AffiliateLinkCreateManyAndReturnArgs} args - Arguments to create many AffiliateLinks.
+     * @example
+     * // Create many AffiliateLinks
+     * const affiliateLink = await prisma.affiliateLink.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AffiliateLinks and only return the `id`
+     * const affiliateLinkWithIdOnly = await prisma.affiliateLink.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AffiliateLinkCreateManyAndReturnArgs>(args?: SelectSubset<T, AffiliateLinkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AffiliateLink.
+     * @param {AffiliateLinkDeleteArgs} args - Arguments to delete one AffiliateLink.
+     * @example
+     * // Delete one AffiliateLink
+     * const AffiliateLink = await prisma.affiliateLink.delete({
+     *   where: {
+     *     // ... filter to delete one AffiliateLink
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AffiliateLinkDeleteArgs>(args: SelectSubset<T, AffiliateLinkDeleteArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AffiliateLink.
+     * @param {AffiliateLinkUpdateArgs} args - Arguments to update one AffiliateLink.
+     * @example
+     * // Update one AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AffiliateLinkUpdateArgs>(args: SelectSubset<T, AffiliateLinkUpdateArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AffiliateLinks.
+     * @param {AffiliateLinkDeleteManyArgs} args - Arguments to filter AffiliateLinks to delete.
+     * @example
+     * // Delete a few AffiliateLinks
+     * const { count } = await prisma.affiliateLink.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AffiliateLinkDeleteManyArgs>(args?: SelectSubset<T, AffiliateLinkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AffiliateLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AffiliateLinks
+     * const affiliateLink = await prisma.affiliateLink.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AffiliateLinkUpdateManyArgs>(args: SelectSubset<T, AffiliateLinkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AffiliateLinks and returns the data updated in the database.
+     * @param {AffiliateLinkUpdateManyAndReturnArgs} args - Arguments to update many AffiliateLinks.
+     * @example
+     * // Update many AffiliateLinks
+     * const affiliateLink = await prisma.affiliateLink.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AffiliateLinks and only return the `id`
+     * const affiliateLinkWithIdOnly = await prisma.affiliateLink.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AffiliateLinkUpdateManyAndReturnArgs>(args: SelectSubset<T, AffiliateLinkUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AffiliateLink.
+     * @param {AffiliateLinkUpsertArgs} args - Arguments to update or create a AffiliateLink.
+     * @example
+     * // Update or create a AffiliateLink
+     * const affiliateLink = await prisma.affiliateLink.upsert({
+     *   create: {
+     *     // ... data to create a AffiliateLink
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AffiliateLink we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AffiliateLinkUpsertArgs>(args: SelectSubset<T, AffiliateLinkUpsertArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AffiliateLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkCountArgs} args - Arguments to filter AffiliateLinks to count.
+     * @example
+     * // Count the number of AffiliateLinks
+     * const count = await prisma.affiliateLink.count({
+     *   where: {
+     *     // ... the filter for the AffiliateLinks we want to count
+     *   }
+     * })
+    **/
+    count<T extends AffiliateLinkCountArgs>(
+      args?: Subset<T, AffiliateLinkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AffiliateLinkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AffiliateLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AffiliateLinkAggregateArgs>(args: Subset<T, AffiliateLinkAggregateArgs>): Prisma.PrismaPromise<GetAffiliateLinkAggregateType<T>>
+
+    /**
+     * Group by AffiliateLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AffiliateLinkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AffiliateLinkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AffiliateLinkGroupByArgs['orderBy'] }
+        : { orderBy?: AffiliateLinkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AffiliateLinkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAffiliateLinkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AffiliateLink model
+   */
+  readonly fields: AffiliateLinkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AffiliateLink.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AffiliateLinkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    subscribedUsers<T extends AffiliateLink$subscribedUsersArgs<ExtArgs> = {}>(args?: Subset<T, AffiliateLink$subscribedUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    payments<T extends AffiliateLink$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, AffiliateLink$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AffiliateLink model
+   */
+  interface AffiliateLinkFieldRefs {
+    readonly id: FieldRef<"AffiliateLink", 'Int'>
+    readonly name: FieldRef<"AffiliateLink", 'String'>
+    readonly token: FieldRef<"AffiliateLink", 'String'>
+    readonly itemType: FieldRef<"AffiliateLink", 'UserPlan'>
+    readonly userId: FieldRef<"AffiliateLink", 'Int'>
+    readonly clickCount: FieldRef<"AffiliateLink", 'Int'>
+    readonly totalAmount: FieldRef<"AffiliateLink", 'Float'>
+    readonly settings: FieldRef<"AffiliateLink", 'Json'>
+    readonly createdAt: FieldRef<"AffiliateLink", 'DateTime'>
+    readonly updatedAt: FieldRef<"AffiliateLink", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AffiliateLink findUnique
+   */
+  export type AffiliateLinkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which AffiliateLink to fetch.
+     */
+    where: AffiliateLinkWhereUniqueInput
+  }
+
+  /**
+   * AffiliateLink findUniqueOrThrow
+   */
+  export type AffiliateLinkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which AffiliateLink to fetch.
+     */
+    where: AffiliateLinkWhereUniqueInput
+  }
+
+  /**
+   * AffiliateLink findFirst
+   */
+  export type AffiliateLinkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which AffiliateLink to fetch.
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AffiliateLinks to fetch.
+     */
+    orderBy?: AffiliateLinkOrderByWithRelationInput | AffiliateLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AffiliateLinks.
+     */
+    cursor?: AffiliateLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AffiliateLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AffiliateLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AffiliateLinks.
+     */
+    distinct?: AffiliateLinkScalarFieldEnum | AffiliateLinkScalarFieldEnum[]
+  }
+
+  /**
+   * AffiliateLink findFirstOrThrow
+   */
+  export type AffiliateLinkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which AffiliateLink to fetch.
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AffiliateLinks to fetch.
+     */
+    orderBy?: AffiliateLinkOrderByWithRelationInput | AffiliateLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AffiliateLinks.
+     */
+    cursor?: AffiliateLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AffiliateLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AffiliateLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AffiliateLinks.
+     */
+    distinct?: AffiliateLinkScalarFieldEnum | AffiliateLinkScalarFieldEnum[]
+  }
+
+  /**
+   * AffiliateLink findMany
+   */
+  export type AffiliateLinkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which AffiliateLinks to fetch.
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AffiliateLinks to fetch.
+     */
+    orderBy?: AffiliateLinkOrderByWithRelationInput | AffiliateLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AffiliateLinks.
+     */
+    cursor?: AffiliateLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AffiliateLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AffiliateLinks.
+     */
+    skip?: number
+    distinct?: AffiliateLinkScalarFieldEnum | AffiliateLinkScalarFieldEnum[]
+  }
+
+  /**
+   * AffiliateLink create
+   */
+  export type AffiliateLinkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AffiliateLink.
+     */
+    data: XOR<AffiliateLinkCreateInput, AffiliateLinkUncheckedCreateInput>
+  }
+
+  /**
+   * AffiliateLink createMany
+   */
+  export type AffiliateLinkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AffiliateLinks.
+     */
+    data: AffiliateLinkCreateManyInput | AffiliateLinkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AffiliateLink createManyAndReturn
+   */
+  export type AffiliateLinkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * The data used to create many AffiliateLinks.
+     */
+    data: AffiliateLinkCreateManyInput | AffiliateLinkCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AffiliateLink update
+   */
+  export type AffiliateLinkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AffiliateLink.
+     */
+    data: XOR<AffiliateLinkUpdateInput, AffiliateLinkUncheckedUpdateInput>
+    /**
+     * Choose, which AffiliateLink to update.
+     */
+    where: AffiliateLinkWhereUniqueInput
+  }
+
+  /**
+   * AffiliateLink updateMany
+   */
+  export type AffiliateLinkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AffiliateLinks.
+     */
+    data: XOR<AffiliateLinkUpdateManyMutationInput, AffiliateLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which AffiliateLinks to update
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * Limit how many AffiliateLinks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AffiliateLink updateManyAndReturn
+   */
+  export type AffiliateLinkUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * The data used to update AffiliateLinks.
+     */
+    data: XOR<AffiliateLinkUpdateManyMutationInput, AffiliateLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which AffiliateLinks to update
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * Limit how many AffiliateLinks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AffiliateLink upsert
+   */
+  export type AffiliateLinkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AffiliateLink to update in case it exists.
+     */
+    where: AffiliateLinkWhereUniqueInput
+    /**
+     * In case the AffiliateLink found by the `where` argument doesn't exist, create a new AffiliateLink with this data.
+     */
+    create: XOR<AffiliateLinkCreateInput, AffiliateLinkUncheckedCreateInput>
+    /**
+     * In case the AffiliateLink was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AffiliateLinkUpdateInput, AffiliateLinkUncheckedUpdateInput>
+  }
+
+  /**
+   * AffiliateLink delete
+   */
+  export type AffiliateLinkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    /**
+     * Filter which AffiliateLink to delete.
+     */
+    where: AffiliateLinkWhereUniqueInput
+  }
+
+  /**
+   * AffiliateLink deleteMany
+   */
+  export type AffiliateLinkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AffiliateLinks to delete
+     */
+    where?: AffiliateLinkWhereInput
+    /**
+     * Limit how many AffiliateLinks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AffiliateLink.subscribedUsers
+   */
+  export type AffiliateLink$subscribedUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * AffiliateLink.payments
+   */
+  export type AffiliateLink$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    where?: PaymentWhereInput
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    cursor?: PaymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * AffiliateLink without action
+   */
+  export type AffiliateLinkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Payment
+   */
+
+  export type AggregatePayment = {
+    _count: PaymentCountAggregateOutputType | null
+    _avg: PaymentAvgAggregateOutputType | null
+    _sum: PaymentSumAggregateOutputType | null
+    _min: PaymentMinAggregateOutputType | null
+    _max: PaymentMaxAggregateOutputType | null
+  }
+
+  export type PaymentAvgAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    buyerId: number | null
+    affiliateLinkId: number | null
+    level1AffiliateAmount: number | null
+    level2AffiliateAmount: number | null
+  }
+
+  export type PaymentSumAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    buyerId: number | null
+    affiliateLinkId: number | null
+    level1AffiliateAmount: number | null
+    level2AffiliateAmount: number | null
+  }
+
+  export type PaymentMinAggregateOutputType = {
+    id: number | null
+    transactionId: string | null
+    amount: number | null
+    currency: string | null
+    status: string | null
+    itemType: $Enums.UserPlan | null
+    buyerId: number | null
+    affiliateLinkId: number | null
+    level1AffiliateAmount: number | null
+    level2AffiliateAmount: number | null
+    affiliatePaid: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaymentMaxAggregateOutputType = {
+    id: number | null
+    transactionId: string | null
+    amount: number | null
+    currency: string | null
+    status: string | null
+    itemType: $Enums.UserPlan | null
+    buyerId: number | null
+    affiliateLinkId: number | null
+    level1AffiliateAmount: number | null
+    level2AffiliateAmount: number | null
+    affiliatePaid: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaymentCountAggregateOutputType = {
+    id: number
+    transactionId: number
+    amount: number
+    currency: number
+    status: number
+    itemType: number
+    buyerId: number
+    affiliateLinkId: number
+    level1AffiliateAmount: number
+    level2AffiliateAmount: number
+    affiliatePaid: number
+    rawData: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PaymentAvgAggregateInputType = {
+    id?: true
+    amount?: true
+    buyerId?: true
+    affiliateLinkId?: true
+    level1AffiliateAmount?: true
+    level2AffiliateAmount?: true
+  }
+
+  export type PaymentSumAggregateInputType = {
+    id?: true
+    amount?: true
+    buyerId?: true
+    affiliateLinkId?: true
+    level1AffiliateAmount?: true
+    level2AffiliateAmount?: true
+  }
+
+  export type PaymentMinAggregateInputType = {
+    id?: true
+    transactionId?: true
+    amount?: true
+    currency?: true
+    status?: true
+    itemType?: true
+    buyerId?: true
+    affiliateLinkId?: true
+    level1AffiliateAmount?: true
+    level2AffiliateAmount?: true
+    affiliatePaid?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaymentMaxAggregateInputType = {
+    id?: true
+    transactionId?: true
+    amount?: true
+    currency?: true
+    status?: true
+    itemType?: true
+    buyerId?: true
+    affiliateLinkId?: true
+    level1AffiliateAmount?: true
+    level2AffiliateAmount?: true
+    affiliatePaid?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaymentCountAggregateInputType = {
+    id?: true
+    transactionId?: true
+    amount?: true
+    currency?: true
+    status?: true
+    itemType?: true
+    buyerId?: true
+    affiliateLinkId?: true
+    level1AffiliateAmount?: true
+    level2AffiliateAmount?: true
+    affiliatePaid?: true
+    rawData?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PaymentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Payment to aggregate.
+     */
+    where?: PaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Payments to fetch.
+     */
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Payments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Payments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Payments
+    **/
+    _count?: true | PaymentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PaymentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PaymentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PaymentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PaymentMaxAggregateInputType
+  }
+
+  export type GetPaymentAggregateType<T extends PaymentAggregateArgs> = {
+        [P in keyof T & keyof AggregatePayment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePayment[P]>
+      : GetScalarType<T[P], AggregatePayment[P]>
+  }
+
+
+
+
+  export type PaymentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentWhereInput
+    orderBy?: PaymentOrderByWithAggregationInput | PaymentOrderByWithAggregationInput[]
+    by: PaymentScalarFieldEnum[] | PaymentScalarFieldEnum
+    having?: PaymentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PaymentCountAggregateInputType | true
+    _avg?: PaymentAvgAggregateInputType
+    _sum?: PaymentSumAggregateInputType
+    _min?: PaymentMinAggregateInputType
+    _max?: PaymentMaxAggregateInputType
+  }
+
+  export type PaymentGroupByOutputType = {
+    id: number
+    transactionId: string
+    amount: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    buyerId: number | null
+    affiliateLinkId: number | null
+    level1AffiliateAmount: number | null
+    level2AffiliateAmount: number | null
+    affiliatePaid: boolean
+    rawData: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PaymentCountAggregateOutputType | null
+    _avg: PaymentAvgAggregateOutputType | null
+    _sum: PaymentSumAggregateOutputType | null
+    _min: PaymentMinAggregateOutputType | null
+    _max: PaymentMaxAggregateOutputType | null
+  }
+
+  type GetPaymentGroupByPayload<T extends PaymentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PaymentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PaymentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PaymentGroupByOutputType[P]>
+            : GetScalarType<T[P], PaymentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PaymentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    transactionId?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    itemType?: boolean
+    buyerId?: boolean
+    affiliateLinkId?: boolean
+    level1AffiliateAmount?: boolean
+    level2AffiliateAmount?: boolean
+    affiliatePaid?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }, ExtArgs["result"]["payment"]>
+
+  export type PaymentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    transactionId?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    itemType?: boolean
+    buyerId?: boolean
+    affiliateLinkId?: boolean
+    level1AffiliateAmount?: boolean
+    level2AffiliateAmount?: boolean
+    affiliatePaid?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }, ExtArgs["result"]["payment"]>
+
+  export type PaymentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    transactionId?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    itemType?: boolean
+    buyerId?: boolean
+    affiliateLinkId?: boolean
+    level1AffiliateAmount?: boolean
+    level2AffiliateAmount?: boolean
+    affiliatePaid?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }, ExtArgs["result"]["payment"]>
+
+  export type PaymentSelectScalar = {
+    id?: boolean
+    transactionId?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    itemType?: boolean
+    buyerId?: boolean
+    affiliateLinkId?: boolean
+    level1AffiliateAmount?: boolean
+    level2AffiliateAmount?: boolean
+    affiliatePaid?: boolean
+    rawData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "transactionId" | "amount" | "currency" | "status" | "itemType" | "buyerId" | "affiliateLinkId" | "level1AffiliateAmount" | "level2AffiliateAmount" | "affiliatePaid" | "rawData" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+  export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }
+  export type PaymentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }
+  export type PaymentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buyer?: boolean | Payment$buyerArgs<ExtArgs>
+    affiliateLink?: boolean | Payment$affiliateLinkArgs<ExtArgs>
+  }
+
+  export type $PaymentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Payment"
+    objects: {
+      buyer: Prisma.$UserPayload<ExtArgs> | null
+      affiliateLink: Prisma.$AffiliateLinkPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      transactionId: string
+      amount: number | null
+      currency: string
+      status: string
+      itemType: $Enums.UserPlan
+      buyerId: number | null
+      affiliateLinkId: number | null
+      level1AffiliateAmount: number | null
+      level2AffiliateAmount: number | null
+      affiliatePaid: boolean
+      rawData: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["payment"]>
+    composites: {}
+  }
+
+  type PaymentGetPayload<S extends boolean | null | undefined | PaymentDefaultArgs> = $Result.GetResult<Prisma.$PaymentPayload, S>
+
+  type PaymentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PaymentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PaymentCountAggregateInputType | true
+    }
+
+  export interface PaymentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Payment'], meta: { name: 'Payment' } }
+    /**
+     * Find zero or one Payment that matches the filter.
+     * @param {PaymentFindUniqueArgs} args - Arguments to find a Payment
+     * @example
+     * // Get one Payment
+     * const payment = await prisma.payment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PaymentFindUniqueArgs>(args: SelectSubset<T, PaymentFindUniqueArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Payment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PaymentFindUniqueOrThrowArgs} args - Arguments to find a Payment
+     * @example
+     * // Get one Payment
+     * const payment = await prisma.payment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PaymentFindUniqueOrThrowArgs>(args: SelectSubset<T, PaymentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Payment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentFindFirstArgs} args - Arguments to find a Payment
+     * @example
+     * // Get one Payment
+     * const payment = await prisma.payment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PaymentFindFirstArgs>(args?: SelectSubset<T, PaymentFindFirstArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Payment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentFindFirstOrThrowArgs} args - Arguments to find a Payment
+     * @example
+     * // Get one Payment
+     * const payment = await prisma.payment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PaymentFindFirstOrThrowArgs>(args?: SelectSubset<T, PaymentFindFirstOrThrowArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Payments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Payments
+     * const payments = await prisma.payment.findMany()
+     * 
+     * // Get first 10 Payments
+     * const payments = await prisma.payment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const paymentWithIdOnly = await prisma.payment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PaymentFindManyArgs>(args?: SelectSubset<T, PaymentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Payment.
+     * @param {PaymentCreateArgs} args - Arguments to create a Payment.
+     * @example
+     * // Create one Payment
+     * const Payment = await prisma.payment.create({
+     *   data: {
+     *     // ... data to create a Payment
+     *   }
+     * })
+     * 
+     */
+    create<T extends PaymentCreateArgs>(args: SelectSubset<T, PaymentCreateArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Payments.
+     * @param {PaymentCreateManyArgs} args - Arguments to create many Payments.
+     * @example
+     * // Create many Payments
+     * const payment = await prisma.payment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PaymentCreateManyArgs>(args?: SelectSubset<T, PaymentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Payments and returns the data saved in the database.
+     * @param {PaymentCreateManyAndReturnArgs} args - Arguments to create many Payments.
+     * @example
+     * // Create many Payments
+     * const payment = await prisma.payment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Payments and only return the `id`
+     * const paymentWithIdOnly = await prisma.payment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PaymentCreateManyAndReturnArgs>(args?: SelectSubset<T, PaymentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Payment.
+     * @param {PaymentDeleteArgs} args - Arguments to delete one Payment.
+     * @example
+     * // Delete one Payment
+     * const Payment = await prisma.payment.delete({
+     *   where: {
+     *     // ... filter to delete one Payment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PaymentDeleteArgs>(args: SelectSubset<T, PaymentDeleteArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Payment.
+     * @param {PaymentUpdateArgs} args - Arguments to update one Payment.
+     * @example
+     * // Update one Payment
+     * const payment = await prisma.payment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PaymentUpdateArgs>(args: SelectSubset<T, PaymentUpdateArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Payments.
+     * @param {PaymentDeleteManyArgs} args - Arguments to filter Payments to delete.
+     * @example
+     * // Delete a few Payments
+     * const { count } = await prisma.payment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PaymentDeleteManyArgs>(args?: SelectSubset<T, PaymentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Payments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Payments
+     * const payment = await prisma.payment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PaymentUpdateManyArgs>(args: SelectSubset<T, PaymentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Payments and returns the data updated in the database.
+     * @param {PaymentUpdateManyAndReturnArgs} args - Arguments to update many Payments.
+     * @example
+     * // Update many Payments
+     * const payment = await prisma.payment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Payments and only return the `id`
+     * const paymentWithIdOnly = await prisma.payment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PaymentUpdateManyAndReturnArgs>(args: SelectSubset<T, PaymentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Payment.
+     * @param {PaymentUpsertArgs} args - Arguments to update or create a Payment.
+     * @example
+     * // Update or create a Payment
+     * const payment = await prisma.payment.upsert({
+     *   create: {
+     *     // ... data to create a Payment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Payment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PaymentUpsertArgs>(args: SelectSubset<T, PaymentUpsertArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Payments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentCountArgs} args - Arguments to filter Payments to count.
+     * @example
+     * // Count the number of Payments
+     * const count = await prisma.payment.count({
+     *   where: {
+     *     // ... the filter for the Payments we want to count
+     *   }
+     * })
+    **/
+    count<T extends PaymentCountArgs>(
+      args?: Subset<T, PaymentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PaymentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Payment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PaymentAggregateArgs>(args: Subset<T, PaymentAggregateArgs>): Prisma.PrismaPromise<GetPaymentAggregateType<T>>
+
+    /**
+     * Group by Payment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PaymentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PaymentGroupByArgs['orderBy'] }
+        : { orderBy?: PaymentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PaymentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPaymentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Payment model
+   */
+  readonly fields: PaymentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Payment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PaymentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    buyer<T extends Payment$buyerArgs<ExtArgs> = {}>(args?: Subset<T, Payment$buyerArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    affiliateLink<T extends Payment$affiliateLinkArgs<ExtArgs> = {}>(args?: Subset<T, Payment$affiliateLinkArgs<ExtArgs>>): Prisma__AffiliateLinkClient<$Result.GetResult<Prisma.$AffiliateLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Payment model
+   */
+  interface PaymentFieldRefs {
+    readonly id: FieldRef<"Payment", 'Int'>
+    readonly transactionId: FieldRef<"Payment", 'String'>
+    readonly amount: FieldRef<"Payment", 'Float'>
+    readonly currency: FieldRef<"Payment", 'String'>
+    readonly status: FieldRef<"Payment", 'String'>
+    readonly itemType: FieldRef<"Payment", 'UserPlan'>
+    readonly buyerId: FieldRef<"Payment", 'Int'>
+    readonly affiliateLinkId: FieldRef<"Payment", 'Int'>
+    readonly level1AffiliateAmount: FieldRef<"Payment", 'Float'>
+    readonly level2AffiliateAmount: FieldRef<"Payment", 'Float'>
+    readonly affiliatePaid: FieldRef<"Payment", 'Boolean'>
+    readonly rawData: FieldRef<"Payment", 'Json'>
+    readonly createdAt: FieldRef<"Payment", 'DateTime'>
+    readonly updatedAt: FieldRef<"Payment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Payment findUnique
+   */
+  export type PaymentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which Payment to fetch.
+     */
+    where: PaymentWhereUniqueInput
+  }
+
+  /**
+   * Payment findUniqueOrThrow
+   */
+  export type PaymentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which Payment to fetch.
+     */
+    where: PaymentWhereUniqueInput
+  }
+
+  /**
+   * Payment findFirst
+   */
+  export type PaymentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which Payment to fetch.
+     */
+    where?: PaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Payments to fetch.
+     */
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Payments.
+     */
+    cursor?: PaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Payments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Payments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Payments.
+     */
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * Payment findFirstOrThrow
+   */
+  export type PaymentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which Payment to fetch.
+     */
+    where?: PaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Payments to fetch.
+     */
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Payments.
+     */
+    cursor?: PaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Payments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Payments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Payments.
+     */
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * Payment findMany
+   */
+  export type PaymentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which Payments to fetch.
+     */
+    where?: PaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Payments to fetch.
+     */
+    orderBy?: PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Payments.
+     */
+    cursor?: PaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Payments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Payments.
+     */
+    skip?: number
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * Payment create
+   */
+  export type PaymentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Payment.
+     */
+    data: XOR<PaymentCreateInput, PaymentUncheckedCreateInput>
+  }
+
+  /**
+   * Payment createMany
+   */
+  export type PaymentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Payments.
+     */
+    data: PaymentCreateManyInput | PaymentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Payment createManyAndReturn
+   */
+  export type PaymentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * The data used to create many Payments.
+     */
+    data: PaymentCreateManyInput | PaymentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Payment update
+   */
+  export type PaymentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Payment.
+     */
+    data: XOR<PaymentUpdateInput, PaymentUncheckedUpdateInput>
+    /**
+     * Choose, which Payment to update.
+     */
+    where: PaymentWhereUniqueInput
+  }
+
+  /**
+   * Payment updateMany
+   */
+  export type PaymentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Payments.
+     */
+    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyInput>
+    /**
+     * Filter which Payments to update
+     */
+    where?: PaymentWhereInput
+    /**
+     * Limit how many Payments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Payment updateManyAndReturn
+   */
+  export type PaymentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * The data used to update Payments.
+     */
+    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyInput>
+    /**
+     * Filter which Payments to update
+     */
+    where?: PaymentWhereInput
+    /**
+     * Limit how many Payments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Payment upsert
+   */
+  export type PaymentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Payment to update in case it exists.
+     */
+    where: PaymentWhereUniqueInput
+    /**
+     * In case the Payment found by the `where` argument doesn't exist, create a new Payment with this data.
+     */
+    create: XOR<PaymentCreateInput, PaymentUncheckedCreateInput>
+    /**
+     * In case the Payment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PaymentUpdateInput, PaymentUncheckedUpdateInput>
+  }
+
+  /**
+   * Payment delete
+   */
+  export type PaymentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    /**
+     * Filter which Payment to delete.
+     */
+    where: PaymentWhereUniqueInput
+  }
+
+  /**
+   * Payment deleteMany
+   */
+  export type PaymentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Payments to delete
+     */
+    where?: PaymentWhereInput
+    /**
+     * Limit how many Payments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Payment.buyer
+   */
+  export type Payment$buyerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Payment.affiliateLink
+   */
+  export type Payment$affiliateLinkArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AffiliateLink
+     */
+    select?: AffiliateLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AffiliateLink
+     */
+    omit?: AffiliateLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AffiliateLinkInclude<ExtArgs> | null
+    where?: AffiliateLinkWhereInput
+  }
+
+  /**
+   * Payment without action
+   */
+  export type PaymentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
   }
 
 
@@ -27289,6 +30151,8 @@ export namespace Prisma {
     passwordResetExpiresAt: 'passwordResetExpiresAt',
     isAdmin: 'isAdmin',
     plan: 'plan',
+    referralLinkUsedId: 'referralLinkUsedId',
+    balance: 'balance',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     maximumFunnels: 'maximumFunnels',
@@ -27297,6 +30161,42 @@ export namespace Prisma {
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const AffiliateLinkScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    token: 'token',
+    itemType: 'itemType',
+    userId: 'userId',
+    clickCount: 'clickCount',
+    totalAmount: 'totalAmount',
+    settings: 'settings',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AffiliateLinkScalarFieldEnum = (typeof AffiliateLinkScalarFieldEnum)[keyof typeof AffiliateLinkScalarFieldEnum]
+
+
+  export const PaymentScalarFieldEnum: {
+    id: 'id',
+    transactionId: 'transactionId',
+    amount: 'amount',
+    currency: 'currency',
+    status: 'status',
+    itemType: 'itemType',
+    buyerId: 'buyerId',
+    affiliateLinkId: 'affiliateLinkId',
+    level1AffiliateAmount: 'level1AffiliateAmount',
+    level2AffiliateAmount: 'level2AffiliateAmount',
+    affiliatePaid: 'affiliatePaid',
+    rawData: 'rawData',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
   export const WorkspaceScalarFieldEnum: {
@@ -27727,6 +30627,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -27878,20 +30792,6 @@ export namespace Prisma {
    */
   export type ListEnumTemplateImageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TemplateImageType[]'>
     
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
   /**
    * Deep Input Types
    */
@@ -27914,6 +30814,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
     plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
+    referralLinkUsedId?: IntNullableFilter<"User"> | number | null
+    balance?: FloatFilter<"User"> | number
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     maximumFunnels?: IntFilter<"User"> | number
@@ -27925,6 +30827,9 @@ export namespace Prisma {
     createdDomains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
     imageFolders?: ImageFolderListRelationFilter
+    affiliateLinks?: AffiliateLinkListRelationFilter
+    referralLinkUsed?: XOR<AffiliateLinkNullableScalarRelationFilter, AffiliateLinkWhereInput> | null
+    payments?: PaymentListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -27941,6 +30846,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
     plan?: SortOrder
+    referralLinkUsedId?: SortOrderInput | SortOrder
+    balance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
@@ -27952,6 +30859,9 @@ export namespace Prisma {
     createdDomains?: DomainOrderByRelationAggregateInput
     templates?: TemplateOrderByRelationAggregateInput
     imageFolders?: ImageFolderOrderByRelationAggregateInput
+    affiliateLinks?: AffiliateLinkOrderByRelationAggregateInput
+    referralLinkUsed?: AffiliateLinkOrderByWithRelationInput
+    payments?: PaymentOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -27971,6 +30881,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isAdmin?: BoolFilter<"User"> | boolean
     plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
+    referralLinkUsedId?: IntNullableFilter<"User"> | number | null
+    balance?: FloatFilter<"User"> | number
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     maximumFunnels?: IntFilter<"User"> | number
@@ -27982,6 +30894,9 @@ export namespace Prisma {
     createdDomains?: DomainListRelationFilter
     templates?: TemplateListRelationFilter
     imageFolders?: ImageFolderListRelationFilter
+    affiliateLinks?: AffiliateLinkListRelationFilter
+    referralLinkUsed?: XOR<AffiliateLinkNullableScalarRelationFilter, AffiliateLinkWhereInput> | null
+    payments?: PaymentListRelationFilter
   }, "id" | "email" | "username" | "verificationToken" | "passwordResetToken">
 
   export type UserOrderByWithAggregationInput = {
@@ -27998,6 +30913,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: SortOrderInput | SortOrder
     isAdmin?: SortOrder
     plan?: SortOrder
+    referralLinkUsedId?: SortOrderInput | SortOrder
+    balance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
@@ -28027,11 +30944,206 @@ export namespace Prisma {
     passwordResetExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
     plan?: EnumUserPlanWithAggregatesFilter<"User"> | $Enums.UserPlan
+    referralLinkUsedId?: IntNullableWithAggregatesFilter<"User"> | number | null
+    balance?: FloatWithAggregatesFilter<"User"> | number
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     maximumFunnels?: IntWithAggregatesFilter<"User"> | number
     maximumCustomDomains?: IntWithAggregatesFilter<"User"> | number
     maximumSubdomains?: IntWithAggregatesFilter<"User"> | number
+  }
+
+  export type AffiliateLinkWhereInput = {
+    AND?: AffiliateLinkWhereInput | AffiliateLinkWhereInput[]
+    OR?: AffiliateLinkWhereInput[]
+    NOT?: AffiliateLinkWhereInput | AffiliateLinkWhereInput[]
+    id?: IntFilter<"AffiliateLink"> | number
+    name?: StringFilter<"AffiliateLink"> | string
+    token?: StringFilter<"AffiliateLink"> | string
+    itemType?: EnumUserPlanFilter<"AffiliateLink"> | $Enums.UserPlan
+    userId?: IntFilter<"AffiliateLink"> | number
+    clickCount?: IntFilter<"AffiliateLink"> | number
+    totalAmount?: FloatFilter<"AffiliateLink"> | number
+    settings?: JsonNullableFilter<"AffiliateLink">
+    createdAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+    updatedAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    subscribedUsers?: UserListRelationFilter
+    payments?: PaymentListRelationFilter
+  }
+
+  export type AffiliateLinkOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    token?: SortOrder
+    itemType?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    subscribedUsers?: UserOrderByRelationAggregateInput
+    payments?: PaymentOrderByRelationAggregateInput
+  }
+
+  export type AffiliateLinkWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    token?: string
+    AND?: AffiliateLinkWhereInput | AffiliateLinkWhereInput[]
+    OR?: AffiliateLinkWhereInput[]
+    NOT?: AffiliateLinkWhereInput | AffiliateLinkWhereInput[]
+    name?: StringFilter<"AffiliateLink"> | string
+    itemType?: EnumUserPlanFilter<"AffiliateLink"> | $Enums.UserPlan
+    userId?: IntFilter<"AffiliateLink"> | number
+    clickCount?: IntFilter<"AffiliateLink"> | number
+    totalAmount?: FloatFilter<"AffiliateLink"> | number
+    settings?: JsonNullableFilter<"AffiliateLink">
+    createdAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+    updatedAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    subscribedUsers?: UserListRelationFilter
+    payments?: PaymentListRelationFilter
+  }, "id" | "token">
+
+  export type AffiliateLinkOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    token?: SortOrder
+    itemType?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AffiliateLinkCountOrderByAggregateInput
+    _avg?: AffiliateLinkAvgOrderByAggregateInput
+    _max?: AffiliateLinkMaxOrderByAggregateInput
+    _min?: AffiliateLinkMinOrderByAggregateInput
+    _sum?: AffiliateLinkSumOrderByAggregateInput
+  }
+
+  export type AffiliateLinkScalarWhereWithAggregatesInput = {
+    AND?: AffiliateLinkScalarWhereWithAggregatesInput | AffiliateLinkScalarWhereWithAggregatesInput[]
+    OR?: AffiliateLinkScalarWhereWithAggregatesInput[]
+    NOT?: AffiliateLinkScalarWhereWithAggregatesInput | AffiliateLinkScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"AffiliateLink"> | number
+    name?: StringWithAggregatesFilter<"AffiliateLink"> | string
+    token?: StringWithAggregatesFilter<"AffiliateLink"> | string
+    itemType?: EnumUserPlanWithAggregatesFilter<"AffiliateLink"> | $Enums.UserPlan
+    userId?: IntWithAggregatesFilter<"AffiliateLink"> | number
+    clickCount?: IntWithAggregatesFilter<"AffiliateLink"> | number
+    totalAmount?: FloatWithAggregatesFilter<"AffiliateLink"> | number
+    settings?: JsonNullableWithAggregatesFilter<"AffiliateLink">
+    createdAt?: DateTimeWithAggregatesFilter<"AffiliateLink"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AffiliateLink"> | Date | string
+  }
+
+  export type PaymentWhereInput = {
+    AND?: PaymentWhereInput | PaymentWhereInput[]
+    OR?: PaymentWhereInput[]
+    NOT?: PaymentWhereInput | PaymentWhereInput[]
+    id?: IntFilter<"Payment"> | number
+    transactionId?: StringFilter<"Payment"> | string
+    amount?: FloatNullableFilter<"Payment"> | number | null
+    currency?: StringFilter<"Payment"> | string
+    status?: StringFilter<"Payment"> | string
+    itemType?: EnumUserPlanFilter<"Payment"> | $Enums.UserPlan
+    buyerId?: IntNullableFilter<"Payment"> | number | null
+    affiliateLinkId?: IntNullableFilter<"Payment"> | number | null
+    level1AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    level2AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    affiliatePaid?: BoolFilter<"Payment"> | boolean
+    rawData?: JsonNullableFilter<"Payment">
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    buyer?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    affiliateLink?: XOR<AffiliateLinkNullableScalarRelationFilter, AffiliateLinkWhereInput> | null
+  }
+
+  export type PaymentOrderByWithRelationInput = {
+    id?: SortOrder
+    transactionId?: SortOrder
+    amount?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    itemType?: SortOrder
+    buyerId?: SortOrderInput | SortOrder
+    affiliateLinkId?: SortOrderInput | SortOrder
+    level1AffiliateAmount?: SortOrderInput | SortOrder
+    level2AffiliateAmount?: SortOrderInput | SortOrder
+    affiliatePaid?: SortOrder
+    rawData?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    buyer?: UserOrderByWithRelationInput
+    affiliateLink?: AffiliateLinkOrderByWithRelationInput
+  }
+
+  export type PaymentWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    transactionId?: string
+    AND?: PaymentWhereInput | PaymentWhereInput[]
+    OR?: PaymentWhereInput[]
+    NOT?: PaymentWhereInput | PaymentWhereInput[]
+    amount?: FloatNullableFilter<"Payment"> | number | null
+    currency?: StringFilter<"Payment"> | string
+    status?: StringFilter<"Payment"> | string
+    itemType?: EnumUserPlanFilter<"Payment"> | $Enums.UserPlan
+    buyerId?: IntNullableFilter<"Payment"> | number | null
+    affiliateLinkId?: IntNullableFilter<"Payment"> | number | null
+    level1AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    level2AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    affiliatePaid?: BoolFilter<"Payment"> | boolean
+    rawData?: JsonNullableFilter<"Payment">
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    buyer?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    affiliateLink?: XOR<AffiliateLinkNullableScalarRelationFilter, AffiliateLinkWhereInput> | null
+  }, "id" | "transactionId">
+
+  export type PaymentOrderByWithAggregationInput = {
+    id?: SortOrder
+    transactionId?: SortOrder
+    amount?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    itemType?: SortOrder
+    buyerId?: SortOrderInput | SortOrder
+    affiliateLinkId?: SortOrderInput | SortOrder
+    level1AffiliateAmount?: SortOrderInput | SortOrder
+    level2AffiliateAmount?: SortOrderInput | SortOrder
+    affiliatePaid?: SortOrder
+    rawData?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PaymentCountOrderByAggregateInput
+    _avg?: PaymentAvgOrderByAggregateInput
+    _max?: PaymentMaxOrderByAggregateInput
+    _min?: PaymentMinOrderByAggregateInput
+    _sum?: PaymentSumOrderByAggregateInput
+  }
+
+  export type PaymentScalarWhereWithAggregatesInput = {
+    AND?: PaymentScalarWhereWithAggregatesInput | PaymentScalarWhereWithAggregatesInput[]
+    OR?: PaymentScalarWhereWithAggregatesInput[]
+    NOT?: PaymentScalarWhereWithAggregatesInput | PaymentScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Payment"> | number
+    transactionId?: StringWithAggregatesFilter<"Payment"> | string
+    amount?: FloatNullableWithAggregatesFilter<"Payment"> | number | null
+    currency?: StringWithAggregatesFilter<"Payment"> | string
+    status?: StringWithAggregatesFilter<"Payment"> | string
+    itemType?: EnumUserPlanWithAggregatesFilter<"Payment"> | $Enums.UserPlan
+    buyerId?: IntNullableWithAggregatesFilter<"Payment"> | number | null
+    affiliateLinkId?: IntNullableWithAggregatesFilter<"Payment"> | number | null
+    level1AffiliateAmount?: FloatNullableWithAggregatesFilter<"Payment"> | number | null
+    level2AffiliateAmount?: FloatNullableWithAggregatesFilter<"Payment"> | number | null
+    affiliatePaid?: BoolWithAggregatesFilter<"Payment"> | boolean
+    rawData?: JsonNullableWithAggregatesFilter<"Payment">
+    createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
   }
 
   export type WorkspaceWhereInput = {
@@ -29711,6 +32823,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -29722,6 +32835,9 @@ export namespace Prisma {
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -29738,6 +32854,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -29749,6 +32867,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUpdateInput = {
@@ -29764,6 +32884,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -29775,6 +32896,9 @@ export namespace Prisma {
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -29791,6 +32915,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -29802,6 +32928,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -29818,6 +32946,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -29838,6 +32968,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -29859,11 +32990,222 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type AffiliateLinkCreateInput = {
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAffiliateLinksInput
+    subscribedUsers?: UserCreateNestedManyWithoutReferralLinkUsedInput
+    payments?: PaymentCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkUncheckedCreateInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    userId: number
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subscribedUsers?: UserUncheckedCreateNestedManyWithoutReferralLinkUsedInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAffiliateLinksNestedInput
+    subscribedUsers?: UserUpdateManyWithoutReferralLinkUsedNestedInput
+    payments?: PaymentUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type AffiliateLinkUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    userId?: IntFieldUpdateOperationsInput | number
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subscribedUsers?: UserUncheckedUpdateManyWithoutReferralLinkUsedNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type AffiliateLinkCreateManyInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    userId: number
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AffiliateLinkUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AffiliateLinkUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    userId?: IntFieldUpdateOperationsInput | number
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentCreateInput = {
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buyer?: UserCreateNestedOneWithoutPaymentsInput
+    affiliateLink?: AffiliateLinkCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type PaymentUncheckedCreateInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    buyerId?: number | null
+    affiliateLinkId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentUpdateInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buyer?: UserUpdateOneWithoutPaymentsNestedInput
+    affiliateLink?: AffiliateLinkUpdateOneWithoutPaymentsNestedInput
+  }
+
+  export type PaymentUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    buyerId?: NullableIntFieldUpdateOperationsInput | number | null
+    affiliateLinkId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentCreateManyInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    buyerId?: number | null
+    affiliateLinkId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentUpdateManyMutationInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    buyerId?: NullableIntFieldUpdateOperationsInput | number | null
+    affiliateLinkId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type WorkspaceCreateInput = {
@@ -31699,6 +35041,28 @@ export namespace Prisma {
     not?: NestedEnumUserPlanFilter<$PrismaModel> | $Enums.UserPlan
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -31746,6 +35110,23 @@ export namespace Prisma {
     none?: ImageFolderWhereInput
   }
 
+  export type AffiliateLinkListRelationFilter = {
+    every?: AffiliateLinkWhereInput
+    some?: AffiliateLinkWhereInput
+    none?: AffiliateLinkWhereInput
+  }
+
+  export type AffiliateLinkNullableScalarRelationFilter = {
+    is?: AffiliateLinkWhereInput | null
+    isNot?: AffiliateLinkWhereInput | null
+  }
+
+  export type PaymentListRelationFilter = {
+    every?: PaymentWhereInput
+    some?: PaymentWhereInput
+    none?: PaymentWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -31775,6 +35156,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type AffiliateLinkOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PaymentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
@@ -31789,6 +35178,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
     plan?: SortOrder
+    referralLinkUsedId?: SortOrder
+    balance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
@@ -31798,6 +35189,8 @@ export namespace Prisma {
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
+    referralLinkUsedId?: SortOrder
+    balance?: SortOrder
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
@@ -31817,6 +35210,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
     plan?: SortOrder
+    referralLinkUsedId?: SortOrder
+    balance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
@@ -31838,6 +35233,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: SortOrder
     isAdmin?: SortOrder
     plan?: SortOrder
+    referralLinkUsedId?: SortOrder
+    balance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     maximumFunnels?: SortOrder
@@ -31847,6 +35244,8 @@ export namespace Prisma {
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
+    referralLinkUsedId?: SortOrder
+    balance?: SortOrder
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
@@ -31936,6 +35335,38 @@ export namespace Prisma {
     _max?: NestedEnumUserPlanFilter<$PrismaModel>
   }
 
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -31976,6 +35407,192 @@ export namespace Prisma {
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
+  }
+
+  export type UserListRelationFilter = {
+    every?: UserWhereInput
+    some?: UserWhereInput
+    none?: UserWhereInput
+  }
+
+  export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AffiliateLinkCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    token?: SortOrder
+    itemType?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+    settings?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AffiliateLinkAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+  }
+
+  export type AffiliateLinkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    token?: SortOrder
+    itemType?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AffiliateLinkMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    token?: SortOrder
+    itemType?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AffiliateLinkSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clickCount?: SortOrder
+    totalAmount?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type PaymentCountOrderByAggregateInput = {
+    id?: SortOrder
+    transactionId?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    itemType?: SortOrder
+    buyerId?: SortOrder
+    affiliateLinkId?: SortOrder
+    level1AffiliateAmount?: SortOrder
+    level2AffiliateAmount?: SortOrder
+    affiliatePaid?: SortOrder
+    rawData?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentAvgOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    buyerId?: SortOrder
+    affiliateLinkId?: SortOrder
+    level1AffiliateAmount?: SortOrder
+    level2AffiliateAmount?: SortOrder
+  }
+
+  export type PaymentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    transactionId?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    itemType?: SortOrder
+    buyerId?: SortOrder
+    affiliateLinkId?: SortOrder
+    level1AffiliateAmount?: SortOrder
+    level2AffiliateAmount?: SortOrder
+    affiliatePaid?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentMinOrderByAggregateInput = {
+    id?: SortOrder
+    transactionId?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    itemType?: SortOrder
+    buyerId?: SortOrder
+    affiliateLinkId?: SortOrder
+    level1AffiliateAmount?: SortOrder
+    level2AffiliateAmount?: SortOrder
+    affiliatePaid?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentSumOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    buyerId?: SortOrder
+    affiliateLinkId?: SortOrder
+    level1AffiliateAmount?: SortOrder
+    level2AffiliateAmount?: SortOrder
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type WorkspaceCountOrderByAggregateInput = {
@@ -32032,32 +35649,6 @@ export namespace Prisma {
     allocatedFunnels?: SortOrder
     allocatedCustomDomains?: SortOrder
     allocatedSubdomains?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumWorkspaceRoleFilter<$PrismaModel = never> = {
@@ -32140,17 +35731,6 @@ export namespace Prisma {
     in?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.FunnelStatus[] | ListEnumFunnelStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumFunnelStatusFilter<$PrismaModel> | $Enums.FunnelStatus
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type FunnelDomainListRelationFilter = {
@@ -32261,22 +35841,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
     _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumDomainTypeFilter<$PrismaModel = never> = {
@@ -33429,6 +36993,26 @@ export namespace Prisma {
     connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
   }
 
+  export type AffiliateLinkCreateNestedManyWithoutUserInput = {
+    create?: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput> | AffiliateLinkCreateWithoutUserInput[] | AffiliateLinkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutUserInput | AffiliateLinkCreateOrConnectWithoutUserInput[]
+    createMany?: AffiliateLinkCreateManyUserInputEnvelope
+    connect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+  }
+
+  export type AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput = {
+    create?: XOR<AffiliateLinkCreateWithoutSubscribedUsersInput, AffiliateLinkUncheckedCreateWithoutSubscribedUsersInput>
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutSubscribedUsersInput
+    connect?: AffiliateLinkWhereUniqueInput
+  }
+
+  export type PaymentCreateNestedManyWithoutBuyerInput = {
+    create?: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput> | PaymentCreateWithoutBuyerInput[] | PaymentUncheckedCreateWithoutBuyerInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutBuyerInput | PaymentCreateOrConnectWithoutBuyerInput[]
+    createMany?: PaymentCreateManyBuyerInputEnvelope
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
   export type WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<WorkspaceMemberCreateWithoutUserInput, WorkspaceMemberUncheckedCreateWithoutUserInput> | WorkspaceMemberCreateWithoutUserInput[] | WorkspaceMemberUncheckedCreateWithoutUserInput[]
     connectOrCreate?: WorkspaceMemberCreateOrConnectWithoutUserInput | WorkspaceMemberCreateOrConnectWithoutUserInput[]
@@ -33471,6 +37055,20 @@ export namespace Prisma {
     connect?: ImageFolderWhereUniqueInput | ImageFolderWhereUniqueInput[]
   }
 
+  export type AffiliateLinkUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput> | AffiliateLinkCreateWithoutUserInput[] | AffiliateLinkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutUserInput | AffiliateLinkCreateOrConnectWithoutUserInput[]
+    createMany?: AffiliateLinkCreateManyUserInputEnvelope
+    connect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+  }
+
+  export type PaymentUncheckedCreateNestedManyWithoutBuyerInput = {
+    create?: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput> | PaymentCreateWithoutBuyerInput[] | PaymentUncheckedCreateWithoutBuyerInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutBuyerInput | PaymentCreateOrConnectWithoutBuyerInput[]
+    createMany?: PaymentCreateManyBuyerInputEnvelope
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -33489,6 +37087,14 @@ export namespace Prisma {
 
   export type EnumUserPlanFieldUpdateOperationsInput = {
     set?: $Enums.UserPlan
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -33587,6 +37193,52 @@ export namespace Prisma {
     deleteMany?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
   }
 
+  export type AffiliateLinkUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput> | AffiliateLinkCreateWithoutUserInput[] | AffiliateLinkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutUserInput | AffiliateLinkCreateOrConnectWithoutUserInput[]
+    upsert?: AffiliateLinkUpsertWithWhereUniqueWithoutUserInput | AffiliateLinkUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AffiliateLinkCreateManyUserInputEnvelope
+    set?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    disconnect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    delete?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    connect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    update?: AffiliateLinkUpdateWithWhereUniqueWithoutUserInput | AffiliateLinkUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AffiliateLinkUpdateManyWithWhereWithoutUserInput | AffiliateLinkUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AffiliateLinkScalarWhereInput | AffiliateLinkScalarWhereInput[]
+  }
+
+  export type AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput = {
+    create?: XOR<AffiliateLinkCreateWithoutSubscribedUsersInput, AffiliateLinkUncheckedCreateWithoutSubscribedUsersInput>
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutSubscribedUsersInput
+    upsert?: AffiliateLinkUpsertWithoutSubscribedUsersInput
+    disconnect?: AffiliateLinkWhereInput | boolean
+    delete?: AffiliateLinkWhereInput | boolean
+    connect?: AffiliateLinkWhereUniqueInput
+    update?: XOR<XOR<AffiliateLinkUpdateToOneWithWhereWithoutSubscribedUsersInput, AffiliateLinkUpdateWithoutSubscribedUsersInput>, AffiliateLinkUncheckedUpdateWithoutSubscribedUsersInput>
+  }
+
+  export type PaymentUpdateManyWithoutBuyerNestedInput = {
+    create?: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput> | PaymentCreateWithoutBuyerInput[] | PaymentUncheckedCreateWithoutBuyerInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutBuyerInput | PaymentCreateOrConnectWithoutBuyerInput[]
+    upsert?: PaymentUpsertWithWhereUniqueWithoutBuyerInput | PaymentUpsertWithWhereUniqueWithoutBuyerInput[]
+    createMany?: PaymentCreateManyBuyerInputEnvelope
+    set?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    disconnect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    delete?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    update?: PaymentUpdateWithWhereUniqueWithoutBuyerInput | PaymentUpdateWithWhereUniqueWithoutBuyerInput[]
+    updateMany?: PaymentUpdateManyWithWhereWithoutBuyerInput | PaymentUpdateManyWithWhereWithoutBuyerInput[]
+    deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<WorkspaceMemberCreateWithoutUserInput, WorkspaceMemberUncheckedCreateWithoutUserInput> | WorkspaceMemberCreateWithoutUserInput[] | WorkspaceMemberUncheckedCreateWithoutUserInput[]
     connectOrCreate?: WorkspaceMemberCreateOrConnectWithoutUserInput | WorkspaceMemberCreateOrConnectWithoutUserInput[]
@@ -33669,6 +37321,172 @@ export namespace Prisma {
     update?: ImageFolderUpdateWithWhereUniqueWithoutUserInput | ImageFolderUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ImageFolderUpdateManyWithWhereWithoutUserInput | ImageFolderUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ImageFolderScalarWhereInput | ImageFolderScalarWhereInput[]
+  }
+
+  export type AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput> | AffiliateLinkCreateWithoutUserInput[] | AffiliateLinkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutUserInput | AffiliateLinkCreateOrConnectWithoutUserInput[]
+    upsert?: AffiliateLinkUpsertWithWhereUniqueWithoutUserInput | AffiliateLinkUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AffiliateLinkCreateManyUserInputEnvelope
+    set?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    disconnect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    delete?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    connect?: AffiliateLinkWhereUniqueInput | AffiliateLinkWhereUniqueInput[]
+    update?: AffiliateLinkUpdateWithWhereUniqueWithoutUserInput | AffiliateLinkUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AffiliateLinkUpdateManyWithWhereWithoutUserInput | AffiliateLinkUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AffiliateLinkScalarWhereInput | AffiliateLinkScalarWhereInput[]
+  }
+
+  export type PaymentUncheckedUpdateManyWithoutBuyerNestedInput = {
+    create?: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput> | PaymentCreateWithoutBuyerInput[] | PaymentUncheckedCreateWithoutBuyerInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutBuyerInput | PaymentCreateOrConnectWithoutBuyerInput[]
+    upsert?: PaymentUpsertWithWhereUniqueWithoutBuyerInput | PaymentUpsertWithWhereUniqueWithoutBuyerInput[]
+    createMany?: PaymentCreateManyBuyerInputEnvelope
+    set?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    disconnect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    delete?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    update?: PaymentUpdateWithWhereUniqueWithoutBuyerInput | PaymentUpdateWithWhereUniqueWithoutBuyerInput[]
+    updateMany?: PaymentUpdateManyWithWhereWithoutBuyerInput | PaymentUpdateManyWithWhereWithoutBuyerInput[]
+    deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutAffiliateLinksInput = {
+    create?: XOR<UserCreateWithoutAffiliateLinksInput, UserUncheckedCreateWithoutAffiliateLinksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAffiliateLinksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedManyWithoutReferralLinkUsedInput = {
+    create?: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput> | UserCreateWithoutReferralLinkUsedInput[] | UserUncheckedCreateWithoutReferralLinkUsedInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutReferralLinkUsedInput | UserCreateOrConnectWithoutReferralLinkUsedInput[]
+    createMany?: UserCreateManyReferralLinkUsedInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type PaymentCreateNestedManyWithoutAffiliateLinkInput = {
+    create?: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput> | PaymentCreateWithoutAffiliateLinkInput[] | PaymentUncheckedCreateWithoutAffiliateLinkInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutAffiliateLinkInput | PaymentCreateOrConnectWithoutAffiliateLinkInput[]
+    createMany?: PaymentCreateManyAffiliateLinkInputEnvelope
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutReferralLinkUsedInput = {
+    create?: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput> | UserCreateWithoutReferralLinkUsedInput[] | UserUncheckedCreateWithoutReferralLinkUsedInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutReferralLinkUsedInput | UserCreateOrConnectWithoutReferralLinkUsedInput[]
+    createMany?: UserCreateManyReferralLinkUsedInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type PaymentUncheckedCreateNestedManyWithoutAffiliateLinkInput = {
+    create?: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput> | PaymentCreateWithoutAffiliateLinkInput[] | PaymentUncheckedCreateWithoutAffiliateLinkInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutAffiliateLinkInput | PaymentCreateOrConnectWithoutAffiliateLinkInput[]
+    createMany?: PaymentCreateManyAffiliateLinkInputEnvelope
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneRequiredWithoutAffiliateLinksNestedInput = {
+    create?: XOR<UserCreateWithoutAffiliateLinksInput, UserUncheckedCreateWithoutAffiliateLinksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAffiliateLinksInput
+    upsert?: UserUpsertWithoutAffiliateLinksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAffiliateLinksInput, UserUpdateWithoutAffiliateLinksInput>, UserUncheckedUpdateWithoutAffiliateLinksInput>
+  }
+
+  export type UserUpdateManyWithoutReferralLinkUsedNestedInput = {
+    create?: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput> | UserCreateWithoutReferralLinkUsedInput[] | UserUncheckedCreateWithoutReferralLinkUsedInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutReferralLinkUsedInput | UserCreateOrConnectWithoutReferralLinkUsedInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutReferralLinkUsedInput | UserUpsertWithWhereUniqueWithoutReferralLinkUsedInput[]
+    createMany?: UserCreateManyReferralLinkUsedInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutReferralLinkUsedInput | UserUpdateWithWhereUniqueWithoutReferralLinkUsedInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutReferralLinkUsedInput | UserUpdateManyWithWhereWithoutReferralLinkUsedInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type PaymentUpdateManyWithoutAffiliateLinkNestedInput = {
+    create?: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput> | PaymentCreateWithoutAffiliateLinkInput[] | PaymentUncheckedCreateWithoutAffiliateLinkInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutAffiliateLinkInput | PaymentCreateOrConnectWithoutAffiliateLinkInput[]
+    upsert?: PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput | PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput[]
+    createMany?: PaymentCreateManyAffiliateLinkInputEnvelope
+    set?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    disconnect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    delete?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    update?: PaymentUpdateWithWhereUniqueWithoutAffiliateLinkInput | PaymentUpdateWithWhereUniqueWithoutAffiliateLinkInput[]
+    updateMany?: PaymentUpdateManyWithWhereWithoutAffiliateLinkInput | PaymentUpdateManyWithWhereWithoutAffiliateLinkInput[]
+    deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutReferralLinkUsedNestedInput = {
+    create?: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput> | UserCreateWithoutReferralLinkUsedInput[] | UserUncheckedCreateWithoutReferralLinkUsedInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutReferralLinkUsedInput | UserCreateOrConnectWithoutReferralLinkUsedInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutReferralLinkUsedInput | UserUpsertWithWhereUniqueWithoutReferralLinkUsedInput[]
+    createMany?: UserCreateManyReferralLinkUsedInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutReferralLinkUsedInput | UserUpdateWithWhereUniqueWithoutReferralLinkUsedInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutReferralLinkUsedInput | UserUpdateManyWithWhereWithoutReferralLinkUsedInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type PaymentUncheckedUpdateManyWithoutAffiliateLinkNestedInput = {
+    create?: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput> | PaymentCreateWithoutAffiliateLinkInput[] | PaymentUncheckedCreateWithoutAffiliateLinkInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutAffiliateLinkInput | PaymentCreateOrConnectWithoutAffiliateLinkInput[]
+    upsert?: PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput | PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput[]
+    createMany?: PaymentCreateManyAffiliateLinkInputEnvelope
+    set?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    disconnect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    delete?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+    update?: PaymentUpdateWithWhereUniqueWithoutAffiliateLinkInput | PaymentUpdateWithWhereUniqueWithoutAffiliateLinkInput[]
+    updateMany?: PaymentUpdateManyWithWhereWithoutAffiliateLinkInput | PaymentUpdateManyWithWhereWithoutAffiliateLinkInput[]
+    deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutPaymentsInput = {
+    create?: XOR<UserCreateWithoutPaymentsInput, UserUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type AffiliateLinkCreateNestedOneWithoutPaymentsInput = {
+    create?: XOR<AffiliateLinkCreateWithoutPaymentsInput, AffiliateLinkUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutPaymentsInput
+    connect?: AffiliateLinkWhereUniqueInput
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneWithoutPaymentsNestedInput = {
+    create?: XOR<UserCreateWithoutPaymentsInput, UserUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentsInput
+    upsert?: UserUpsertWithoutPaymentsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPaymentsInput, UserUpdateWithoutPaymentsInput>, UserUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type AffiliateLinkUpdateOneWithoutPaymentsNestedInput = {
+    create?: XOR<AffiliateLinkCreateWithoutPaymentsInput, AffiliateLinkUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: AffiliateLinkCreateOrConnectWithoutPaymentsInput
+    upsert?: AffiliateLinkUpsertWithoutPaymentsInput
+    disconnect?: AffiliateLinkWhereInput | boolean
+    delete?: AffiliateLinkWhereInput | boolean
+    connect?: AffiliateLinkWhereUniqueInput
+    update?: XOR<XOR<AffiliateLinkUpdateToOneWithWhereWithoutPaymentsInput, AffiliateLinkUpdateWithoutPaymentsInput>, AffiliateLinkUncheckedUpdateWithoutPaymentsInput>
   }
 
   export type UserCreateNestedOneWithoutOwnedWorkspacesInput = {
@@ -34004,14 +37822,6 @@ export namespace Prisma {
     update?: InsightUpdateWithWhereUniqueWithoutFunnelInput | InsightUpdateWithWhereUniqueWithoutFunnelInput[]
     updateMany?: InsightUpdateManyWithWhereWithoutFunnelInput | InsightUpdateManyWithWhereWithoutFunnelInput[]
     deleteMany?: InsightScalarWhereInput | InsightScalarWhereInput[]
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput = {
@@ -34824,6 +38634,28 @@ export namespace Prisma {
     not?: NestedEnumUserPlanFilter<$PrismaModel> | $Enums.UserPlan
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -34849,17 +38681,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -34904,17 +38725,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -34937,6 +38747,49 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserPlanFilter<$PrismaModel>
     _max?: NestedEnumUserPlanFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -34976,6 +38829,22 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumWorkspaceRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.WorkspaceRole | EnumWorkspaceRoleFieldRefInput<$PrismaModel>
     in?: $Enums.WorkspaceRole[] | ListEnumWorkspaceRoleFieldRefInput<$PrismaModel>
@@ -35008,33 +38877,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumFunnelStatusFilter<$PrismaModel>
     _max?: NestedEnumFunnelStatusFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedEnumDomainTypeFilter<$PrismaModel = never> = {
@@ -35407,6 +39249,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AffiliateLinkCreateWithoutUserInput = {
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subscribedUsers?: UserCreateNestedManyWithoutReferralLinkUsedInput
+    payments?: PaymentCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkUncheckedCreateWithoutUserInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subscribedUsers?: UserUncheckedCreateNestedManyWithoutReferralLinkUsedInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkCreateOrConnectWithoutUserInput = {
+    where: AffiliateLinkWhereUniqueInput
+    create: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput>
+  }
+
+  export type AffiliateLinkCreateManyUserInputEnvelope = {
+    data: AffiliateLinkCreateManyUserInput | AffiliateLinkCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AffiliateLinkCreateWithoutSubscribedUsersInput = {
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAffiliateLinksInput
+    payments?: PaymentCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkUncheckedCreateWithoutSubscribedUsersInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    userId: number
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutAffiliateLinkInput
+  }
+
+  export type AffiliateLinkCreateOrConnectWithoutSubscribedUsersInput = {
+    where: AffiliateLinkWhereUniqueInput
+    create: XOR<AffiliateLinkCreateWithoutSubscribedUsersInput, AffiliateLinkUncheckedCreateWithoutSubscribedUsersInput>
+  }
+
+  export type PaymentCreateWithoutBuyerInput = {
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    affiliateLink?: AffiliateLinkCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type PaymentUncheckedCreateWithoutBuyerInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    affiliateLinkId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentCreateOrConnectWithoutBuyerInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput>
+  }
+
+  export type PaymentCreateManyBuyerInputEnvelope = {
+    data: PaymentCreateManyBuyerInput | PaymentCreateManyBuyerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type WorkspaceMemberUpsertWithWhereUniqueWithoutUserInput = {
     where: WorkspaceMemberWhereUniqueInput
     update: XOR<WorkspaceMemberUpdateWithoutUserInput, WorkspaceMemberUncheckedUpdateWithoutUserInput>
@@ -35603,6 +39555,618 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ImageFolder"> | Date | string
   }
 
+  export type AffiliateLinkUpsertWithWhereUniqueWithoutUserInput = {
+    where: AffiliateLinkWhereUniqueInput
+    update: XOR<AffiliateLinkUpdateWithoutUserInput, AffiliateLinkUncheckedUpdateWithoutUserInput>
+    create: XOR<AffiliateLinkCreateWithoutUserInput, AffiliateLinkUncheckedCreateWithoutUserInput>
+  }
+
+  export type AffiliateLinkUpdateWithWhereUniqueWithoutUserInput = {
+    where: AffiliateLinkWhereUniqueInput
+    data: XOR<AffiliateLinkUpdateWithoutUserInput, AffiliateLinkUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AffiliateLinkUpdateManyWithWhereWithoutUserInput = {
+    where: AffiliateLinkScalarWhereInput
+    data: XOR<AffiliateLinkUpdateManyMutationInput, AffiliateLinkUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AffiliateLinkScalarWhereInput = {
+    AND?: AffiliateLinkScalarWhereInput | AffiliateLinkScalarWhereInput[]
+    OR?: AffiliateLinkScalarWhereInput[]
+    NOT?: AffiliateLinkScalarWhereInput | AffiliateLinkScalarWhereInput[]
+    id?: IntFilter<"AffiliateLink"> | number
+    name?: StringFilter<"AffiliateLink"> | string
+    token?: StringFilter<"AffiliateLink"> | string
+    itemType?: EnumUserPlanFilter<"AffiliateLink"> | $Enums.UserPlan
+    userId?: IntFilter<"AffiliateLink"> | number
+    clickCount?: IntFilter<"AffiliateLink"> | number
+    totalAmount?: FloatFilter<"AffiliateLink"> | number
+    settings?: JsonNullableFilter<"AffiliateLink">
+    createdAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+    updatedAt?: DateTimeFilter<"AffiliateLink"> | Date | string
+  }
+
+  export type AffiliateLinkUpsertWithoutSubscribedUsersInput = {
+    update: XOR<AffiliateLinkUpdateWithoutSubscribedUsersInput, AffiliateLinkUncheckedUpdateWithoutSubscribedUsersInput>
+    create: XOR<AffiliateLinkCreateWithoutSubscribedUsersInput, AffiliateLinkUncheckedCreateWithoutSubscribedUsersInput>
+    where?: AffiliateLinkWhereInput
+  }
+
+  export type AffiliateLinkUpdateToOneWithWhereWithoutSubscribedUsersInput = {
+    where?: AffiliateLinkWhereInput
+    data: XOR<AffiliateLinkUpdateWithoutSubscribedUsersInput, AffiliateLinkUncheckedUpdateWithoutSubscribedUsersInput>
+  }
+
+  export type AffiliateLinkUpdateWithoutSubscribedUsersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAffiliateLinksNestedInput
+    payments?: PaymentUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type AffiliateLinkUncheckedUpdateWithoutSubscribedUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    userId?: IntFieldUpdateOperationsInput | number
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: PaymentUncheckedUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type PaymentUpsertWithWhereUniqueWithoutBuyerInput = {
+    where: PaymentWhereUniqueInput
+    update: XOR<PaymentUpdateWithoutBuyerInput, PaymentUncheckedUpdateWithoutBuyerInput>
+    create: XOR<PaymentCreateWithoutBuyerInput, PaymentUncheckedCreateWithoutBuyerInput>
+  }
+
+  export type PaymentUpdateWithWhereUniqueWithoutBuyerInput = {
+    where: PaymentWhereUniqueInput
+    data: XOR<PaymentUpdateWithoutBuyerInput, PaymentUncheckedUpdateWithoutBuyerInput>
+  }
+
+  export type PaymentUpdateManyWithWhereWithoutBuyerInput = {
+    where: PaymentScalarWhereInput
+    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutBuyerInput>
+  }
+
+  export type PaymentScalarWhereInput = {
+    AND?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+    OR?: PaymentScalarWhereInput[]
+    NOT?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+    id?: IntFilter<"Payment"> | number
+    transactionId?: StringFilter<"Payment"> | string
+    amount?: FloatNullableFilter<"Payment"> | number | null
+    currency?: StringFilter<"Payment"> | string
+    status?: StringFilter<"Payment"> | string
+    itemType?: EnumUserPlanFilter<"Payment"> | $Enums.UserPlan
+    buyerId?: IntNullableFilter<"Payment"> | number | null
+    affiliateLinkId?: IntNullableFilter<"Payment"> | number | null
+    level1AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    level2AffiliateAmount?: FloatNullableFilter<"Payment"> | number | null
+    affiliatePaid?: BoolFilter<"Payment"> | boolean
+    rawData?: JsonNullableFilter<"Payment">
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    updatedAt?: DateTimeFilter<"Payment"> | Date | string
+  }
+
+  export type UserCreateWithoutAffiliateLinksInput = {
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
+    templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
+  }
+
+  export type UserUncheckedCreateWithoutAffiliateLinksInput = {
+    id?: number
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
+    templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
+  }
+
+  export type UserCreateOrConnectWithoutAffiliateLinksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAffiliateLinksInput, UserUncheckedCreateWithoutAffiliateLinksInput>
+  }
+
+  export type UserCreateWithoutReferralLinkUsedInput = {
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
+    templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
+  }
+
+  export type UserUncheckedCreateWithoutReferralLinkUsedInput = {
+    id?: number
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
+    templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
+  }
+
+  export type UserCreateOrConnectWithoutReferralLinkUsedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput>
+  }
+
+  export type UserCreateManyReferralLinkUsedInputEnvelope = {
+    data: UserCreateManyReferralLinkUsedInput | UserCreateManyReferralLinkUsedInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PaymentCreateWithoutAffiliateLinkInput = {
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buyer?: UserCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type PaymentUncheckedCreateWithoutAffiliateLinkInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    buyerId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentCreateOrConnectWithoutAffiliateLinkInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput>
+  }
+
+  export type PaymentCreateManyAffiliateLinkInputEnvelope = {
+    data: PaymentCreateManyAffiliateLinkInput | PaymentCreateManyAffiliateLinkInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutAffiliateLinksInput = {
+    update: XOR<UserUpdateWithoutAffiliateLinksInput, UserUncheckedUpdateWithoutAffiliateLinksInput>
+    create: XOR<UserCreateWithoutAffiliateLinksInput, UserUncheckedCreateWithoutAffiliateLinksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAffiliateLinksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAffiliateLinksInput, UserUncheckedUpdateWithoutAffiliateLinksInput>
+  }
+
+  export type UserUpdateWithoutAffiliateLinksInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAffiliateLinksInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutReferralLinkUsedInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutReferralLinkUsedInput, UserUncheckedUpdateWithoutReferralLinkUsedInput>
+    create: XOR<UserCreateWithoutReferralLinkUsedInput, UserUncheckedCreateWithoutReferralLinkUsedInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutReferralLinkUsedInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutReferralLinkUsedInput, UserUncheckedUpdateWithoutReferralLinkUsedInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutReferralLinkUsedInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutReferralLinkUsedInput>
+  }
+
+  export type UserScalarWhereInput = {
+    AND?: UserScalarWhereInput | UserScalarWhereInput[]
+    OR?: UserScalarWhereInput[]
+    NOT?: UserScalarWhereInput | UserScalarWhereInput[]
+    id?: IntFilter<"User"> | number
+    email?: StringFilter<"User"> | string
+    username?: StringFilter<"User"> | string
+    firstName?: StringFilter<"User"> | string
+    lastName?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
+    verified?: BoolFilter<"User"> | boolean
+    verificationToken?: StringNullableFilter<"User"> | string | null
+    verificationTokenExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    passwordResetToken?: StringNullableFilter<"User"> | string | null
+    passwordResetExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    isAdmin?: BoolFilter<"User"> | boolean
+    plan?: EnumUserPlanFilter<"User"> | $Enums.UserPlan
+    referralLinkUsedId?: IntNullableFilter<"User"> | number | null
+    balance?: FloatFilter<"User"> | number
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
+    maximumFunnels?: IntFilter<"User"> | number
+    maximumCustomDomains?: IntFilter<"User"> | number
+    maximumSubdomains?: IntFilter<"User"> | number
+  }
+
+  export type PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput = {
+    where: PaymentWhereUniqueInput
+    update: XOR<PaymentUpdateWithoutAffiliateLinkInput, PaymentUncheckedUpdateWithoutAffiliateLinkInput>
+    create: XOR<PaymentCreateWithoutAffiliateLinkInput, PaymentUncheckedCreateWithoutAffiliateLinkInput>
+  }
+
+  export type PaymentUpdateWithWhereUniqueWithoutAffiliateLinkInput = {
+    where: PaymentWhereUniqueInput
+    data: XOR<PaymentUpdateWithoutAffiliateLinkInput, PaymentUncheckedUpdateWithoutAffiliateLinkInput>
+  }
+
+  export type PaymentUpdateManyWithWhereWithoutAffiliateLinkInput = {
+    where: PaymentScalarWhereInput
+    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutAffiliateLinkInput>
+  }
+
+  export type UserCreateWithoutPaymentsInput = {
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainCreateNestedManyWithoutCreatorInput
+    templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+  }
+
+  export type UserUncheckedCreateWithoutPaymentsInput = {
+    id?: number
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+    workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+    ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+    createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
+    createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
+    templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPaymentsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPaymentsInput, UserUncheckedCreateWithoutPaymentsInput>
+  }
+
+  export type AffiliateLinkCreateWithoutPaymentsInput = {
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAffiliateLinksInput
+    subscribedUsers?: UserCreateNestedManyWithoutReferralLinkUsedInput
+  }
+
+  export type AffiliateLinkUncheckedCreateWithoutPaymentsInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    userId: number
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subscribedUsers?: UserUncheckedCreateNestedManyWithoutReferralLinkUsedInput
+  }
+
+  export type AffiliateLinkCreateOrConnectWithoutPaymentsInput = {
+    where: AffiliateLinkWhereUniqueInput
+    create: XOR<AffiliateLinkCreateWithoutPaymentsInput, AffiliateLinkUncheckedCreateWithoutPaymentsInput>
+  }
+
+  export type UserUpsertWithoutPaymentsInput = {
+    update: XOR<UserUpdateWithoutPaymentsInput, UserUncheckedUpdateWithoutPaymentsInput>
+    create: XOR<UserCreateWithoutPaymentsInput, UserUncheckedCreateWithoutPaymentsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPaymentsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPaymentsInput, UserUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type UserUpdateWithoutPaymentsInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPaymentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type AffiliateLinkUpsertWithoutPaymentsInput = {
+    update: XOR<AffiliateLinkUpdateWithoutPaymentsInput, AffiliateLinkUncheckedUpdateWithoutPaymentsInput>
+    create: XOR<AffiliateLinkCreateWithoutPaymentsInput, AffiliateLinkUncheckedCreateWithoutPaymentsInput>
+    where?: AffiliateLinkWhereInput
+  }
+
+  export type AffiliateLinkUpdateToOneWithWhereWithoutPaymentsInput = {
+    where?: AffiliateLinkWhereInput
+    data: XOR<AffiliateLinkUpdateWithoutPaymentsInput, AffiliateLinkUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type AffiliateLinkUpdateWithoutPaymentsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAffiliateLinksNestedInput
+    subscribedUsers?: UserUpdateManyWithoutReferralLinkUsedNestedInput
+  }
+
+  export type AffiliateLinkUncheckedUpdateWithoutPaymentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    userId?: IntFieldUpdateOperationsInput | number
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subscribedUsers?: UserUncheckedUpdateManyWithoutReferralLinkUsedNestedInput
+  }
+
   export type UserCreateWithoutOwnedWorkspacesInput = {
     email: string
     username: string
@@ -35616,6 +40180,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -35626,6 +40191,9 @@ export namespace Prisma {
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutOwnedWorkspacesInput = {
@@ -35642,6 +40210,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -35652,6 +40222,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutOwnedWorkspacesInput = {
@@ -35804,6 +40376,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -35814,6 +40387,9 @@ export namespace Prisma {
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOwnedWorkspacesInput = {
@@ -35830,6 +40406,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -35840,6 +40418,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type WorkspaceMemberUpsertWithWhereUniqueWithoutWorkspaceInput = {
@@ -35903,6 +40483,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -35913,6 +40494,9 @@ export namespace Prisma {
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutWorkspaceMembersInput = {
@@ -35929,6 +40513,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -35939,6 +40525,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutWorkspaceMembersInput = {
@@ -36006,6 +40594,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36016,6 +40605,9 @@ export namespace Prisma {
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWorkspaceMembersInput = {
@@ -36032,6 +40624,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36042,6 +40636,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type WorkspaceUpsertWithoutMembersInput = {
@@ -36135,6 +40731,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -36145,6 +40742,9 @@ export namespace Prisma {
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutCreatedFunnelsInput = {
@@ -36161,6 +40761,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -36171,6 +40773,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutCreatedFunnelsInput = {
@@ -36425,6 +41029,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36435,6 +41040,9 @@ export namespace Prisma {
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedFunnelsInput = {
@@ -36451,6 +41059,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36461,6 +41071,8 @@ export namespace Prisma {
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type FunnelDomainUpsertWithWhereUniqueWithoutFunnelInput = {
@@ -36702,6 +41314,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -36712,6 +41325,9 @@ export namespace Prisma {
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutCreatedDomainsInput = {
@@ -36728,6 +41344,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -36738,6 +41356,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutCreatedDomainsInput = {
@@ -36836,6 +41456,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36846,6 +41467,9 @@ export namespace Prisma {
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedDomainsInput = {
@@ -36862,6 +41486,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -36872,6 +41498,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type FunnelDomainUpsertWithWhereUniqueWithoutDomainInput = {
@@ -37732,6 +42360,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -37742,6 +42371,9 @@ export namespace Prisma {
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     imageFolders?: ImageFolderCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutTemplatesInput = {
@@ -37758,6 +42390,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -37768,6 +42402,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     imageFolders?: ImageFolderUncheckedCreateNestedManyWithoutUserInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutTemplatesInput = {
@@ -37892,6 +42528,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -37902,6 +42539,9 @@ export namespace Prisma {
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTemplatesInput = {
@@ -37918,6 +42558,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -37928,6 +42570,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type TemplateCreateWithoutPreviewImagesInput = {
@@ -38145,6 +42789,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -38155,6 +42800,9 @@ export namespace Prisma {
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
     templates?: TemplateCreateNestedManyWithoutCreatedByInput
+    affiliateLinks?: AffiliateLinkCreateNestedManyWithoutUserInput
+    referralLinkUsed?: AffiliateLinkCreateNestedOneWithoutSubscribedUsersInput
+    payments?: PaymentCreateNestedManyWithoutBuyerInput
   }
 
   export type UserUncheckedCreateWithoutImageFoldersInput = {
@@ -38171,6 +42819,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: Date | string | null
     isAdmin?: boolean
     plan: $Enums.UserPlan
+    referralLinkUsedId?: number | null
+    balance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     maximumFunnels?: number
@@ -38181,6 +42831,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
     templates?: TemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    affiliateLinks?: AffiliateLinkUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBuyerInput
   }
 
   export type UserCreateOrConnectWithoutImageFoldersInput = {
@@ -38241,6 +42893,7 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -38251,6 +42904,9 @@ export namespace Prisma {
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    referralLinkUsed?: AffiliateLinkUpdateOneWithoutSubscribedUsersNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutImageFoldersInput = {
@@ -38267,6 +42923,8 @@ export namespace Prisma {
     passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    referralLinkUsedId?: NullableIntFieldUpdateOperationsInput | number | null
+    balance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     maximumFunnels?: IntFieldUpdateOperationsInput | number
@@ -38277,6 +42935,8 @@ export namespace Prisma {
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
     templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutFolderInput = {
@@ -38650,6 +43310,34 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type AffiliateLinkCreateManyUserInput = {
+    id?: number
+    name: string
+    token: string
+    itemType: $Enums.UserPlan
+    clickCount?: number
+    totalAmount?: number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentCreateManyBuyerInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    affiliateLinkId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type WorkspaceMemberUpdateWithoutUserInput = {
     role?: EnumWorkspaceRoleFieldUpdateOperationsInput | $Enums.WorkspaceRole
     permissions?: WorkspaceMemberUpdatepermissionsInput | $Enums.WorkspacePermission[]
@@ -38890,6 +43578,258 @@ export namespace Prisma {
   export type ImageFolderUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AffiliateLinkUpdateWithoutUserInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subscribedUsers?: UserUpdateManyWithoutReferralLinkUsedNestedInput
+    payments?: PaymentUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type AffiliateLinkUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subscribedUsers?: UserUncheckedUpdateManyWithoutReferralLinkUsedNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutAffiliateLinkNestedInput
+  }
+
+  export type AffiliateLinkUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    clickCount?: IntFieldUpdateOperationsInput | number
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentUpdateWithoutBuyerInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    affiliateLink?: AffiliateLinkUpdateOneWithoutPaymentsNestedInput
+  }
+
+  export type PaymentUncheckedUpdateWithoutBuyerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    affiliateLinkId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentUncheckedUpdateManyWithoutBuyerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    affiliateLinkId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserCreateManyReferralLinkUsedInput = {
+    id?: number
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    password: string
+    verified?: boolean
+    verificationToken?: string | null
+    verificationTokenExpiresAt?: Date | string | null
+    passwordResetToken?: string | null
+    passwordResetExpiresAt?: Date | string | null
+    isAdmin?: boolean
+    plan: $Enums.UserPlan
+    balance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    maximumFunnels?: number
+    maximumCustomDomains?: number
+    maximumSubdomains?: number
+  }
+
+  export type PaymentCreateManyAffiliateLinkInput = {
+    id?: number
+    transactionId: string
+    amount?: number | null
+    currency: string
+    status: string
+    itemType: $Enums.UserPlan
+    buyerId?: number | null
+    level1AffiliateAmount?: number | null
+    level2AffiliateAmount?: number | null
+    affiliatePaid?: boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserUpdateWithoutReferralLinkUsedInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUpdateManyWithoutUserNestedInput
+    payments?: PaymentUpdateManyWithoutBuyerNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutReferralLinkUsedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+    ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+    createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
+    createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
+    templates?: TemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    imageFolders?: ImageFolderUncheckedUpdateManyWithoutUserNestedInput
+    affiliateLinks?: AffiliateLinkUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBuyerNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutReferralLinkUsedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    verificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokenExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordResetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordResetExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    plan?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    balance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    maximumFunnels?: IntFieldUpdateOperationsInput | number
+    maximumCustomDomains?: IntFieldUpdateOperationsInput | number
+    maximumSubdomains?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PaymentUpdateWithoutAffiliateLinkInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buyer?: UserUpdateOneWithoutPaymentsNestedInput
+  }
+
+  export type PaymentUncheckedUpdateWithoutAffiliateLinkInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    buyerId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentUncheckedUpdateManyWithoutAffiliateLinkInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    itemType?: EnumUserPlanFieldUpdateOperationsInput | $Enums.UserPlan
+    buyerId?: NullableIntFieldUpdateOperationsInput | number | null
+    level1AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    level2AffiliateAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    affiliatePaid?: BoolFieldUpdateOperationsInput | boolean
+    rawData?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

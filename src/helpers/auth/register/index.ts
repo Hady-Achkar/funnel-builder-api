@@ -8,6 +8,11 @@ export interface PlanLimits {
 
 export class PlanLimitsHelper {
   private static readonly PLAN_CONFIGS: Record<$Enums.UserPlan, PlanLimits> = {
+    [$Enums.UserPlan.FREE]: {
+      maximumFunnels: 3,
+      maximumCustomDomains: 0,
+      maximumSubdomains: 1,
+    },
     [$Enums.UserPlan.BUSINESS]: {
       maximumFunnels: 10,
       maximumCustomDomains: 2,
