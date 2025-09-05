@@ -7,7 +7,7 @@ export interface CacheOptions {
 
 export class CacheService {
   private static instance: CacheService;
-  private defaultTTL = 0; // No expiration
+  private defaultTTL = 3600; // 1 hour default
 
   static getInstance(): CacheService {
     if (!CacheService.instance) {
@@ -46,19 +46,30 @@ export class CacheService {
     await redisService.invalidatePattern(formattedPattern);
   }
 
-  // Memoization wrapper
+  // Memoization wrapper with graceful degradation
   async memoize<T>(
     key: string,
     fn: () => Promise<T>,
     options?: CacheOptions
   ): Promise<T> {
-    const cached = await this.get<T>(key, options);
-    if (cached !== null) {
-      return cached;
+    try {
+      const cached = await this.get<T>(key, options);
+      if (cached !== null) {
+        return cached;
+      }
+    } catch (error) {
+      console.debug(`Cache memoize get failed for key ${key}, executing function directly`);
     }
 
     const result = await fn();
-    await this.set(key, result, options);
+    
+    // Try to cache the result but don't fail if Redis is down
+    try {
+      await this.set(key, result, options);
+    } catch (error) {
+      console.debug(`Cache memoize set failed for key ${key}, continuing without cache`);
+    }
+    
     return result;
   }
 
@@ -211,14 +222,20 @@ export class CacheService {
     limit: number,
     window: number
   ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
-    const key = `ratelimit:${identifier}`;
-    const current = await redisService.incrementCounter(key, window);
+    try {
+      const key = `ratelimit:${identifier}`;
+      const current = await redisService.incrementCounter(key, window);
 
-    const allowed = current <= limit;
-    const remaining = Math.max(0, limit - current);
-    const resetTime = Date.now() + window * 1000;
+      const allowed = current <= limit;
+      const remaining = Math.max(0, limit - current);
+      const resetTime = Date.now() + window * 1000;
 
-    return { allowed, remaining, resetTime };
+      return { allowed, remaining, resetTime };
+    } catch (error) {
+      console.error(`Rate limit check failed for ${identifier}:`, error);
+      // If Redis is down, deny the request for safety
+      return { allowed: false, remaining: 0, resetTime: Date.now() + window * 1000 };
+    }
   }
 
   // Session management

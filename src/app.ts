@@ -83,15 +83,15 @@ export function createServer(): Express {
       redis: false,
     };
 
-    // Check Redis health
+    // Check Redis health (non-blocking, quick check)
     try {
       healthStatus.redis = await redisService.ping();
     } catch (error) {
       healthStatus.redis = false;
     }
 
-    const statusCode = healthStatus.redis ? 200 : 503;
-    res.status(statusCode).json(healthStatus);
+    // Always return 200 - app is healthy even if Redis is down
+    res.status(200).json(healthStatus);
   });
 
   // Root endpoint
