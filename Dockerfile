@@ -55,7 +55,8 @@ RUN pnpm install --prod --frozen-lockfile && \
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
 # Copy generated Prisma client from builder stage to the correct location
-COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./src/generated
+# The compiled JS expects it at ./generated relative to dist
+COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./dist/generated
 
 # Copy Prisma schema (for reference, not for generation)
 COPY --chown=nodejs:nodejs prisma ./prisma
