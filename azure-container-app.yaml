@@ -8,7 +8,7 @@ properties:
     activeRevisionsMode: Multiple
     ingress:
       external: true
-      targetPort: 3000
+      targetPort: 4444
       transport: Http
       traffic:
         - weight: 100
@@ -89,7 +89,7 @@ properties:
           - name: NODE_ENV
             value: staging
           - name: PORT
-            value: "3000"
+            value: "4444"
           - name: AZURE_STORAGE_CONNECTION_STRING
             secretRef: azure-storage-connection-string
           - name: AZURE_STORAGE_CONTAINER_NAME
@@ -126,7 +126,7 @@ properties:
           - type: Liveness
             httpGet:
               path: /health
-              port: 3000
+              port: 4444
             initialDelaySeconds: 30
             periodSeconds: 30
             failureThreshold: 3
@@ -134,7 +134,7 @@ properties:
           - type: Readiness
             httpGet:
               path: /health
-              port: 3000
+              port: 4444
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
@@ -142,7 +142,7 @@ properties:
           - type: Startup
             httpGet:
               path: /health
-              port: 3000
+              port: 4444
             initialDelaySeconds: 5
             periodSeconds: 10
             failureThreshold: 30

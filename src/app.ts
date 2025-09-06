@@ -27,11 +27,13 @@ export function createServer(): Express {
 
   // Security middleware
   app.use(helmet());
-  app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-  }));
-  
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
   // Cookie parsing middleware
   app.use(cookieParser());
 
@@ -89,30 +91,8 @@ export function createServer(): Express {
   // Root endpoint
   app.get("/", (req, res) => {
     res.json({
-      message: "Funnel Builder API",
-      version: "1.0.0",
-      environment: process.env.NODE_ENV || "development",
-      endpoints: {
-        auth: "/api/auth",
-        users: "/api/users",
-        funnels: "/api/funnels",
-        pages: "/api/pages",
-        domains: "/api/domains",
-        "domains/create-custom-domain": "/api/domains/create-custom-domain",
-        "domains/verify": "/api/domains/verify",
-        "domains/dns-instructions": "/api/domains/dns-instructions",
-        "domain-funnel/connect": "/api/domain-funnel/connect",
-        "domain-funnel/connections": "/api/domain-funnel/connections",
-        health: "/health",
-        themes: "/api/themes",
-        forms: "/api/forms",
-        formSubmissions: "/api/form-submissions",
-        workspaces: "/api/workspaces",
-        insights: "/api/insights",
-        insightSubmissions: "/api/insight-submissions",
-        affiliate: "/api/affiliate",
-        "affiliate/generate-link": "/api/affiliate/generate-link",
-      },
+      message: "DS API is running",
+      timestamp: new Date().toISOString(),
     });
   });
 
