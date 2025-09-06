@@ -26,29 +26,36 @@ export class RedisService {
         url: this.config.url,
         password: this.config.password,
         database: this.config.database,
+        socket: {
+          connectTimeout: 5000,
+          reconnectStrategy: false, // Disable auto-reconnect to stop spamming
+        },
       });
 
-      this.client.on("error", (err) => {
-        console.error("Redis Client Error:", err);
+      this.client.on("error", () => {
+        // Silently handle errors - already logged in connect catch
       });
 
       await this.client.connect();
       console.log("Redis connected successfully");
     } catch (error) {
-      console.error("Failed to connect to Redis:", error);
+      console.error("Failed to connect to Redis - will operate without cache");
       this.client = null;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (this.client) {
+    if (this.client && this.client.isOpen) {
       try {
         await this.client.quit();
-        this.client = null;
         console.log("Redis disconnected");
       } catch (error) {
         console.error("Error disconnecting Redis:", error);
+      } finally {
+        this.client = null;
       }
+    } else if (this.client) {
+      this.client = null;
     }
   }
 
