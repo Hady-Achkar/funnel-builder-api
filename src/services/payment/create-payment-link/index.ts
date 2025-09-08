@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError } from "../../../errors/http-errors";
@@ -23,7 +24,22 @@ export class CreatePaymentLinkService {
       }
 
       let affiliateLink = null;
+      let affiliateAmount = 0;
+      
       if (validatedData.affiliateToken) {
+        // Decode JWT to extract affiliate amount
+        try {
+          const jwtSecret = process.env.JWT_SECRET;
+          if (!jwtSecret) {
+            throw new Error("JWT_SECRET is not configured");
+          }
+          
+          const decodedToken = jwt.verify(validatedData.affiliateToken, jwtSecret) as any;
+          affiliateAmount = decodedToken.affiliateAmount || 0;
+        } catch (error) {
+          throw new BadRequestError("Invalid affiliate token");
+        }
+        
         affiliateLink = await getPrisma().affiliateLink.findUnique({
           where: { token: validatedData.affiliateToken },
         });
@@ -69,6 +85,7 @@ export class CreatePaymentLinkService {
               token: affiliateLink.token,
               itemType: affiliateLink.itemType,
               userId: affiliateLink.userId,
+              affiliateAmount: affiliateAmount,
             },
           }),
         },

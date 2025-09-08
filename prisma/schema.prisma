@@ -14,6 +14,19 @@ enum UserPlan {
   FREE
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum IntervalUnit {
+  WEEK
+  MONTH
+  YEAR
+}
+
 model User {
   id                        Int                @id @default(autoincrement())
   email                     String             @unique
@@ -47,6 +60,7 @@ model User {
   affiliateLinks            AffiliateLink[]    @relation("AffiliateOwner")
   referralLinkUsed          AffiliateLink?     @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
   payments                  Payment[]          @relation("UserPayments")
+  subscriptions             Subscription[]     @relation("UserSubscriptions")
 
   @@map("users")
 }
@@ -84,7 +98,6 @@ model Payment {
   buyerId                Int?       
   affiliateLinkId        Int?
   level1AffiliateAmount  Float?
-  level2AffiliateAmount  Float?
   affiliatePaid          Boolean        @default(false)
   rawData                Json?          @default("{}")
   createdAt              DateTime       @default(now())
@@ -99,6 +112,29 @@ model Payment {
   @@index([status])
   @@index([transactionId])
   @@map("payments")
+}
+
+model Subscription {
+  id               Int                @id @default(autoincrement())
+  subscriptionId   String             @unique
+  startsAt         DateTime
+  endsAt           DateTime
+  status           SubscriptionStatus @default(ACTIVE)
+  userId           Int
+  intervalUnit     IntervalUnit
+  intervalCount    Int                @default(1)
+  rawData          Json?              @default("{}")
+  subscriptionType UserPlan
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  
+  // Relations
+  user             User               @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([subscriptionId])
+  @@map("subscriptions")
 }
 
 model Workspace {

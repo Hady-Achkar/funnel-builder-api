@@ -9,6 +9,7 @@ export const GenerateAffiliateLinkRequest = z.object({
       ", "
     )}`,
   }),
+  affiliateAmount: z.number().positive("Affiliate amount must be positive"),
   settings: z.record(z.string(), z.any()).optional().default({}),
 });
 

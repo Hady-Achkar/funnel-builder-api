@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 import {
-  GenerateAffiliateLinkRequest,
+  GenerateAffiliateLinkRequest as GenerateAffiliateLinkRequestSchema,
   GenerateAffiliateLinkResponse,
 } from "../../../types/affiliate/generate-affiliate-link";
 import { getPrisma } from "../../../lib/prisma";
@@ -10,10 +10,13 @@ import { BadRequestError } from "../../../errors";
 export class AffiliateLinkService {
   static async generateLink(
     userId: number,
-    requestData: GenerateAffiliateLinkRequest
+    requestData: unknown
   ): Promise<GenerateAffiliateLinkResponse> {
     try {
-      const { name, funnelId, planType, settings } = requestData;
+      const validatedData =
+        GenerateAffiliateLinkRequestSchema.parse(requestData);
+      const { name, funnelId, planType, affiliateAmount, settings } =
+        validatedData;
       const user = await getPrisma().user.findUnique({
         where: { id: userId },
       });
@@ -62,6 +65,7 @@ export class AffiliateLinkService {
         userId,
         funnelId,
         name,
+        affiliateAmount,
         settings,
         affiliateLinkId: affiliateLink.id,
       };

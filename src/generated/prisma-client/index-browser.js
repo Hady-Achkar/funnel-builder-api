@@ -169,9 +169,23 @@ exports.Prisma.PaymentScalarFieldEnum = {
   buyerId: 'buyerId',
   affiliateLinkId: 'affiliateLinkId',
   level1AffiliateAmount: 'level1AffiliateAmount',
-  level2AffiliateAmount: 'level2AffiliateAmount',
   affiliatePaid: 'affiliatePaid',
   rawData: 'rawData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  status: 'status',
+  userId: 'userId',
+  intervalUnit: 'intervalUnit',
+  intervalCount: 'intervalCount',
+  rawData: 'rawData',
+  subscriptionType: 'subscriptionType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -465,6 +479,19 @@ exports.UserPlan = exports.$Enums.UserPlan = {
   FREE: 'FREE'
 };
 
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED',
+  PENDING: 'PENDING'
+};
+
+exports.IntervalUnit = exports.$Enums.IntervalUnit = {
+  WEEK: 'WEEK',
+  MONTH: 'MONTH',
+  YEAR: 'YEAR'
+};
+
 exports.WorkspaceRole = exports.$Enums.WorkspaceRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
@@ -539,6 +566,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   AffiliateLink: 'AffiliateLink',
   Payment: 'Payment',
+  Subscription: 'Subscription',
   Workspace: 'Workspace',
   WorkspaceMember: 'WorkspaceMember',
   Funnel: 'Funnel',
