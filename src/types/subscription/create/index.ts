@@ -47,17 +47,29 @@ export const subscriptionWebhookRequest = z.object({
 
 export type SubscriptionWebhookRequest = z.infer<typeof subscriptionWebhookRequest>;
 
-export interface SubscriptionCreateResponse {
-  received: boolean;
-  ignored?: boolean;
-  message?: string;
-  userId?: number;
-  subscriptionId?: number;
-  paymentId?: number;
-}
+export const subscriptionCreateResponse = z.object({
+  received: z.boolean(),
+  ignored: z.boolean().optional(),
+  message: z.string().optional(),
+  userId: z.number().optional(),
+  subscriptionId: z.number().optional(),
+  paymentId: z.number().optional(),
+});
 
-export interface SubscriptionCreateError {
-  error: string;
-  details?: string;
-  stage?: "validation" | "duplicate_check" | "user_creation" | "payment_creation" | "subscription_creation" | "email_sending" | "affiliate_processing";
-}
+export type SubscriptionCreateResponse = z.infer<typeof subscriptionCreateResponse>;
+
+export const subscriptionCreateError = z.object({
+  error: z.string(),
+  details: z.string().optional(),
+  stage: z.enum([
+    "validation",
+    "duplicate_check", 
+    "user_creation",
+    "payment_creation",
+    "subscription_creation",
+    "email_sending",
+    "affiliate_processing"
+  ]).optional(),
+});
+
+export type SubscriptionCreateError = z.infer<typeof subscriptionCreateError>;
