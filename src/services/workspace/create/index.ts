@@ -12,7 +12,7 @@ import {
   validateSlugFormat,
   validateAllocationAmounts,
 } from "../../../helpers/workspace/create";
-import { CreateSubdomainService } from "../../domain/create-subdomain/create-subdomain.service";
+import { createARecord } from "../../../helpers/domain/create-subdomain";
 import {
   BadRequestError,
   InternalServerError,
@@ -28,11 +28,9 @@ export class CreateWorkspaceService {
     requestData: unknown
   ): Promise<{ message: string; workspaceId: number }> {
     try {
-      // Validate request data
       const validatedData = createWorkspaceRequest.parse(requestData);
       const { name, slug, description, allocations } = validatedData;
 
-      // Default allocations to 0 if not provided (stepper approach)
       const finalAllocations = allocations || {
         allocatedFunnels: 0,
         allocatedCustomDomains: 0,
@@ -120,40 +118,14 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 4. Create subdomain (outside transaction to avoid rollback complications)
-      // Make subdomain creation optional for now - can be created later
+      // 4. Create DNS record for workspace subdomain (digitalsite.com)
       try {
-        await CreateSubdomainService.create(
-          userId,
-          {
-            subdomain: slug,
-            workspaceId: result.id,
-          },
-          workspaceDomainConfig
+        await createARecord(
+          slug,
+          workspaceDomainConfig.zoneId,
+          workspaceDomainConfig.targetIp // target IP
         );
-        console.log(
-          `Subdomain created successfully for workspace: ${slug}.digitalsite.com`
-        );
-      } catch (subdomainError) {
-        // Log error but don't fail workspace creation
-        console.error(
-          "Failed to create subdomain for workspace (workspace still created):",
-          {
-            workspaceSlug: slug,
-            error: subdomainError,
-            domainConfig: workspaceDomainConfig,
-            stack:
-              subdomainError instanceof Error
-                ? subdomainError.stack
-                : "No stack trace",
-          }
-        );
-
-        // Continue without subdomain - user can create it later
-        console.log(
-          `Workspace created successfully without subdomain: ${slug}`
-        );
-      }
+      } catch (dnsError) {}
 
       return {
         message: "Workspace created successfully",

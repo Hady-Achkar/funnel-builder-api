@@ -9,6 +9,7 @@ import {
   lockFunnelResponse,
 } from '../../../types/funnel-settings/lock-funnel';
 import { ZodError } from 'zod';
+import { cacheService } from '../../cache/cache.service';
 
 export const lockFunnel = async (
   userId: number,
@@ -47,6 +48,13 @@ export const lockFunnel = async (
         });
       }
     });
+
+    const cacheKey = `funnel:${validatedRequest.funnelId}:settings:full`;
+    try {
+      await cacheService.del(cacheKey);
+    } catch (cacheError) {
+      console.warn('Failed to invalidate funnel settings cache:', cacheError);
+    }
 
     const response = {
       message: 'Funnel locked successfully',

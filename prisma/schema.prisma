@@ -35,6 +35,9 @@ model User {
   maximumFunnels            Int                @default(5) // Total funnel budget for the user
   maximumCustomDomains      Int                @default(1) // Total custom domain budget
   maximumSubdomains         Int                @default(3) // Total subdomain budget
+  maximumAdmins             Int                @default(1) // Total admin budget for the user
+  trialStartDate            DateTime?          // Trial start date
+  trialEndDate              DateTime?          // Trial end date
   workspaceMembers          WorkspaceMember[]
   ownedWorkspaces           Workspace[]        @relation("WorkspaceOwner")
   createdFunnels            Funnel[]           @relation("FunnelCreator")
@@ -77,8 +80,8 @@ model Payment {
   amount                 Float?
   currency               String
   status                 String
-  itemType               UserPlan       // BUSINESS, AGENCY, or FREE
-  buyerId                Int?           // User who made the payment
+  itemType               UserPlan      
+  buyerId                Int?       
   affiliateLinkId        Int?
   level1AffiliateAmount  Float?
   level2AffiliateAmount  Float?

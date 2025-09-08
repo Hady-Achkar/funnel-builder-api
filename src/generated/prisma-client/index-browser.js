@@ -140,7 +140,10 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt',
   maximumFunnels: 'maximumFunnels',
   maximumCustomDomains: 'maximumCustomDomains',
-  maximumSubdomains: 'maximumSubdomains'
+  maximumSubdomains: 'maximumSubdomains',
+  maximumAdmins: 'maximumAdmins',
+  trialStartDate: 'trialStartDate',
+  trialEndDate: 'trialEndDate'
 };
 
 exports.Prisma.AffiliateLinkScalarFieldEnum = {

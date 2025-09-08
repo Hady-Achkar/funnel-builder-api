@@ -8,6 +8,7 @@ import {
 } from "../../../types/funnel-settings/unlock-funnel";
 import { ZodError } from "zod";
 import { checkFunnelSettingsPermissions } from "../../../helpers/funnel-settings/unlock-funnel";
+import { cacheService } from "../../cache/cache.service";
 
 export const unlockFunnel = async (
   userId: number,
@@ -29,6 +30,13 @@ export const unlockFunnel = async (
         passwordHash: null,
       },
     });
+
+    const cacheKey = `funnel:${validatedRequest.funnelId}:settings:full`;
+    try {
+      await cacheService.del(cacheKey);
+    } catch (cacheError) {
+      console.warn("Failed to invalidate funnel settings cache:", cacheError);
+    }
 
     const response = {
       message: "Funnel unlocked successfully",

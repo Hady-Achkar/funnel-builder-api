@@ -3436,6 +3436,7 @@ export namespace Prisma {
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
+    maximumAdmins: number | null
   }
 
   export type UserSumAggregateOutputType = {
@@ -3445,6 +3446,7 @@ export namespace Prisma {
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
+    maximumAdmins: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -3468,6 +3470,9 @@ export namespace Prisma {
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
+    maximumAdmins: number | null
+    trialStartDate: Date | null
+    trialEndDate: Date | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -3491,6 +3496,9 @@ export namespace Prisma {
     maximumFunnels: number | null
     maximumCustomDomains: number | null
     maximumSubdomains: number | null
+    maximumAdmins: number | null
+    trialStartDate: Date | null
+    trialEndDate: Date | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -3514,6 +3522,9 @@ export namespace Prisma {
     maximumFunnels: number
     maximumCustomDomains: number
     maximumSubdomains: number
+    maximumAdmins: number
+    trialStartDate: number
+    trialEndDate: number
     _all: number
   }
 
@@ -3525,6 +3536,7 @@ export namespace Prisma {
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
+    maximumAdmins?: true
   }
 
   export type UserSumAggregateInputType = {
@@ -3534,6 +3546,7 @@ export namespace Prisma {
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
+    maximumAdmins?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -3557,6 +3570,9 @@ export namespace Prisma {
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
+    maximumAdmins?: true
+    trialStartDate?: true
+    trialEndDate?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -3580,6 +3596,9 @@ export namespace Prisma {
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
+    maximumAdmins?: true
+    trialStartDate?: true
+    trialEndDate?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -3603,6 +3622,9 @@ export namespace Prisma {
     maximumFunnels?: true
     maximumCustomDomains?: true
     maximumSubdomains?: true
+    maximumAdmins?: true
+    trialStartDate?: true
+    trialEndDate?: true
     _all?: true
   }
 
@@ -3713,6 +3735,9 @@ export namespace Prisma {
     maximumFunnels: number
     maximumCustomDomains: number
     maximumSubdomains: number
+    maximumAdmins: number
+    trialStartDate: Date | null
+    trialEndDate: Date | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -3755,6 +3780,9 @@ export namespace Prisma {
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    maximumAdmins?: boolean
+    trialStartDate?: boolean
+    trialEndDate?: boolean
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
     createdFunnels?: boolean | User$createdFunnelsArgs<ExtArgs>
@@ -3788,6 +3816,9 @@ export namespace Prisma {
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    maximumAdmins?: boolean
+    trialStartDate?: boolean
+    trialEndDate?: boolean
     referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3812,6 +3843,9 @@ export namespace Prisma {
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    maximumAdmins?: boolean
+    trialStartDate?: boolean
+    trialEndDate?: boolean
     referralLinkUsed?: boolean | User$referralLinkUsedArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3836,9 +3870,12 @@ export namespace Prisma {
     maximumFunnels?: boolean
     maximumCustomDomains?: boolean
     maximumSubdomains?: boolean
+    maximumAdmins?: boolean
+    trialStartDate?: boolean
+    trialEndDate?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "verified" | "verificationToken" | "verificationTokenExpiresAt" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "referralLinkUsedId" | "balance" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "username" | "firstName" | "lastName" | "password" | "verified" | "verificationToken" | "verificationTokenExpiresAt" | "passwordResetToken" | "passwordResetExpiresAt" | "isAdmin" | "plan" | "referralLinkUsedId" | "balance" | "createdAt" | "updatedAt" | "maximumFunnels" | "maximumCustomDomains" | "maximumSubdomains" | "maximumAdmins" | "trialStartDate" | "trialEndDate", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspaceMembers?: boolean | User$workspaceMembersArgs<ExtArgs>
     ownedWorkspaces?: boolean | User$ownedWorkspacesArgs<ExtArgs>
@@ -3892,6 +3929,9 @@ export namespace Prisma {
       maximumFunnels: number
       maximumCustomDomains: number
       maximumSubdomains: number
+      maximumAdmins: number
+      trialStartDate: Date | null
+      trialEndDate: Date | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -4344,6 +4384,9 @@ export namespace Prisma {
     readonly maximumFunnels: FieldRef<"User", 'Int'>
     readonly maximumCustomDomains: FieldRef<"User", 'Int'>
     readonly maximumSubdomains: FieldRef<"User", 'Int'>
+    readonly maximumAdmins: FieldRef<"User", 'Int'>
+    readonly trialStartDate: FieldRef<"User", 'DateTime'>
+    readonly trialEndDate: FieldRef<"User", 'DateTime'>
   }
     
 
@@ -30157,7 +30200,10 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     maximumFunnels: 'maximumFunnels',
     maximumCustomDomains: 'maximumCustomDomains',
-    maximumSubdomains: 'maximumSubdomains'
+    maximumSubdomains: 'maximumSubdomains',
+    maximumAdmins: 'maximumAdmins',
+    trialStartDate: 'trialStartDate',
+    trialEndDate: 'trialEndDate'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -30821,6 +30867,9 @@ export namespace Prisma {
     maximumFunnels?: IntFilter<"User"> | number
     maximumCustomDomains?: IntFilter<"User"> | number
     maximumSubdomains?: IntFilter<"User"> | number
+    maximumAdmins?: IntFilter<"User"> | number
+    trialStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
+    trialEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     workspaceMembers?: WorkspaceMemberListRelationFilter
     ownedWorkspaces?: WorkspaceListRelationFilter
     createdFunnels?: FunnelListRelationFilter
@@ -30853,6 +30902,9 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
+    trialStartDate?: SortOrderInput | SortOrder
+    trialEndDate?: SortOrderInput | SortOrder
     workspaceMembers?: WorkspaceMemberOrderByRelationAggregateInput
     ownedWorkspaces?: WorkspaceOrderByRelationAggregateInput
     createdFunnels?: FunnelOrderByRelationAggregateInput
@@ -30888,6 +30940,9 @@ export namespace Prisma {
     maximumFunnels?: IntFilter<"User"> | number
     maximumCustomDomains?: IntFilter<"User"> | number
     maximumSubdomains?: IntFilter<"User"> | number
+    maximumAdmins?: IntFilter<"User"> | number
+    trialStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
+    trialEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     workspaceMembers?: WorkspaceMemberListRelationFilter
     ownedWorkspaces?: WorkspaceListRelationFilter
     createdFunnels?: FunnelListRelationFilter
@@ -30920,6 +30975,9 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
+    trialStartDate?: SortOrderInput | SortOrder
+    trialEndDate?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -30951,6 +31009,9 @@ export namespace Prisma {
     maximumFunnels?: IntWithAggregatesFilter<"User"> | number
     maximumCustomDomains?: IntWithAggregatesFilter<"User"> | number
     maximumSubdomains?: IntWithAggregatesFilter<"User"> | number
+    maximumAdmins?: IntWithAggregatesFilter<"User"> | number
+    trialStartDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    trialEndDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   }
 
   export type AffiliateLinkWhereInput = {
@@ -32829,6 +32890,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -32861,6 +32925,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -32890,6 +32957,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -32922,6 +32992,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -32953,6 +33026,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -32974,6 +33050,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -32997,6 +33076,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AffiliateLinkCreateInput = {
@@ -35185,6 +35267,9 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
+    trialStartDate?: SortOrder
+    trialEndDate?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -35194,6 +35279,7 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -35217,6 +35303,9 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
+    trialStartDate?: SortOrder
+    trialEndDate?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -35240,6 +35329,9 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
+    trialStartDate?: SortOrder
+    trialEndDate?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -35249,6 +35341,7 @@ export namespace Prisma {
     maximumFunnels?: SortOrder
     maximumCustomDomains?: SortOrder
     maximumSubdomains?: SortOrder
+    maximumAdmins?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -39680,6 +39773,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -39711,6 +39807,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -39744,6 +39843,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -39774,6 +39876,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -39865,6 +39970,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -39896,6 +40004,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -39945,6 +40056,9 @@ export namespace Prisma {
     maximumFunnels?: IntFilter<"User"> | number
     maximumCustomDomains?: IntFilter<"User"> | number
     maximumSubdomains?: IntFilter<"User"> | number
+    maximumAdmins?: IntFilter<"User"> | number
+    trialStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
+    trialEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
   }
 
   export type PaymentUpsertWithWhereUniqueWithoutAffiliateLinkInput = {
@@ -39982,6 +40096,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -40013,6 +40130,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -40089,6 +40209,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -40120,6 +40243,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -40186,6 +40312,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
@@ -40217,6 +40346,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
@@ -40382,6 +40514,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
@@ -40413,6 +40548,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
@@ -40489,6 +40627,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
@@ -40520,6 +40661,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
@@ -40600,6 +40744,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
@@ -40631,6 +40778,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
@@ -40737,6 +40887,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdDomains?: DomainCreateNestedManyWithoutCreatorInput
@@ -40768,6 +40921,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdDomains?: DomainUncheckedCreateNestedManyWithoutCreatorInput
@@ -41035,6 +41191,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdDomains?: DomainUpdateManyWithoutCreatorNestedInput
@@ -41066,6 +41225,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdDomains?: DomainUncheckedUpdateManyWithoutCreatorNestedInput
@@ -41320,6 +41482,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -41351,6 +41516,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -41462,6 +41630,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -41493,6 +41664,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -42366,6 +42540,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -42397,6 +42574,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -42534,6 +42714,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -42565,6 +42748,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -42795,6 +42981,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelCreateNestedManyWithoutCreatorInput
@@ -42826,6 +43015,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
     ownedWorkspaces?: WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
     createdFunnels?: FunnelUncheckedCreateNestedManyWithoutCreatorInput
@@ -42899,6 +43091,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -42930,6 +43125,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -43688,6 +43886,9 @@ export namespace Prisma {
     maximumFunnels?: number
     maximumCustomDomains?: number
     maximumSubdomains?: number
+    maximumAdmins?: number
+    trialStartDate?: Date | string | null
+    trialEndDate?: Date | string | null
   }
 
   export type PaymentCreateManyAffiliateLinkInput = {
@@ -43725,6 +43926,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUpdateManyWithoutCreatorNestedInput
@@ -43755,6 +43959,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     workspaceMembers?: WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
     ownedWorkspaces?: WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
     createdFunnels?: FunnelUncheckedUpdateManyWithoutCreatorNestedInput
@@ -43785,6 +43992,9 @@ export namespace Prisma {
     maximumFunnels?: IntFieldUpdateOperationsInput | number
     maximumCustomDomains?: IntFieldUpdateOperationsInput | number
     maximumSubdomains?: IntFieldUpdateOperationsInput | number
+    maximumAdmins?: IntFieldUpdateOperationsInput | number
+    trialStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    trialEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type PaymentUpdateWithoutAffiliateLinkInput = {

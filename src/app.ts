@@ -21,6 +21,7 @@ import workspacesRouter from "./routes/workspace";
 import insightRoutes from "./routes/insight";
 import insightSubmissionRoutes from "./routes/insight-submission";
 import affiliateRoutes from "./routes/affiliate";
+import paymentRoutes from "./routes/payment";
 
 export function createServer(): Express {
   const app = express();
@@ -75,6 +76,7 @@ export function createServer(): Express {
   app.use("/api/insights", insightRoutes);
   app.use("/api/insight-submissions", insightSubmissionRoutes);
   app.use("/api/affiliate", affiliateRoutes);
+  app.use("/api/payment", paymentRoutes);
 
   // Health check endpoint
   app.get("/health", async (req, res) => {
