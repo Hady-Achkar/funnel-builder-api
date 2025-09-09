@@ -16,6 +16,7 @@ import {
   generateUniqueSlug,
 } from "../../../helpers/funnel/shared";
 import { format } from "date-fns";
+import { $Enums } from "../../../generated/prisma-client";
 
 export const createFunnel = async (
   userId: number,
@@ -185,6 +186,7 @@ export const createFunnel = async (
       order: 1,
       funnelId: funnel.id,
       linkingId: "home",
+      type: $Enums.PageType.PAGE,
     };
 
     const homePage = await tx.page.create({

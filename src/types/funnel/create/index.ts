@@ -79,16 +79,16 @@ export const createFunnelPayload = z.object(
 export const createFunnelSettingsPayload = z.object(
   {
     funnelId: z.number({ message: "Funnel ID must be a valid number" }),
-    defaultSeoTitle: z.null().optional(),
-    defaultSeoDescription: z.null().optional(),
-    defaultSeoKeywords: z.null().optional(),
-    favicon: z.null().optional(),
-    ogImage: z.null().optional(),
-    googleAnalyticsId: z.null().optional(),
-    facebookPixelId: z.null().optional(),
-    cookieConsentText: z.null().optional(),
-    privacyPolicyUrl: z.null().optional(),
-    termsOfServiceUrl: z.null().optional(),
+    defaultSeoTitle: z.string().nullable().optional(),
+    defaultSeoDescription: z.string().nullable().optional(),
+    defaultSeoKeywords: z.string().nullable().optional(),
+    favicon: z.string().nullable().optional(),
+    ogImage: z.string().nullable().optional(),
+    googleAnalyticsId: z.string().nullable().optional(),
+    facebookPixelId: z.string().nullable().optional(),
+    cookieConsentText: z.string().nullable().optional(),
+    privacyPolicyUrl: z.string().nullable().optional(),
+    termsOfServiceUrl: z.string().nullable().optional(),
   },
   { message: "Funnel settings data is required" }
 );
@@ -114,6 +114,7 @@ export const createHomePagePayload = z.object(
     linkingId: z
       .string({ message: "Linking ID must be a string" })
       .min(1, "Linking ID cannot be empty"),
+    type: z.nativeEnum($Enums.PageType),
   },
   { message: "Home page creation data is required" }
 );
