@@ -5,8 +5,6 @@ import {
 } from "../../../types/funnel/create";
 import { $Enums } from "../../../generated/prisma-client";
 
-// Test fixtures for funnel creation - ONLY for test files
-
 // Workspace fixtures (used in funnel creation tests)
 export const mockWorkspace: WorkspacePayload = {
   id: 8,
@@ -21,7 +19,7 @@ export const mockWorkspace: WorkspacePayload = {
 
 export const mockWorkspaceMember: WorkspaceMemberPayload = {
   role: $Enums.WorkspaceRole.ADMIN,
-  permissions: ["CREATE_FUNNEL"],
+  permissions: [$Enums.WorkspacePermission.CREATE_FUNNELS],
 };
 
 // Funnel request fixtures
@@ -75,10 +73,10 @@ export const mockCreateFunnelResponse = {
 // Payload fixtures for testing factory logic
 export const mockCreateFunnelPayload = {
   name: "Test Funnel",
-  slug: "test-funnel", 
+  slug: "test-funnel",
   status: $Enums.FunnelStatus.DRAFT,
   workspaceId: 8,
-  createdBy: 1
+  createdBy: 1,
 };
 
 export const mockCreateFunnelSettingsPayload = {

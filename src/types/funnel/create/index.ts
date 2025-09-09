@@ -53,7 +53,7 @@ export const workspacePayload = z.object(
 
 export const workspaceMemberPayload = z.object({
   role: z.nativeEnum($Enums.WorkspaceRole, "Member role must be valid"),
-  permissions: z.any(),
+  permissions: z.array(z.nativeEnum($Enums.WorkspacePermission)),
 });
 
 export const createFunnelPayload = z.object(

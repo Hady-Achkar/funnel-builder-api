@@ -193,15 +193,18 @@ export const createFunnel = async (
 
     const funnelWithHomePage = {
       ...funnelWithTheme,
-      pages: [{
-        id: homePage.id,
-        name: homePage.name,
-        order: homePage.order,
-        linkingId: homePage.linkingId,
-        seoTitle: homePage.seoTitle,
-        seoDescription: homePage.seoDescription,
-        seoKeywords: homePage.seoKeywords,
-      }],
+      pages: [
+        {
+          id: homePage.id,
+          name: homePage.name,
+          order: homePage.order,
+          linkingId: homePage.linkingId,
+          seoTitle: homePage.seoTitle,
+          seoDescription: homePage.seoDescription,
+          seoKeywords: homePage.seoKeywords,
+          type: homePage.type,
+        },
+      ],
     };
 
     return { funnel: funnelWithHomePage, homePage };
