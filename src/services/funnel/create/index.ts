@@ -3,13 +3,11 @@ import {
   CreateFunnelResponse,
   WorkspacePayload,
   WorkspaceMemberPayload,
+  CreateFunnelPayload,
+  CreateFunnelSettingsPayload,
+  CreateHomePagePayload,
+  UpdateFunnelWithThemePayload,
 } from "../../../types/funnel/create";
-import {
-  createFunnelPayloadFactory,
-  createFunnelSettingsPayloadFactory,
-  createHomePagePayloadFactory,
-  updateFunnelWithThemePayloadFactory,
-} from "../../../factories/funnel/create";
 import { getPrisma } from "../../../lib/prisma";
 import { hasPermissionToCreateFunnel } from "../../../helpers/funnel/create";
 import {
@@ -22,7 +20,7 @@ import { format } from "date-fns";
 export const createFunnel = async (
   userId: number,
   data: CreateFunnelRequest
-): Promise<CreateFunnelResponse> => {
+): Promise<{ response: CreateFunnelResponse; workspaceId: number }> => {
   if (!userId) throw new Error("User ID is required");
 
   if (!data.workspaceSlug) {
@@ -31,7 +29,7 @@ export const createFunnel = async (
 
   const prisma = getPrisma();
 
-  const workspace: WorkspacePayload = await prisma.workspace.findUniqueOrThrow({
+  const workspace: WorkspacePayload | null = await prisma.workspace.findUnique({
     where: { slug: data.workspaceSlug },
     select: {
       id: true,
@@ -46,6 +44,10 @@ export const createFunnel = async (
       },
     },
   });
+
+  if (!workspace) {
+    throw new Error(`The workspace was not found`);
+  }
 
   const currentFunnelCount = await prisma.funnel.count({
     where: { workspaceId: workspace.id },
@@ -121,13 +123,13 @@ export const createFunnel = async (
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const createFunnelData = createFunnelPayloadFactory(
-      data.name,
+    const createFunnelData: CreateFunnelPayload = {
+      name: data.name,
       slug,
-      data.status,
-      workspace.id,
-      userId
-    );
+      status: data.status,
+      workspaceId: workspace.id,
+      createdBy: userId,
+    };
 
     const funnel = await tx.funnel.create({
       data: createFunnelData,
@@ -135,15 +137,27 @@ export const createFunnel = async (
 
     const theme = await tx.theme.create({ data: {} });
 
-    const createFunnelSettingsData = createFunnelSettingsPayloadFactory(
-      funnel.id
-    );
+    const createFunnelSettingsData: CreateFunnelSettingsPayload = {
+      funnelId: funnel.id,
+      defaultSeoTitle: null,
+      defaultSeoDescription: null,
+      defaultSeoKeywords: null,
+      favicon: null,
+      ogImage: null,
+      googleAnalyticsId: null,
+      facebookPixelId: null,
+      cookieConsentText: null,
+      privacyPolicyUrl: null,
+      termsOfServiceUrl: null,
+    };
 
     await tx.funnelSettings.create({
       data: createFunnelSettingsData,
     });
 
-    const updateFunnelData = updateFunnelWithThemePayloadFactory(theme.id);
+    const updateFunnelData: UpdateFunnelWithThemePayload = {
+      themeId: theme.id,
+    };
 
     const funnelWithTheme = await tx.funnel.update({
       where: { id: funnel.id },
@@ -165,7 +179,13 @@ export const createFunnel = async (
       },
     });
 
-    const createHomePageData = createHomePagePayloadFactory(funnel.id);
+    const createHomePageData: CreateHomePagePayload = {
+      name: "Home",
+      content: "",
+      order: 1,
+      funnelId: funnel.id,
+      linkingId: "home",
+    };
 
     const homePage = await tx.page.create({
       data: createHomePageData,
@@ -173,7 +193,15 @@ export const createFunnel = async (
 
     const funnelWithHomePage = {
       ...funnelWithTheme,
-      pages: [homePage],
+      pages: [{
+        id: homePage.id,
+        name: homePage.name,
+        order: homePage.order,
+        linkingId: homePage.linkingId,
+        seoTitle: homePage.seoTitle,
+        seoDescription: homePage.seoDescription,
+        seoKeywords: homePage.seoKeywords,
+      }],
     };
 
     return { funnel: funnelWithHomePage, homePage };
@@ -182,8 +210,7 @@ export const createFunnel = async (
   const response: CreateFunnelResponse = {
     message: `Funnel created successfully!`,
     funnelId: result.funnel.id,
-    workspaceId: workspace.id,
   };
 
-  return response;
+  return { response, workspaceId: workspace.id };
 };

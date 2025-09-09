@@ -19,22 +19,31 @@ export const createFunnelController = async (
       throw new UnauthorizedError("Please log in to create a funnel");
     }
 
-    const result = await createFunnel(userId, validatedData);
+    const { response, workspaceId } = await createFunnel(userId, validatedData);
 
     try {
-      const cacheKey = `workspace:${result.workspaceId}:funnels:all`;
+      const cacheKey = `workspace:${workspaceId}:funnels:all`;
       await cacheService.del(cacheKey);
     } catch (cacheError) {
-      console.error("Cache invalidation failed in funnel create controller:", cacheError);
+      console.error(
+        "Cache invalidation failed in funnel create controller:",
+        cacheError
+      );
     }
 
-    return res.status(201).json(result);
+    return res.status(201).json(response);
   } catch (error) {
-    console.error("[FUNNEL_CREATE_CONTROLLER_ERROR] Error in funnel create controller:", error);
+    console.error(
+      "[FUNNEL_CREATE_CONTROLLER_ERROR] Error in funnel create controller:",
+      error
+    );
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: "Validation failed",
-        details: error.issues[0]?.message || "Invalid request data",
+        details:
+          error.issues.length > 0
+            ? error.issues.map((issue) => issue.message)
+            : ["Invalid request data"],
       });
     }
     return next(error);

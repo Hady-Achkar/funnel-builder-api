@@ -28,7 +28,6 @@ export const createFunnelRequest = z.object({
 export const createFunnelResponse = z.object({
   message: z.string(),
   funnelId: z.number(),
-  workspaceId: z.number(),
 });
 
 export const workspacePayload = z.object(
@@ -80,32 +79,16 @@ export const createFunnelPayload = z.object(
 export const createFunnelSettingsPayload = z.object(
   {
     funnelId: z.number({ message: "Funnel ID must be a valid number" }),
-    defaultSeoTitle: z.null({
-      message: "Default SEO title must be null initially",
-    }),
-    defaultSeoDescription: z.null({
-      message: "Default SEO description must be null initially",
-    }),
-    defaultSeoKeywords: z.null({
-      message: "Default SEO keywords must be null initially",
-    }),
-    favicon: z.null({ message: "Favicon must be null initially" }),
-    ogImage: z.null({ message: "OG image must be null initially" }),
-    googleAnalyticsId: z.null({
-      message: "Google Analytics ID must be null initially",
-    }),
-    facebookPixelId: z.null({
-      message: "Facebook Pixel ID must be null initially",
-    }),
-    cookieConsentText: z.null({
-      message: "Cookie consent text must be null initially",
-    }),
-    privacyPolicyUrl: z.null({
-      message: "Privacy policy URL must be null initially",
-    }),
-    termsOfServiceUrl: z.null({
-      message: "Terms of service URL must be null initially",
-    }),
+    defaultSeoTitle: z.null().optional(),
+    defaultSeoDescription: z.null().optional(),
+    defaultSeoKeywords: z.null().optional(),
+    favicon: z.null().optional(),
+    ogImage: z.null().optional(),
+    googleAnalyticsId: z.null().optional(),
+    facebookPixelId: z.null().optional(),
+    cookieConsentText: z.null().optional(),
+    privacyPolicyUrl: z.null().optional(),
+    termsOfServiceUrl: z.null().optional(),
   },
   { message: "Funnel settings data is required" }
 );
