@@ -1,4 +1,9 @@
 import sgMail from "@sendgrid/mail";
+import { 
+  getSubscriptionWelcomeEmailHtml, 
+  getSubscriptionWelcomeEmailText,
+  SubscriptionWelcomeTemplateData 
+} from "../../../../constants/emails/registration-emails/subscription-welcome";
 
 let initialized = false;
 
@@ -16,12 +21,20 @@ function initialize() {
 export async function sendSubscriptionVerificationEmail(
   to: string,
   firstName: string,
-  verificationToken: string
+  verificationToken: string,
+  temporaryPassword: string
 ): Promise<void> {
   try {
     initialize();
 
     const confirmationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+    const templateData: SubscriptionWelcomeTemplateData = {
+      firstName,
+      email: to,
+      temporaryPassword,
+      verificationLink: confirmationLink,
+    };
 
     const msg = {
       to,
@@ -29,11 +42,9 @@ export async function sendSubscriptionVerificationEmail(
         email: process.env.SENDGRID_FROM_EMAIL,
         name: "Digitalsite",
       },
-      templateId: "d-0ec5ea02e0e14ef380469a2ab63917d4",
-      dynamicTemplateData: {
-        firstName,
-        confirmationLink,
-      },
+      subject: "Welcome to Digitalsite - Verify Your Email",
+      html: getSubscriptionWelcomeEmailHtml(templateData),
+      text: getSubscriptionWelcomeEmailText(templateData),
     };
 
     await sgMail.send(msg);

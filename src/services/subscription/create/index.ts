@@ -8,10 +8,12 @@ import {
 } from "../../../types/subscription/create";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendSubscriptionVerificationEmail } from "../../../helpers/subscription/emails/create";
+import { sendAffiliateCongratulationsEmail } from "../../../helpers/subscription/emails/affiliate/congratulations";
 import { UsernameGenerator } from "../../../helpers/subscription/username-generator";
 import { parseCreatedDate } from "../../../helpers/subscription/date-parser";
 import { calculateEndDate } from "../../../helpers/subscription/end-date-calculator";
 import { mapFrequencyToIntervalUnit } from "../../../helpers/subscription/frequency-mapper";
+import { TemporaryPasswordGenerator } from "../../../helpers/subscription/password-generator";
 
 export class SubscriptionCreateService {
   static async createSubscription(
@@ -77,8 +79,8 @@ export class SubscriptionCreateService {
         );
       }
 
-      // 8. Generate verification token and password (user will set their own)
-      const tempPassword = Math.random().toString(36).slice(-8);
+      // 8. Generate verification token and readable temporary password
+      const tempPassword = TemporaryPasswordGenerator.generateReadablePassword();
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
       const tokenData = {
@@ -142,6 +144,14 @@ export class SubscriptionCreateService {
         // Find affiliate link by token
         const foundAffiliateLink = await prisma.affiliateLink.findUnique({
           where: { token: affiliateLink.token },
+          include: {
+            user: {
+              select: {
+                email: true,
+                firstName: true,
+              },
+            },
+          },
         });
 
         if (foundAffiliateLink) {
@@ -156,6 +166,16 @@ export class SubscriptionCreateService {
             },
           });
           affiliateCommission = affiliateAmount;
+
+          // Send congratulations email to affiliate owner
+          try {
+            await sendAffiliateCongratulationsEmail(
+              foundAffiliateLink.user.email,
+              foundAffiliateLink.user.firstName
+            );
+          } catch (emailError) {
+            console.error("Failed to send affiliate congratulations email:", emailError);
+          }
         }
       }
 
@@ -200,12 +220,13 @@ export class SubscriptionCreateService {
         },
       });
 
-      // 16. Send verification email
+      // 16. Send verification email with temporary password
       try {
         await sendSubscriptionVerificationEmail(
           createdUser.email,
           createdUser.firstName,
-          verificationToken
+          verificationToken,
+          tempPassword
         );
       } catch (emailError) {
         console.error("Failed to send verification email:", emailError);
