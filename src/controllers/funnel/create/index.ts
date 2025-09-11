@@ -1,10 +1,12 @@
 import { Response, NextFunction } from "express";
-import { z } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
-import { createFunnel } from "../../../services/funnel/create";
 import { createFunnelRequest } from "../../../types/funnel/create";
-import { UnauthorizedError } from "../../../errors/http-errors";
+import { checkUserCanCreateFunnel } from "./utils/checkUserPermissions";
+import { isFunnelNameAvailable } from "./utils/validateFunnelName";
+import { canWorkspaceCreateFunnel } from "./utils/checkWorkspaceLimit";
+import { createFunnel } from "../../../services/funnel/create";
 import { cacheService } from "../../../services/cache/cache.service";
+import z from "zod";
 
 export const createFunnelController = async (
   req: AuthRequest,
@@ -12,40 +14,75 @@ export const createFunnelController = async (
   next: NextFunction
 ) => {
   try {
-    const validatedData = createFunnelRequest.parse(req.body);
-
     const userId = req.userId;
     if (!userId) {
-      throw new UnauthorizedError("Please log in to create a funnel");
+      return res
+        .status(401)
+        .json({ error: "Please log in to create a funnel" });
+    }
+    const validatedData = createFunnelRequest.parse(req.body);
+
+    // Generate slug if not provided
+    if (!validatedData.slug) {
+      validatedData.slug = validatedData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
     }
 
-    const { response, workspaceId } = await createFunnel(userId, validatedData);
-
-    try {
-      const cacheKey = `workspace:${workspaceId}:funnels:all`;
-      await cacheService.del(cacheKey);
-    } catch (cacheError) {
-      console.error(
-        "Cache invalidation failed in funnel create controller:",
-        cacheError
-      );
-    }
-
-    return res.status(201).json(response);
-  } catch (error) {
-    console.error(
-      "[FUNNEL_CREATE_CONTROLLER_ERROR] Error in funnel create controller:",
-      error
+    const canCreate = await checkUserCanCreateFunnel(
+      userId,
+      validatedData.workspaceSlug
     );
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        error: "Validation failed",
-        details:
-          error.issues.length > 0
-            ? error.issues.map((issue) => issue.message)
-            : ["Invalid request data"],
+    if (!canCreate) {
+      return res.status(403).json({
+        error: "You don't have permission to create funnels in this workspace",
       });
     }
-    return next(error);
+
+    const canCreateFunnel = await canWorkspaceCreateFunnel(
+      validatedData.workspaceSlug
+    );
+    if (!canCreateFunnel) {
+      return res.status(400).json({
+        error: "Workspace has reached its maximum funnel limit",
+      });
+    }
+
+    const isValidName = await isFunnelNameAvailable(
+      validatedData.name,
+      validatedData.workspaceSlug
+    );
+    if (!isValidName) {
+      return res.status(400).json({
+        error: "Invalid funnel name or name already exists in this workspace",
+      });
+    }
+
+    const funnel = await createFunnel(userId, validatedData);
+
+    // Invalidate workspace funnels cache
+    try {
+      const cacheKey = `workspace:${funnel.workspaceId}:funnels:all`;
+      await cacheService.del(cacheKey);
+    } catch (cacheError) {
+      console.error("Cache invalidation failed in funnel create controller:", cacheError);
+    }
+
+    return res.status(201).json({
+      message: "Funnel created successfully",
+      funnelId: funnel.id,
+      funnelSlug: funnel.slug,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstIssue = error.issues[0];
+      const field = firstIssue.path.join(".");
+      return res.status(400).json({
+        error: `${field} ${firstIssue.message}`,
+      });
+    }
+
+    next(error);
   }
 };
