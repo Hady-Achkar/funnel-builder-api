@@ -1,5 +1,7 @@
 import { Funnel } from "../../../../generated/prisma-client";
 
+const DEFAULT_FUNNEL_NAME_PREFIX = "Funnel";
+
 interface FunnelDefaults {
   name: Pick<Funnel, "name">["name"];
   slug: Pick<Funnel, "slug">["slug"];
@@ -35,7 +37,7 @@ export const generateFunnelDefaults = (
     const year = now.getFullYear().toString().slice(-2);
     const randomCode = generateRandomCode(4);
 
-    finalName = `Funnel-${day}_${month}_${year}-${randomCode}`;
+    finalName = `${DEFAULT_FUNNEL_NAME_PREFIX}-${day}_${month}_${year}-${randomCode}`;
   }
 
   const finalSlug = providedSlug || generateSlugFromName(finalName);
