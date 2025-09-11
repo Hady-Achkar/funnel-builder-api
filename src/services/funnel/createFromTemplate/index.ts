@@ -144,7 +144,11 @@ export const createFromTemplate = async (
       });
 
       // Create theme
-      const theme = await tx.theme.create({ data: {} });
+      const theme = await tx.theme.create({ 
+        data: { 
+          funnelId: funnel.id 
+        } 
+      });
 
       // Update funnel with theme
       const funnelWithTheme = await tx.funnel.update({

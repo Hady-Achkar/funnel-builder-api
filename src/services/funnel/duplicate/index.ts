@@ -226,7 +226,22 @@ export const duplicateFunnel = async (
 
     // Duplicate funnel and pages in transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create new theme (copy of original)
+      // Generate unique slug for duplicated funnel
+      const baseSlug = generateSlug(finalFunnelName);
+      const uniqueSlug = await generateUniqueSlug(baseSlug, targetWorkspaceId);
+
+      // Create the new funnel first
+      const newFunnel = await tx.funnel.create({
+        data: {
+          name: finalFunnelName,
+          slug: uniqueSlug,
+          status: originalFunnel.status,
+          workspaceId: targetWorkspaceId,
+          createdBy: userId,
+        },
+      });
+
+      // Create new theme (copy of original) with funnel reference
       const newTheme = await tx.theme.create({
         data: {
           name: originalFunnel.theme?.name || "Default Theme",
@@ -238,23 +253,14 @@ export const duplicateFunnel = async (
           optionColor: originalFunnel.theme?.optionColor || "#16331b",
           fontFamily: originalFunnel.theme?.fontFamily || "Inter, sans-serif",
           borderRadius: originalFunnel.theme?.borderRadius || "SOFT",
+          funnelId: newFunnel.id,
         },
       });
 
-      // Generate unique slug for duplicated funnel
-      const baseSlug = generateSlug(finalFunnelName);
-      const uniqueSlug = await generateUniqueSlug(baseSlug, targetWorkspaceId);
-
-      // Create the new funnel
-      const newFunnel = await tx.funnel.create({
-        data: {
-          name: finalFunnelName,
-          slug: uniqueSlug,
-          status: originalFunnel.status,
-          workspaceId: targetWorkspaceId,
-          createdBy: userId,
-          themeId: newTheme.id,
-        },
+      // Update funnel with theme reference
+      const updatedFunnel = await tx.funnel.update({
+        where: { id: newFunnel.id },
+        data: { themeId: newTheme.id },
         include: {
           theme: true,
         },
@@ -278,7 +284,7 @@ export const duplicateFunnel = async (
             content: updatedContent,
             order: originalPage.order,
             type: originalPage.type, // Preserve the original type
-            funnelId: newFunnel.id,
+            funnelId: updatedFunnel.id,
             linkingId: newLinkingId,
             seoTitle: originalPage.seoTitle,
             seoDescription: originalPage.seoDescription,
@@ -289,7 +295,7 @@ export const duplicateFunnel = async (
         createdPages.push(newPage);
       }
 
-      return { funnel: newFunnel, pages: createdPages };
+      return { funnel: updatedFunnel, pages: createdPages };
     });
 
     // Cache management
