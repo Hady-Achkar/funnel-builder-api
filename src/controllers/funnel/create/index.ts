@@ -28,12 +28,16 @@ export const createFunnelController = async (
       validatedData.name,
       validatedData.slug
     );
-    validatedData.name = generatedFunnelDefaults.name;
-    validatedData.slug = generatedFunnelDefaults.slug;
+    
+    const funnelData = {
+      ...validatedData,
+      name: generatedFunnelDefaults.name,
+      slug: generatedFunnelDefaults.slug
+    };
 
     const canCreate = await checkUserCanCreateFunnel(
       userId,
-      validatedData.workspaceSlug
+      funnelData.workspaceSlug
     );
     if (!canCreate) {
       return res.status(403).json({
@@ -42,7 +46,7 @@ export const createFunnelController = async (
     }
 
     const canCreateFunnel = await canWorkspaceCreateFunnel(
-      validatedData.workspaceSlug
+      funnelData.workspaceSlug
     );
     if (!canCreateFunnel) {
       return res.status(400).json({
@@ -51,8 +55,8 @@ export const createFunnelController = async (
     }
 
     const isValidName = await isFunnelNameAvailable(
-      validatedData.name,
-      validatedData.workspaceSlug
+      funnelData.name,
+      funnelData.workspaceSlug
     );
     if (!isValidName) {
       return res.status(400).json({
@@ -60,7 +64,7 @@ export const createFunnelController = async (
       });
     }
 
-    const funnel = await createFunnel(userId, validatedData);
+    const funnel = await createFunnel(userId, funnelData);
 
     try {
       const cacheKey = CACHE_KEYS.WORKSPACE.FUNNELS.ALL(funnel.workspaceId);

@@ -10,17 +10,12 @@ export const canWorkspaceCreateFunnel = async (
     where: { slug: workspaceSlug },
     select: {
       allocatedFunnels: true,
-      owner: {
-        select: {
-          maximumFunnels: true
-        }
-      },
       _count: {
         select: {
-          funnels: true
-        }
-      }
-    }
+          funnels: true,
+        },
+      },
+    },
   });
 
   if (!workspace) {
@@ -28,7 +23,7 @@ export const canWorkspaceCreateFunnel = async (
   }
 
   const currentFunnelCount = workspace._count.funnels;
-  const maxAllowedFunnels = workspace.owner.maximumFunnels;
+  const maxAllowedFunnels = workspace.allocatedFunnels;
 
   return currentFunnelCount < maxAllowedFunnels;
 };

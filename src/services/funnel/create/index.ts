@@ -52,11 +52,7 @@ export const createFunnel = async (
 
       const theme: CreateThemePayload = await tx.theme.create({
         data: {
-          funnel: {
-            connect: {
-              id: funnel.id,
-            },
-          },
+          funnelId: funnel.id,
         },
       });
 

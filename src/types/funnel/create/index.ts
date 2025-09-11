@@ -20,6 +20,7 @@ export const createFunnelRequest = z.object({
         $Enums.FunnelStatus
       ).join(", ")}`,
     })
+    .optional()
     .default($Enums.FunnelStatus.DRAFT),
   workspaceSlug: z.string().trim().min(1, "Workspace slug is required"),
 });
