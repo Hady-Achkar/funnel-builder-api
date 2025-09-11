@@ -6,6 +6,7 @@ import { isFunnelNameAvailable } from "./utils/validateFunnelName";
 import { canWorkspaceCreateFunnel } from "./utils/checkWorkspaceLimit";
 import { createFunnel } from "../../../services/funnel/create";
 import { cacheService } from "../../../services/cache/cache.service";
+import { CACHE_KEYS } from "../../../config/cache-keys";
 import z from "zod";
 
 export const createFunnelController = async (
@@ -61,12 +62,14 @@ export const createFunnelController = async (
 
     const funnel = await createFunnel(userId, validatedData);
 
-    // Invalidate workspace funnels cache
     try {
-      const cacheKey = `workspace:${funnel.workspaceId}:funnels:all`;
+      const cacheKey = CACHE_KEYS.WORKSPACE.FUNNELS.ALL(funnel.workspaceId);
       await cacheService.del(cacheKey);
     } catch (cacheError) {
-      console.error("Cache invalidation failed in funnel create controller:", cacheError);
+      console.error(
+        "Cache invalidation failed in funnel create controller:",
+        cacheError
+      );
     }
 
     return res.status(201).json({
