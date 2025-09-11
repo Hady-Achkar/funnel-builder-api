@@ -11493,7 +11493,6 @@ export namespace Prisma {
     themeId?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
-    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
   export type FunnelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -11508,7 +11507,6 @@ export namespace Prisma {
     themeId?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
-    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }, ExtArgs["result"]["funnel"]>
 
   export type FunnelSelectScalar = {
@@ -11537,12 +11535,10 @@ export namespace Prisma {
   export type FunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
-    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }
   export type FunnelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
-    theme?: boolean | Funnel$themeArgs<ExtArgs>
   }
 
   export type $FunnelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17347,10 +17343,12 @@ export namespace Prisma {
 
   export type ThemeAvgAggregateOutputType = {
     id: number | null
+    funnelId: number | null
   }
 
   export type ThemeSumAggregateOutputType = {
     id: number | null
+    funnelId: number | null
   }
 
   export type ThemeMinAggregateOutputType = {
@@ -17366,6 +17364,7 @@ export namespace Prisma {
     borderRadius: $Enums.BorderRadius | null
     createdAt: Date | null
     updatedAt: Date | null
+    funnelId: number | null
   }
 
   export type ThemeMaxAggregateOutputType = {
@@ -17381,6 +17380,7 @@ export namespace Prisma {
     borderRadius: $Enums.BorderRadius | null
     createdAt: Date | null
     updatedAt: Date | null
+    funnelId: number | null
   }
 
   export type ThemeCountAggregateOutputType = {
@@ -17396,16 +17396,19 @@ export namespace Prisma {
     borderRadius: number
     createdAt: number
     updatedAt: number
+    funnelId: number
     _all: number
   }
 
 
   export type ThemeAvgAggregateInputType = {
     id?: true
+    funnelId?: true
   }
 
   export type ThemeSumAggregateInputType = {
     id?: true
+    funnelId?: true
   }
 
   export type ThemeMinAggregateInputType = {
@@ -17421,6 +17424,7 @@ export namespace Prisma {
     borderRadius?: true
     createdAt?: true
     updatedAt?: true
+    funnelId?: true
   }
 
   export type ThemeMaxAggregateInputType = {
@@ -17436,6 +17440,7 @@ export namespace Prisma {
     borderRadius?: true
     createdAt?: true
     updatedAt?: true
+    funnelId?: true
   }
 
   export type ThemeCountAggregateInputType = {
@@ -17451,6 +17456,7 @@ export namespace Prisma {
     borderRadius?: true
     createdAt?: true
     updatedAt?: true
+    funnelId?: true
     _all?: true
   }
 
@@ -17553,6 +17559,7 @@ export namespace Prisma {
     borderRadius: $Enums.BorderRadius
     createdAt: Date
     updatedAt: Date
+    funnelId: number
     _count: ThemeCountAggregateOutputType | null
     _avg: ThemeAvgAggregateOutputType | null
     _sum: ThemeSumAggregateOutputType | null
@@ -17587,7 +17594,8 @@ export namespace Prisma {
     borderRadius?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    funnel?: boolean | Theme$funnelArgs<ExtArgs>
+    funnelId?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["theme"]>
 
   export type ThemeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -17603,6 +17611,8 @@ export namespace Prisma {
     borderRadius?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    funnelId?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["theme"]>
 
   export type ThemeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -17618,6 +17628,8 @@ export namespace Prisma {
     borderRadius?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    funnelId?: boolean
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["theme"]>
 
   export type ThemeSelectScalar = {
@@ -17633,19 +17645,24 @@ export namespace Prisma {
     borderRadius?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    funnelId?: boolean
   }
 
-  export type ThemeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "backgroundColor" | "textColor" | "buttonColor" | "buttonTextColor" | "borderColor" | "optionColor" | "fontFamily" | "borderRadius" | "createdAt" | "updatedAt", ExtArgs["result"]["theme"]>
+  export type ThemeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "backgroundColor" | "textColor" | "buttonColor" | "buttonTextColor" | "borderColor" | "optionColor" | "fontFamily" | "borderRadius" | "createdAt" | "updatedAt" | "funnelId", ExtArgs["result"]["theme"]>
   export type ThemeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    funnel?: boolean | Theme$funnelArgs<ExtArgs>
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
   }
-  export type ThemeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type ThemeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ThemeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
+  export type ThemeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    funnel?: boolean | FunnelDefaultArgs<ExtArgs>
+  }
 
   export type $ThemePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Theme"
     objects: {
-      funnel: Prisma.$FunnelPayload<ExtArgs> | null
+      funnel: Prisma.$FunnelPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -17660,6 +17677,7 @@ export namespace Prisma {
       borderRadius: $Enums.BorderRadius
       createdAt: Date
       updatedAt: Date
+      funnelId: number
     }, ExtArgs["result"]["theme"]>
     composites: {}
   }
@@ -18054,7 +18072,7 @@ export namespace Prisma {
    */
   export interface Prisma__ThemeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    funnel<T extends Theme$funnelArgs<ExtArgs> = {}>(args?: Subset<T, Theme$funnelArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    funnel<T extends FunnelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FunnelDefaultArgs<ExtArgs>>): Prisma__FunnelClient<$Result.GetResult<Prisma.$FunnelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18096,6 +18114,7 @@ export namespace Prisma {
     readonly borderRadius: FieldRef<"Theme", 'BorderRadius'>
     readonly createdAt: FieldRef<"Theme", 'DateTime'>
     readonly updatedAt: FieldRef<"Theme", 'DateTime'>
+    readonly funnelId: FieldRef<"Theme", 'Int'>
   }
     
 
@@ -18345,6 +18364,10 @@ export namespace Prisma {
      */
     data: ThemeCreateManyInput | ThemeCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -18415,6 +18438,10 @@ export namespace Prisma {
      * Limit how many Themes to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -18481,25 +18508,6 @@ export namespace Prisma {
      * Limit how many Themes to delete.
      */
     limit?: number
-  }
-
-  /**
-   * Theme.funnel
-   */
-  export type Theme$funnelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Funnel
-     */
-    select?: FunnelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Funnel
-     */
-    omit?: FunnelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FunnelInclude<ExtArgs> | null
-    where?: FunnelWhereInput
   }
 
   /**
@@ -31714,7 +31722,8 @@ export namespace Prisma {
     fontFamily: 'fontFamily',
     borderRadius: 'borderRadius',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    funnelId: 'funnelId'
   };
 
   export type ThemeScalarFieldEnum = (typeof ThemeScalarFieldEnum)[keyof typeof ThemeScalarFieldEnum]
@@ -33319,7 +33328,8 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusFilter<"Theme"> | $Enums.BorderRadius
     createdAt?: DateTimeFilter<"Theme"> | Date | string
     updatedAt?: DateTimeFilter<"Theme"> | Date | string
-    funnel?: XOR<FunnelNullableScalarRelationFilter, FunnelWhereInput> | null
+    funnelId?: IntFilter<"Theme"> | number
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
   }
 
   export type ThemeOrderByWithRelationInput = {
@@ -33335,11 +33345,13 @@ export namespace Prisma {
     borderRadius?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    funnelId?: SortOrder
     funnel?: FunnelOrderByWithRelationInput
   }
 
   export type ThemeWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    funnelId?: number
     AND?: ThemeWhereInput | ThemeWhereInput[]
     OR?: ThemeWhereInput[]
     NOT?: ThemeWhereInput | ThemeWhereInput[]
@@ -33354,8 +33366,8 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusFilter<"Theme"> | $Enums.BorderRadius
     createdAt?: DateTimeFilter<"Theme"> | Date | string
     updatedAt?: DateTimeFilter<"Theme"> | Date | string
-    funnel?: XOR<FunnelNullableScalarRelationFilter, FunnelWhereInput> | null
-  }, "id">
+    funnel?: XOR<FunnelScalarRelationFilter, FunnelWhereInput>
+  }, "id" | "funnelId">
 
   export type ThemeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -33370,6 +33382,7 @@ export namespace Prisma {
     borderRadius?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    funnelId?: SortOrder
     _count?: ThemeCountOrderByAggregateInput
     _avg?: ThemeAvgOrderByAggregateInput
     _max?: ThemeMaxOrderByAggregateInput
@@ -33393,6 +33406,7 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusWithAggregatesFilter<"Theme"> | $Enums.BorderRadius
     createdAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Theme"> | Date | string
+    funnelId?: IntWithAggregatesFilter<"Theme"> | number
   }
 
   export type InsightWhereInput = {
@@ -35025,6 +35039,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
@@ -35045,6 +35060,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
@@ -35056,6 +35072,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
@@ -35076,6 +35093,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
@@ -35099,6 +35117,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type FunnelUncheckedUpdateManyInput = {
@@ -35529,7 +35548,7 @@ export namespace Prisma {
     borderRadius?: $Enums.BorderRadius
     createdAt?: Date | string
     updatedAt?: Date | string
-    funnel?: FunnelCreateNestedOneWithoutThemeInput
+    funnel: FunnelCreateNestedOneWithoutThemeInput
   }
 
   export type ThemeUncheckedCreateInput = {
@@ -35545,7 +35564,7 @@ export namespace Prisma {
     borderRadius?: $Enums.BorderRadius
     createdAt?: Date | string
     updatedAt?: Date | string
-    funnel?: FunnelUncheckedCreateNestedOneWithoutThemeInput
+    funnelId: number
   }
 
   export type ThemeUpdateInput = {
@@ -35560,7 +35579,7 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    funnel?: FunnelUpdateOneWithoutThemeNestedInput
+    funnel?: FunnelUpdateOneRequiredWithoutThemeNestedInput
   }
 
   export type ThemeUncheckedUpdateInput = {
@@ -35576,7 +35595,7 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    funnel?: FunnelUncheckedUpdateOneWithoutThemeNestedInput
+    funnelId?: IntFieldUpdateOperationsInput | number
   }
 
   export type ThemeCreateManyInput = {
@@ -35592,6 +35611,7 @@ export namespace Prisma {
     borderRadius?: $Enums.BorderRadius
     createdAt?: Date | string
     updatedAt?: Date | string
+    funnelId: number
   }
 
   export type ThemeUpdateManyMutationInput = {
@@ -35621,6 +35641,7 @@ export namespace Prisma {
     borderRadius?: EnumBorderRadiusFieldUpdateOperationsInput | $Enums.BorderRadius
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    funnelId?: IntFieldUpdateOperationsInput | number
   }
 
   export type InsightCreateInput = {
@@ -37972,11 +37993,6 @@ export namespace Prisma {
     not?: NestedEnumBorderRadiusFilter<$PrismaModel> | $Enums.BorderRadius
   }
 
-  export type FunnelNullableScalarRelationFilter = {
-    is?: FunnelWhereInput | null
-    isNot?: FunnelWhereInput | null
-  }
-
   export type ThemeCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -37990,10 +38006,12 @@ export namespace Prisma {
     borderRadius?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type ThemeAvgOrderByAggregateInput = {
     id?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type ThemeMaxOrderByAggregateInput = {
@@ -38009,6 +38027,7 @@ export namespace Prisma {
     borderRadius?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type ThemeMinOrderByAggregateInput = {
@@ -38024,10 +38043,12 @@ export namespace Prisma {
     borderRadius?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type ThemeSumOrderByAggregateInput = {
     id?: SortOrder
+    funnelId?: SortOrder
   }
 
   export type EnumBorderRadiusWithAggregatesFilter<$PrismaModel = never> = {
@@ -39531,6 +39552,12 @@ export namespace Prisma {
     connect?: FunnelDomainWhereUniqueInput | FunnelDomainWhereUniqueInput[]
   }
 
+  export type ThemeUncheckedCreateNestedOneWithoutFunnelInput = {
+    create?: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutFunnelInput
+    connect?: ThemeWhereUniqueInput
+  }
+
   export type PageUncheckedCreateNestedManyWithoutFunnelInput = {
     create?: XOR<PageCreateWithoutFunnelInput, PageUncheckedCreateWithoutFunnelInput> | PageCreateWithoutFunnelInput[] | PageUncheckedCreateWithoutFunnelInput[]
     connectOrCreate?: PageCreateOrConnectWithoutFunnelInput | PageCreateOrConnectWithoutFunnelInput[]
@@ -39645,6 +39672,16 @@ export namespace Prisma {
     update?: FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput | FunnelDomainUpdateWithWhereUniqueWithoutFunnelInput[]
     updateMany?: FunnelDomainUpdateManyWithWhereWithoutFunnelInput | FunnelDomainUpdateManyWithWhereWithoutFunnelInput[]
     deleteMany?: FunnelDomainScalarWhereInput | FunnelDomainScalarWhereInput[]
+  }
+
+  export type ThemeUncheckedUpdateOneWithoutFunnelNestedInput = {
+    create?: XOR<ThemeCreateWithoutFunnelInput, ThemeUncheckedCreateWithoutFunnelInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutFunnelInput
+    upsert?: ThemeUpsertWithoutFunnelInput
+    disconnect?: ThemeWhereInput | boolean
+    delete?: ThemeWhereInput | boolean
+    connect?: ThemeWhereUniqueInput
+    update?: XOR<XOR<ThemeUpdateToOneWithWhereWithoutFunnelInput, ThemeUpdateWithoutFunnelInput>, ThemeUncheckedUpdateWithoutFunnelInput>
   }
 
   export type PageUncheckedUpdateManyWithoutFunnelNestedInput = {
@@ -39912,32 +39949,14 @@ export namespace Prisma {
     connect?: FunnelWhereUniqueInput
   }
 
-  export type FunnelUncheckedCreateNestedOneWithoutThemeInput = {
-    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
-    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
-    connect?: FunnelWhereUniqueInput
-  }
-
   export type EnumBorderRadiusFieldUpdateOperationsInput = {
     set?: $Enums.BorderRadius
   }
 
-  export type FunnelUpdateOneWithoutThemeNestedInput = {
+  export type FunnelUpdateOneRequiredWithoutThemeNestedInput = {
     create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
     connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
     upsert?: FunnelUpsertWithoutThemeInput
-    disconnect?: FunnelWhereInput | boolean
-    delete?: FunnelWhereInput | boolean
-    connect?: FunnelWhereUniqueInput
-    update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutThemeInput, FunnelUpdateWithoutThemeInput>, FunnelUncheckedUpdateWithoutThemeInput>
-  }
-
-  export type FunnelUncheckedUpdateOneWithoutThemeNestedInput = {
-    create?: XOR<FunnelCreateWithoutThemeInput, FunnelUncheckedCreateWithoutThemeInput>
-    connectOrCreate?: FunnelCreateOrConnectWithoutThemeInput
-    upsert?: FunnelUpsertWithoutThemeInput
-    disconnect?: FunnelWhereInput | boolean
-    delete?: FunnelWhereInput | boolean
     connect?: FunnelWhereUniqueInput
     update?: XOR<XOR<FunnelUpdateToOneWithWhereWithoutThemeInput, FunnelUpdateWithoutThemeInput>, FunnelUncheckedUpdateWithoutThemeInput>
   }
@@ -40938,6 +40957,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
@@ -40956,6 +40976,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
@@ -42374,6 +42395,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
@@ -42392,6 +42414,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
@@ -43740,6 +43763,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     theme?: ThemeCreateNestedOneWithoutFunnelInput
@@ -43758,6 +43782,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     themeId?: number | null
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
@@ -43841,6 +43866,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
@@ -43859,6 +43885,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
@@ -43870,6 +43897,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
@@ -43889,6 +43917,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
@@ -43915,6 +43944,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
@@ -43934,6 +43964,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
@@ -44059,6 +44090,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
@@ -44076,6 +44108,7 @@ export namespace Prisma {
     createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
@@ -44104,6 +44137,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
@@ -44121,6 +44155,7 @@ export namespace Prisma {
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
@@ -44133,6 +44168,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
@@ -44152,6 +44188,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     settings?: FunnelSettingsUncheckedCreateNestedOneWithoutFunnelInput
   }
@@ -44205,6 +44242,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
@@ -44224,6 +44262,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
   }
@@ -45364,6 +45403,7 @@ export namespace Prisma {
     status?: $Enums.FunnelStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    themeId?: number | null
     workspace: WorkspaceCreateNestedOneWithoutFunnelsInput
     creator: UserCreateNestedOneWithoutCreatedFunnelsInput
     domainConnections?: FunnelDomainCreateNestedManyWithoutFunnelInput
@@ -45383,6 +45423,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     themeId?: number | null
     domainConnections?: FunnelDomainUncheckedCreateNestedManyWithoutFunnelInput
+    theme?: ThemeUncheckedCreateNestedOneWithoutFunnelInput
     pages?: PageUncheckedCreateNestedManyWithoutFunnelInput
     insights?: InsightUncheckedCreateNestedManyWithoutFunnelInput
   }
@@ -45409,6 +45450,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
@@ -45428,6 +45470,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
   }
@@ -45625,6 +45668,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     workspace?: WorkspaceUpdateOneRequiredWithoutFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
@@ -45643,6 +45687,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput
@@ -46167,6 +46212,7 @@ export namespace Prisma {
     status?: EnumFunnelStatusFieldUpdateOperationsInput | $Enums.FunnelStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    themeId?: NullableIntFieldUpdateOperationsInput | number | null
     creator?: UserUpdateOneRequiredWithoutCreatedFunnelsNestedInput
     domainConnections?: FunnelDomainUpdateManyWithoutFunnelNestedInput
     theme?: ThemeUpdateOneWithoutFunnelNestedInput
@@ -46185,6 +46231,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     themeId?: NullableIntFieldUpdateOperationsInput | number | null
     domainConnections?: FunnelDomainUncheckedUpdateManyWithoutFunnelNestedInput
+    theme?: ThemeUncheckedUpdateOneWithoutFunnelNestedInput
     pages?: PageUncheckedUpdateManyWithoutFunnelNestedInput
     settings?: FunnelSettingsUncheckedUpdateOneWithoutFunnelNestedInput
     insights?: InsightUncheckedUpdateManyWithoutFunnelNestedInput

@@ -7,8 +7,7 @@ export const createFunnelRequest = z.object({
     .trim()
     .min(1, "Name is required")
     .max(50, "Name must be less than 50 characters")
-    .optional()
-    .default(() => `Funnel ${new Date().toLocaleDateString()}`),
+    .optional(),
   slug: z
     .string({ message: "Funnel slug must be a string" })
     .trim()

@@ -4,6 +4,7 @@ import { createFunnelRequest } from "../../../types/funnel/create";
 import { checkUserCanCreateFunnel } from "./utils/checkUserPermissions";
 import { isFunnelNameAvailable } from "./utils/validateFunnelName";
 import { canWorkspaceCreateFunnel } from "./utils/checkWorkspaceLimit";
+import { generateFunnelDefaults } from "./utils/generateFunnelDefaults";
 import { createFunnel } from "../../../services/funnel/create";
 import { cacheService } from "../../../services/cache/cache.service";
 import { CACHE_KEYS } from "../../../config/cache-keys";
@@ -23,13 +24,12 @@ export const createFunnelController = async (
     }
     const validatedData = createFunnelRequest.parse(req.body);
 
-    // Generate slug if not provided
-    if (!validatedData.slug) {
-      validatedData.slug = validatedData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-    }
+    const generatedFunnelDefaults = generateFunnelDefaults(
+      validatedData.name,
+      validatedData.slug
+    );
+    validatedData.name = generatedFunnelDefaults.name;
+    validatedData.slug = generatedFunnelDefaults.slug;
 
     const canCreate = await checkUserCanCreateFunnel(
       userId,

@@ -210,7 +210,7 @@ model Funnel {
   updatedAt         DateTime        @updatedAt
   themeId           Int?            @unique
   domainConnections FunnelDomain[]
-  theme             Theme?          @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  theme             Theme?
   pages             Page[]
   settings          FunnelSettings?
   insights          Insight[]
@@ -355,7 +355,8 @@ model Theme {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  funnel Funnel?
+  funnel   Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  funnelId Int    @unique
 
   @@map("themes")
 }

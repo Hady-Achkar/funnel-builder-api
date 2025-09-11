@@ -296,7 +296,8 @@ exports.Prisma.ThemeScalarFieldEnum = {
   fontFamily: 'fontFamily',
   borderRadius: 'borderRadius',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  funnelId: 'funnelId'
 };
 
 exports.Prisma.InsightScalarFieldEnum = {
