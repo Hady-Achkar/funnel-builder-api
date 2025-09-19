@@ -47,8 +47,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install production dependencies only (without prisma CLI)
-RUN pnpm install --prod --frozen-lockfile && \
+# Install production dependencies AND prisma CLI for migrations
+RUN pnpm install --frozen-lockfile && \
     pnpm store prune
 
 # Copy built application
@@ -58,7 +58,7 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 # The compiled JS expects it at ./generated relative to dist
 COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./dist/generated
 
-# Copy Prisma schema (for reference, not for generation)
+# Copy Prisma schema and migrations for deployment
 COPY --chown=nodejs:nodejs prisma ./prisma
 
 # Create necessary directories
