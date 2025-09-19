@@ -6,7 +6,8 @@ export const getAllWorkspacesResponse = z.array(
     id: z.number(),
     name: z.string(),
     slug: z.string(),
-    role: z.nativeEnum($Enums.WorkspaceRole),
+    role: z.enum($Enums.WorkspaceRole),
+    funnelsCount: z.number(),
   })
 );
 
