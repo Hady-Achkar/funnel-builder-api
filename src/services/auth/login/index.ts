@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { loginRequest, LoginResponse } from "../../../types/auth/login";
+import { User } from "../../../generated/prisma-client";
 
 // Internal service response includes token
 interface LoginServiceResponse extends LoginResponse {
@@ -19,7 +20,7 @@ export class LoginService {
 
       // Check if input is email or username
       const isEmail = identifier.includes("@");
-      
+
       const user = await prisma.user.findUnique({
         where: isEmail ? { email: identifier } : { username: identifier },
         select: {
@@ -46,14 +47,16 @@ export class LoginService {
 
       // Check if user email is verified
       if (!user.verified) {
-        throw new Error("Please verify your email address before logging in. Check your inbox for a verification link.");
+        throw new Error(
+          "Please verify your email address before logging in. Check your inbox for a verification link."
+        );
       }
 
-      const token = this.generateToken(user.id);
+      const token = this.generateToken(user);
 
       return {
         message: "Login successful",
-        token, // Keep token for setting cookie in controller
+        token,
         user: {
           id: user.id,
           email: user.email,
@@ -72,12 +75,26 @@ export class LoginService {
     }
   }
 
-  private static generateToken(userId: number): string {
+  private static generateToken(
+    user: Pick<
+      User,
+      "id" | "email" | "username" | "firstName" | "lastName" | "isAdmin"
+    >
+  ): string {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       throw new Error("JWT secret not configured");
     }
 
-    return jwt.sign({ userId }, jwtSecret, { expiresIn: "180d" });
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isAdmin: user.isAdmin || false,
+    };
+
+    return jwt.sign(payload, jwtSecret, { expiresIn: "180d" });
   }
 }
