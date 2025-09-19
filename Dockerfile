@@ -61,9 +61,10 @@ COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./dist/generated
 # Copy Prisma schema and migrations for deployment
 COPY --chown=nodejs:nodejs prisma ./prisma
 
-# Create necessary directories
+# Create necessary directories and fix permissions
 RUN mkdir -p /app/logs && \
-    chown -R nodejs:nodejs /app/logs
+    chown -R nodejs:nodejs /app/logs && \
+    chown -R nodejs:nodejs /app/node_modules
 
 # Switch to non-root user
 USER nodejs
