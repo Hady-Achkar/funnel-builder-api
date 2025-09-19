@@ -28,60 +28,60 @@ enum IntervalUnit {
 }
 
 model User {
-  id                        Int                @id @default(autoincrement())
-  email                     String             @unique
-  username                  String             @unique
-  firstName                 String
-  lastName                  String
-  password                  String
-  verified                  Boolean            @default(false)
-  verificationToken         String?            @unique
+  id                         Int               @id @default(autoincrement())
+  email                      String            @unique
+  username                   String            @unique
+  firstName                  String
+  lastName                   String
+  password                   String
+  verified                   Boolean           @default(false)
+  verificationToken          String?           @unique
   verificationTokenExpiresAt DateTime?
-  passwordResetToken        String?            @unique
-  passwordResetExpiresAt    DateTime?
-  isAdmin                   Boolean            @default(false)
-  plan                      UserPlan           
-  referralLinkUsedId        Int?               // Reference to affiliate link that was used for signup
-  balance                   Float              @default(0) // Affiliate balance
-  createdAt                 DateTime           @default(now())
-  updatedAt                 DateTime           @updatedAt
-  maximumFunnels            Int                @default(5) // Total funnel budget for the user
-  maximumCustomDomains      Int                @default(1) // Total custom domain budget
-  maximumSubdomains         Int                @default(3) // Total subdomain budget
-  maximumAdmins             Int                @default(1) // Total admin budget for the user
-  trialStartDate            DateTime?          // Trial start date
-  trialEndDate              DateTime?          // Trial end date
-  workspaceMembers          WorkspaceMember[]
-  ownedWorkspaces           Workspace[]        @relation("WorkspaceOwner")
-  createdFunnels            Funnel[]           @relation("FunnelCreator")
-  createdDomains            Domain[]           @relation("DomainCreator")
-  templates                 Template[]
-  imageFolders              ImageFolder[]
-  affiliateLinks            AffiliateLink[]    @relation("AffiliateOwner")
-  referralLinkUsed          AffiliateLink?     @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
-  payments                  Payment[]          @relation("UserPayments")
-  subscriptions             Subscription[]     @relation("UserSubscriptions")
+  passwordResetToken         String?           @unique
+  passwordResetExpiresAt     DateTime?
+  isAdmin                    Boolean           @default(false)
+  plan                       UserPlan
+  referralLinkUsedId         Int? // Reference to affiliate link that was used for signup
+  balance                    Float             @default(0) // Affiliate balance
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  maximumFunnels             Int               @default(5) // Total funnel budget for the user
+  maximumCustomDomains       Int               @default(1) // Total custom domain budget
+  maximumSubdomains          Int               @default(3) // Total subdomain budget
+  maximumAdmins              Int               @default(1) // Total admin budget for the user
+  trialStartDate             DateTime? // Trial start date
+  trialEndDate               DateTime? // Trial end date
+  workspaceMembers           WorkspaceMember[]
+  ownedWorkspaces            Workspace[]       @relation("WorkspaceOwner")
+  createdFunnels             Funnel[]          @relation("FunnelCreator")
+  createdDomains             Domain[]          @relation("DomainCreator")
+  templates                  Template[]
+  imageFolders               ImageFolder[]
+  affiliateLinks             AffiliateLink[]   @relation("AffiliateOwner")
+  referralLinkUsed           AffiliateLink?    @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
+  payments                   Payment[]         @relation("UserPayments")
+  subscriptions              Subscription[]    @relation("UserSubscriptions")
 
   @@map("users")
 }
 
 model AffiliateLink {
-  id               Int        @id @default(autoincrement())
-  name             String
-  token            String     @unique
-  itemType         UserPlan   // BUSINESS, AGENCY, or FREE
-  userId           Int        // Owner of the affiliate link
-  clickCount       Int        @default(0)
-  totalAmount      Float      @default(0)
-  settings         Json?      @default("{}")
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  
+  id          Int      @id @default(autoincrement())
+  name        String
+  token       String   @unique
+  itemType    UserPlan // BUSINESS, AGENCY, or FREE
+  userId      Int // Owner of the affiliate link
+  clickCount  Int      @default(0)
+  totalAmount Float    @default(0)
+  settings    Json?    @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   // Relations
-  user             User       @relation("AffiliateOwner", fields: [userId], references: [id], onDelete: Cascade)
-  subscribedUsers  User[]     @relation("ReferralUsers")
-  payments         Payment[]
-  
+  user            User      @relation("AffiliateOwner", fields: [userId], references: [id], onDelete: Cascade)
+  subscribedUsers User[]    @relation("ReferralUsers")
+  payments        Payment[]
+
   @@index([token])
   @@index([userId])
   @@index([itemType])
@@ -89,24 +89,24 @@ model AffiliateLink {
 }
 
 model Payment {
-  id                     Int            @id @default(autoincrement())
-  transactionId          String         @unique
-  amount                 Float?
-  currency               String
-  status                 String
-  itemType               UserPlan      
-  buyerId                Int?       
-  affiliateLinkId        Int?
-  level1AffiliateAmount  Float?
-  affiliatePaid          Boolean        @default(false)
-  rawData                Json?          @default("{}")
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
-  
+  id                    Int      @id @default(autoincrement())
+  transactionId         String   @unique
+  amount                Float?
+  currency              String
+  status                String
+  itemType              UserPlan
+  buyerId               Int?
+  affiliateLinkId       Int?
+  level1AffiliateAmount Float?
+  affiliatePaid         Boolean  @default(false)
+  rawData               Json?    @default("{}")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
   // Relations
-  buyer                  User?          @relation("UserPayments", fields: [buyerId], references: [id])
-  affiliateLink          AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
-  
+  buyer         User?          @relation("UserPayments", fields: [buyerId], references: [id])
+  affiliateLink AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
+
   @@index([buyerId])
   @@index([affiliateLinkId])
   @@index([status])
@@ -127,10 +127,10 @@ model Subscription {
   subscriptionType UserPlan
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  
+
   // Relations
-  user             User               @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([status])
   @@index([subscriptionId])
@@ -149,27 +149,28 @@ model Workspace {
   allocatedSubdomains    Int      @default(0) // Subdomains allocated from user's budget
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
+  image                  String?
 
-  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members     WorkspaceMember[]
-  funnels     Funnel[]
-  domains     Domain[]
-  
+  owner   User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members WorkspaceMember[]
+  funnels Funnel[]
+  domains Domain[]
+
   @@map("workspaces")
 }
 
 model WorkspaceMember {
-  id          Int                     @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   userId      Int
   workspaceId Int
   role        WorkspaceRole
   permissions WorkspacePermission[]
-  joinedAt    DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
-  
-  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
+  joinedAt    DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
   @@unique([userId, workspaceId])
   @@index([workspaceId])
   @@index([userId])
@@ -198,19 +199,19 @@ enum WorkspacePermission {
 }
 
 model Funnel {
-  id                Int            @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   name              String
   slug              String
-  status            FunnelStatus   @default(DRAFT)
+  status            FunnelStatus    @default(DRAFT)
   workspaceId       Int
   createdBy         Int
-  workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  creator           User           @relation("FunnelCreator", fields: [createdBy], references: [id])
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  themeId           Int?           @unique
+  workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator           User            @relation("FunnelCreator", fields: [createdBy], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  themeId           Int?            @unique
   domainConnections FunnelDomain[]
-  theme             Theme?         @relation(fields: [themeId], references: [id])
+  theme             Theme?          @relation(fields: [themeId], references: [id])
   pages             Page[]
   settings          FunnelSettings?
   insights          Insight[]
@@ -279,20 +280,20 @@ model FunnelDomain {
 }
 
 model Page {
-  id        Int      @id @default(autoincrement())
-  name      String
-  content   String?
-  order     Int
-  type      PageType @default(PAGE)
-  linkingId String?
+  id             Int      @id @default(autoincrement())
+  name           String
+  content        String?
+  order          Int
+  type           PageType @default(PAGE)
+  linkingId      String?
   seoTitle       String?
   seoDescription String?
   seoKeywords    String?
-  visits    Int      @default(0)
-  funnelId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  funnel    Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  visits         Int      @default(0)
+  funnelId       Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  funnel         Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
 
   @@unique([funnelId, linkingId])
   @@map("pages")
@@ -311,10 +312,10 @@ model Session {
   interactions Json     @default("{}")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   formSubmissions    FormSubmission[]
   insightSubmissions InsightSubmission[]
-  
+
   @@index([sessionId])
   @@index([funnelId])
   @@index([createdAt])
@@ -344,12 +345,12 @@ enum SslStatus {
 model Theme {
   id              Int          @id @default(autoincrement())
   name            String       @default("Default Theme")
-  backgroundColor String       @default("#0e1e12")   
-  textColor       String       @default("#d4ecd0")   
-  buttonColor     String       @default("#387e3d")  
-  buttonTextColor String       @default("#e8f5e9")  
-  borderColor     String       @default("#214228")  
-  optionColor     String       @default("#16331b")  
+  backgroundColor String       @default("#0e1e12")
+  textColor       String       @default("#d4ecd0")
+  buttonColor     String       @default("#387e3d")
+  buttonTextColor String       @default("#e8f5e9")
+  borderColor     String       @default("#214228")
+  optionColor     String       @default("#16331b")
   fontFamily      String       @default("Inter, sans-serif")
   borderRadius    BorderRadius @default(SOFT)
   createdAt       DateTime     @default(now())
@@ -377,15 +378,15 @@ model Insight {
   type        InsightType
   name        String
   description String?
-  content     Json        // Questions and options
+  content     Json // Questions and options
   settings    Json?       @default("{}")
   funnelId    Int
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
+
   funnel      Funnel              @relation(fields: [funnelId], references: [id], onDelete: Cascade)
   submissions InsightSubmission[]
-  
+
   @@index([funnelId])
   @@index([type])
   @@map("insights")
@@ -399,10 +400,10 @@ model InsightSubmission {
   completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   insight Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  
+
   @@unique([insightId, sessionId])
   @@index([sessionId])
   @@map("insight_submissions")
@@ -423,22 +424,22 @@ model TemplateCategory {
 }
 
 model Template {
-  id                 Int                @id @default(autoincrement())
-  name               String
-  slug               String             @unique
-  description        String?
-  categoryId         Int
-  category           TemplateCategory   @relation(fields: [categoryId], references: [id])
-  previewImages      TemplateImage[]    
-  pages              TemplatePage[]   
-  tags               String[]          
-  usageCount         Int                @default(0)
-  isActive           Boolean            @default(true)
-  isPublic           Boolean            @default(true)
-  createdByUserId    Int
-  createdBy          User               @relation(fields: [createdByUserId], references: [id])
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id              Int              @id @default(autoincrement())
+  name            String
+  slug            String           @unique
+  description     String?
+  categoryId      Int
+  category        TemplateCategory @relation(fields: [categoryId], references: [id])
+  previewImages   TemplateImage[]
+  pages           TemplatePage[]
+  tags            String[]
+  usageCount      Int              @default(0)
+  isActive        Boolean          @default(true)
+  isPublic        Boolean          @default(true)
+  createdByUserId Int
+  createdBy       User             @relation(fields: [createdByUserId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([slug])
   @@index([categoryId])
@@ -448,15 +449,15 @@ model Template {
 }
 
 model TemplateImage {
-  id          Int      @id @default(autoincrement())
-  templateId  Int
-  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  imageUrl    String  
-  imageType   TemplateImageType @default(PREVIEW)
-  order       Int      @default(0)
-  caption     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         Int               @id @default(autoincrement())
+  templateId Int
+  template   Template          @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  imageType  TemplateImageType @default(PREVIEW)
+  order      Int               @default(0)
+  caption    String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 
   @@index([templateId])
   @@map("template_images")
@@ -468,49 +469,49 @@ enum TemplateImageType {
 }
 
 model TemplatePage {
-  id              Int      @id @default(autoincrement())
-  templateId      Int
-  template        Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  name            String
-  content         String?
-  order           Int
-  type            PageType @default(PAGE)
-  settings        Json?
-  linkingId       String? @unique
-  seoTitle        String?
-  seoDescription  String?
-  seoKeywords     String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  templateId     Int
+  template       Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  name           String
+  content        String?
+  order          Int
+  type           PageType @default(PAGE)
+  settings       Json?
+  linkingId      String?  @unique
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([templateId])
   @@map("template_pages")
 }
 
 model Image {
-  id          Int          @id @default(autoincrement())
-  name        String?
-  url         String
-  altText     String?
-  size        Int?
-  folderId    Int?
-  folder      ImageFolder? @relation("ImageFolderImages", fields: [folderId], references: [id], onDelete: Cascade)
+  id       Int          @id @default(autoincrement())
+  name     String?
+  url      String
+  altText  String?
+  size     Int?
+  folderId Int?
+  folder   ImageFolder? @relation("ImageFolderImages", fields: [folderId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("images")
 }
 
 model ImageFolder {
-  id          Int      @id @default(autoincrement())
-  name        String
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images      Image[]  @relation("ImageFolderImages")
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id     Int     @id @default(autoincrement())
+  name   String
+  userId Int
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images Image[] @relation("ImageFolderImages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, name])
   @@index([userId])
@@ -518,24 +519,24 @@ model ImageFolder {
 }
 
 model Form {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  formContent Json     
-  isActive    Boolean  @default(true)
-  funnelId    Int?
-  webhookUrl        String?   
-  webhookEnabled    Boolean   @default(false)
-  webhookHeaders    Json?     @default("{}") 
-  webhookSecret     String?   
-  webhookSuccessCount Int @default(0)
-  webhookFailureCount Int @default(0)
-  lastWebhookAt      DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id                  Int       @id @default(autoincrement())
+  name                String
+  description         String?
+  formContent         Json
+  isActive            Boolean   @default(true)
+  funnelId            Int?
+  webhookUrl          String?
+  webhookEnabled      Boolean   @default(false)
+  webhookHeaders      Json?     @default("{}")
+  webhookSecret       String?
+  webhookSuccessCount Int       @default(0)
+  webhookFailureCount Int       @default(0)
+  lastWebhookAt       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
   submissions FormSubmission[]
-  
+
   @@index([isActive])
   @@index([funnelId])
   @@index([webhookEnabled])
@@ -545,17 +546,17 @@ model Form {
 model FormSubmission {
   id            Int       @id @default(autoincrement())
   formId        Int
-  sessionId     String    
-  submittedData Json?     
+  sessionId     String
+  submittedData Json?
   isCompleted   Boolean   @default(false)
   completedAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   form    Form    @relation(fields: [formId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  
-  @@unique([formId, sessionId]) 
+
+  @@unique([formId, sessionId])
   @@index([sessionId])
   @@index([isCompleted])
   @@map("form_submissions")
@@ -584,7 +585,7 @@ model FunnelSettings {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   funnel                Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
-  
+
   @@index([funnelId])
   @@map("funnel_settings")
 }

@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
+import { v4 as uuidv4 } from "uuid";
 import { getPrisma } from "../../../lib/prisma";
 import { registerRequest, RegisterResponse } from "../../../types/auth/register";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
+import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 
 export class RegisterService {
   static async register(userData: unknown): Promise<RegisterResponse> {
@@ -48,6 +50,10 @@ export class RegisterService {
         maximumSubdomains,
       });
 
+      const verificationToken = uuidv4();
+      const verificationTokenExpiresAt = new Date();
+      verificationTokenExpiresAt.setHours(verificationTokenExpiresAt.getHours() + 24);
+
       const user = await prisma.user.create({
         data: {
           email,
@@ -55,7 +61,9 @@ export class RegisterService {
           firstName,
           lastName,
           password: hashedPassword,
-          verified: true,
+          verified: false,
+          verificationToken,
+          verificationTokenExpiresAt,
           isAdmin,
           plan,
           maximumFunnels: finalLimits.maximumFunnels,
@@ -64,9 +72,15 @@ export class RegisterService {
         },
       });
 
+      try {
+        await sendVerificationEmail(email, firstName, verificationToken);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+      }
+
       return {
         message:
-          "User created successfully.",
+          "User created successfully. Please check your email to verify your account.",
         user: {
           id: user.id,
           email: user.email,
