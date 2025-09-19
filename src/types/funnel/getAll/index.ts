@@ -35,7 +35,7 @@ export const getAllFunnelsResponse = z.object({
         ogImage: z.string().nullable(),
         googleAnalyticsId: z.string().nullable(),
         facebookPixelId: z.string().nullable(),
-        customTrackingScripts: z.any().nullable(),
+        customTrackingScripts: z.array(z.string()).nullable(),
         enableCookieConsent: z.boolean(),
         cookieConsentText: z.string().nullable(),
         privacyPolicyUrl: z.string().nullable(),
