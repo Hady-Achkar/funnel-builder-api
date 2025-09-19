@@ -14,8 +14,11 @@ on:
           - test
           - production
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
-  AZURE_CONTAINER_APP_NAME: digitalsite-api
   AZURE_RESOURCE_GROUP: digitalsite-eu-rg
   AZURE_CONTAINER_REGISTRY: digitalsiteeuacr
   NODE_VERSION: "20.x"
@@ -59,7 +62,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -69,7 +72,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Setup pnpm cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -111,7 +114,7 @@ jobs:
 
       - name: Set environment-specific variables
         run: |
-          if [ "${{ github.event.inputs.environment }}" == "production" ] || [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          if [ "${{ github.event.inputs.environment }}" == "production" ] || ([ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]); then
             echo "DEPLOYMENT_ENV=production" >> $GITHUB_ENV
             echo "CONTAINER_APP_ENV=digitalsite-prod-env" >> $GITHUB_ENV
             echo "CONTAINER_APP_NAME=digitalsite-api-prod" >> $GITHUB_ENV
@@ -132,7 +135,7 @@ jobs:
 
       - name: Build and push container image
         run: |
-          IMAGE_TAG=${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_CONTAINER_APP_NAME }}:${{ github.sha }}
+          IMAGE_TAG=${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_APP_NAME }}:${{ github.sha }}
           docker build -t $IMAGE_TAG .
           docker push $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
@@ -180,3 +183,5 @@ jobs:
           echo "✅ Deployment to ${{ env.DEPLOYMENT_ENV }} completed"
           echo "Container App URL: https://$CONTAINER_APP_URL"
           echo "Revision: ${{ github.sha }}"
+          echo "Environment: ${{ env.DEPLOYMENT_ENV }}"
+          echo "Deployed at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
