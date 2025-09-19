@@ -3,7 +3,6 @@ import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { registerRequest, RegisterResponse } from "../../../types/auth/register";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
-import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 
 export class RegisterService {
   static async register(userData: unknown): Promise<RegisterResponse> {
@@ -43,19 +42,6 @@ export class RegisterService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const tokenData = {
-        email,
-        password: hashedPassword,
-        timestamp: Date.now(),
-      };
-      const verificationToken = Buffer.from(JSON.stringify(tokenData)).toString(
-        "base64"
-      );
-      const verificationTokenExpiresAt = new Date();
-      verificationTokenExpiresAt.setHours(
-        verificationTokenExpiresAt.getHours() + 24
-      );
-
       const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {
         maximumFunnels,
         maximumCustomDomains,
@@ -69,9 +55,7 @@ export class RegisterService {
           firstName,
           lastName,
           password: hashedPassword,
-          verified: false,
-          verificationToken,
-          verificationTokenExpiresAt,
+          verified: true,
           isAdmin,
           plan,
           maximumFunnels: finalLimits.maximumFunnels,
@@ -80,19 +64,9 @@ export class RegisterService {
         },
       });
 
-      try {
-        await sendVerificationEmail(
-          user.email,
-          user.firstName,
-          verificationToken
-        );
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-      }
-
       return {
         message:
-          "User created successfully. Please check your email to verify your account.",
+          "User created successfully.",
         user: {
           id: user.id,
           email: user.email,
