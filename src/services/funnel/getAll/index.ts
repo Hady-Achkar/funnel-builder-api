@@ -87,7 +87,7 @@ export const getAllFunnels = async (
       const funnelsFromDb = await prisma.funnel.findMany({
         where: { workspaceId: workspace.id },
         include: {
-          theme: true,
+          settings: true,
         },
         orderBy: { createdAt: "desc" },
       });
@@ -98,11 +98,10 @@ export const getAllFunnels = async (
         slug: funnel.slug,
         status: funnel.status,
         workspaceId: funnel.workspaceId,
+        settings: funnel.settings,
         createdBy: funnel.createdBy,
-        themeId: funnel.themeId,
         createdAt: funnel.createdAt,
         updatedAt: funnel.updatedAt,
-        theme: funnel.theme,
       }));
 
       await cacheService.set(allFunnelsCacheKey, allFunnels, { ttl: 0 });
