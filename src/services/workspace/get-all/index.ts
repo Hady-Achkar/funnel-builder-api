@@ -21,15 +21,13 @@ export const getAllWorkspaces = async (
       where: {
         OR: [{ ownerId: userId }, { members: { some: { userId: userId } } }],
       },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        ownerId: true,
+      include: {
         members: {
           where: { userId: userId },
           select: { role: true },
         },
+        owner: true,
+        funnels: true,
       },
     });
 
