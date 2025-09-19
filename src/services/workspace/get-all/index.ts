@@ -26,7 +26,9 @@ export const getAllWorkspaces = async (
           where: { userId: userId },
           select: { role: true },
         },
-        owner: true,
+        owner: {
+          select: { id: true, firstName: true, lastName: true, username: true },
+        },
         _count: {
           select: { funnels: true },
         },
@@ -40,6 +42,7 @@ export const getAllWorkspaces = async (
           name: workspace.name,
           slug: workspace.slug,
           role: $Enums.WorkspaceRole.OWNER,
+          owner: workspace.owner,
           funnelsCount: workspace._count.funnels,
         };
       }
@@ -51,6 +54,7 @@ export const getAllWorkspaces = async (
         name: workspace.name,
         slug: workspace.slug,
         role: memberRole,
+        owner: workspace.owner,
         funnelsCount: workspace._count.funnels,
       };
     });
