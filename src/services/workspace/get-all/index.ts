@@ -39,9 +39,9 @@ export const getAllWorkspaces = async (
                 firstName: true,
                 lastName: true,
                 email: true,
-                username: true
-              }
-            }
+                username: true,
+              },
+            },
           },
         },
         owner: {
@@ -50,14 +50,14 @@ export const getAllWorkspaces = async (
             firstName: true,
             lastName: true,
             email: true,
-            username: true
+            username: true,
           },
         },
         _count: {
           select: {
             funnels: true,
             members: true,
-            domains: true
+            domains: true,
           },
         },
       },
@@ -75,7 +75,9 @@ export const getAllWorkspaces = async (
         // Owner has all permissions
         currentUserPermissions = Object.values($Enums.WorkspacePermission);
       } else {
-        const currentUserMember = workspace.members.find(m => m.userId === userId);
+        const currentUserMember = workspace.members.find(
+          (m) => m.userId === userId
+        );
         if (currentUserMember) {
           currentUserRole = currentUserMember.role;
           currentUserPermissions = currentUserMember.permissions || [];
@@ -93,17 +95,19 @@ export const getAllWorkspaces = async (
           email: workspace.owner.email,
           username: workspace.owner.username,
           role: $Enums.WorkspaceRole.OWNER,
-          permissions: Object.values($Enums.WorkspacePermission)
+          permissions: Object.values($Enums.WorkspacePermission),
         },
-        ...workspace.members.filter(m => m.userId !== workspace.ownerId).map(member => ({
-          id: member.user.id,
-          firstName: member.user.firstName,
-          lastName: member.user.lastName,
-          email: member.user.email,
-          username: member.user.username,
-          role: member.role,
-          permissions: member.permissions || []
-        }))
+        ...workspace.members
+          .filter((m) => m.userId !== workspace.ownerId)
+          .map((member) => ({
+            id: member.user.id,
+            firstName: member.user.firstName,
+            lastName: member.user.lastName,
+            email: member.user.email,
+            username: member.user.username,
+            role: member.role,
+            permissions: member.permissions || [],
+          })),
       ];
 
       return {
@@ -115,7 +119,6 @@ export const getAllWorkspaces = async (
         permissions: currentUserPermissions,
         owner: workspace.owner,
         members: membersList,
-        memberCount: workspace._count.members + 1, // +1 for owner
         funnelCount: workspace._count.funnels,
         domainCount: workspace._count.domains,
         createdAt: workspace.createdAt,
