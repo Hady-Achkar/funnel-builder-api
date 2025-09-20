@@ -1,17 +1,15 @@
 import { getPrisma } from "../../../lib/prisma";
 import { ZodError } from "zod";
 import {
-  CreateWorkspaceRequest,
   createWorkspaceRequest,
 } from "../../../types/workspace/create";
 import { DomainConfig } from "../../../types/domain/shared/domain.types";
 import {
   validateSlugAvailability,
   validateWorkspaceNameUniqueness,
-  validateUserAllocationBudget,
   validateSlugFormat,
-  validateAllocationAmounts,
 } from "../../../helpers/workspace/create";
+import { PlanLimitsHelper } from "../../../helpers/plan/limits";
 import { createARecord } from "../../../helpers/domain/create-subdomain";
 import {
   BadRequestError,
@@ -29,40 +27,33 @@ export class CreateWorkspaceService {
   ): Promise<{ message: string; workspaceId: number }> {
     try {
       const validatedData = createWorkspaceRequest.parse(requestData);
-      const { name, slug, description, allocations } = validatedData;
-
-      const finalAllocations = allocations || {
-        allocatedFunnels: 0,
-        allocatedCustomDomains: 0,
-        allocatedSubdomains: 0,
-      };
+      const { name, slug, description } = validatedData;
 
       // Validate slug format and availability
       validateSlugFormat(slug);
       await validateSlugAvailability(slug);
       await validateWorkspaceNameUniqueness(userId, name);
 
-      // Only validate allocations if they're provided and > 0
-      if (allocations) {
-        validateAllocationAmounts(finalAllocations);
+      const prisma = getPrisma();
 
-        // Only check budget if user is actually allocating resources
-        const hasAllocations =
-          finalAllocations.allocatedFunnels > 0 ||
-          finalAllocations.allocatedCustomDomains > 0 ||
-          finalAllocations.allocatedSubdomains > 0;
+      // Get user's plan and current workspace count
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan: true }
+      });
 
-        if (hasAllocations) {
-          await validateUserAllocationBudget({
-            userId,
-            requestedFunnels: finalAllocations.allocatedFunnels,
-            requestedCustomDomains: finalAllocations.allocatedCustomDomains,
-            requestedSubdomains: finalAllocations.allocatedSubdomains,
-          });
-        }
+      if (!user) {
+        throw new BadRequestError("User not found");
       }
 
-      const prisma = getPrisma();
+      const currentWorkspaceCount = await prisma.workspace.count({
+        where: { ownerId: userId }
+      });
+
+      // Check if user can create more workspaces based on their plan
+      if (!PlanLimitsHelper.canCreateWorkspace(user.plan, currentWorkspaceCount)) {
+        throw new BadRequestError("You have reached the workspace limit for your plan");
+      }
 
       // Prepare domain configuration for subdomain creation
       const workspaceDomainConfig: DomainConfig = {
@@ -87,9 +78,6 @@ export class CreateWorkspaceService {
             slug,
             description,
             ownerId: userId,
-            allocatedFunnels: finalAllocations.allocatedFunnels,
-            allocatedCustomDomains: finalAllocations.allocatedCustomDomains,
-            allocatedSubdomains: finalAllocations.allocatedSubdomains,
           },
         });
 

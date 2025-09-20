@@ -5,7 +5,6 @@ import {
   registerRequest,
   RegisterResponse,
 } from "../../../types/auth/register";
-import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 import { User } from "../../../generated/prisma-client";
 import { generateToken } from "../utils";
@@ -23,9 +22,6 @@ export class RegisterService {
         password,
         isAdmin,
         plan,
-        maximumFunnels,
-        maximumCustomDomains,
-        maximumSubdomains,
       } = validatedData;
 
       const prisma = getPrisma();
@@ -48,12 +44,6 @@ export class RegisterService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {
-        maximumFunnels,
-        maximumCustomDomains,
-        maximumSubdomains,
-      });
-
       const verificationToken = generateToken(userData);
       const verificationTokenExpiresAt = new Date();
       verificationTokenExpiresAt.setHours(
@@ -72,9 +62,6 @@ export class RegisterService {
           verificationTokenExpiresAt,
           isAdmin,
           plan,
-          maximumFunnels: finalLimits.maximumFunnels,
-          maximumCustomDomains: finalLimits.maximumCustomDomains,
-          maximumSubdomains: finalLimits.maximumSubdomains,
         },
       });
 

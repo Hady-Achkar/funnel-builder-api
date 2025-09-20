@@ -50,21 +50,6 @@ export const registerRequest = z.object({
       message: "Plan must be BUSINESS or AGENCY",
     })
     .default($Enums.UserPlan.BUSINESS),
-  maximumFunnels: z
-    .number()
-    .int()
-    .positive()
-    .optional(),
-  maximumCustomDomains: z
-    .number()
-    .int()
-    .min(0)
-    .optional(),
-  maximumSubdomains: z
-    .number()
-    .int()
-    .min(0)
-    .optional(),
 });
 
 export type RegisterRequest = z.infer<typeof registerRequest>;
