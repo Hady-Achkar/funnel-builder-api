@@ -17,14 +17,8 @@ export const verifyEmailController = async (
     }
 
     const result = await VerifyService.verifyEmail(token);
-    
-    // Set HTTP-only cookie with the JWT token
-    setAuthCookie(res, result.token);
-    
-    // Return response without token
-    const { token: jwtToken, ...responseWithoutToken } = result;
-    
-    return res.status(200).json(responseWithoutToken);
+
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }
