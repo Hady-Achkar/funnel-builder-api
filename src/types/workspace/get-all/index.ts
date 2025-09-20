@@ -1,19 +1,36 @@
 import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
+const workspaceMemberSchema = z.object({
+  id: z.number(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string(),
+  username: z.string(),
+  role: z.enum($Enums.WorkspaceRole),
+  permissions: z.array(z.enum($Enums.WorkspacePermission)),
+});
+
 export const getAllWorkspacesResponse = z.array(
   z.object({
     id: z.number(),
     name: z.string(),
     slug: z.string(),
+    description: z.string().nullable().optional(),
     role: z.enum($Enums.WorkspaceRole),
+    permissions: z.array(z.enum($Enums.WorkspacePermission)),
     owner: z.object({
       id: z.number(),
       firstName: z.string(),
       lastName: z.string(),
+      email: z.string(),
       username: z.string(),
     }),
-    funnelsCount: z.number(),
+    members: z.array(workspaceMemberSchema),
+    memberCount: z.number(),
+    funnelCount: z.number(),
+    domainCount: z.number(),
+    createdAt: z.date(),
   })
 );
 
