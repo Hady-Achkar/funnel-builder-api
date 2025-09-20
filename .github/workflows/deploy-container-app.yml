@@ -149,28 +149,6 @@ jobs:
           imageToDeploy: ${{ env.IMAGE_TAG }}
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
           targetPort: 4444
-          environmentVariables: |
-            DATABASE_URL=secretref:database-url
-            REDIS_URL=secretref:redis-url
-            JWT_SECRET=secretref:jwt-secret
-            NODE_ENV=${{ env.DEPLOYMENT_ENV }}
-            PORT=4444
-            AZURE_STORAGE_CONNECTION_STRING=secretref:azure-storage-connection-string
-            AZURE_STORAGE_CONTAINER_NAME=secretref:azure-storage-container-name
-            STORAGE_URL=secretref:storage-url
-            SENDGRID_API_KEY=secretref:sendgrid-api-key
-            SENDGRID_FROM_EMAIL=secretref:sendgrid-from-email
-            FRONTEND_URL=secretref:frontend-url
-            CF_API_TOKEN=secretref:cf-api-token
-            CF_ACCOUNT_ID=secretref:cf-account-id
-            CF_VERIFICATION_DOMAIN=secretref:cf-verification-domain
-            CF_DOMAIN=secretref:cf-domain
-            CF_ZONE_ID=secretref:cf-zone-id
-            WORKSPACE_DOMAIN=secretref:workspace-domain
-            WORKSPACE_ZONE_ID=secretref:workspace-zone-id
-            WORKSPACE_IP=secretref:workspace-ip
-            MAMOPAY_API_KEY=secretref:mamopay-api-key
-            MAMOPAY_API_URL=secretref:mamopay-api-url
 
       - name: Show deployment URL
         run: |
