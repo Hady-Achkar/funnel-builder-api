@@ -98,12 +98,7 @@ export class SubscriptionCreateService {
 
       // 9. Calculate plan limits
       const finalLimits = PlanLimitsHelper.calculateFinalLimits(
-        details.planType,
-        {
-          maximumFunnels: details.funnels,
-          maximumCustomDomains: details.customDomains,
-          maximumSubdomains: details.subdomains,
-        }
+        details.planType
       );
 
       // 10. Calculate trial dates based on subscription period
@@ -128,9 +123,7 @@ export class SubscriptionCreateService {
           verificationTokenExpiresAt,
           isAdmin: false,
           plan: details.planType,
-          maximumFunnels: finalLimits.maximumFunnels,
-          maximumCustomDomains: finalLimits.maximumCustomDomains,
-          maximumSubdomains: finalLimits.maximumSubdomains,
+          maximumWorkspaces: finalLimits.maximumWorkspaces,
           maximumAdmins: details.admins,
           trialStartDate,
           trialEndDate,

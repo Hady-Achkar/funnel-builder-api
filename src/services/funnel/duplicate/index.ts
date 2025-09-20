@@ -166,25 +166,15 @@ export const duplicateFunnel = async (
       };
     }
 
-    // Check if target workspace has reached its funnel allocation limit
-    const targetWorkspaceWithAllocations = await prisma.workspace.findUnique({
-      where: { id: targetWorkspaceId },
-      select: {
-        allocatedFunnels: true,
-      },
-    });
-
-    if (!targetWorkspaceWithAllocations) {
-      throw new Error("Target workspace not found");
-    }
-
+    // Check against fixed workspace limit of 3 funnels
+    const WORKSPACE_FUNNEL_LIMIT = 3;
     const currentFunnelCount = await prisma.funnel.count({
       where: { workspaceId: targetWorkspaceId },
     });
 
-    if (currentFunnelCount >= targetWorkspaceWithAllocations.allocatedFunnels) {
+    if (currentFunnelCount >= WORKSPACE_FUNNEL_LIMIT) {
       throw new Error(
-        "This workspace has reached its maximum number of funnels."
+        `This workspace has reached its maximum limit of ${WORKSPACE_FUNNEL_LIMIT} funnels.`
       );
     }
 

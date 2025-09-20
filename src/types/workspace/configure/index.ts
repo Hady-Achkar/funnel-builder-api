@@ -10,24 +10,15 @@ export const configureWorkspaceRequest = z
 
     addPermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)).optional(),
     removePermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)).optional(),
-
-    allocations: z
-      .object({
-        allocatedFunnels: z.number().int().min(0).optional(),
-        allocatedCustomDomains: z.number().int().min(0).optional(),
-        allocatedSubdomains: z.number().int().min(0).optional(),
-      })
-      .optional(),
   })
   .refine(
     (data) =>
       data.newRole ||
       data.addPermissions ||
-      data.removePermissions ||
-      data.allocations,
+      data.removePermissions,
     {
       message:
-        "At least one change (role, permissions, or allocations) must be specified",
+        "At least one change (role or permissions) must be specified",
       path: ["changes"],
     }
   )
@@ -67,23 +58,13 @@ export const memberInfo = z.object({
 
 export type MemberInfo = z.infer<typeof memberInfo>;
 
-export const workspaceAllocations = z.object({
-  allocatedFunnels: z.number(),
-  allocatedCustomDomains: z.number(),
-  allocatedSubdomains: z.number(),
-});
-
-export type WorkspaceAllocations = z.infer<typeof workspaceAllocations>;
-
 export const configureWorkspaceResponse = z.object({
   message: z.string(),
   member: memberInfo.optional(),
-  allocations: workspaceAllocations.optional(),
   changes: z.object({
     roleChanged: z.boolean(),
     permissionsAdded: z.array(z.nativeEnum($Enums.WorkspacePermission)),
     permissionsRemoved: z.array(z.nativeEnum($Enums.WorkspacePermission)),
-    allocationsUpdated: z.boolean(),
   }),
 });
 

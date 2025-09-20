@@ -23,9 +23,6 @@ export class RegisterService {
         password,
         isAdmin,
         plan,
-        maximumFunnels,
-        maximumCustomDomains,
-        maximumSubdomains,
       } = validatedData;
 
       const prisma = getPrisma();
@@ -48,11 +45,7 @@ export class RegisterService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {
-        maximumFunnels,
-        maximumCustomDomains,
-        maximumSubdomains,
-      });
+      const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {});
 
       const verificationToken = generateToken(userData);
       const verificationTokenExpiresAt = new Date();
@@ -72,9 +65,7 @@ export class RegisterService {
           verificationTokenExpiresAt,
           isAdmin,
           plan,
-          maximumFunnels: finalLimits.maximumFunnels,
-          maximumCustomDomains: finalLimits.maximumCustomDomains,
-          maximumSubdomains: finalLimits.maximumSubdomains,
+          maximumWorkspaces: finalLimits.maximumWorkspaces,
         },
       });
 

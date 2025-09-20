@@ -36,13 +36,6 @@ export const createFunnel = async (
       id: true,
       name: true,
       ownerId: true,
-      allocatedFunnels: true,
-      owner: {
-        select: {
-          id: true,
-          maximumFunnels: true,
-        },
-      },
     },
   });
 
@@ -50,13 +43,15 @@ export const createFunnel = async (
     throw new Error(`The workspace was not found`);
   }
 
+  // Check against fixed workspace limit of 3 funnels
+  const WORKSPACE_FUNNEL_LIMIT = 3;
   const currentFunnelCount = await prisma.funnel.count({
     where: { workspaceId: workspace.id },
   });
 
-  if (currentFunnelCount >= workspace.allocatedFunnels) {
+  if (currentFunnelCount >= WORKSPACE_FUNNEL_LIMIT) {
     throw new Error(
-      "This workspace has reached its maximum number of funnels."
+      `This workspace has reached its maximum limit of ${WORKSPACE_FUNNEL_LIMIT} funnels.`
     );
   }
 

@@ -7,11 +7,13 @@ export const checkWorkspaceDomainLimits = async (
 ): Promise<void> => {
   const prisma = getPrisma();
 
+  // Fixed workspace limit of 3 custom domains
+  const WORKSPACE_CUSTOM_DOMAIN_LIMIT = 3;
+
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
     select: {
       id: true,
-      allocatedCustomDomains: true,
     },
   });
 
@@ -26,9 +28,9 @@ export const checkWorkspaceDomainLimits = async (
     },
   });
 
-  if (currentCustomDomainCount >= workspace.allocatedCustomDomains) {
+  if (currentCustomDomainCount >= WORKSPACE_CUSTOM_DOMAIN_LIMIT) {
     throw new BadRequestError(
-      "This workspace has reached its maximum number of custom domains."
+      `This workspace has reached its maximum limit of ${WORKSPACE_CUSTOM_DOMAIN_LIMIT} custom domains.`
     );
   }
 };

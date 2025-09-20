@@ -9,10 +9,8 @@ import {
 import {
   canUserModifyRole,
   canUserAssignPermissions,
-  canUserManageAllocations,
   validateRoleHierarchy,
   getPermissionError,
-  validateAllocationRequest,
 } from "../../../helpers/workspace/configure";
 import {
   BadRequestError,
@@ -34,7 +32,6 @@ export const configureWorkspace = async (
       newRole,
       addPermissions,
       removePermissions,
-      allocations,
     } = validatedData;
 
     const prisma = getPrisma();
@@ -45,16 +42,6 @@ export const configureWorkspace = async (
         id: true,
         name: true,
         ownerId: true,
-        allocatedFunnels: true,
-        allocatedCustomDomains: true,
-        allocatedSubdomains: true,
-        owner: {
-          select: {
-            maximumFunnels: true,
-            maximumCustomDomains: true,
-            maximumSubdomains: true,
-          },
-        },
       },
     });
 
@@ -128,7 +115,6 @@ export const configureWorkspace = async (
       roleChanged: false,
       permissionsAdded: [] as $Enums.WorkspacePermission[],
       permissionsRemoved: [] as $Enums.WorkspacePermission[],
-      allocationsUpdated: false,
     };
 
     // Handle role change (only if targetMember exists)
@@ -224,55 +210,6 @@ export const configureWorkspace = async (
 
         updatedMember.permissions = newPermissions;
       }
-    }
-
-    // Handle allocation changes
-    if (allocations) {
-      if (!canUserManageAllocations(requesterRole, requesterPermissions)) {
-        throw new ForbiddenError(
-          getPermissionError(requesterRole, requesterPermissions, "allocations")
-        );
-      }
-
-      // Validate allocations don't exceed owner's total limits across all workspaces
-      const newAllocations = {
-        allocatedFunnels: allocations.allocatedFunnels,
-        allocatedCustomDomains: allocations.allocatedCustomDomains,
-        allocatedSubdomains: allocations.allocatedSubdomains,
-      };
-
-      const currentAllocations = {
-        allocatedFunnels: workspace.allocatedFunnels,
-        allocatedCustomDomains: workspace.allocatedCustomDomains,
-        allocatedSubdomains: workspace.allocatedSubdomains,
-      };
-
-      const validationError = await validateAllocationRequest(
-        workspace.ownerId,
-        workspace.id,
-        newAllocations,
-        currentAllocations
-      );
-
-      if (validationError) {
-        throw new BadRequestError(validationError);
-      }
-
-      // Update allocations
-      await prisma.workspace.update({
-        where: { id: workspace.id },
-        data: {
-          allocatedFunnels:
-            newAllocations.allocatedFunnels ?? workspace.allocatedFunnels,
-          allocatedCustomDomains:
-            newAllocations.allocatedCustomDomains ??
-            workspace.allocatedCustomDomains,
-          allocatedSubdomains:
-            newAllocations.allocatedSubdomains ?? workspace.allocatedSubdomains,
-        },
-      });
-
-      changes.allocationsUpdated = true;
     }
 
     const response = {

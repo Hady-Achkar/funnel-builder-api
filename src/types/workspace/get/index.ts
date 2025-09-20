@@ -62,9 +62,6 @@ export const getWorkspaceResponse = z.object({
   slug: z.string(),
   description: z.string().nullable(),
   settings: z.any().nullable(),
-  allocatedFunnels: z.number(),
-  allocatedCustomDomains: z.number(),
-  allocatedSubdomains: z.number(),
   createdAt: z.date(),
   updatedAt: z.date(),
   

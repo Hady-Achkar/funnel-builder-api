@@ -1,28 +1,34 @@
 import { $Enums } from "../../../generated/prisma-client";
 
 export interface PlanLimits {
+  maximumWorkspaces: number;
+}
+
+export interface WorkspaceResourceLimits {
   maximumFunnels: number;
   maximumCustomDomains: number;
   maximumSubdomains: number;
 }
 
 export class PlanLimitsHelper {
+  // Plan-based workspace limits
   private static readonly PLAN_CONFIGS: Record<$Enums.UserPlan, PlanLimits> = {
     [$Enums.UserPlan.FREE]: {
-      maximumFunnels: 3,
-      maximumCustomDomains: 0,
-      maximumSubdomains: 1,
+      maximumWorkspaces: 1,
     },
     [$Enums.UserPlan.BUSINESS]: {
-      maximumFunnels: 10,
-      maximumCustomDomains: 2,
-      maximumSubdomains: 5,
+      maximumWorkspaces: 3,
     },
     [$Enums.UserPlan.AGENCY]: {
-      maximumFunnels: 50,
-      maximumCustomDomains: 10,
-      maximumSubdomains: 25,
+      maximumWorkspaces: 10,
     },
+  };
+
+  // Fixed limits per workspace (same for all plans)
+  private static readonly WORKSPACE_RESOURCE_LIMITS: WorkspaceResourceLimits = {
+    maximumFunnels: 3,
+    maximumCustomDomains: 3,
+    maximumSubdomains: 3,
   };
 
   /**
@@ -37,10 +43,15 @@ export class PlanLimitsHelper {
    */
   static getBasicLimits(): PlanLimits {
     return {
-      maximumFunnels: 5,
-      maximumCustomDomains: 1,
-      maximumSubdomains: 3,
+      maximumWorkspaces: 1,
     };
+  }
+
+  /**
+   * Get workspace resource limits (fixed for all plans)
+   */
+  static getWorkspaceResourceLimits(): WorkspaceResourceLimits {
+    return this.WORKSPACE_RESOURCE_LIMITS;
   }
 
   /**
@@ -49,17 +60,13 @@ export class PlanLimitsHelper {
   static calculateFinalLimits(
     plan: $Enums.UserPlan,
     customLimits?: {
-      maximumFunnels?: number;
-      maximumCustomDomains?: number;
-      maximumSubdomains?: number;
+      maximumWorkspaces?: number;
     }
   ): PlanLimits {
     const defaultLimits = this.getDefaultLimits(plan);
-    
+
     return {
-      maximumFunnels: customLimits?.maximumFunnels ?? defaultLimits.maximumFunnels,
-      maximumCustomDomains: customLimits?.maximumCustomDomains ?? defaultLimits.maximumCustomDomains,
-      maximumSubdomains: customLimits?.maximumSubdomains ?? defaultLimits.maximumSubdomains,
+      maximumWorkspaces: customLimits?.maximumWorkspaces ?? defaultLimits.maximumWorkspaces,
     };
   }
 
@@ -71,30 +78,12 @@ export class PlanLimitsHelper {
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (customLimits.maximumFunnels !== undefined) {
-      if (customLimits.maximumFunnels < 0) {
-        errors.push("Maximum funnels cannot be negative");
+    if (customLimits.maximumWorkspaces !== undefined) {
+      if (customLimits.maximumWorkspaces < 0) {
+        errors.push("Maximum workspaces cannot be negative");
       }
-      if (customLimits.maximumFunnels > 1000) {
-        errors.push("Maximum funnels cannot exceed 1000");
-      }
-    }
-
-    if (customLimits.maximumCustomDomains !== undefined) {
-      if (customLimits.maximumCustomDomains < 0) {
-        errors.push("Maximum custom domains cannot be negative");
-      }
-      if (customLimits.maximumCustomDomains > 100) {
-        errors.push("Maximum custom domains cannot exceed 100");
-      }
-    }
-
-    if (customLimits.maximumSubdomains !== undefined) {
-      if (customLimits.maximumSubdomains < 0) {
-        errors.push("Maximum subdomains cannot be negative");
-      }
-      if (customLimits.maximumSubdomains > 500) {
-        errors.push("Maximum subdomains cannot exceed 500");
+      if (customLimits.maximumWorkspaces > 100) {
+        errors.push("Maximum workspaces cannot exceed 100");
       }
     }
 

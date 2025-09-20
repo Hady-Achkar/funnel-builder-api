@@ -20,26 +20,6 @@ export const createWorkspaceRequest = z.object({
     .string()
     .max(200, "Description must be 200 characters or less")
     .optional(),
-  
-  allocations: z.object({
-    allocatedFunnels: z
-      .number()
-      .int()
-      .min(0, "Allocated funnels must be 0 or more")
-      .max(1000, "Allocated funnels cannot exceed 1000"),
-    
-    allocatedCustomDomains: z
-      .number()
-      .int()
-      .min(0, "Allocated custom domains must be 0 or more")
-      .max(100, "Allocated custom domains cannot exceed 100"),
-    
-    allocatedSubdomains: z
-      .number()
-      .int()
-      .min(0, "Allocated subdomains must be 0 or more")
-      .max(100, "Allocated subdomains cannot exceed 100"),
-  }).optional(),
 });
 
 export type CreateWorkspaceRequest = z.infer<typeof createWorkspaceRequest>;
@@ -51,9 +31,6 @@ export const workspaceDetailsSchema = z.object({
   slug: z.string(),
   description: z.string().nullable(),
   ownerId: z.number(),
-  allocatedFunnels: z.number(),
-  allocatedCustomDomains: z.number(),
-  allocatedSubdomains: z.number(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -93,13 +70,3 @@ export const createWorkspaceResponse = z.object({
 });
 
 export type CreateWorkspaceResponse = z.infer<typeof createWorkspaceResponse>;
-
-// Internal types for service logic
-export const workspaceAllocationValidation = z.object({
-  userId: z.number(),
-  requestedFunnels: z.number(),
-  requestedCustomDomains: z.number(),
-  requestedSubdomains: z.number(),
-});
-
-export type WorkspaceAllocationValidation = z.infer<typeof workspaceAllocationValidation>;

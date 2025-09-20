@@ -8,9 +8,8 @@ import { DomainConfig } from "../../../types/domain/shared/domain.types";
 import {
   validateSlugAvailability,
   validateWorkspaceNameUniqueness,
-  validateUserAllocationBudget,
+  validateUserWorkspaceLimit,
   validateSlugFormat,
-  validateAllocationAmounts,
 } from "../../../helpers/workspace/create";
 import { createARecord } from "../../../helpers/domain/create-subdomain";
 import {
@@ -29,38 +28,15 @@ export class CreateWorkspaceService {
   ): Promise<{ message: string; workspaceId: number }> {
     try {
       const validatedData = createWorkspaceRequest.parse(requestData);
-      const { name, slug, description, allocations } = validatedData;
+      const { name, slug, description } = validatedData;
 
-      const finalAllocations = allocations || {
-        allocatedFunnels: 0,
-        allocatedCustomDomains: 0,
-        allocatedSubdomains: 0,
-      };
+      // Validate user hasn't exceeded their workspace limit
+      await validateUserWorkspaceLimit(userId);
 
       // Validate slug format and availability
       validateSlugFormat(slug);
       await validateSlugAvailability(slug);
       await validateWorkspaceNameUniqueness(userId, name);
-
-      // Only validate allocations if they're provided and > 0
-      if (allocations) {
-        validateAllocationAmounts(finalAllocations);
-
-        // Only check budget if user is actually allocating resources
-        const hasAllocations =
-          finalAllocations.allocatedFunnels > 0 ||
-          finalAllocations.allocatedCustomDomains > 0 ||
-          finalAllocations.allocatedSubdomains > 0;
-
-        if (hasAllocations) {
-          await validateUserAllocationBudget({
-            userId,
-            requestedFunnels: finalAllocations.allocatedFunnels,
-            requestedCustomDomains: finalAllocations.allocatedCustomDomains,
-            requestedSubdomains: finalAllocations.allocatedSubdomains,
-          });
-        }
-      }
 
       const prisma = getPrisma();
 
@@ -87,9 +63,6 @@ export class CreateWorkspaceService {
             slug,
             description,
             ownerId: userId,
-            allocatedFunnels: finalAllocations.allocatedFunnels,
-            allocatedCustomDomains: finalAllocations.allocatedCustomDomains,
-            allocatedSubdomains: finalAllocations.allocatedSubdomains,
           },
         });
 

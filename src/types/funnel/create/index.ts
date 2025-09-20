@@ -35,18 +35,6 @@ export const workspacePayload = z.object(
     id: z.number({ message: "Workspace ID must be a valid number" }),
     name: z.string({ message: "Workspace name must be a string" }),
     ownerId: z.number({ message: "Owner ID must be a valid number" }),
-    allocatedFunnels: z.number({
-      message: "Allocated funnels must be a valid number",
-    }),
-    owner: z.object(
-      {
-        id: z.number({ message: "Owner ID must be a valid number" }),
-        maximumFunnels: z.number({
-          message: "Maximum funnels must be a valid number",
-        }),
-      },
-      { message: "Workspace owner information is required" }
-    ),
   },
   { message: "Workspace data is required" }
 );

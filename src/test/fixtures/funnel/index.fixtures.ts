@@ -10,11 +10,6 @@ export const mockWorkspace: WorkspacePayload = {
   id: 8,
   name: "Test Workspace",
   ownerId: 1,
-  allocatedFunnels: 10,
-  owner: {
-    id: 1,
-    maximumFunnels: 50,
-  },
 };
 
 export const mockWorkspaceMember: WorkspaceMemberPayload = {

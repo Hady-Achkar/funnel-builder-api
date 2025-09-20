@@ -22,8 +22,6 @@ const extractTokenDataFromUser = (user: User) => {
     isAdmin: user.isAdmin || false,
     balance: user.balance,
     plan: user.plan || "FREE",
-    maximumFunnels: user.maximumFunnels,
-    maximumCustomDomains: user.maximumCustomDomains,
-    maximumSubdomains: user.maximumSubdomains,
+    maximumWorkspaces: user.maximumWorkspaces,
   };
 };

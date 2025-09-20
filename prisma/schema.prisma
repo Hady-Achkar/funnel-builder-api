@@ -45,9 +45,7 @@ model User {
   balance                    Float             @default(0) // Affiliate balance
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
-  maximumFunnels             Int               @default(5) // Total funnel budget for the user
-  maximumCustomDomains       Int               @default(1) // Total custom domain budget
-  maximumSubdomains          Int               @default(3) // Total subdomain budget
+  maximumWorkspaces          Int               @default(1) // Maximum workspaces based on plan
   maximumAdmins              Int               @default(1) // Total admin budget for the user
   trialStartDate             DateTime? // Trial start date
   trialEndDate               DateTime? // Trial end date
@@ -144,9 +142,6 @@ model Workspace {
   ownerId                Int
   description            String?
   settings               Json?    @default("{}")
-  allocatedFunnels       Int      @default(0) // Funnels allocated from user's budget
-  allocatedCustomDomains Int      @default(0) // Custom domains allocated from user's budget
-  allocatedSubdomains    Int      @default(0) // Subdomains allocated from user's budget
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
   image                  String?

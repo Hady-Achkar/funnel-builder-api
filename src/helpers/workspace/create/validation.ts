@@ -1,6 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError } from "../../../errors/http-errors";
-import { WorkspaceAllocationValidation } from "../../../types/workspace/create";
 
 /**
  * Validates that a workspace slug is available (both as workspace slug and subdomain)
@@ -58,27 +57,19 @@ export async function validateWorkspaceNameUniqueness(
 }
 
 /**
- * Validates that user has sufficient allocation budget remaining
+ * Validates that user has not exceeded their workspace limit based on plan
  */
-export async function validateUserAllocationBudget(
-  validation: WorkspaceAllocationValidation
+export async function validateUserWorkspaceLimit(
+  userId: number
 ): Promise<void> {
   const prisma = getPrisma();
 
-  const {
-    userId,
-    requestedFunnels,
-    requestedCustomDomains,
-    requestedSubdomains,
-  } = validation;
-
-  // Get user's total limits
+  // Get user's maximum workspace limit
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      maximumFunnels: true,
-      maximumCustomDomains: true,
-      maximumSubdomains: true,
+      maximumWorkspaces: true,
+      plan: true,
     },
   });
 
@@ -86,36 +77,14 @@ export async function validateUserAllocationBudget(
     throw new BadRequestError("User not found");
   }
 
-  // Get currently allocated resources across all user's workspaces
-  const currentAllocations = await prisma.workspace.aggregate({
+  // Count existing workspaces owned by user
+  const workspaceCount = await prisma.workspace.count({
     where: { ownerId: userId },
-    _sum: {
-      allocatedFunnels: true,
-      allocatedCustomDomains: true,
-      allocatedSubdomains: true,
-    },
   });
 
-  const allocatedFunnels = currentAllocations._sum.allocatedFunnels || 0;
-  const allocatedCustomDomains = currentAllocations._sum.allocatedCustomDomains || 0;
-  const allocatedSubdomains = currentAllocations._sum.allocatedSubdomains || 0;
-
-  // Check if requested allocations would exceed user's limits
-  if (allocatedFunnels + requestedFunnels > user.maximumFunnels) {
+  if (workspaceCount >= user.maximumWorkspaces) {
     throw new BadRequestError(
-      `Insufficient funnel allocation. You have ${user.maximumFunnels - allocatedFunnels} funnels remaining of your ${user.maximumFunnels} total limit.`
-    );
-  }
-
-  if (allocatedCustomDomains + requestedCustomDomains > user.maximumCustomDomains) {
-    throw new BadRequestError(
-      `Insufficient custom domain allocation. You have ${user.maximumCustomDomains - allocatedCustomDomains} custom domains remaining of your ${user.maximumCustomDomains} total limit.`
-    );
-  }
-
-  if (allocatedSubdomains + requestedSubdomains > user.maximumSubdomains) {
-    throw new BadRequestError(
-      `Insufficient subdomain allocation. You have ${user.maximumSubdomains - allocatedSubdomains} subdomains remaining of your ${user.maximumSubdomains} total limit.`
+      `You have reached your workspace limit of ${user.maximumWorkspaces} workspace${user.maximumWorkspaces !== 1 ? 's' : ''}. Please upgrade your plan to create more workspaces.`
     );
   }
 }
