@@ -7,9 +7,12 @@ import {
   resetPasswordServiceResponse,
   ResetPasswordServiceResponse,
 } from "../../../types/auth/reset-password";
+import { generateToken } from "../utils";
 
 export class ResetPasswordService {
-  static async resetPassword(userData: unknown): Promise<ResetPasswordServiceResponse> {
+  static async resetPassword(
+    userData: unknown
+  ): Promise<ResetPasswordServiceResponse> {
     try {
       const validatedData = resetPasswordRequest.parse(userData);
       const { token, password } = validatedData;
@@ -19,7 +22,7 @@ export class ResetPasswordService {
       // Decode token to get email and timestamp
       let tokenData;
       try {
-        const decodedToken = Buffer.from(token, 'base64').toString('utf-8');
+        const decodedToken = Buffer.from(token, "base64").toString("utf-8");
         tokenData = JSON.parse(decodedToken);
       } catch {
         throw new Error("Invalid reset token format");
@@ -39,12 +42,6 @@ export class ResetPasswordService {
       // Find user with this reset token
       const user = await prisma.user.findUnique({
         where: { passwordResetToken: token },
-        select: {
-          id: true,
-          email: true,
-          verified: true,
-          passwordResetExpiresAt: true,
-        },
       });
 
       if (!user) {
@@ -74,7 +71,7 @@ export class ResetPasswordService {
       });
 
       // Generate JWT token for auto-login
-      const jwtToken = this.generateToken(user.id);
+      const jwtToken = generateToken(user);
 
       const response = {
         message: "Password reset successfully",
@@ -89,14 +86,5 @@ export class ResetPasswordService {
       }
       throw error;
     }
-  }
-
-  private static generateToken(userId: number): string {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("JWT secret not configured");
-    }
-
-    return jwt.sign({ userId }, jwtSecret, { expiresIn: "180d" });
   }
 }

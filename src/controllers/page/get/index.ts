@@ -10,6 +10,7 @@ export const getPageController = async (
 ) => {
   try {
     const userId = req.userId;
+
     if (!userId) {
       throw new UnauthorizedError("Authentication required");
     }

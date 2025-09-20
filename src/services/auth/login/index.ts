@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import { loginRequest, LoginResponse } from "../../../types/auth/login";
-import { User } from "../../../generated/prisma-client";
+import { generateToken } from "../utils";
 
 // Internal service response includes token
 interface LoginServiceResponse extends LoginResponse {
@@ -23,16 +23,6 @@ export class LoginService {
 
       const user = await prisma.user.findUnique({
         where: isEmail ? { email: identifier } : { username: identifier },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          password: true,
-          isAdmin: true,
-          verified: true,
-        },
       });
 
       if (!user) {
@@ -52,7 +42,7 @@ export class LoginService {
         );
       }
 
-      const token = this.generateToken(user);
+      const token = generateToken(user);
 
       return {
         message: "Login successful",
@@ -73,28 +63,5 @@ export class LoginService {
       }
       throw error;
     }
-  }
-
-  private static generateToken(
-    user: Pick<
-      User,
-      "id" | "email" | "username" | "firstName" | "lastName" | "isAdmin"
-    >
-  ): string {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("JWT secret not configured");
-    }
-
-    const payload = {
-      userId: user.id,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      isAdmin: user.isAdmin || false,
-    };
-
-    return jwt.sign(payload, jwtSecret, { expiresIn: "180d" });
   }
 }

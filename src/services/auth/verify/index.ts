@@ -1,11 +1,12 @@
-import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
+import jwt from "jsonwebtoken";
 import { getPrisma } from "../../../lib/prisma";
 import {
   verifyEmailRequest,
   verifyEmailServiceResponse,
   VerifyEmailServiceResponse,
 } from "../../../types/auth/verify";
+import { generateToken } from "../utils";
 
 export class VerifyService {
   static async verifyEmail(token: string): Promise<VerifyEmailServiceResponse> {
@@ -13,63 +14,46 @@ export class VerifyService {
       const validatedData = verifyEmailRequest.parse({ token });
       const prisma = getPrisma();
 
-      let tokenData;
-      try {
-        const decodedToken = Buffer.from(
-          validatedData.token,
-          "base64"
-        ).toString("utf-8");
-        tokenData = JSON.parse(decodedToken);
-      } catch {
-        throw new Error("Invalid verification token format");
+      // Verify JWT token
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error("JWT secret not configured");
       }
 
-      if (!tokenData.email || !tokenData.password || !tokenData.timestamp) {
+      let tokenData;
+      try {
+        tokenData = jwt.verify(validatedData.token, jwtSecret) as any;
+      } catch (error: any) {
+        if (error.name === "TokenExpiredError") {
+          throw new Error("Verification token has expired");
+        }
+        throw new Error("Invalid verification token");
+      }
+
+      if (!tokenData.email) {
         throw new Error("Invalid verification token data");
       }
 
-      const tokenAge = Date.now() - tokenData.timestamp;
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-      if (tokenAge > maxAge) {
-        throw new Error("Verification token has expired");
-      }
-
       const user = await prisma.user.findUnique({
-        where: { verificationToken: validatedData.token },
-        select: {
-          id: true,
-          email: true,
-          password: true,
-          verified: true,
-          verificationTokenExpiresAt: true,
-        },
+        where: { email: tokenData.email },
       });
 
       if (!user) {
-        throw new Error("Invalid verification token");
+        throw new Error("User not found");
       }
 
       if (user.verified) {
         throw new Error("Email is already verified");
       }
 
-      if (
-        user.email !== tokenData.email ||
-        user.password !== tokenData.password
-      ) {
-        throw new Error("Token data does not match user");
-      }
-
       await prisma.user.update({
         where: { id: user.id },
         data: {
           verified: true,
-          verificationToken: null,
-          verificationTokenExpiresAt: null,
         },
       });
 
-      const jwtToken = this.generateToken(user.id);
+      const jwtToken = generateToken(user);
 
       const response = {
         message: "Email verified successfully",
@@ -85,14 +69,5 @@ export class VerifyService {
       }
       throw error;
     }
-  }
-
-  private static generateToken(userId: number): string {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("JWT secret not configured");
-    }
-
-    return jwt.sign({ userId }, jwtSecret, { expiresIn: "180d" });
   }
 }

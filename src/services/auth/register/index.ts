@@ -1,13 +1,17 @@
 import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
-import { v4 as uuidv4 } from "uuid";
 import { getPrisma } from "../../../lib/prisma";
-import { registerRequest, RegisterResponse } from "../../../types/auth/register";
+import {
+  registerRequest,
+  RegisterResponse,
+} from "../../../types/auth/register";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
+import { User } from "../../../generated/prisma-client";
+import { generateToken } from "../utils";
 
 export class RegisterService {
-  static async register(userData: unknown): Promise<RegisterResponse> {
+  static async register(userData: User): Promise<RegisterResponse> {
     try {
       const validatedData = registerRequest.parse(userData);
 
@@ -50,9 +54,11 @@ export class RegisterService {
         maximumSubdomains,
       });
 
-      const verificationToken = uuidv4();
+      const verificationToken = generateToken(userData);
       const verificationTokenExpiresAt = new Date();
-      verificationTokenExpiresAt.setHours(verificationTokenExpiresAt.getHours() + 24);
+      verificationTokenExpiresAt.setHours(
+        verificationTokenExpiresAt.getHours() + 24
+      );
 
       const user = await prisma.user.create({
         data: {
