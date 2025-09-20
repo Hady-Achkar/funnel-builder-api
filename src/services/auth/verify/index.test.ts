@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import jwt from "jsonwebtoken";
 import { VerifyService } from "./index";
 import { getPrisma } from "../../../lib/prisma";
+import { generateToken } from "../utils";
 
 // Mock dependencies
 vi.mock("../../../lib/prisma");
 vi.mock("jsonwebtoken");
+vi.mock("../utils");
 
 // Mock Prisma client
 const mockPrisma = {
@@ -25,57 +27,42 @@ describe("VerifyService", () => {
   it("should verify email successfully with valid token", async () => {
     // Arrange
     const userEmail = "test@example.com";
-    const userPassword = "hashed-password";
-    const timestamp = Date.now() - 1000; // 1 second ago
+    const token = "valid-jwt-token";
+    const mockJwtToken = "generated-jwt-token";
 
     const tokenData = {
       email: userEmail,
-      password: userPassword,
-      timestamp,
     };
-
-    const token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
-    const mockJwtToken = "generated-jwt-token";
 
     const mockUser = {
       id: 1,
       email: userEmail,
-      password: userPassword,
       verified: false,
-      verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
 
+    vi.mocked(jwt.verify).mockReturnValue(tokenData as any);
     mockPrisma.user.findUnique.mockResolvedValue(mockUser);
     mockPrisma.user.update.mockResolvedValue({ ...mockUser, verified: true });
-    vi.mocked(jwt.sign).mockReturnValue(mockJwtToken as any);
+    vi.mocked(generateToken).mockReturnValue(mockJwtToken);
 
     // Act
     const result = await VerifyService.verifyEmail(token);
 
     // Assert
+    expect(jwt.verify).toHaveBeenCalledWith(token, "test-secret");
+
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-      where: { verificationToken: token },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        verified: true,
-        verificationTokenExpiresAt: true,
-      },
+      where: { email: userEmail },
     });
 
     expect(mockPrisma.user.update).toHaveBeenCalledWith({
       where: { id: 1 },
       data: {
         verified: true,
-        verificationToken: null,
-        verificationTokenExpiresAt: null,
       },
     });
 
-    expect(jwt.sign).toHaveBeenCalledWith({ userId: 1 }, "test-secret", {
-      expiresIn: "180d",
-    });
+    expect(generateToken).toHaveBeenCalledWith(mockUser);
 
     expect(result).toEqual({
       message: "Email verified successfully",
@@ -86,11 +73,15 @@ describe("VerifyService", () => {
 
   it("should throw error for invalid token format", async () => {
     // Arrange
-    const invalidToken = "invalid-base64-token";
+    const invalidToken = "invalid-jwt-token";
+
+    vi.mocked(jwt.verify).mockImplementation(() => {
+      throw new Error("jwt malformed");
+    });
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(invalidToken)).rejects.toThrow(
-      "Invalid verification token format"
+      "Invalid verification token"
     );
 
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
@@ -99,19 +90,13 @@ describe("VerifyService", () => {
 
   it("should throw error for expired token", async () => {
     // Arrange
-    const userEmail = "test@example.com";
-    const userPassword = "hashed-password";
-    const timestamp = Date.now() - 25 * 60 * 60 * 1000; // 25 hours ago (expired)
+    const expiredToken = "expired-jwt-token";
 
-    const tokenData = {
-      email: userEmail,
-      password: userPassword,
-      timestamp,
-    };
-
-    const expiredToken = Buffer.from(JSON.stringify(tokenData)).toString(
-      "base64"
-    );
+    vi.mocked(jwt.verify).mockImplementation(() => {
+      const error: any = new Error("jwt expired");
+      error.name = "TokenExpiredError";
+      throw error;
+    });
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(expiredToken)).rejects.toThrow(
@@ -125,33 +110,22 @@ describe("VerifyService", () => {
   it("should throw error when user not found", async () => {
     // Arrange
     const userEmail = "test@example.com";
-    const userPassword = "hashed-password";
-    const timestamp = Date.now() - 1000;
+    const token = "valid-jwt-token";
 
     const tokenData = {
       email: userEmail,
-      password: userPassword,
-      timestamp,
     };
 
-    const token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
-
+    vi.mocked(jwt.verify).mockReturnValue(tokenData as any);
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(token)).rejects.toThrow(
-      "Invalid verification token"
+      "User not found"
     );
 
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-      where: { verificationToken: token },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        verified: true,
-        verificationTokenExpiresAt: true,
-      },
+      where: { email: userEmail },
     });
 
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
@@ -160,25 +134,19 @@ describe("VerifyService", () => {
   it("should throw error when user is already verified", async () => {
     // Arrange
     const userEmail = "test@example.com";
-    const userPassword = "hashed-password";
-    const timestamp = Date.now() - 1000;
+    const token = "valid-jwt-token";
 
     const tokenData = {
       email: userEmail,
-      password: userPassword,
-      timestamp,
     };
-
-    const token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
 
     const mockUser = {
       id: 1,
       email: userEmail,
-      password: userPassword,
       verified: true, // Already verified
-      verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
 
+    vi.mocked(jwt.verify).mockReturnValue(tokenData as any);
     mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
     // Act & Assert
@@ -189,36 +157,20 @@ describe("VerifyService", () => {
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
   });
 
-  it("should throw error when token data does not match user", async () => {
+  it("should throw error when token has no email", async () => {
     // Arrange
-    const tokenEmail = "token@example.com";
-    const userEmail = "user@example.com"; // Different email
-    const password = "hashed-password";
-    const timestamp = Date.now() - 1000;
+    const token = "valid-jwt-token";
 
-    const tokenData = {
-      email: tokenEmail,
-      password: password,
-      timestamp,
-    };
+    const tokenData = {}; // No email field
 
-    const token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
-
-    const mockUser = {
-      id: 1,
-      email: userEmail, // Different from token
-      password: password,
-      verified: false,
-      verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    };
-
-    mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+    vi.mocked(jwt.verify).mockReturnValue(tokenData as any);
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(token)).rejects.toThrow(
-      "Token data does not match user"
+      "Invalid verification token data"
     );
 
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
   });
 });
