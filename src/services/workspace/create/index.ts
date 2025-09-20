@@ -25,7 +25,12 @@ export class CreateWorkspaceService {
   static async create(
     userId: number,
     requestData: unknown
-  ): Promise<{ message: string; workspaceId: number }> {
+  ): Promise<{
+    message: string;
+    workspaceId: number;
+    slug: string;
+    name: string;
+  }> {
     try {
       const validatedData = createWorkspaceRequest.parse(requestData);
       const { name, slug, description } = validatedData;
@@ -47,7 +52,6 @@ export class CreateWorkspaceService {
         targetIp: process.env.WORKSPACE_IP || "20.56.136.29",
       };
 
-      // Validate domain configuration
       if (!workspaceDomainConfig.zoneId) {
         throw new InternalServerError(
           "Workspace domain configuration is missing. Please contact support."
@@ -92,17 +96,24 @@ export class CreateWorkspaceService {
       });
 
       // 4. Create DNS record for workspace subdomain (digitalsite.com)
-      try {
-        await createARecord(
-          slug,
-          workspaceDomainConfig.zoneId,
-          workspaceDomainConfig.targetIp // target IP
-        );
-      } catch (dnsError) {}
+      // Temporarily skip for local testing
+      if (workspaceDomainConfig.zoneId) {
+        try {
+          await createARecord(
+            slug,
+            workspaceDomainConfig.zoneId,
+            workspaceDomainConfig.targetIp // target IP
+          );
+        } catch (dnsError) {
+          console.error("DNS record creation failed:", dnsError);
+        }
+      }
 
       return {
         message: "Workspace created successfully",
         workspaceId: result.id,
+        slug: result.slug,
+        name: result.name,
       };
     } catch (error: unknown) {
       if (error instanceof ZodError) {

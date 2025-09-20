@@ -52,18 +52,23 @@ export class InviteMemberService {
       throw new NotFoundError("Workspace not found");
     }
 
-    const inviterMember = workspace.members[0];
-    if (!inviterMember) {
-      throw new ForbiddenError("You are not a member of this workspace");
-    }
+    // Check if inviter is owner
+    const isOwner = workspace.ownerId === inviterUserId;
 
-    if (
-      !WorkspacePermissions.canInviteMembers({
-        role: inviterMember.role,
-        permissions: inviterMember.permissions,
-      })
-    ) {
-      throw new ForbiddenError("You don't have permission to invite members");
+    if (!isOwner) {
+      const inviterMember = workspace.members[0];
+      if (!inviterMember) {
+        throw new ForbiddenError("You are not a member of this workspace");
+      }
+
+      if (
+        !WorkspacePermissions.canInviteMembers({
+          role: inviterMember.role,
+          permissions: inviterMember.permissions,
+        })
+      ) {
+        throw new ForbiddenError("You don't have permission to invite members");
+      }
     }
 
     const userToInvite = await prisma.user.findUnique({
@@ -72,6 +77,11 @@ export class InviteMemberService {
 
     if (!userToInvite) {
       throw new NotFoundError("User with this email does not exist");
+    }
+
+    // Check if user to invite is the workspace owner
+    if (userToInvite.id === workspace.ownerId) {
+      throw new BadRequestError("Cannot invite the workspace owner as a member");
     }
 
     const existingMember = await prisma.workspaceMember.findUnique({

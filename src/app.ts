@@ -42,26 +42,6 @@ export function createServer(): Express {
   // Cookie parsing middleware
   app.use(cookieParser());
 
-  // Rate limiting
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: "Too many requests from this IP, please try again later.",
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    validate: { xForwardedForHeader: false }, // Disable warning when behind proxy
-  });
-
-  const speedLimiter = slowDown({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    delayAfter: 50, // allow 50 requests per windowMs at full speed
-    delayMs: () => 500, // add 500ms delay per request after delayAfter
-    validate: { delayMs: false }, // disable deprecation warning
-  });
-
-  app.use("/api/", limiter);
-  app.use("/api/", speedLimiter);
-
   // Body parsing middleware
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));

@@ -7,6 +7,7 @@ import { CreateWorkspaceController } from "../../controllers/workspace/create";
 import { GetWorkspaceController } from "../../controllers/workspace/get";
 import { InviteMemberController } from "../../controllers/workspace/invite-member";
 import { uploadWorkspaceImageController } from "../../controllers/workspace/upload-image";
+import { UpdateWorkspaceController } from "../../controllers/workspace/update";
 
 const router: Router = express.Router();
 
@@ -25,8 +26,11 @@ router.get("/", getAllWorkspacesController);
 // Get single workspace by slug
 router.get("/:slug", GetWorkspaceController.getBySlug);
 
-// Configure workspace (roles, permissions, allocations)
+// Configure workspace (roles, permissions, allocations) - legacy endpoint
 router.patch("/configure", ConfigureWorkspaceController.configure);
+
+// Update workspace - comprehensive endpoint for all workspace settings
+router.put("/:slug", UpdateWorkspaceController.update);
 
 // Invite member to workspace
 router.post("/invite-member/:slug", InviteMemberController.inviteMember);

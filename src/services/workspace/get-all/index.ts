@@ -119,6 +119,7 @@ export const getAllWorkspaces = async (
         permissions: currentUserPermissions,
         owner: workspace.owner,
         members: membersList,
+        memberCount: membersList.length,
         funnelCount: workspace._count.funnels,
         domainCount: workspace._count.domains,
         createdAt: workspace.createdAt,
