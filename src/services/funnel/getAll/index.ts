@@ -98,8 +98,8 @@ export const getAllFunnels = async (
         slug: funnel.slug,
         status: funnel.status,
         workspaceId: funnel.workspaceId,
-        settings: funnel.settings,
         createdBy: funnel.createdBy,
+        settings: funnel.settings,
         createdAt: funnel.createdAt,
         updatedAt: funnel.updatedAt,
       }));
