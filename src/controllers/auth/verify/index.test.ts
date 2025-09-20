@@ -2,11 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { verifyEmailController } from './index';
 import { VerifyService } from '../../../services/auth/verify';
-import { setAuthCookie } from '../../../lib/cookies';
-
 // Mock dependencies
 vi.mock('../../../services/auth/verify');
-vi.mock('../../../lib/cookies');
 
 describe('verifyEmailController', () => {
   let req: Partial<Request>;
@@ -26,7 +23,7 @@ describe('verifyEmailController', () => {
     vi.clearAllMocks();
   });
 
-  it('should verify email successfully with valid token', async () => {
+  it('should verify email successfully with valid token and return token', async () => {
     // Arrange
     const mockToken = 'valid-token';
     const mockServiceResponse = {
@@ -43,11 +40,11 @@ describe('verifyEmailController', () => {
 
     // Assert
     expect(VerifyService.verifyEmail).toHaveBeenCalledWith(mockToken);
-    expect(setAuthCookie).toHaveBeenCalledWith(res, 'jwt-token');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       message: 'Email verified successfully',
-      verified: true
+      verified: true,
+      token: 'jwt-token'
     });
   });
 
@@ -64,7 +61,6 @@ describe('verifyEmailController', () => {
       error: 'Verification token is required'
     });
     expect(VerifyService.verifyEmail).not.toHaveBeenCalled();
-    expect(setAuthCookie).not.toHaveBeenCalled();
   });
 
   it('should call next with error when service throws', async () => {
@@ -81,7 +77,6 @@ describe('verifyEmailController', () => {
     // Assert
     expect(VerifyService.verifyEmail).toHaveBeenCalledWith(mockToken);
     expect(next).toHaveBeenCalledWith(mockError);
-    expect(setAuthCookie).not.toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });

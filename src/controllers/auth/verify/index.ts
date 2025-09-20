@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { VerifyService } from "../../../services/auth/verify";
-import { setAuthCookie } from "../../../lib/cookies";
 
 export const verifyEmailController = async (
   req: Request,
@@ -18,7 +17,11 @@ export const verifyEmailController = async (
 
     const result = await VerifyService.verifyEmail(token);
 
-    return res.status(200).json(result);
+    return res.status(200).json({
+      message: result.message,
+      verified: result.verified,
+      token: result.token,
+    });
   } catch (error) {
     return next(error);
   }
