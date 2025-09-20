@@ -32,7 +32,7 @@ export const authenticateToken = async (
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as any;
-    const userId = decoded.userId;
+    const userId = decoded.id; // Changed from decoded.userId to decoded.id
 
     // Get user from database to check trial status
     const user = await getPrisma().user.findUnique({
