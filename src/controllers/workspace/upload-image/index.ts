@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
 import { UnauthorizedError, BadRequestError } from "../../../errors";
 import { uploadWorkspaceImage } from "../../../services/workspace/upload-image";
+import { UploadWorkspaceImageRequest } from "../../../types/workspace/upload-image";
 
 interface UploadRequest extends AuthRequest {
   file?: Express.Multer.File;
@@ -23,7 +24,8 @@ export const uploadWorkspaceImageController = async (
       throw new BadRequestError("No file provided");
     }
 
-    const result = await uploadWorkspaceImage(userId, req.params, file);
+    const params = req.params as UploadWorkspaceImageRequest;
+    const result = await uploadWorkspaceImage(userId, params, file);
 
     return res.status(200).json(result);
   } catch (error) {
