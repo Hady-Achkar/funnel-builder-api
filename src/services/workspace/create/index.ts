@@ -46,17 +46,17 @@ export class CreateWorkspaceService {
       const prisma = getPrisma();
 
       // Prepare domain configuration for subdomain creation
-      const workspaceDomainConfig: DomainConfig = {
-        baseDomain: process.env.WORKSPACE_DOMAIN || "digitalsite.com",
-        zoneId: process.env.WORKSPACE_ZONE_ID || "",
-        targetIp: process.env.WORKSPACE_IP || "20.56.136.29",
-      };
+      // const workspaceDomainConfig: DomainConfig = {
+      //   baseDomain: process.env.WORKSPACE_DOMAIN || "digitalsite.com",
+      //   zoneId: process.env.WORKSPACE_ZONE_ID || "",
+      //   targetIp: process.env.WORKSPACE_IP || "20.56.136.29",
+      // };
 
-      if (!workspaceDomainConfig.zoneId) {
-        throw new InternalServerError(
-          "Workspace domain configuration is missing. Please contact support."
-        );
-      }
+      // if (!workspaceDomainConfig.zoneId) {
+      //   throw new InternalServerError(
+      //     "Workspace domain configuration is missing. Please contact support."
+      //   );
+      // }
 
       // Start transaction to ensure atomicity
       const result = await prisma.$transaction(async (tx) => {
@@ -97,17 +97,17 @@ export class CreateWorkspaceService {
 
       // 4. Create DNS record for workspace subdomain (digitalsite.com)
       // Temporarily skip for local testing
-      if (workspaceDomainConfig.zoneId) {
-        try {
-          await createARecord(
-            slug,
-            workspaceDomainConfig.zoneId,
-            workspaceDomainConfig.targetIp // target IP
-          );
-        } catch (dnsError) {
-          console.error("DNS record creation failed:", dnsError);
-        }
-      }
+      // if (workspaceDomainConfig.zoneId) {
+      //   try {
+      //     await createARecord(
+      //       slug,
+      //       workspaceDomainConfig.zoneId,
+      //       workspaceDomainConfig.targetIp // target IP
+      //     );
+      //   } catch (dnsError) {
+      //     console.error("DNS record creation failed:", dnsError);
+      //   }
+      // }
 
       return {
         message: "Workspace created successfully",
