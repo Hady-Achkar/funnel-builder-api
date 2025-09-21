@@ -339,7 +339,7 @@ describe.skip("Funnel Duplicate Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(targetWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue({
         role: $Enums.WorkspaceRole.VIEWER,
-        permissions: [$Enums.WorkspacePermission.VIEW_FUNNEL],
+        permissions: [],
       });
       mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
@@ -385,7 +385,7 @@ describe.skip("Funnel Duplicate Tests", () => {
       });
 
       const result = await duplicateFunnel(originalFunnelId, userId, {
-        targetWorkspaceSlug
+        workspaceSlug: targetWorkspaceSlug
       });
 
       expect(result.funnelId).toBe(2);
@@ -428,7 +428,7 @@ describe.skip("Funnel Duplicate Tests", () => {
         });
 
       await expect(
-        duplicateFunnel(originalFunnelId, userId, { targetWorkspaceSlug })
+        duplicateFunnel(originalFunnelId, userId, { workspaceSlug: targetWorkspaceSlug })
       ).rejects.toThrow("You don't have permission to create funnels in the target workspace");
     });
   });
@@ -596,8 +596,8 @@ describe.skip("Funnel Duplicate Tests", () => {
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue({
-        role: $Enums.WorkspaceRole.MEMBER,
-        permissions: [$Enums.WorkspacePermission.VIEW_FUNNEL, $Enums.WorkspacePermission.CREATE_FUNNEL],
+        role: $Enums.WorkspaceRole.VIEWER,
+        permissions: [$Enums.WorkspacePermission.CREATE_FUNNELS],
       });
       mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);

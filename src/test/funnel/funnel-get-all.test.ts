@@ -153,8 +153,8 @@ describe("Get All Funnels Tests", () => {
     it.skip("should filter funnels for members based on permissions", async () => {
       const workspaceData = { id: 1, name: "Test Workspace", ownerId: 999 };
       const memberData = {
-        role: $Enums.WorkspaceRole.MEMBER,
-        permissions: [$Enums.WorkspacePermission.VIEW_ALL_FUNNELS]
+        role: $Enums.WorkspaceRole.VIEWER,
+        permissions: []
       };
       const funnelsData = [
         {
@@ -195,7 +195,7 @@ describe("Get All Funnels Tests", () => {
       const workspaceData = { id: 1, name: "Test Workspace", ownerId: 999 };
       const memberData = {
         role: $Enums.WorkspaceRole.ADMIN,
-        permissions: [$Enums.WorkspacePermission.VIEW_FUNNEL]
+        permissions: []
       };
       const funnelsData = [
         {

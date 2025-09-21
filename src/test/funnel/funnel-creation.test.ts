@@ -98,6 +98,7 @@ describe("Funnel Creation Tests", () => {
 
       const result = await createFunnel(userId, {
         name: "My Custom Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -156,6 +157,8 @@ describe("Funnel Creation Tests", () => {
       });
 
       const result = await createFunnel(userId, {
+        name: "",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -217,6 +220,7 @@ describe("Funnel Creation Tests", () => {
 
       const result = await createFunnel(userId, {
         name: "Test Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -231,6 +235,7 @@ describe("Funnel Creation Tests", () => {
       await expect(
         createFunnel(userId, {
           name: "Test Funnel",
+          status: $Enums.FunnelStatus.DRAFT,
           workspaceSlug: "non-existent"
         })
       ).rejects.toThrow("The workspace was not found");
@@ -244,6 +249,7 @@ describe("Funnel Creation Tests", () => {
       await expect(
         createFunnel(userId, {
           name: "Test Funnel",
+          status: $Enums.FunnelStatus.DRAFT,
           workspaceSlug: "test-workspace"
         })
       ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels");
@@ -303,6 +309,7 @@ describe("Funnel Creation Tests", () => {
 
       const result = await createFunnel(userId, {
         name: "Owners Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -317,6 +324,7 @@ describe("Funnel Creation Tests", () => {
       await expect(
         createFunnel(userId, {
           name: "Test Funnel",
+          status: $Enums.FunnelStatus.DRAFT,
           workspaceSlug: "test-workspace"
         })
       ).rejects.toThrow("You don't have access to the \"Test Workspace\" workspace");
@@ -327,7 +335,7 @@ describe("Funnel Creation Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue({
         role: $Enums.WorkspaceRole.ADMIN,
-        permissions: [$Enums.WorkspacePermission.CREATE_FUNNEL]
+        permissions: [$Enums.WorkspacePermission.CREATE_FUNNELS]
       });
       mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
@@ -378,6 +386,7 @@ describe("Funnel Creation Tests", () => {
 
       const result = await createFunnel(userId, {
         name: "Admin Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -439,6 +448,7 @@ describe("Funnel Creation Tests", () => {
 
       await createFunnel(userId, {
         name: "Test Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
@@ -575,6 +585,7 @@ describe("Funnel Creation Tests", () => {
 
       await createFunnel(userId, {
         name: "Complete Funnel",
+        status: $Enums.FunnelStatus.DRAFT,
         workspaceSlug: "test-workspace"
       });
 
