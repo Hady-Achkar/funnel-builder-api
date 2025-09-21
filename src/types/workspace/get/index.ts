@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { WorkspaceRole, WorkspacePermission, DomainType, DomainStatus, SslStatus } from "../../../generated/prisma-client";
+import { WorkspaceRole, WorkspacePermission, DomainType, DomainStatus, SslStatus, UserPlan } from "../../../generated/prisma-client";
 
 // Request parameters
 export const getWorkspaceParams = z.object({
@@ -61,10 +61,11 @@ export const getWorkspaceResponse = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable(),
+  image: z.string().nullable().optional(),
   settings: z.any().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  
+
   // Owner information
   owner: z.object({
     id: z.number(),
@@ -72,6 +73,8 @@ export const getWorkspaceResponse = z.object({
     lastName: z.string(),
     email: z.string(),
     username: z.string(),
+    plan: z.nativeEnum(UserPlan),
+    maximumWorkspaces: z.number(),
   }),
   
   // Current user's role and permissions in this workspace
@@ -95,6 +98,169 @@ export const getWorkspaceResponse = z.object({
     funnelsUsed: z.number(),
     customDomainsUsed: z.number(),
     subdomainsUsed: z.number(),
+    totalDomains: z.number(),
+    membersCount: z.number(),
+    activeFunnels: z.number(),
+    draftFunnels: z.number(),
+    archivedFunnels: z.number(),
+  }),
+
+  // Workspace limits
+  limits: z.object({
+    maxFunnels: z.number(),
+    maxDomains: z.number(),
+    maxMembers: z.number(),
+    maxStorage: z.number(), // in MB
+    funnelsRemaining: z.number(),
+    domainsRemaining: z.number(),
+  }),
+
+  // Role-based permission groups for UI
+  rolePermissions: z.object({
+    OWNER: z.object({
+      workspace: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          renameAndChangeIcon: z.boolean(),
+          inviteMembers: z.boolean(),
+          changeRoles: z.boolean(),
+          deleteMembers: z.boolean(),
+          assignPermissionsToRoles: z.boolean(),
+        }),
+      }),
+      funnels: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          createNewFunnel: z.boolean(),
+          viewFunnel: z.boolean(),
+          editFunnel: z.boolean(),
+          viewAnalytics: z.boolean(),
+          shareFunnel: z.boolean(),
+          rename: z.boolean(),
+          duplicate: z.boolean(),
+          archive: z.boolean(),
+          restoreArchivedFunnels: z.boolean(),
+          moveFunnel: z.boolean(),
+          deleteFunnel: z.boolean(),
+        }),
+      }),
+      domains: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          addDomain: z.boolean(),
+          deleteDomain: z.boolean(),
+          manageDomain: z.boolean(),
+        }),
+      }),
+    }),
+    ADMIN: z.object({
+      workspace: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          renameAndChangeIcon: z.boolean(),
+          inviteMembers: z.boolean(),
+          changeRoles: z.boolean(),
+          deleteMembers: z.boolean(),
+          assignPermissionsToRoles: z.boolean(),
+        }),
+      }),
+      funnels: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          createNewFunnel: z.boolean(),
+          viewFunnel: z.boolean(),
+          editFunnel: z.boolean(),
+          viewAnalytics: z.boolean(),
+          shareFunnel: z.boolean(),
+          rename: z.boolean(),
+          duplicate: z.boolean(),
+          archive: z.boolean(),
+          restoreArchivedFunnels: z.boolean(),
+          moveFunnel: z.boolean(),
+          deleteFunnel: z.boolean(),
+        }),
+      }),
+      domains: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          addDomain: z.boolean(),
+          deleteDomain: z.boolean(),
+          manageDomain: z.boolean(),
+        }),
+      }),
+    }),
+    EDITOR: z.object({
+      workspace: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          renameAndChangeIcon: z.boolean(),
+          inviteMembers: z.boolean(),
+          changeRoles: z.boolean(),
+          deleteMembers: z.boolean(),
+          assignPermissionsToRoles: z.boolean(),
+        }),
+      }),
+      funnels: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          createNewFunnel: z.boolean(),
+          viewFunnel: z.boolean(),
+          editFunnel: z.boolean(),
+          viewAnalytics: z.boolean(),
+          shareFunnel: z.boolean(),
+          rename: z.boolean(),
+          duplicate: z.boolean(),
+          archive: z.boolean(),
+          restoreArchivedFunnels: z.boolean(),
+          moveFunnel: z.boolean(),
+          deleteFunnel: z.boolean(),
+        }),
+      }),
+      domains: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          addDomain: z.boolean(),
+          deleteDomain: z.boolean(),
+          manageDomain: z.boolean(),
+        }),
+      }),
+    }),
+    VIEWER: z.object({
+      workspace: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          renameAndChangeIcon: z.boolean(),
+          inviteMembers: z.boolean(),
+          changeRoles: z.boolean(),
+          deleteMembers: z.boolean(),
+          assignPermissionsToRoles: z.boolean(),
+        }),
+      }),
+      funnels: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          createNewFunnel: z.boolean(),
+          viewFunnel: z.boolean(),
+          editFunnel: z.boolean(),
+          viewAnalytics: z.boolean(),
+          shareFunnel: z.boolean(),
+          rename: z.boolean(),
+          duplicate: z.boolean(),
+          archive: z.boolean(),
+          restoreArchivedFunnels: z.boolean(),
+          moveFunnel: z.boolean(),
+          deleteFunnel: z.boolean(),
+        }),
+      }),
+      domains: z.object({
+        enabled: z.boolean(),
+        permissions: z.object({
+          addDomain: z.boolean(),
+          deleteDomain: z.boolean(),
+          manageDomain: z.boolean(),
+        }),
+      }),
+    }),
   }),
 });
 
