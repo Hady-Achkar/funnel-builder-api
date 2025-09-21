@@ -146,10 +146,11 @@ model Workspace {
   updatedAt              DateTime @updatedAt
   image                  String?
 
-  owner   User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members WorkspaceMember[]
-  funnels Funnel[]
-  domains Domain[]
+  owner             User                        @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members           WorkspaceMember[]
+  funnels           Funnel[]
+  domains           Domain[]
+  rolePermTemplates WorkspaceRolePermTemplate[]
 
   @@map("workspaces")
 }
@@ -191,6 +192,21 @@ enum WorkspacePermission {
   CREATE_DOMAINS
   DELETE_DOMAINS
   CONNECT_DOMAINS
+}
+
+model WorkspaceRolePermTemplate {
+  id          Int                   @id @default(autoincrement())
+  workspaceId Int
+  role        WorkspaceRole
+  permissions WorkspacePermission[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, role])
+  @@index([workspaceId])
+  @@map("workspace_role_perm_templates")
 }
 
 model Funnel {

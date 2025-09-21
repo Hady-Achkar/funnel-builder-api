@@ -37,6 +37,12 @@ describe("Workspace Update Tests", () => {
       user: {
         findUnique: vi.fn(),
       },
+      workspaceRolePermTemplate: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        upsert: vi.fn(),
+      },
       $transaction: vi.fn(),
     };
 
@@ -305,6 +311,9 @@ describe("Workspace Update Tests", () => {
                 ],
               }),
             },
+            workspaceRolePermTemplate: {
+              findUnique: vi.fn().mockResolvedValue(null),
+            },
             workspace: {
               findUnique: vi.fn().mockResolvedValue({
                 ...existingWorkspace,
@@ -501,6 +510,9 @@ describe("Workspace Update Tests", () => {
                   WorkspacePermission.MANAGE_MEMBERS,
                 ],
               }),
+            },
+            workspaceRolePermTemplate: {
+              findUnique: vi.fn().mockResolvedValue(null),
             },
             workspace: {
               findUnique: vi.fn().mockResolvedValue({
@@ -827,6 +839,9 @@ describe("Workspace Update Tests", () => {
             workspaceMember: {
               update: vi.fn().mockResolvedValue({}),
             },
+            workspaceRolePermTemplate: {
+              upsert: vi.fn().mockResolvedValue({}),
+            },
             workspace: {
               findUnique: vi.fn().mockResolvedValue({
                 ...existingWorkspace,
@@ -1023,6 +1038,9 @@ describe("Workspace Update Tests", () => {
               create: vi.fn().mockResolvedValue({}),
               update: vi.fn().mockResolvedValue({}),
               delete: vi.fn().mockResolvedValue({}),
+            },
+            workspaceRolePermTemplate: {
+              findUnique: vi.fn().mockResolvedValue(null),
             },
           };
           return callback(txMock);

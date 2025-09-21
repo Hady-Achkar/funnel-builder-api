@@ -10,6 +10,7 @@ import {
   NotFoundError,
 } from "../../../errors/http-errors";
 import { ZodError } from "zod";
+import { cacheService } from "../../cache/cache.service";
 
 export class DeleteWorkspaceService {
   static async deleteBySlug(
@@ -56,6 +57,11 @@ export class DeleteWorkspaceService {
       }
 
       await prisma.$transaction(async (tx) => {
+        // Delete role permission templates
+        await tx.workspaceRolePermTemplate.deleteMany({
+          where: { workspaceId: workspace.id },
+        });
+
         await tx.workspaceMember.deleteMany({
           where: { workspaceId: workspace.id },
         });
@@ -64,6 +70,28 @@ export class DeleteWorkspaceService {
           where: { id: workspace.id },
         });
       });
+
+      // Invalidate all caches related to this workspace
+      try {
+        // Invalidate workspace cache by ID
+        await cacheService.invalidateWorkspaceCache(workspace.id);
+
+        // Invalidate workspace cache by slug
+        await cacheService.invalidatePattern(`${workspace.slug}:*`, "workspace");
+
+        // Invalidate user workspaces cache for owner
+        await cacheService.invalidateUserWorkspacesCache(workspace.owner.id);
+
+        // Invalidate cache for all members
+        for (const member of workspace.members) {
+          await cacheService.invalidateUserWorkspacesCache(member.userId);
+        }
+
+        console.log(`[Cache] Invalidated all caches for deleted workspace ${workspace.slug}`);
+      } catch (cacheError) {
+        console.error("Failed to invalidate workspace cache:", cacheError);
+        // Don't fail the delete operation if cache invalidation fails
+      }
 
       const response: DeleteWorkspaceResponse = {
         success: true,

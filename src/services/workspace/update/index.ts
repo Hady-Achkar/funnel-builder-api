@@ -13,6 +13,7 @@ import {
   NotFoundError,
   ConflictError,
 } from "../../../errors/http-errors";
+import { cacheService } from "../../cache/cache.service";
 
 export class UpdateWorkspaceService {
   static async update(
@@ -166,10 +167,23 @@ export class UpdateWorkspaceService {
               }
 
               // Set permissions based on role if not explicitly provided
-              const permissions =
-                newMember.permissions ||
-                (rolePermissionPresets[newMember.role] as $Enums.WorkspacePermission[]) ||
-                [];
+              let permissions = newMember.permissions;
+
+              if (!permissions) {
+                // First check if there's a workspace-specific template
+                const roleTemplate = await tx.workspaceRolePermTemplate.findUnique({
+                  where: {
+                    workspaceId_role: {
+                      workspaceId: workspace.id,
+                      role: newMember.role,
+                    },
+                  },
+                });
+
+                permissions = roleTemplate?.permissions ||
+                  (rolePermissionPresets[newMember.role] as $Enums.WorkspacePermission[]) ||
+                  [];
+              }
 
               await tx.workspaceMember.create({
                 data: {
@@ -238,7 +252,19 @@ export class UpdateWorkspaceService {
 
                 // Apply default permissions for role if permissions not explicitly set
                 if (!updateMember.permissions) {
-                  updateData.permissions = rolePermissionPresets[updateMember.role] as $Enums.WorkspacePermission[];
+                  // First check if there's a workspace-specific template
+                  const roleTemplate = await tx.workspaceRolePermTemplate.findUnique({
+                    where: {
+                      workspaceId_role: {
+                        workspaceId: workspace.id,
+                        role: updateMember.role,
+                      },
+                    },
+                  });
+
+                  updateData.permissions = roleTemplate?.permissions ||
+                    (rolePermissionPresets[updateMember.role] as $Enums.WorkspacePermission[]) ||
+                    [];
                 }
               }
 
@@ -299,6 +325,25 @@ export class UpdateWorkspaceService {
             );
           }
 
+          // Update or create the role permission template for the workspace
+          await tx.workspaceRolePermTemplate.upsert({
+            where: {
+              workspaceId_role: {
+                workspaceId: workspace.id,
+                role: rolePermissions.role,
+              },
+            },
+            create: {
+              workspaceId: workspace.id,
+              role: rolePermissions.role,
+              permissions: rolePermissions.permissions,
+            },
+            update: {
+              permissions: rolePermissions.permissions,
+            },
+          });
+
+          // Update all existing members with that role
           const membersToUpdate = workspace.members.filter(
             (m) => m.role === rolePermissions.role && m.userId !== workspace.ownerId
           );
@@ -314,9 +359,7 @@ export class UpdateWorkspaceService {
             changes.permissions.affectedMembers.push(member.userId);
           }
 
-          if (membersToUpdate.length > 0) {
-            changes.permissions.updated = true;
-          }
+          changes.permissions.updated = true;
         }
 
         // 4. Update limits (if applicable - might need separate table)
@@ -386,6 +429,41 @@ export class UpdateWorkspaceService {
           changes,
         };
       });
+
+      // Invalidate all caches related to this workspace
+      try {
+        // Invalidate workspace cache by ID
+        await cacheService.invalidateWorkspaceCache(workspace.id);
+
+        // Invalidate workspace cache by slug (all user-specific entries)
+        await cacheService.invalidatePattern(`${workspace.slug}:*`, "workspace");
+
+        // Invalidate user workspaces cache for owner
+        await cacheService.invalidateUserWorkspacesCache(workspace.ownerId);
+
+        // Invalidate cache for all members
+        for (const member of workspace.members) {
+          await cacheService.invalidateUserWorkspacesCache(member.userId);
+        }
+
+        // If members were added, invalidate their user cache too
+        if (changes.members.added.length > 0 && members?.add) {
+          for (const newMember of members.add) {
+            const user = await prisma.user.findUnique({
+              where: { email: newMember.email },
+              select: { id: true },
+            });
+            if (user) {
+              await cacheService.invalidateUserWorkspacesCache(user.id);
+            }
+          }
+        }
+
+        console.log(`[Cache] Invalidated workspace cache for ${workspace.slug}`);
+      } catch (cacheError) {
+        console.error("Failed to invalidate workspace cache:", cacheError);
+        // Don't fail the update operation if cache invalidation fails
+      }
 
       return result;
     } catch (error: unknown) {

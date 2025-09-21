@@ -297,6 +297,84 @@ export class CacheService {
     await this.invalidatePattern("*", `template:${templateId}`);
   }
 
+  // Workspace cache methods
+  async getWorkspaceCache<T>(
+    workspaceId: number,
+    key: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(key, {
+      ...options,
+      prefix: `workspace:${workspaceId}`,
+    });
+  }
+
+  async setWorkspaceCache(
+    workspaceId: number,
+    key: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(key, value, {
+      ...options,
+      prefix: `workspace:${workspaceId}`,
+    });
+  }
+
+  async invalidateWorkspaceCache(workspaceId: number): Promise<void> {
+    await this.invalidatePattern("*", `workspace:${workspaceId}`);
+  }
+
+  async getWorkspaceBySlugCache<T>(
+    cacheKey: string,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(cacheKey, {
+      ...options,
+      prefix: "workspace",
+    });
+  }
+
+  async setWorkspaceBySlugCache(
+    cacheKey: string,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(cacheKey, value, {
+      ...options,
+      prefix: "workspace",
+    });
+  }
+
+  async invalidateWorkspaceBySlugCache(slug: string): Promise<void> {
+    await this.del(`slug:${slug}`, { prefix: "workspace" });
+  }
+
+  async getUserWorkspacesCache<T>(
+    userId: number,
+    options?: CacheOptions
+  ): Promise<T | null> {
+    return await this.get<T>(`workspaces`, {
+      ...options,
+      prefix: `user:${userId}`,
+    });
+  }
+
+  async setUserWorkspacesCache(
+    userId: number,
+    value: any,
+    options?: CacheOptions
+  ): Promise<void> {
+    await this.set(`workspaces`, value, {
+      ...options,
+      prefix: `user:${userId}`,
+    });
+  }
+
+  async invalidateUserWorkspacesCache(userId: number): Promise<void> {
+    await this.del(`workspaces`, { prefix: `user:${userId}` });
+  }
+
   // Health check
   async healthCheck(): Promise<{ redis: boolean; latency?: number }> {
     const start = Date.now();

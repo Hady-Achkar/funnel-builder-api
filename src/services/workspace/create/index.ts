@@ -20,6 +20,8 @@ import {
   WorkspaceRole,
   WorkspacePermission,
 } from "../../../generated/prisma-client";
+import { rolePermissionPresets } from "../../../types/workspace/update";
+import { cacheService } from "../../cache/cache.service";
 
 export class CreateWorkspaceService {
   static async create(
@@ -92,6 +94,23 @@ export class CreateWorkspaceService {
           },
         });
 
+        // 3. Initialize default role permission templates for the workspace
+        const rolesToInitialize = [
+          WorkspaceRole.ADMIN,
+          WorkspaceRole.EDITOR,
+          WorkspaceRole.VIEWER,
+        ];
+
+        for (const role of rolesToInitialize) {
+          await tx.workspaceRolePermTemplate.create({
+            data: {
+              workspaceId: workspace.id,
+              role,
+              permissions: rolePermissionPresets[role] || [],
+            },
+          });
+        }
+
         return workspace;
       });
 
@@ -108,6 +127,15 @@ export class CreateWorkspaceService {
       //     console.error("DNS record creation failed:", dnsError);
       //   }
       // }
+
+      // Invalidate user's workspaces cache since they have a new workspace
+      try {
+        await cacheService.invalidateUserWorkspacesCache(userId);
+        console.log(`[Cache] Invalidated user workspaces cache for user ${userId}`);
+      } catch (cacheError) {
+        console.error("Failed to invalidate user workspaces cache:", cacheError);
+        // Don't fail the create operation if cache invalidation fails
+      }
 
       return {
         message: "Workspace created successfully",

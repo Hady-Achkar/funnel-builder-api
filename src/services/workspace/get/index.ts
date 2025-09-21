@@ -16,6 +16,7 @@ import {
   FunnelStatus,
 } from "../../../generated/prisma-client";
 import { rolePermissionPresets } from "../../../types/workspace/update";
+import { cacheService } from "../../cache/cache.service";
 
 export class GetWorkspaceService {
 
@@ -26,6 +27,18 @@ export class GetWorkspaceService {
     try {
       const validatedParams = getWorkspaceParams.parse({ slug });
 
+      // Try to get from cache first
+      const cacheKey = `${slug}:user:${userId}`;
+      const cached = await cacheService.getWorkspaceBySlugCache<GetWorkspaceResponse>(cacheKey, {
+        ttl: 300 // 5 minutes
+      });
+
+      if (cached) {
+        console.log(`[Cache HIT] Workspace ${slug} for user ${userId}`);
+        return cached;
+      }
+
+      console.log(`[Cache MISS] Workspace ${slug} for user ${userId}`);
       const prisma = getPrisma();
 
       const workspace = await prisma.workspace.findUnique({
@@ -177,12 +190,17 @@ export class GetWorkspaceService {
         pagesCount: funnel._count.pages,
       }));
 
-      // Generate permissions for each role (using raw permission constants)
-      const rolePermissions = {
+      // Get role permission templates from database for this workspace
+      const rolePermTemplates = await prisma.workspaceRolePermTemplate.findMany({
+        where: { workspaceId: workspace.id },
+      });
+
+      // Build role permissions using workspace-specific templates if available
+      const workspaceRolePermissions = {
         [WorkspaceRole.OWNER]: rolePermissionPresets[WorkspaceRole.OWNER] || [],
-        [WorkspaceRole.ADMIN]: rolePermissionPresets[WorkspaceRole.ADMIN] || [],
-        [WorkspaceRole.EDITOR]: rolePermissionPresets[WorkspaceRole.EDITOR] || [],
-        [WorkspaceRole.VIEWER]: rolePermissionPresets[WorkspaceRole.VIEWER] || [],
+        [WorkspaceRole.ADMIN]: rolePermTemplates.find(t => t.role === WorkspaceRole.ADMIN)?.permissions || rolePermissionPresets[WorkspaceRole.ADMIN] || [],
+        [WorkspaceRole.EDITOR]: rolePermTemplates.find(t => t.role === WorkspaceRole.EDITOR)?.permissions || rolePermissionPresets[WorkspaceRole.EDITOR] || [],
+        [WorkspaceRole.VIEWER]: rolePermTemplates.find(t => t.role === WorkspaceRole.VIEWER)?.permissions || rolePermissionPresets[WorkspaceRole.VIEWER] || [],
       };
 
       const response: GetWorkspaceResponse = {
@@ -201,10 +219,17 @@ export class GetWorkspaceService {
         funnels,
         usage,
         limits,
-        rolePermissions,
+        rolePermissions: workspaceRolePermissions,
       };
 
-      return getWorkspaceResponse.parse(response);
+      const validatedResponse = getWorkspaceResponse.parse(response);
+
+      // Cache the response for 5 minutes
+      await cacheService.setWorkspaceBySlugCache(cacheKey, validatedResponse, {
+        ttl: 300, // 5 minutes
+      });
+
+      return validatedResponse;
     } catch (error) {
       if (error instanceof ZodError) {
         const message = error.issues[0]?.message || "Invalid data provided";
