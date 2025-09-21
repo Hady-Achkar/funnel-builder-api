@@ -21,7 +21,7 @@ export const updateFunnelRequest = z.object({
     .max(100, "Funnel slug must be less than 100 characters")
     .optional(),
   status: z
-    .nativeEnum($Enums.FunnelStatus, { message: "Invalid funnel status" })
+    .enum($Enums.FunnelStatus, { message: "Invalid funnel status" })
     .optional(),
 });
 

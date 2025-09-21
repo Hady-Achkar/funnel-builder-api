@@ -23,13 +23,17 @@ export const GetAllDomainsRequestSchema = z.object({
   filters: z
     .object({
       status: z
-        .nativeEnum($Enums.DomainStatus, {
-          message: `Status must be one of: ${Object.values($Enums.DomainStatus).join(", ")}`,
+        .enum($Enums.DomainStatus, {
+          message: `Status must be one of: ${Object.values(
+            $Enums.DomainStatus
+          ).join(", ")}`,
         })
         .optional(),
       type: z
-        .nativeEnum($Enums.DomainType, {
-          message: `Type must be one of: ${Object.values($Enums.DomainType).join(", ")}`,
+        .enum($Enums.DomainType, {
+          message: `Type must be one of: ${Object.values(
+            $Enums.DomainType
+          ).join(", ")}`,
         })
         .optional(),
       hostname: z
@@ -60,11 +64,15 @@ export type GetAllDomainsRequest = z.infer<typeof GetAllDomainsRequestSchema>;
 export const DomainSummarySchema = z.object({
   id: z.number({ message: "Domain ID must be a number" }),
   hostname: z.string({ message: "Hostname must be a string" }),
-  type: z.nativeEnum($Enums.DomainType, {
-    message: `Domain type must be one of: ${Object.values($Enums.DomainType).join(", ")}`,
+  type: z.enum($Enums.DomainType, {
+    message: `Domain type must be one of: ${Object.values(
+      $Enums.DomainType
+    ).join(", ")}`,
   }),
-  status: z.nativeEnum($Enums.DomainStatus, {
-    message: `Domain status must be one of: ${Object.values($Enums.DomainStatus).join(", ")}`,
+  status: z.enum($Enums.DomainStatus, {
+    message: `Domain status must be one of: ${Object.values(
+      $Enums.DomainStatus
+    ).join(", ")}`,
   }),
   workspaceId: z.number({ message: "Workspace ID must be a number" }),
 });
@@ -88,8 +96,8 @@ export const GetAllDomainsResponseSchema = z.object({
   }),
   pagination: PaginationSchema,
   filters: z.object({
-    status: z.nativeEnum($Enums.DomainStatus).optional(),
-    type: z.nativeEnum($Enums.DomainType).optional(),
+    status: z.enum($Enums.DomainStatus).optional(),
+    type: z.enum($Enums.DomainType).optional(),
     hostname: z.string().optional(),
   }),
 });

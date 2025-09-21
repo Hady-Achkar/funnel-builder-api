@@ -46,7 +46,7 @@ export const registerRequest = z.object({
     })
     .default(false),
   plan: z
-    .nativeEnum($Enums.UserPlan, {
+    .enum($Enums.UserPlan, {
       message: "Plan must be BUSINESS or AGENCY",
     })
     .default($Enums.UserPlan.BUSINESS),
@@ -63,7 +63,7 @@ export const registerResponse = z.object({
     firstName: z.string(),
     lastName: z.string(),
     isAdmin: z.boolean().default(false),
-    plan: z.nativeEnum($Enums.UserPlan),
+    plan: z.enum($Enums.UserPlan),
     verified: z.boolean(),
   }),
 });

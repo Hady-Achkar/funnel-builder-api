@@ -14,9 +14,11 @@ export const updateInsightRequest = z.object({
     .refine((val) => val > 0, {
       message: "Insight ID must be a positive number",
     }),
-  type: z.nativeEnum($Enums.InsightType, {
-    message: "Type must be QUIZ, SINGLE_CHOICE, or MULTIPLE_CHOICE",
-  }).optional(),
+  type: z
+    .enum($Enums.InsightType, {
+      message: "Type must be QUIZ, SINGLE_CHOICE, or MULTIPLE_CHOICE",
+    })
+    .optional(),
   name: z
     .string({
       message: "Insight name must be a string",
@@ -33,13 +35,11 @@ export const updateInsightRequest = z.object({
     .max(1000, "Insight description must be less than 1000 characters")
     .optional()
     .nullable(),
-  content: z
-    .any()
-    .optional(),
+  content: z.any().optional(),
   settings: z
     .record(z.string(), z.any())
     .optional()
-    .transform(val => val || {}),
+    .transform((val) => val || {}),
 });
 
 export type UpdateInsightRequest = z.infer<typeof updateInsightRequest>;

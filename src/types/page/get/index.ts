@@ -16,7 +16,7 @@ export const getPageResponse = z.object({
   name: z.string(),
   content: z.string(),
   order: z.number(),
-  type: z.nativeEnum(PageType),
+  type: z.enum(PageType),
   linkingId: z.string(),
   seoTitle: z.string().nullable(),
   seoDescription: z.string().nullable(),

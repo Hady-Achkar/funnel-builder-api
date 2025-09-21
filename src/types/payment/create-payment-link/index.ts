@@ -5,7 +5,7 @@ export const createPaymentLinkRequest = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Must be a valid email address"),
-  planType: z.nativeEnum($Enums.UserPlan, {
+  planType: z.enum($Enums.UserPlan, {
     message: `Plan type must be one of: ${Object.values($Enums.UserPlan).join(
       ", "
     )}`,
@@ -51,7 +51,7 @@ export const createPaymentLinkResponse = z.object({
     active: z.boolean(),
     createdDate: z.string(),
     planDetails: z.object({
-      planType: z.nativeEnum($Enums.UserPlan),
+      planType: z.enum($Enums.UserPlan),
       maximumFunnelsAllowed: z.number(),
       maximumSubdomainsAllowed: z.number(),
       maximumCustomDomainsAllowed: z.number(),

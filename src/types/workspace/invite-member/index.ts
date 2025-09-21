@@ -7,8 +7,12 @@ import {
 export const InviteMemberRequestSchema = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required"),
   email: z.string().email("Please provide a valid email address"),
-  role: z.nativeEnum(WorkspaceRole, { message: "Invalid workspace role" }),
-  permissions: z.array(z.nativeEnum(WorkspacePermission, { message: "Invalid workspace permission" })).optional(),
+  role: z.enum(WorkspaceRole, { message: "Invalid workspace role" }),
+  permissions: z
+    .array(
+      z.enum(WorkspacePermission, { message: "Invalid workspace permission" })
+    )
+    .optional(),
 });
 
 export type InviteMemberRequest = z.infer<typeof InviteMemberRequestSchema>;
@@ -19,8 +23,8 @@ export const InviteMemberResponseSchema = z.object({
     id: z.number(),
     userId: z.number(),
     workspaceId: z.number(),
-    role: z.nativeEnum(WorkspaceRole),
-    permissions: z.array(z.nativeEnum(WorkspacePermission)),
+    role: z.enum(WorkspaceRole),
+    permissions: z.array(z.enum(WorkspacePermission)),
     joinedAt: z.date(),
   }),
 });

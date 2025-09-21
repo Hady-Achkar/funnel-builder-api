@@ -37,17 +37,17 @@ export type SetupInstructions = z.infer<typeof SetupInstructionsSchema>;
 export const CreatedDomainSchema = z.object({
   id: z.number({ message: "Domain ID must be a number" }),
   hostname: z.string({ message: "Hostname must be a string" }),
-  type: z.nativeEnum($Enums.DomainType, {
+  type: z.enum($Enums.DomainType, {
     message: `Domain type must be one of: ${Object.values(
       $Enums.DomainType
     ).join(", ")}`,
   }),
-  status: z.nativeEnum($Enums.DomainStatus, {
+  status: z.enum($Enums.DomainStatus, {
     message: `Domain status must be one of: ${Object.values(
       $Enums.DomainStatus
     ).join(", ")}`,
   }),
-  sslStatus: z.nativeEnum($Enums.SslStatus).nullable(),
+  sslStatus: z.enum($Enums.SslStatus).nullable(),
   isVerified: z.boolean({ message: "Is verified must be a boolean" }),
   isActive: z.boolean({ message: "Is active must be a boolean" }),
   verificationToken: z.string().nullable(),

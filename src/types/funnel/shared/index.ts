@@ -5,7 +5,7 @@ import { $Enums } from "../../../generated/prisma-client";
 export const cachedFunnelWithPages = z.object({
   id: z.number(),
   name: z.string(),
-  status: z.nativeEnum($Enums.FunnelStatus),
+  status: z.enum($Enums.FunnelStatus),
   workspaceId: z.number(),
   createdBy: z.number(),
   themeId: z.number(),
@@ -21,7 +21,7 @@ export const cachedFunnelWithPages = z.object({
     borderColor: z.string(),
     optionColor: z.string(),
     fontFamily: z.string(),
-    borderRadius: z.nativeEnum($Enums.BorderRadius),
+    borderRadius: z.enum($Enums.BorderRadius),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),
   }),

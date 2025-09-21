@@ -3,29 +3,28 @@ import { $Enums } from "../../../generated/prisma-client";
 
 export const configureWorkspaceRequest = z
   .object({
-    workspaceSlug: z.string().min(3, "Workspace slug must be at least 3 characters"),
+    workspaceSlug: z
+      .string()
+      .min(3, "Workspace slug must be at least 3 characters"),
     memberId: z.number().int().positive().optional(),
 
-    newRole: z.nativeEnum($Enums.WorkspaceRole).optional(),
+    newRole: z.enum($Enums.WorkspaceRole).optional(),
 
-    addPermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)).optional(),
-    removePermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)).optional(),
+    addPermissions: z.array(z.enum($Enums.WorkspacePermission)).optional(),
+    removePermissions: z.array(z.enum($Enums.WorkspacePermission)).optional(),
   })
   .refine(
-    (data) =>
-      data.newRole ||
-      data.addPermissions ||
-      data.removePermissions,
+    (data) => data.newRole || data.addPermissions || data.removePermissions,
     {
-      message:
-        "At least one change (role or permissions) must be specified",
+      message: "At least one change (role or permissions) must be specified",
       path: ["changes"],
     }
   )
   .refine(
     (data) => {
       // If member-related changes are requested, memberId is required
-      const memberChanges = data.newRole || data.addPermissions || data.removePermissions;
+      const memberChanges =
+        data.newRole || data.addPermissions || data.removePermissions;
       if (memberChanges && !data.memberId) {
         return false;
       }
@@ -44,8 +43,8 @@ export type ConfigureWorkspaceRequest = z.infer<
 export const memberInfo = z.object({
   id: z.number(),
   userId: z.number(),
-  role: z.nativeEnum($Enums.WorkspaceRole),
-  permissions: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+  role: z.enum($Enums.WorkspaceRole),
+  permissions: z.array(z.enum($Enums.WorkspacePermission)),
   joinedAt: z.date(),
   updatedAt: z.date(),
   user: z.object({
@@ -63,8 +62,8 @@ export const configureWorkspaceResponse = z.object({
   member: memberInfo.optional(),
   changes: z.object({
     roleChanged: z.boolean(),
-    permissionsAdded: z.array(z.nativeEnum($Enums.WorkspacePermission)),
-    permissionsRemoved: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+    permissionsAdded: z.array(z.enum($Enums.WorkspacePermission)),
+    permissionsRemoved: z.array(z.enum($Enums.WorkspacePermission)),
   }),
 });
 
@@ -74,11 +73,11 @@ export type ConfigureWorkspaceResponse = z.infer<
 
 export const roleChangeAttempt = z.object({
   requesterId: z.number(),
-  requesterRole: z.nativeEnum($Enums.WorkspaceRole),
-  requesterPermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+  requesterRole: z.enum($Enums.WorkspaceRole),
+  requesterPermissions: z.array(z.enum($Enums.WorkspacePermission)),
   targetMemberId: z.number(),
-  targetRole: z.nativeEnum($Enums.WorkspaceRole),
-  newRole: z.nativeEnum($Enums.WorkspaceRole),
+  targetRole: z.enum($Enums.WorkspaceRole),
+  newRole: z.enum($Enums.WorkspaceRole),
   isOwner: z.boolean(),
 });
 
@@ -86,12 +85,12 @@ export type RoleChangeAttempt = z.infer<typeof roleChangeAttempt>;
 
 export const permissionChangeAttempt = z.object({
   requesterId: z.number(),
-  requesterRole: z.nativeEnum($Enums.WorkspaceRole),
-  requesterPermissions: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+  requesterRole: z.enum($Enums.WorkspaceRole),
+  requesterPermissions: z.array(z.enum($Enums.WorkspacePermission)),
   targetMemberId: z.number(),
-  targetRole: z.nativeEnum($Enums.WorkspaceRole),
-  permissionsToAdd: z.array(z.nativeEnum($Enums.WorkspacePermission)),
-  permissionsToRemove: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+  targetRole: z.enum($Enums.WorkspaceRole),
+  permissionsToAdd: z.array(z.enum($Enums.WorkspacePermission)),
+  permissionsToRemove: z.array(z.enum($Enums.WorkspacePermission)),
   isOwner: z.boolean(),
 });
 

@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { WorkspaceRole, WorkspacePermission, DomainType, DomainStatus, SslStatus, UserPlan } from "../../../generated/prisma-client";
+import {
+  WorkspaceRole,
+  WorkspacePermission,
+  DomainType,
+  DomainStatus,
+  SslStatus,
+  UserPlan,
+} from "../../../generated/prisma-client";
 
 // Request parameters
 export const getWorkspaceParams = z.object({
@@ -12,8 +19,8 @@ export type GetWorkspaceParams = z.infer<typeof getWorkspaceParams>;
 export const workspaceMemberSchema = z.object({
   id: z.number(),
   userId: z.number(),
-  role: z.nativeEnum(WorkspaceRole),
-  permissions: z.array(z.nativeEnum(WorkspacePermission)),
+  role: z.enum(WorkspaceRole),
+  permissions: z.array(z.enum(WorkspacePermission)),
   joinedAt: z.date(),
   updatedAt: z.date(),
   user: z.object({
@@ -31,9 +38,9 @@ export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;
 export const workspaceDomainSchema = z.object({
   id: z.number(),
   hostname: z.string(),
-  type: z.nativeEnum(DomainType),
-  status: z.nativeEnum(DomainStatus),
-  sslStatus: z.nativeEnum(SslStatus),
+  type: z.enum(DomainType),
+  status: z.enum(DomainStatus),
+  sslStatus: z.enum(SslStatus),
   isVerified: z.boolean(),
   isActive: z.boolean(),
   createdAt: z.date(),
@@ -73,26 +80,26 @@ export const getWorkspaceResponse = z.object({
     lastName: z.string(),
     email: z.string(),
     username: z.string(),
-    plan: z.nativeEnum(UserPlan),
+    plan: z.enum(UserPlan),
     maximumWorkspaces: z.number(),
   }),
-  
+
   // Current user's role and permissions in this workspace
   currentUserMember: z.object({
-    role: z.nativeEnum(WorkspaceRole),
-    permissions: z.array(z.nativeEnum(WorkspacePermission)),
+    role: z.enum(WorkspaceRole),
+    permissions: z.array(z.enum(WorkspacePermission)),
     joinedAt: z.date(),
   }),
-  
+
   // All members
   members: z.array(workspaceMemberSchema),
-  
+
   // Domains
   domains: z.array(workspaceDomainSchema),
-  
+
   // Funnels (summary)
   funnels: z.array(funnelSummarySchema),
-  
+
   // Usage statistics
   usage: z.object({
     funnelsUsed: z.number(),
@@ -117,10 +124,10 @@ export const getWorkspaceResponse = z.object({
 
   // Role-based permissions (raw permission constants)
   rolePermissions: z.object({
-    OWNER: z.array(z.nativeEnum(WorkspacePermission)),
-    ADMIN: z.array(z.nativeEnum(WorkspacePermission)),
-    EDITOR: z.array(z.nativeEnum(WorkspacePermission)),
-    VIEWER: z.array(z.nativeEnum(WorkspacePermission)),
+    OWNER: z.array(z.enum(WorkspacePermission)),
+    ADMIN: z.array(z.enum(WorkspacePermission)),
+    EDITOR: z.array(z.enum(WorkspacePermission)),
+    VIEWER: z.array(z.enum(WorkspacePermission)),
   }),
 });
 

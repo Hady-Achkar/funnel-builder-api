@@ -8,19 +8,21 @@ export const getAllAffiliateLinksResponse = z.object({
       id: z.number(),
       name: z.string(),
       token: z.string(),
-      itemType: z.nativeEnum($Enums.UserPlan),
+      itemType: z.enum($Enums.UserPlan),
       clickCount: z.number(),
       totalAmount: z.number(),
       settings: z.record(z.string(), z.any()),
       url: z.string(),
       createdAt: z.date(),
       updatedAt: z.date(),
-      funnel: z.object({
-        id: z.number(),
-        name: z.string(),
-        slug: z.string(),
-        status: z.string(),
-      }).optional(),
+      funnel: z
+        .object({
+          id: z.number(),
+          name: z.string(),
+          slug: z.string(),
+          status: z.string(),
+        })
+        .optional(),
       user: z.object({
         id: z.number(),
         firstName: z.string(),
@@ -49,11 +51,18 @@ export const getAllAffiliateLinksQuery = z.object({
   page: z.coerce.number().min(1).optional().default(1),
   limit: z.coerce.number().min(1).max(100).optional().default(10),
   search: z.string().optional(),
-  planType: z.nativeEnum($Enums.UserPlan, {
-    message: `Plan type must be one of: ${Object.values($Enums.UserPlan).join(", ")}`
-  }).optional(),
-  sortBy: z.enum(['createdAt', 'clickCount', 'totalAmount', 'name']).optional().default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+  planType: z
+    .enum($Enums.UserPlan, {
+      message: `Plan type must be one of: ${Object.values($Enums.UserPlan).join(
+        ", "
+      )}`,
+    })
+    .optional(),
+  sortBy: z
+    .enum(["createdAt", "clickCount", "totalAmount", "name"])
+    .optional()
+    .default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export type GetAllAffiliateLinksQuery = z.infer<

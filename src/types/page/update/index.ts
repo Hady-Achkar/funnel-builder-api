@@ -11,12 +11,8 @@ export const updatePageRequest = z.object({
     .min(1, "Page name cannot be empty")
     .max(255, "Page name cannot exceed 255 characters")
     .optional(),
-  content: z
-    .string({ message: "Page content must be a string" })
-    .optional(),
-  type: z
-    .nativeEnum(PageType)
-    .optional(),
+  content: z.string({ message: "Page content must be a string" }).optional(),
+  type: z.enum(PageType).optional(),
   linkingId: z
     .string({ message: "Linking ID must be a string" })
     .min(1, "Linking ID cannot be empty")
@@ -49,11 +45,15 @@ export const updatePageResponse = z.object({
     name: z.string({ message: "Page name must be a string" }),
     content: z.string({ message: "Page content must be a string" }),
     order: z.number({ message: "Page order must be a number" }),
-    type: z.nativeEnum(PageType),
+    type: z.enum(PageType),
     linkingId: z.string({ message: "Linking ID must be a string" }),
     seoTitle: z.string({ message: "SEO title must be a string" }).nullable(),
-    seoDescription: z.string({ message: "SEO description must be a string" }).nullable(),
-    seoKeywords: z.string({ message: "SEO keywords must be a string" }).nullable(),
+    seoDescription: z
+      .string({ message: "SEO description must be a string" })
+      .nullable(),
+    seoKeywords: z
+      .string({ message: "SEO keywords must be a string" })
+      .nullable(),
     funnelId: z.number({ message: "Funnel ID must be a number" }),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),

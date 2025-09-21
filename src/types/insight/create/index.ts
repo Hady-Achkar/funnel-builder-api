@@ -2,7 +2,7 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const createInsightRequest = z.object({
-  type: z.nativeEnum($Enums.InsightType, {
+  type: z.enum($Enums.InsightType, {
     message: "Type must be QUIZ, SINGLE_CHOICE, or MULTIPLE_CHOICE",
   }),
   name: z
@@ -23,11 +23,11 @@ export const createInsightRequest = z.object({
   content: z
     .record(z.string(), z.any())
     .optional()
-    .transform(val => val || {}),
+    .transform((val) => val || {}),
   settings: z
     .record(z.string(), z.any())
     .optional()
-    .transform(val => val || {}),
+    .transform((val) => val || {}),
   funnelId: z
     .number({
       message: "Funnel ID must be a number",

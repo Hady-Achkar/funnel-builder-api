@@ -334,4 +334,349 @@ describe("Workspace Creation Tests", () => {
       });
     });
   });
+
+  describe("Multiple workspace creation", () => {
+    it("should allow users to create multiple workspaces within their plan limits", async () => {
+      const userId = 1;
+
+      // Mock user with BUSINESS plan (3 workspace limit)
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+        maximumWorkspaces: 3,
+      });
+
+      // First workspace
+      const firstWorkspace = {
+        name: "First Workspace",
+        slug: "first-workspace",
+      };
+
+      mockPrisma.workspace.count.mockResolvedValueOnce(0);
+      mockPrisma.workspace.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.workspace.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.domain.findUnique.mockResolvedValueOnce(null);
+
+      mockPrisma.$transaction.mockImplementationOnce(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: firstWorkspace.name,
+              slug: firstWorkspace.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result1 = await CreateWorkspaceService.create(userId, firstWorkspace);
+      expect(result1.message).toBe("Workspace created successfully");
+
+      // Second workspace
+      const secondWorkspace = {
+        name: "Second Workspace",
+        slug: "second-workspace",
+      };
+
+      mockPrisma.workspace.count.mockResolvedValueOnce(1);
+      mockPrisma.workspace.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.workspace.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.domain.findUnique.mockResolvedValueOnce(null);
+
+      mockPrisma.$transaction.mockImplementationOnce(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 2,
+              name: secondWorkspace.name,
+              slug: secondWorkspace.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result2 = await CreateWorkspaceService.create(userId, secondWorkspace);
+      expect(result2.message).toBe("Workspace created successfully");
+
+      // Third workspace (still within limit)
+      const thirdWorkspace = {
+        name: "Third Workspace",
+        slug: "third-workspace",
+      };
+
+      mockPrisma.workspace.count.mockResolvedValueOnce(2);
+      mockPrisma.workspace.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.workspace.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.domain.findUnique.mockResolvedValueOnce(null);
+
+      mockPrisma.$transaction.mockImplementationOnce(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 3,
+              name: thirdWorkspace.name,
+              slug: thirdWorkspace.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result3 = await CreateWorkspaceService.create(userId, thirdWorkspace);
+      expect(result3.message).toBe("Workspace created successfully");
+
+      // Fourth workspace (should fail - exceeds limit)
+      const fourthWorkspace = {
+        name: "Fourth Workspace",
+        slug: "fourth-workspace",
+      };
+
+      mockPrisma.workspace.count.mockResolvedValueOnce(3);
+
+      await expect(
+        CreateWorkspaceService.create(userId, fourthWorkspace)
+      ).rejects.toThrow(
+        "You have reached your workspace limit of 3 workspaces. Please upgrade your plan to create more workspaces."
+      );
+    });
+
+    it("should only count workspaces owned by the user, not member workspaces", async () => {
+      const userId = 1;
+
+      // Mock user with FREE plan (1 workspace limit)
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.FREE,
+        maximumWorkspaces: 1,
+      });
+
+      // User owns 0 workspaces (but is a member of others)
+      mockPrisma.workspace.count.mockResolvedValue(0);
+
+      const workspaceData = {
+        name: "My Own Workspace",
+        slug: "my-own-workspace",
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(result.message).toBe("Workspace created successfully");
+      expect(mockPrisma.workspace.count).toHaveBeenCalledWith({
+        where: { ownerId: userId },
+      });
+    });
+
+    it("should handle workspace creation after deletion", async () => {
+      const userId = 1;
+
+      // Mock user with FREE plan
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.FREE,
+        maximumWorkspaces: 1,
+      });
+
+      // Scenario: User had 1 workspace, deleted it, now creating a new one
+      mockPrisma.workspace.count.mockResolvedValue(0); // No workspaces after deletion
+
+      const workspaceData = {
+        name: "New After Deletion",
+        slug: "new-after-deletion",
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 5,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(result.message).toBe("Workspace created successfully");
+      expect(result.workspaceId).toBe(5);
+    });
+
+    it("should correctly create owner as workspace member with all permissions", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Test Permissions",
+        slug: "test-permissions",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+        maximumWorkspaces: 3,
+      });
+
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let memberCreateData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockImplementation(({ data }: any) => {
+              memberCreateData = data;
+              return Promise.resolve({});
+            }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      // Verify member was created with correct role and permissions
+      expect(memberCreateData).toMatchObject({
+        userId: userId,
+        workspaceId: 1,
+        role: "OWNER",
+        permissions: expect.arrayContaining([
+          "MANAGE_WORKSPACE",
+          "MANAGE_MEMBERS",
+          "CREATE_FUNNELS",
+          "EDIT_FUNNELS",
+          "EDIT_PAGES",
+          "DELETE_FUNNELS",
+          "VIEW_ANALYTICS",
+          "MANAGE_DOMAINS",
+          "CREATE_DOMAINS",
+          "DELETE_DOMAINS",
+          "CONNECT_DOMAINS",
+        ]),
+      });
+    });
+
+    it("should handle consecutive workspace creation by same user", async () => {
+      const userId = 1;
+
+      // Mock user with BUSINESS plan
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+        maximumWorkspaces: 3,
+      });
+
+      // Create first workspace
+      mockPrisma.workspace.count.mockResolvedValueOnce(0);
+      mockPrisma.workspace.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.workspace.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.domain.findUnique.mockResolvedValueOnce(null);
+
+      mockPrisma.$transaction.mockImplementationOnce(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "First WS",
+              slug: "first-ws",
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result1 = await CreateWorkspaceService.create(userId, {
+        name: "First WS",
+        slug: "first-ws",
+      });
+      expect(result1.message).toBe("Workspace created successfully");
+
+      // Immediately create second workspace
+      mockPrisma.workspace.count.mockResolvedValueOnce(1);
+      mockPrisma.workspace.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.workspace.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.domain.findUnique.mockResolvedValueOnce(null);
+
+      mockPrisma.$transaction.mockImplementationOnce(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 2,
+              name: "Second WS",
+              slug: "second-ws",
+              ownerId: userId,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result2 = await CreateWorkspaceService.create(userId, {
+        name: "Second WS",
+        slug: "second-ws",
+      });
+      expect(result2.message).toBe("Workspace created successfully");
+      expect(result2.workspaceId).toBe(2);
+    });
+  });
 });

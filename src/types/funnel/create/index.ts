@@ -17,7 +17,7 @@ export const createFunnelRequest = z.object({
     .max(100, "Funnel slug must be less than 100 characters")
     .optional(),
   status: z
-    .nativeEnum($Enums.FunnelStatus, {
+    .enum($Enums.FunnelStatus, {
       message: "Status must be DRAFT, LIVE, ARCHIVED, or SHARED",
     })
     .optional()
@@ -40,8 +40,8 @@ export const workspacePayload = z.object(
 );
 
 export const workspaceMemberPayload = z.object({
-  role: z.nativeEnum($Enums.WorkspaceRole, "Member role must be valid"),
-  permissions: z.array(z.nativeEnum($Enums.WorkspacePermission)),
+  role: z.enum($Enums.WorkspaceRole, "Member role must be valid"),
+  permissions: z.array(z.enum($Enums.WorkspacePermission)),
 });
 
 export const createFunnelPayload = z.object(
@@ -54,7 +54,7 @@ export const createFunnelPayload = z.object(
       .string({ message: "Funnel slug must be a string" })
       .min(1, "Funnel slug cannot be empty")
       .max(100, "Funnel slug must be less than 100 characters"),
-    status: z.nativeEnum(
+    status: z.enum(
       $Enums.FunnelStatus,
       "Status must be DRAFT, LIVE, ARCHIVED, or SHARED"
     ),
@@ -102,7 +102,7 @@ export const createHomePagePayload = z.object(
     linkingId: z
       .string({ message: "Linking ID must be a string" })
       .min(1, "Linking ID cannot be empty"),
-    type: z.nativeEnum($Enums.PageType),
+    type: z.enum($Enums.PageType),
   },
   { message: "Home page creation data is required" }
 );

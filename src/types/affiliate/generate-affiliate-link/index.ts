@@ -4,7 +4,7 @@ import { $Enums } from "../../../generated/prisma-client";
 export const GenerateAffiliateLinkRequest = z.object({
   name: z.string().min(1, "Name is required"),
   funnelId: z.number().min(1, "Funnel ID is required"),
-  planType: z.nativeEnum($Enums.UserPlan, {
+  planType: z.enum($Enums.UserPlan, {
     message: `Plan type must be one of: ${Object.values($Enums.UserPlan).join(
       ", "
     )}`,

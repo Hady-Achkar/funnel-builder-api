@@ -15,10 +15,7 @@ export const createPageRequest = z.object({
     })
     .default("")
     .optional(),
-  type: z
-    .nativeEnum(PageType)
-    .default(PageType.PAGE)
-    .optional(),
+  type: z.enum(PageType).default(PageType.PAGE).optional(),
   funnelId: z.coerce
     .number({
       message: "Funnel ID must be a number",
