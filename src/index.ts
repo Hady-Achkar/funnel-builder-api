@@ -17,7 +17,8 @@ const startServer = async () => {
     );
 
     // Connect to Redis (non-blocking to prevent startup hang)
-    redisService.connect()
+    redisService
+      .connect()
       .then(() => {
         console.log("Connected to Redis");
       })
@@ -64,11 +65,9 @@ process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
-  gracefulShutdown();
 });
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  gracefulShutdown();
 });
 
 startServer();

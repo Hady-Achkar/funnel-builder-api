@@ -4,6 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
 import cookieParser from "cookie-parser";
+import { requestLogger } from "./middleware/requestLogger";
 import { redisService } from "./services/cache/redis.service";
 import authRoutes from "./routes/auth";
 import funnelRoutes from "./routes/funnel";
@@ -29,6 +30,9 @@ export function createServer(): Express {
 
   // Trust proxy settings for Azure Container Apps
   app.set("trust proxy", true);
+
+  // Request logging middleware
+  app.use(requestLogger());
 
   // Security middleware
   app.use(helmet());
@@ -67,7 +71,7 @@ export function createServer(): Express {
   app.use("/api/subscription", subscriptionRoutes);
 
   // Health check endpoint
-  app.get("/health", async (req, res) => {
+  app.get("/health", async (_req, res) => {
     const healthStatus = {
       status: "OK",
       timestamp: new Date().toISOString(),
@@ -79,7 +83,7 @@ export function createServer(): Express {
   });
 
   // Root endpoint
-  app.get("/", (req, res) => {
+  app.get("/", (_req, res) => {
     res.json({
       message: "DS API is running",
       timestamp: new Date().toISOString(),
