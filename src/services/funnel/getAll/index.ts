@@ -14,7 +14,7 @@ import {
 export const getAllFunnels = async (
   workspaceSlug: string,
   userId: number,
-  query: Partial<GetAllFunnelsRequest>
+  query: Partial<GetAllFunnelsRequest> = {}
 ): Promise<GetAllFunnelsResponse> => {
   let validatedParams: GetAllFunnelsParams;
   let validatedQuery: GetAllFunnelsRequest;
@@ -25,11 +25,11 @@ export const getAllFunnels = async (
     validatedParams = getAllFunnelsParams.parse({ workspaceSlug });
 
     const parsedQuery = {
-      page: query.page ? parseInt(String(query.page), 10) : undefined,
-      limit: query.limit ? parseInt(String(query.limit), 10) : undefined,
-      sortBy: query.sortBy,
-      sortOrder: query.sortOrder,
-      status: query.status,
+      page: query?.page ? parseInt(String(query.page), 10) : undefined,
+      limit: query?.limit ? parseInt(String(query.limit), 10) : undefined,
+      sortBy: query?.sortBy,
+      sortOrder: query?.sortOrder,
+      status: query?.status,
     };
 
     validatedQuery = getAllFunnelsRequest.parse(parsedQuery);

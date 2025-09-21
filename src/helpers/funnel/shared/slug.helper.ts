@@ -38,7 +38,7 @@ export const generateSlug = (name: string): string => {
 
 /**
  * Generate a unique slug from a date (for auto-generated funnel names)
- * Format: dd-mm-yyyy-hh-mm
+ * Format: dd-mm-yyyy-hh-mm-ss
  */
 export const generateDateSlug = (date: Date = new Date()): string => {
   const day = String(date.getDate()).padStart(2, '0');
@@ -46,8 +46,9 @@ export const generateDateSlug = (date: Date = new Date()): string => {
   const year = date.getFullYear();
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
-  
-  return `${day}-${month}-${year}-${hour}-${minute}`;
+  const second = String(date.getSeconds()).padStart(2, '0');
+
+  return `${day}-${month}-${year}-${hour}-${minute}-${second}`;
 };
 
 /**

@@ -15,7 +15,7 @@ export const getAllFunnelsController = async (
     }
     
     const workspaceSlug = req.params.workspaceSlug;
-    const query = req.query;
+    const query = req.query || {};
 
     const result = await getAllFunnels(workspaceSlug, userId, query);
 
