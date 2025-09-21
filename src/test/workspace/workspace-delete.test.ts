@@ -20,6 +20,9 @@ describe("Workspace Deletion Tests", () => {
       workspaceMember: {
         deleteMany: vi.fn(),
       },
+      workspaceRolePermTemplate: {
+        deleteMany: vi.fn(),
+      },
       $transaction: vi.fn(),
     };
 
@@ -43,6 +46,9 @@ describe("Workspace Deletion Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         return callback({
+          workspaceRolePermTemplate: {
+            deleteMany: vi.fn().mockResolvedValue({}),
+          },
           workspaceMember: {
             deleteMany: vi.fn().mockResolvedValue({}),
           },
@@ -189,6 +195,9 @@ describe("Workspace Deletion Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
 
       const mockTransaction = {
+        workspaceRolePermTemplate: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+        },
         workspaceMember: {
           deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
         },

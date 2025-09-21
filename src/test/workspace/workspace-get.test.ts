@@ -32,6 +32,9 @@ describe("Workspace Get Tests", () => {
       workspace: {
         findUnique: vi.fn(),
       },
+      workspaceRolePermTemplate: {
+        findMany: vi.fn(),
+      },
     };
 
     (getPrisma as any).mockReturnValue(mockPrisma);
@@ -135,6 +138,7 @@ describe("Workspace Get Tests", () => {
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+        mockPrisma.workspaceRolePermTemplate.findMany.mockResolvedValue([]);
 
         const result = await GetWorkspaceService.getBySlug(userId, slug);
 
@@ -212,6 +216,7 @@ describe("Workspace Get Tests", () => {
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+        mockPrisma.workspaceRolePermTemplate.findMany.mockResolvedValue([]);
 
         const result = await GetWorkspaceService.getBySlug(userId, slug);
 
@@ -341,6 +346,7 @@ describe("Workspace Get Tests", () => {
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+        mockPrisma.workspaceRolePermTemplate.findMany.mockResolvedValue([]);
 
         const result = await GetWorkspaceService.getBySlug(userId, slug);
 
@@ -405,6 +411,7 @@ describe("Workspace Get Tests", () => {
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+        mockPrisma.workspaceRolePermTemplate.findMany.mockResolvedValue([]);
 
         const result = await GetWorkspaceService.getBySlug(userId, slug);
 

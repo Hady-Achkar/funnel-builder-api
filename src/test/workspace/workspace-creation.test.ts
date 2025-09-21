@@ -39,6 +39,11 @@ describe("Workspace Creation Tests", () => {
       workspaceMember: {
         create: vi.fn(),
       },
+      workspaceRolePermTemplate: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+        deleteMany: vi.fn(),
+      },
       $transaction: vi.fn(),
     };
 
@@ -77,6 +82,9 @@ describe("Workspace Creation Tests", () => {
             }),
           },
           workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
             create: vi.fn().mockResolvedValue({}),
           },
         };
@@ -146,6 +154,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -188,6 +199,9 @@ describe("Workspace Creation Tests", () => {
             }),
           },
           workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
             create: vi.fn().mockResolvedValue({}),
           },
         };
@@ -314,6 +328,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -370,6 +387,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -401,6 +421,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -430,6 +453,9 @@ describe("Workspace Creation Tests", () => {
             }),
           },
           workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
             create: vi.fn().mockResolvedValue({}),
           },
         };
@@ -489,6 +515,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -536,6 +565,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({}),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -581,6 +613,9 @@ describe("Workspace Creation Tests", () => {
               memberCreateData = data;
               return Promise.resolve({});
             }),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
           },
         };
         return callback(txMock);
@@ -638,6 +673,9 @@ describe("Workspace Creation Tests", () => {
           workspaceMember: {
             create: vi.fn().mockResolvedValue({ id: 1 }),
           },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
         };
         return callback(txMock);
       });
@@ -666,6 +704,9 @@ describe("Workspace Creation Tests", () => {
           },
           workspaceMember: {
             create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
           },
         };
         return callback(txMock);

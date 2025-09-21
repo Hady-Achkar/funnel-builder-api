@@ -22,8 +22,14 @@ export const createFunnelController = async (
     const { response, workspaceId } = await createFunnel(userId, validatedData);
 
     try {
-      const cacheKey = `workspace:${workspaceId}:funnels:all`;
-      await cacheService.del(cacheKey);
+      // Invalidate funnel list cache
+      const funnelsCacheKey = `workspace:${workspaceId}:funnels:all`;
+      await cacheService.del(funnelsCacheKey);
+
+      // Invalidate workspace cache (includes funnel list)
+      const workspaceSlug = validatedData.workspaceSlug;
+      const workspaceCacheKey = `workspace:${workspaceSlug}:user:${userId}`;
+      await cacheService.del(workspaceCacheKey);
     } catch (cacheError) {
       console.error(
         "Cache invalidation failed in funnel create controller:",
