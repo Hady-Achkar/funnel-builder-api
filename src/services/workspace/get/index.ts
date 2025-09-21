@@ -18,100 +18,19 @@ import {
 import { rolePermissionPresets } from "../../../types/workspace/update";
 
 export class GetWorkspaceService {
-  // Helper function to generate permission groups for each role
-  private static generatePermissionGroups(role: WorkspaceRole) {
-    const permissions = (rolePermissionPresets[role] || []) as WorkspacePermission[];
-
-    return {
-      workspace: {
-        enabled:
-          permissions.includes(WorkspacePermission.MANAGE_WORKSPACE) ||
-          permissions.includes(WorkspacePermission.MANAGE_MEMBERS),
-        permissions: {
-          renameAndChangeIcon: permissions.includes(
-            WorkspacePermission.MANAGE_WORKSPACE
-          ),
-          inviteMembers: permissions.includes(
-            WorkspacePermission.MANAGE_MEMBERS
-          ),
-          changeRoles: permissions.includes(WorkspacePermission.MANAGE_MEMBERS),
-          deleteMembers: permissions.includes(
-            WorkspacePermission.MANAGE_MEMBERS
-          ),
-          assignPermissionsToRoles: permissions.includes(
-            WorkspacePermission.MANAGE_MEMBERS
-          ),
-        },
-      },
-      funnels: {
-        enabled: permissions.some((p) =>
-          ([
-            WorkspacePermission.CREATE_FUNNELS,
-            WorkspacePermission.EDIT_FUNNELS,
-            WorkspacePermission.DELETE_FUNNELS,
-            WorkspacePermission.VIEW_ANALYTICS,
-          ] as WorkspacePermission[]).includes(p)
-        ),
-        permissions: {
-          createNewFunnel: permissions.includes(
-            WorkspacePermission.CREATE_FUNNELS
-          ),
-          viewFunnel: true, // Always true if they have access to workspace
-          editFunnel: permissions.includes(WorkspacePermission.EDIT_FUNNELS),
-          viewAnalytics: permissions.includes(
-            WorkspacePermission.VIEW_ANALYTICS
-          ),
-          shareFunnel: permissions.includes(WorkspacePermission.EDIT_FUNNELS),
-          rename: permissions.includes(WorkspacePermission.EDIT_FUNNELS),
-          duplicate: permissions.includes(WorkspacePermission.CREATE_FUNNELS),
-          archive: permissions.includes(WorkspacePermission.EDIT_FUNNELS),
-          restoreArchivedFunnels: permissions.includes(
-            WorkspacePermission.EDIT_FUNNELS
-          ),
-          moveFunnel: permissions.includes(WorkspacePermission.EDIT_FUNNELS),
-          deleteFunnel: permissions.includes(
-            WorkspacePermission.DELETE_FUNNELS
-          ),
-        },
-      },
-      domains: {
-        enabled: permissions.some((p) =>
-          ([
-            WorkspacePermission.MANAGE_DOMAINS,
-            WorkspacePermission.CREATE_DOMAINS,
-            WorkspacePermission.DELETE_DOMAINS,
-          ] as WorkspacePermission[]).includes(p)
-        ),
-        permissions: {
-          addDomain:
-            permissions.includes(WorkspacePermission.CREATE_DOMAINS) ||
-            permissions.includes(WorkspacePermission.CONNECT_DOMAINS),
-          deleteDomain: permissions.includes(
-            WorkspacePermission.DELETE_DOMAINS
-          ),
-          manageDomain: permissions.includes(
-            WorkspacePermission.MANAGE_DOMAINS
-          ),
-        },
-      },
-    };
-  }
 
   static async getBySlug(
     userId: number,
     slug: string
   ): Promise<GetWorkspaceResponse> {
     try {
-      // Validate input
       const validatedParams = getWorkspaceParams.parse({ slug });
 
       const prisma = getPrisma();
 
-      // Get workspace with all related data
       const workspace = await prisma.workspace.findUnique({
         where: { slug: validatedParams.slug },
         include: {
-          // Owner info
           owner: {
             select: {
               id: true,
@@ -123,8 +42,6 @@ export class GetWorkspaceService {
               maximumWorkspaces: true,
             },
           },
-
-          // All members
           members: {
             include: {
               user: {
@@ -138,11 +55,7 @@ export class GetWorkspaceService {
               },
             },
           },
-
-          // Domains
           domains: true,
-
-          // Funnels (summary)
           funnels: {
             include: {
               _count: {
@@ -264,20 +177,12 @@ export class GetWorkspaceService {
         pagesCount: funnel._count.pages,
       }));
 
-      // Generate permission groups for each role
+      // Generate permissions for each role (using raw permission constants)
       const rolePermissions = {
-        [WorkspaceRole.OWNER]: this.generatePermissionGroups(
-          WorkspaceRole.OWNER
-        ),
-        [WorkspaceRole.ADMIN]: this.generatePermissionGroups(
-          WorkspaceRole.ADMIN
-        ),
-        [WorkspaceRole.EDITOR]: this.generatePermissionGroups(
-          WorkspaceRole.EDITOR
-        ),
-        [WorkspaceRole.VIEWER]: this.generatePermissionGroups(
-          WorkspaceRole.VIEWER
-        ),
+        [WorkspaceRole.OWNER]: rolePermissionPresets[WorkspaceRole.OWNER] || [],
+        [WorkspaceRole.ADMIN]: rolePermissionPresets[WorkspaceRole.ADMIN] || [],
+        [WorkspaceRole.EDITOR]: rolePermissionPresets[WorkspaceRole.EDITOR] || [],
+        [WorkspaceRole.VIEWER]: rolePermissionPresets[WorkspaceRole.VIEWER] || [],
       };
 
       const response: GetWorkspaceResponse = {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { $Enums } from "../../../generated/prisma-client";
+import { $Enums, WorkspacePermission } from "../../../generated/prisma-client";
 
 // General workspace settings
 export const updateWorkspaceGeneralRequest = z.object({
@@ -66,39 +66,39 @@ export const permissionGroups = z.object({
 // Role-based permission presets
 export const rolePermissionPresets = {
   OWNER: [
-    "MANAGE_WORKSPACE",
-    "MANAGE_MEMBERS",
-    "CREATE_FUNNELS",
-    "EDIT_FUNNELS",
-    "EDIT_PAGES",
-    "DELETE_FUNNELS",
-    "VIEW_ANALYTICS",
-    "MANAGE_DOMAINS",
-    "CREATE_DOMAINS",
-    "DELETE_DOMAINS",
-    "CONNECT_DOMAINS",
+    WorkspacePermission.MANAGE_WORKSPACE,
+    WorkspacePermission.MANAGE_MEMBERS,
+    WorkspacePermission.CREATE_FUNNELS,
+    WorkspacePermission.EDIT_FUNNELS,
+    WorkspacePermission.EDIT_PAGES,
+    WorkspacePermission.DELETE_FUNNELS,
+    WorkspacePermission.VIEW_ANALYTICS,
+    WorkspacePermission.MANAGE_DOMAINS,
+    WorkspacePermission.CREATE_DOMAINS,
+    WorkspacePermission.DELETE_DOMAINS,
+    WorkspacePermission.CONNECT_DOMAINS,
   ],
   ADMIN: [
-    "MANAGE_WORKSPACE",
-    "MANAGE_MEMBERS",
-    "CREATE_FUNNELS",
-    "EDIT_FUNNELS",
-    "EDIT_PAGES",
-    "DELETE_FUNNELS",
-    "VIEW_ANALYTICS",
-    "MANAGE_DOMAINS",
-    "CREATE_DOMAINS",
-    "DELETE_DOMAINS",
-    "CONNECT_DOMAINS",
+    WorkspacePermission.MANAGE_WORKSPACE,
+    WorkspacePermission.MANAGE_MEMBERS,
+    WorkspacePermission.CREATE_FUNNELS,
+    WorkspacePermission.EDIT_FUNNELS,
+    WorkspacePermission.EDIT_PAGES,
+    WorkspacePermission.DELETE_FUNNELS,
+    WorkspacePermission.VIEW_ANALYTICS,
+    WorkspacePermission.MANAGE_DOMAINS,
+    WorkspacePermission.CREATE_DOMAINS,
+    WorkspacePermission.DELETE_DOMAINS,
+    WorkspacePermission.CONNECT_DOMAINS,
   ],
   EDITOR: [
-    "CREATE_FUNNELS",
-    "EDIT_FUNNELS",
-    "EDIT_PAGES",
-    "VIEW_ANALYTICS",
+    WorkspacePermission.CREATE_FUNNELS,
+    WorkspacePermission.EDIT_FUNNELS,
+    WorkspacePermission.EDIT_PAGES,
+    WorkspacePermission.VIEW_ANALYTICS,
   ],
   VIEWER: [
-    "VIEW_ANALYTICS",
+    WorkspacePermission.VIEW_ANALYTICS,
   ],
 };
 
