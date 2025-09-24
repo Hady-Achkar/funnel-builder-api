@@ -43,6 +43,7 @@ model User {
   plan                       UserPlan
   referralLinkUsedId         Int? // Reference to affiliate link that was used for signup
   balance                    Float             @default(0) // Affiliate balance
+  avatar                     String? // Profile avatar image URL
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
   maximumWorkspaces          Int               @default(1) // Maximum workspaces based on plan
