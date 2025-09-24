@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import multer from "multer";
 import { authenticateToken } from "../../middleware/auth";
 import { uploadImagesController } from "../../controllers/image/upload";
+import { uploadSingleImageController } from "../../controllers/image/upload-single";
 import { deleteImageController } from "../../controllers/image/delete";
 import { bulkDeleteImagesController } from "../../controllers/image/bulk-delete";
 import { updateImageController } from "../../controllers/image/update";
@@ -19,6 +20,12 @@ router.post(
   "/folder/:folderId",
   upload.array("images"),
   uploadImagesController
+);
+
+router.post(
+  "/upload-single",
+  upload.single("image"),
+  uploadSingleImageController
 );
 
 router.delete("/:imageId", deleteImageController);
