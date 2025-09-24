@@ -51,16 +51,6 @@ describe("Single Image Upload Tests", () => {
       user: {
         findUnique: vi.fn(),
       },
-      image: {
-        create: vi.fn().mockResolvedValue({
-          id: 1,
-          name: "test.jpg",
-          url: "https://testcontainer.blob.core.windows.net/digitalsite/users/test@example.com/mock-uuid-1234.jpg",
-          size: 1024 * 1024,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-      },
     };
     (getPrisma as any).mockReturnValue(mockPrisma);
 

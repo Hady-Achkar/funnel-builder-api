@@ -54,15 +54,6 @@ export async function uploadSingleImage(
       }
     );
 
-    // Save to database
-    await prisma.image.create({
-      data: {
-        name: file.originalname,
-        url: uploadResult.url,
-        size: file.size,
-      },
-    });
-
     // Return success message and URL
     return {
       message: "Image uploaded successfully",
