@@ -1,21 +1,17 @@
 import bcrypt from "bcryptjs";
-import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
 import {
-  registerRequest,
+  RegisterRequest,
   RegisterResponse,
 } from "../../../types/auth/register";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
-import { User } from "../../../generated/prisma-client";
 import { generateToken } from "../utils";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
 
 export class RegisterService {
-  static async register(userData: User): Promise<RegisterResponse> {
+  static async register(userData: RegisterRequest): Promise<RegisterResponse> {
     try {
-      const validatedData = registerRequest.parse(userData);
-
       const {
         email,
         username,
@@ -25,7 +21,7 @@ export class RegisterService {
         isAdmin,
         plan,
         invitationToken,
-      } = validatedData;
+      } = userData;
 
       const prisma = getPrisma();
 
@@ -111,10 +107,6 @@ export class RegisterService {
         workspace: workspaceData,
       };
     } catch (error) {
-      if (error instanceof ZodError) {
-        const firstError = error.issues[0];
-        throw firstError;
-      }
       throw error;
     }
   }
