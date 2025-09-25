@@ -6,7 +6,7 @@ import {
 } from "../../../types/auth/register";
 import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
-import { generateToken } from "../utils";
+import { generateVerificationToken } from "../utils";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
 
 export class RegisterService {
@@ -45,7 +45,7 @@ export class RegisterService {
 
       const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {});
 
-      const verificationToken = generateToken(userData);
+      const verificationToken = generateVerificationToken(userData);
       const verificationTokenExpiresAt = new Date();
       verificationTokenExpiresAt.setHours(
         verificationTokenExpiresAt.getHours() + 24
