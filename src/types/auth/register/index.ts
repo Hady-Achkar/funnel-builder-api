@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { $Enums } from "../../../generated/prisma-client";
+import { $Enums, WorkspaceRole, WorkspacePermission } from "../../../generated/prisma-client";
 
 export const registerRequest = z.object({
   email: z
@@ -50,6 +50,9 @@ export const registerRequest = z.object({
       message: "Plan must be BUSINESS or AGENCY",
     })
     .default($Enums.UserPlan.BUSINESS),
+  invitationToken: z
+    .string()
+    .optional(),
 });
 
 export type RegisterRequest = z.infer<typeof registerRequest>;
@@ -66,6 +69,13 @@ export const registerResponse = z.object({
     plan: z.enum($Enums.UserPlan),
     verified: z.boolean(),
   }),
+  workspace: z.object({
+    id: z.number(),
+    name: z.string(),
+    slug: z.string(),
+    role: z.enum(WorkspaceRole),
+    permissions: z.array(z.enum(WorkspacePermission)),
+  }).optional(),
 });
 
 export type RegisterResponse = z.infer<typeof registerResponse>;

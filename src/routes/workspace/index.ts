@@ -6,6 +6,7 @@ import { ConfigureWorkspaceController } from "../../controllers/workspace/config
 import { CreateWorkspaceController } from "../../controllers/workspace/create";
 import { GetWorkspaceController } from "../../controllers/workspace/get";
 import { InviteMemberController } from "../../controllers/workspace/invite-member";
+import { AcceptInvitationController } from "../../controllers/workspace/accept-invitation";
 import { uploadWorkspaceImageController } from "../../controllers/workspace/upload-image";
 import { UpdateWorkspaceController } from "../../controllers/workspace/update";
 import { DeleteWorkspaceController } from "../../controllers/workspace/delete";
@@ -35,6 +36,9 @@ router.put("/:slug", UpdateWorkspaceController.update);
 
 // Invite member to workspace
 router.post("/invite-member/:slug", InviteMemberController.inviteMember);
+
+// Accept workspace invitation
+router.post("/accept-invitation", AcceptInvitationController.acceptInvitation);
 
 // Upload workspace image
 router.post(

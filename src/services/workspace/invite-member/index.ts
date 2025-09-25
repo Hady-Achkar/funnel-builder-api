@@ -1,121 +1,98 @@
 import { getPrisma } from "../../../lib/prisma";
-import { ZodError } from "zod";
+import jwt from "jsonwebtoken";
 import {
   InviteMemberRequest,
-  InviteMemberRequestSchema,
   InviteMemberResponse,
 } from "../../../types/workspace/invite-member";
-import { WorkspacePermissions } from "../../../helpers/workspace-permissions";
 import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from "../../../errors";
+  validateWorkspaceExists,
+  validateInviterPermissions,
+  validateMemberAllocationLimit,
+  validateInvitationRequest,
+  checkExistingMembership,
+} from "../../../helpers/workspace/invite-member/validation";
+import {
+  sendWorkspaceInvitationEmail,
+  sendWorkspaceRegisterInvitationEmail,
+} from "../../../helpers/workspace/invite-member";
 
 export class InviteMemberService {
   static async inviteMember(
     inviterUserId: number,
-    requestData: unknown
-  ): Promise<InviteMemberResponse> {
-    try {
-      const validatedData = InviteMemberRequestSchema.parse(requestData);
-      return await this.processInvitation(inviterUserId, validatedData);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError("Invalid request data");
-      }
-      throw error;
-    }
-  }
-
-  private static async processInvitation(
-    inviterUserId: number,
     data: InviteMemberRequest
   ): Promise<InviteMemberResponse> {
-    const prisma = getPrisma();
+    try {
+      const prisma = getPrisma();
 
-    const workspace = await prisma.workspace.findUnique({
-      where: { slug: data.workspaceSlug },
-      include: {
-        members: {
-          where: { userId: inviterUserId },
-          include: {
-            user: {
-              select: { id: true, email: true },
-            },
-          },
-        },
-      },
-    });
+      const workspace = await validateWorkspaceExists(data.workspaceSlug);
 
-    if (!workspace) {
-      throw new NotFoundError("Workspace not found");
-    }
+      validateInviterPermissions(workspace, inviterUserId);
 
-    // Check if inviter is owner
-    const isOwner = workspace.ownerId === inviterUserId;
+      await validateMemberAllocationLimit(workspace.ownerId, workspace.id);
 
-    if (!isOwner) {
-      const inviterMember = workspace.members[0];
-      if (!inviterMember) {
-        throw new ForbiddenError("You are not a member of this workspace");
-      }
+      const userToInvite = await prisma.user.findUnique({
+        where: { email: data.email },
+        select: { id: true, email: true },
+      });
 
-      if (
-        !WorkspacePermissions.canInviteMembers({
-          role: inviterMember.role,
-          permissions: inviterMember.permissions,
-        })
-      ) {
-        throw new ForbiddenError("You don't have permission to invite members");
-      }
-    }
+      validateInvitationRequest(userToInvite, workspace.ownerId);
 
-    const userToInvite = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (!userToInvite) {
-      throw new NotFoundError("User with this email does not exist");
-    }
-
-    // Check if user to invite is the workspace owner
-    if (userToInvite.id === workspace.ownerId) {
-      throw new BadRequestError("Cannot invite the workspace owner as a member");
-    }
-
-    const existingMember = await prisma.workspaceMember.findUnique({
-      where: {
-        userId_workspaceId: {
-          userId: userToInvite.id,
+      const invitationToken = jwt.sign(
+        {
           workspaceId: workspace.id,
+          workspaceSlug: workspace.slug,
+          role: data.role,
+          email: data.email,
+          type: "workspace_invitation",
         },
-      },
-    });
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
 
-    if (existingMember) {
-      throw new BadRequestError("User is already a member of this workspace");
+      if (!userToInvite) {
+        await sendWorkspaceRegisterInvitationEmail(
+          data.email,
+          workspace.name,
+          data.role,
+          invitationToken
+        );
+      } else {
+        await checkExistingMembership(userToInvite.id, workspace.id);
+
+        const rolePermTemplate =
+          await prisma.workspaceRolePermTemplate.findUnique({
+            where: {
+              workspaceId_role: {
+                workspaceId: workspace.id,
+                role: data.role,
+              },
+            },
+          });
+
+        const permissions = rolePermTemplate?.permissions || [];
+
+        await prisma.workspaceMember.create({
+          data: {
+            userId: userToInvite.id,
+            workspaceId: workspace.id,
+            role: data.role,
+            permissions,
+          },
+        });
+
+        await sendWorkspaceInvitationEmail(
+          userToInvite.email,
+          workspace.name,
+          data.role,
+          invitationToken
+        );
+      }
+
+      return {
+        message: "Member invited successfully",
+      };
+    } catch (error) {
+      throw error;
     }
-
-    const newMember = await prisma.workspaceMember.create({
-      data: {
-        userId: userToInvite.id,
-        workspaceId: workspace.id,
-        role: data.role,
-        permissions: data.permissions || [],
-      },
-    });
-
-    return {
-      message: "Member invited successfully",
-      member: {
-        id: newMember.id,
-        userId: newMember.userId,
-        workspaceId: newMember.workspaceId,
-        role: newMember.role,
-        permissions: newMember.permissions,
-        joinedAt: newMember.joinedAt,
-      },
-    };
   }
 }

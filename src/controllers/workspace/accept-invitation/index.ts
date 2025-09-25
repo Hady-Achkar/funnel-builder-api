@@ -1,27 +1,24 @@
 import { Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
-import { InviteMemberService } from "../../../services/workspace/invite-member";
-import { InviteMemberRequestSchema } from "../../../types/workspace/invite-member";
+import { AcceptInvitationService } from "../../../services/workspace/accept-invitation";
+import { AcceptInvitationRequestSchema } from "../../../types/workspace/accept-invitation";
 import { BadRequestError } from "../../../errors";
 
-export class InviteMemberController {
-  static async inviteMember(
+export class AcceptInvitationController {
+  static async acceptInvitation(
     req: AuthRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
       const userId = req.userId!;
-      const { slug } = req.params;
-      const requestData = { ...req.body, workspaceSlug: slug };
 
-      const validatedData = InviteMemberRequestSchema.parse(requestData);
+      // Validate request data
+      const validatedData = AcceptInvitationRequestSchema.parse(req.body);
 
-      const result = await InviteMemberService.inviteMember(
-        userId,
-        validatedData
-      );
+      const service = new AcceptInvitationService();
+      const result = await service.acceptInvitation(userId, validatedData);
       res.status(200).json(result);
     } catch (error) {
       if (error instanceof ZodError) {
