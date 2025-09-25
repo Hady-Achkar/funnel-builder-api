@@ -26,6 +26,7 @@ export const getAllWorkspaces = async (
         name: true,
         slug: true,
         description: true,
+        image: true,
         ownerId: true,
         createdAt: true,
         members: {
@@ -115,6 +116,7 @@ export const getAllWorkspaces = async (
         name: workspace.name,
         slug: workspace.slug,
         description: workspace.description,
+        image: workspace.image,
         role: currentUserRole,
         permissions: currentUserPermissions,
         owner: workspace.owner,

@@ -17,6 +17,7 @@ export const getAllWorkspacesResponse = z.array(
     name: z.string(),
     slug: z.string(),
     description: z.string().nullable().optional(),
+    image: z.string().nullable(),
     role: z.enum($Enums.WorkspaceRole),
     permissions: z.array(z.enum($Enums.WorkspacePermission)),
     owner: z.object({
