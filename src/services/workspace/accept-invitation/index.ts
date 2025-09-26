@@ -87,18 +87,8 @@ export class AcceptInvitationService {
           };
         }
 
-        // If pending, update to active
+        // If pending, update to active (no need to check allocation since user is already counted)
         if (existingMember.status === MembershipStatus.PENDING) {
-          const canAddMember = await AllocationService.canAddMember(
-            workspace.ownerId,
-            workspace.id
-          );
-          if (!canAddMember) {
-            throw new BadRequestError(
-              "Cannot accept invitation. Workspace member limit reached."
-            );
-          }
-
           const updatedMember = await prisma.workspaceMember.update({
             where: { id: existingMember.id },
             data: {

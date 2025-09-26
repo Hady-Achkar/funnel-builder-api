@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { AllocationService } from "../../../../utils/allocations";
+import { MembershipStatus } from "../../../../generated/prisma-client";
 
 export class WorkspaceInvitationProcessor {
   /**
@@ -41,25 +42,26 @@ export class WorkspaceInvitationProcessor {
       throw new Error("Workspace member limit reached");
     }
 
-    // Get permissions from workspace role permission templates
-    const rolePermTemplate = await prisma.workspaceRolePermTemplate.findUnique({
+    // Find existing PENDING membership by email
+    const existingMember = await prisma.workspaceMember.findFirst({
       where: {
-        workspaceId_role: {
-          workspaceId: workspace.id,
-          role: tokenPayload.role,
-        },
+        email: userEmail,
+        workspaceId: workspace.id,
+        status: MembershipStatus.PENDING,
       },
     });
 
-    const permissions = rolePermTemplate?.permissions || [];
+    if (!existingMember) {
+      throw new Error("No pending invitation found for this workspace");
+    }
 
-    // Create workspace member
-    const newMember = await prisma.workspaceMember.create({
+    // Update the pending membership to active
+    const updatedMember = await prisma.workspaceMember.update({
+      where: { id: existingMember.id },
       data: {
         userId,
-        workspaceId: workspace.id,
-        role: tokenPayload.role,
-        permissions: permissions,
+        status: MembershipStatus.ACTIVE,
+        joinedAt: new Date(),
       },
     });
 
@@ -67,8 +69,8 @@ export class WorkspaceInvitationProcessor {
       id: workspace.id,
       name: workspace.name,
       slug: workspace.slug,
-      role: newMember.role,
-      permissions: newMember.permissions,
+      role: updatedMember.role,
+      permissions: updatedMember.permissions,
     };
   }
 }
