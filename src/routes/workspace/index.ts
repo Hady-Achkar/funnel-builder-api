@@ -10,6 +10,7 @@ import { AcceptInvitationController } from "../../controllers/workspace/accept-i
 import { uploadWorkspaceImageController } from "../../controllers/workspace/upload-image";
 import { UpdateWorkspaceController } from "../../controllers/workspace/update";
 import { DeleteWorkspaceController } from "../../controllers/workspace/delete";
+import { LeaveWorkspaceController } from "../../controllers/workspace/leave";
 
 const router: Router = express.Router();
 
@@ -46,6 +47,9 @@ router.post(
   upload.single("image"),
   uploadWorkspaceImageController
 );
+
+// Leave workspace
+router.post("/:slug/leave", LeaveWorkspaceController.leave);
 
 // Delete workspace
 router.delete("/:slug", DeleteWorkspaceController.deleteBySlug);
