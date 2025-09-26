@@ -11,6 +11,7 @@ import {
 } from "../../../errors";
 import jwt from "jsonwebtoken";
 import { AllocationService } from "../../../utils/allocations";
+import { MembershipStatus } from "../../../generated/prisma-client";
 
 export class AcceptInvitationService {
   async acceptInvitation(
@@ -58,12 +59,11 @@ export class AcceptInvitationService {
         throw new NotFoundError("Workspace not found");
       }
 
-      const existingMember = await prisma.workspaceMember.findUnique({
+      // Find existing membership (could be PENDING or ACTIVE)
+      const existingMember = await prisma.workspaceMember.findFirst({
         where: {
-          userId_workspaceId: {
-            userId: user.id,
-            workspaceId: workspace.id,
-          },
+          email: user.email,
+          workspaceId: workspace.id,
         },
         include: {
           workspace: {
@@ -73,59 +73,61 @@ export class AcceptInvitationService {
       });
 
       if (existingMember) {
-        return {
-          message: "Invitation already accepted",
-          workspace: {
-            id: workspace.id,
-            name: workspace.name,
-            slug: workspace.slug,
-            role: existingMember.role,
-            permissions: existingMember.permissions,
-          },
-        };
-      }
-
-      const canAddMember = await AllocationService.canAddMember(
-        workspace.ownerId,
-        workspace.id
-      );
-      if (!canAddMember) {
-        throw new BadRequestError(
-          "Cannot accept invitation. Workspace member limit reached."
-        );
-      }
-
-      const rolePermTemplate =
-        await prisma.workspaceRolePermTemplate.findUnique({
-          where: {
-            workspaceId_role: {
-              workspaceId: workspace.id,
-              role: tokenPayload.role as any,
+        // If already active, return success message
+        if (existingMember.status === MembershipStatus.ACTIVE) {
+          return {
+            message: "Invitation already accepted",
+            workspace: {
+              id: workspace.id,
+              name: workspace.name,
+              slug: workspace.slug,
+              role: existingMember.role,
+              permissions: existingMember.permissions,
             },
-          },
-        });
+          };
+        }
 
-      const permissions = rolePermTemplate?.permissions || [];
+        // If pending, update to active
+        if (existingMember.status === MembershipStatus.PENDING) {
+          const canAddMember = await AllocationService.canAddMember(
+            workspace.ownerId,
+            workspace.id
+          );
+          if (!canAddMember) {
+            throw new BadRequestError(
+              "Cannot accept invitation. Workspace member limit reached."
+            );
+          }
 
-      const newMember = await prisma.workspaceMember.create({
-        data: {
-          userId: user.id,
-          workspaceId: workspace.id,
-          role: tokenPayload.role as any,
-          permissions: permissions,
-        },
-      });
+          const updatedMember = await prisma.workspaceMember.update({
+            where: { id: existingMember.id },
+            data: {
+              userId: user.id,
+              status: MembershipStatus.ACTIVE,
+              joinedAt: new Date(),
+            },
+          });
 
-      return {
-        message: "Invitation accepted successfully",
-        workspace: {
-          id: workspace.id,
-          name: workspace.name,
-          slug: workspace.slug,
-          role: newMember.role,
-          permissions: newMember.permissions,
-        },
-      };
+          return {
+            message: "Invitation accepted successfully",
+            workspace: {
+              id: workspace.id,
+              name: workspace.name,
+              slug: workspace.slug,
+              role: updatedMember.role,
+              permissions: updatedMember.permissions,
+            },
+          };
+        }
+
+        // If rejected, throw error
+        if (existingMember.status === MembershipStatus.REJECTED) {
+          throw new BadRequestError("This invitation has been rejected");
+        }
+      }
+
+      // No pending invitation found
+      throw new NotFoundError("No pending invitation found for this workspace");
     } catch (error) {
       throw error;
     }

@@ -51,6 +51,7 @@ model User {
   trialStartDate             DateTime? // Trial start date
   trialEndDate               DateTime? // Trial end date
   workspaceMembers           WorkspaceMember[]
+  sentInvitations            WorkspaceMember[] @relation("InvitationSender")
   ownedWorkspaces            Workspace[]       @relation("WorkspaceOwner")
   createdFunnels             Funnel[]          @relation("FunnelCreator")
   createdDomains             Domain[]          @relation("DomainCreator")
@@ -158,19 +159,26 @@ model Workspace {
 
 model WorkspaceMember {
   id          Int                   @id @default(autoincrement())
-  userId      Int
+  userId      Int?
+  email       String?
   workspaceId Int
   role        WorkspaceRole
   permissions WorkspacePermission[]
-  joinedAt    DateTime              @default(now())
+  status      MembershipStatus      @default(ACTIVE)
+  invitedBy   Int?
+  invitedAt   DateTime              @default(now())
+  joinedAt    DateTime?
   updatedAt   DateTime              @updatedAt
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  inviter   User?     @relation("InvitationSender", fields: [invitedBy], references: [id])
 
   @@unique([userId, workspaceId])
   @@index([workspaceId])
   @@index([userId])
+  @@index([email])
+  @@index([status])
   @@map("workspace_members")
 }
 
@@ -193,6 +201,12 @@ enum WorkspacePermission {
   CREATE_DOMAINS
   DELETE_DOMAINS
   CONNECT_DOMAINS
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  REJECTED
 }
 
 model WorkspaceRolePermTemplate {

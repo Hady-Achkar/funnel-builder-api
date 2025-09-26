@@ -4,6 +4,7 @@ import {
   InviteMemberRequest,
   InviteMemberResponse,
 } from "../../../types/workspace/invite-member";
+import { MembershipStatus } from "../../../generated/prisma-client";
 import {
   validateWorkspaceExists,
   validateInviterPermissions,
@@ -49,7 +50,33 @@ export class InviteMemberService {
         { expiresIn: "7d" }
       );
 
+      // Get role permissions template
+      const rolePermTemplate =
+        await prisma.workspaceRolePermTemplate.findUnique({
+          where: {
+            workspaceId_role: {
+              workspaceId: workspace.id,
+              role: data.role,
+            },
+          },
+        });
+
+      const permissions = rolePermTemplate?.permissions || [];
+
       if (!userToInvite) {
+        // For non-existing users: Create pending membership without userId
+        await prisma.workspaceMember.create({
+          data: {
+            userId: null,
+            email: data.email,
+            workspaceId: workspace.id,
+            role: data.role,
+            permissions,
+            status: MembershipStatus.PENDING,
+            invitedBy: inviterUserId,
+          },
+        });
+
         await sendWorkspaceRegisterInvitationEmail(
           data.email,
           workspace.name,
@@ -57,26 +84,18 @@ export class InviteMemberService {
           invitationToken
         );
       } else {
+        // For existing users: Check membership then create pending membership
         await checkExistingMembership(userToInvite.id, workspace.id);
-
-        const rolePermTemplate =
-          await prisma.workspaceRolePermTemplate.findUnique({
-            where: {
-              workspaceId_role: {
-                workspaceId: workspace.id,
-                role: data.role,
-              },
-            },
-          });
-
-        const permissions = rolePermTemplate?.permissions || [];
 
         await prisma.workspaceMember.create({
           data: {
             userId: userToInvite.id,
+            email: userToInvite.email,
             workspaceId: workspace.id,
             role: data.role,
             permissions,
+            status: MembershipStatus.PENDING,
+            invitedBy: inviterUserId,
           },
         });
 

@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
 import { InviteMemberService } from "../../../services/workspace/invite-member";
 import { InviteMemberRequestSchema } from "../../../types/workspace/invite-member";
-import { BadRequestError } from "../../../errors";
+import { BadRequestError, UnauthorizedError } from "../../../errors";
 
 export class InviteMemberController {
   static async inviteMember(
@@ -12,7 +12,12 @@ export class InviteMemberController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const userId = req.userId!;
+      const userId = req.userId;
+
+      if (!userId) {
+        throw new UnauthorizedError("Authentication required");
+      }
+
       const { slug } = req.params;
       const requestData = { ...req.body, workspaceSlug: slug };
 
