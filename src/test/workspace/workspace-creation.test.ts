@@ -19,9 +19,9 @@ describe("Workspace Creation Tests", () => {
     vi.clearAllMocks();
 
     // Set required environment variables for testing
-    process.env.WORKSPACE_ZONE_ID = 'test-zone-id';
-    process.env.WORKSPACE_DOMAIN = 'digitalsite.com';
-    process.env.WORKSPACE_IP = '20.56.136.29';
+    process.env.WORKSPACE_ZONE_ID = "test-zone-id";
+    process.env.WORKSPACE_DOMAIN = "digitalsite.com";
+    process.env.WORKSPACE_IP = "20.56.136.29";
 
     mockPrisma = {
       workspace: {
@@ -57,6 +57,7 @@ describe("Workspace Creation Tests", () => {
         name: "My Workspace",
         slug: "my-workspace",
         description: "Test workspace",
+        image: "https://example.com/free-plan-workspace.png",
       };
 
       // Mock user with FREE plan and no existing workspaces
@@ -292,6 +293,168 @@ describe("Workspace Creation Tests", () => {
     });
   });
 
+  describe("Workspace creation with image field", () => {
+    it("should create workspace with image field", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Test Workspace with Image",
+        slug: "test-workspace-image",
+        description: "A test workspace with image",
+        image: "https://example.com/workspace-logo.png",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+        maximumWorkspaces: 3,
+      });
+
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation(({ data }: any) => {
+              createdWorkspaceData = data;
+              return Promise.resolve({
+                id: 1,
+                ...data,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(result.message).toBe("Workspace created successfully");
+      expect(createdWorkspaceData).toMatchObject({
+        name: workspaceData.name,
+        slug: workspaceData.slug,
+        description: workspaceData.description,
+        image: workspaceData.image,
+        ownerId: userId,
+      });
+    });
+
+    it("should create workspace without image field (optional)", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Test Workspace No Image",
+        slug: "test-workspace-no-image",
+        description: "A test workspace without image",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+        maximumWorkspaces: 3,
+      });
+
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation(({ data }: any) => {
+              createdWorkspaceData = data;
+              return Promise.resolve({
+                id: 1,
+                ...data,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(result.message).toBe("Workspace created successfully");
+      expect(createdWorkspaceData).toMatchObject({
+        name: workspaceData.name,
+        slug: workspaceData.slug,
+        description: workspaceData.description,
+        ownerId: userId,
+      });
+      expect(createdWorkspaceData).not.toHaveProperty("image");
+    });
+
+    it("should verify image field is properly stored when provided", async () => {
+      const userId = 1;
+      const imageUrl = "https://cdn.example.com/my-company-logo.jpg";
+      const workspaceData = {
+        name: "Company Workspace",
+        slug: "company-workspace",
+        description: "Company workspace with logo",
+        image: imageUrl,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.AGENCY,
+        maximumWorkspaces: 10,
+      });
+
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation(({ data }: any) => {
+              createdWorkspaceData = data;
+              return Promise.resolve({
+                id: 1,
+                ...data,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(result.message).toBe("Workspace created successfully");
+      expect(createdWorkspaceData.image).toBe(imageUrl);
+      expect(createdWorkspaceData).toHaveProperty("image");
+    });
+  });
+
   describe("Workspace creation without allocations", () => {
     it("should create workspace without any allocation fields", async () => {
       const userId = 1;
@@ -394,7 +557,10 @@ describe("Workspace Creation Tests", () => {
         return callback(txMock);
       });
 
-      const result1 = await CreateWorkspaceService.create(userId, firstWorkspace);
+      const result1 = await CreateWorkspaceService.create(
+        userId,
+        firstWorkspace
+      );
       expect(result1.message).toBe("Workspace created successfully");
 
       // Second workspace
@@ -428,7 +594,10 @@ describe("Workspace Creation Tests", () => {
         return callback(txMock);
       });
 
-      const result2 = await CreateWorkspaceService.create(userId, secondWorkspace);
+      const result2 = await CreateWorkspaceService.create(
+        userId,
+        secondWorkspace
+      );
       expect(result2.message).toBe("Workspace created successfully");
 
       // Third workspace (still within limit)
@@ -462,7 +631,10 @@ describe("Workspace Creation Tests", () => {
         return callback(txMock);
       });
 
-      const result3 = await CreateWorkspaceService.create(userId, thirdWorkspace);
+      const result3 = await CreateWorkspaceService.create(
+        userId,
+        thirdWorkspace
+      );
       expect(result3.message).toBe("Workspace created successfully");
 
       // Fourth workspace (should fail - exceeds limit)

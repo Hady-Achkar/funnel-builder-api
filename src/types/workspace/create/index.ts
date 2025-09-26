@@ -26,6 +26,18 @@ export const createWorkspaceRequest = z.object({
     .string()
     .max(200, "Description must be 200 characters or less")
     .optional(),
+
+  image: z
+    .string()
+    .refine((val) => {
+      try {
+        new URL(val);
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Image must be a valid URL")
+    .optional(),
 });
 
 export type CreateWorkspaceRequest = z.infer<typeof createWorkspaceRequest>;

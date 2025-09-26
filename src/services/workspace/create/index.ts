@@ -35,7 +35,7 @@ export class CreateWorkspaceService {
   }> {
     try {
       const validatedData = createWorkspaceRequest.parse(requestData);
-      const { name, slug, description } = validatedData;
+      const { name, slug, description, image } = validatedData;
 
       // Validate user hasn't exceeded their workspace limit
       await validateUserWorkspaceLimit(userId);
@@ -63,13 +63,19 @@ export class CreateWorkspaceService {
       // Start transaction to ensure atomicity
       const result = await prisma.$transaction(async (tx) => {
         // 1. Create the workspace
+        const workspaceData: any = {
+          name,
+          slug,
+          description,
+          ownerId: userId,
+        };
+
+        if (image) {
+          workspaceData.image = image;
+        }
+
         const workspace = await tx.workspace.create({
-          data: {
-            name,
-            slug,
-            description,
-            ownerId: userId,
-          },
+          data: workspaceData,
         });
 
         // 2. Create workspace member (owner)
