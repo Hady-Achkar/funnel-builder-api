@@ -111,17 +111,23 @@ export const getAllWorkspaces = async (
           status: MembershipStatus.ACTIVE, // Owner is always active
         },
         ...workspace.members
-          .filter((m) => m.userId !== workspace.ownerId && m.user !== null)
-          .map((member) => ({
-            id: member.user.id,
-            firstName: member.user.firstName,
-            lastName: member.user.lastName,
-            email: member.user.email,
-            username: member.user.username,
-            role: member.role,
-            permissions: member.permissions || [],
-            status: member.status,
-          })),
+          .filter((m) => m.userId !== workspace.ownerId)
+          .map((member) => {
+            if (member.user) {
+              return {
+                id: member.user.id,
+                firstName: member.user.firstName,
+                lastName: member.user.lastName,
+                email: member.user.email,
+                username: member.user.username,
+                role: member.role,
+                permissions: member.permissions || [],
+                status: member.status,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean),
       ];
 
       return {

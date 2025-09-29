@@ -20,6 +20,7 @@ export type GetWorkspaceParams = z.infer<typeof getWorkspaceParams>;
 export const workspaceMemberSchema = z.object({
   id: z.number(),
   userId: z.number().nullable(),
+  email: z.string().nullable(), 
   role: z.enum(WorkspaceRole),
   permissions: z.array(z.enum(WorkspacePermission)),
   status: z.enum(MembershipStatus),
@@ -94,14 +95,6 @@ export const getWorkspaceResponse = z.object({
   }),
 
   members: z.array(workspaceMemberSchema),
-
-  // Pending invitations (email addresses of invited but not registered users)
-  pendingInvitations: z.array(z.object({
-    email: z.string(),
-    role: z.enum(WorkspaceRole),
-    invitedAt: z.date(),
-    invitedBy: z.number().nullable(),
-  })).optional(),
 
   // Domains
   domains: z.array(workspaceDomainSchema),
