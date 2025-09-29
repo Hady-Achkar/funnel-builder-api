@@ -111,7 +111,7 @@ export const getAllWorkspaces = async (
           status: MembershipStatus.ACTIVE, // Owner is always active
         },
         ...workspace.members
-          .filter((m) => m.userId !== workspace.ownerId)
+          .filter((m) => m.userId !== workspace.ownerId && m.status === MembershipStatus.ACTIVE)
           .map((member) => {
             if (member.user) {
               return {
