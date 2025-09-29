@@ -47,6 +47,7 @@ describe("Get All Workspaces Tests", () => {
                 userId: 2,
                 role: WorkspaceRole.EDITOR,
                 permissions: [WorkspacePermission.EDIT_FUNNELS],
+                status: MembershipStatus.ACTIVE,
                 user: {
                   id: 2,
                   firstName: "Jane",
@@ -85,6 +86,7 @@ describe("Get All Workspaces Tests", () => {
                   WorkspacePermission.MANAGE_WORKSPACE,
                   WorkspacePermission.MANAGE_MEMBERS,
                 ],
+                status: MembershipStatus.ACTIVE,
                 user: {
                   id: 1,
                   firstName: "John",
@@ -201,6 +203,7 @@ describe("Get All Workspaces Tests", () => {
               username: "johndoe",
               role: WorkspaceRole.OWNER,
               permissions: Object.values(WorkspacePermission),
+              status: MembershipStatus.ACTIVE,
             },
             {
               id: 2,
@@ -210,6 +213,7 @@ describe("Get All Workspaces Tests", () => {
               username: "janesmith",
               role: WorkspaceRole.EDITOR,
               permissions: [WorkspacePermission.EDIT_FUNNELS],
+              status: MembershipStatus.ACTIVE,
             },
           ],
           memberCount: 2,
@@ -246,6 +250,7 @@ describe("Get All Workspaces Tests", () => {
               username: "janesmith",
               role: WorkspaceRole.OWNER,
               permissions: Object.values(WorkspacePermission),
+              status: MembershipStatus.ACTIVE,
             },
             {
               id: 1,
@@ -258,6 +263,7 @@ describe("Get All Workspaces Tests", () => {
                 WorkspacePermission.MANAGE_WORKSPACE,
                 WorkspacePermission.MANAGE_MEMBERS,
               ],
+              status: MembershipStatus.ACTIVE,
             },
           ],
           memberCount: 2,

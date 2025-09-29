@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { $Enums } from "../../../generated/prisma-client";
+import { $Enums, MembershipStatus } from "../../../generated/prisma-client";
 
 const workspaceMemberSchema = z.object({
   id: z.number(),
@@ -9,6 +9,7 @@ const workspaceMemberSchema = z.object({
   username: z.string(),
   role: z.enum($Enums.WorkspaceRole),
   permissions: z.array(z.enum($Enums.WorkspacePermission)),
+  status: z.enum(MembershipStatus),
 });
 
 export const getAllWorkspacesResponse = z.array(
