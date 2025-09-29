@@ -25,19 +25,31 @@ export const getFunnelSettings = async (
 
     const settings = await prisma.funnelSettings.findUnique({
       where: { funnelId: validatedData.funnelId },
+      include: {
+        funnel: {
+          select: {
+            status: true,
+          },
+        },
+      },
     });
 
     if (!settings) {
       throw new Error("Funnel settings not found");
     }
 
+    const responseData = {
+      ...settings,
+      funnelStatus: settings.funnel.status,
+    };
+
     try {
-      await cacheService.set(cacheKey, settings, { ttl: 0 });
+      await cacheService.set(cacheKey, responseData, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Failed to cache funnel settings:", cacheError);
     }
 
-    return getFunnelSettingsResponse.parse(settings);
+    return getFunnelSettingsResponse.parse(responseData);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const firstError = error.issues[0];

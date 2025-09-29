@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { $Enums } from "../../../generated/prisma-client";
 
 export const getFunnelSettingsRequest = z.object({
   funnelId: z.number()
@@ -27,6 +28,7 @@ export const getFunnelSettingsResponse = z.object({
   timezone: z.string().nullable(),
   dateFormat: z.string().nullable(),
   isPasswordProtected: z.boolean(),
+  funnelStatus: z.enum($Enums.FunnelStatus),
   createdAt: z.date().or(z.string()),
   updatedAt: z.date().or(z.string()),
 });

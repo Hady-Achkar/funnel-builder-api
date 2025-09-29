@@ -13,7 +13,8 @@ export const updateFunnelSettings = async (
   userId: number,
   data: Partial<UpdateFunnelSettingsRequest>
 ): Promise<UpdateFunnelSettingsResponse> => {
-  let validatedData: UpdateFunnelSettingsRequest = {} as UpdateFunnelSettingsRequest;
+  let validatedData: UpdateFunnelSettingsRequest =
+    {} as UpdateFunnelSettingsRequest;
 
   try {
     if (!userId) throw new Error("User ID is required");
@@ -84,38 +85,43 @@ export const updateFunnelSettings = async (
     });
 
     if (!existingSettings) {
-      throw new Error("Funnel settings not found. Settings should have been created when the funnel was created.");
+      throw new Error(
+        "Funnel settings not found. Settings should have been created when the funnel was created."
+      );
     }
 
     // Build update data from fields that were explicitly provided
     const updateFields = [
-      'defaultSeoTitle',
-      'defaultSeoDescription', 
-      'defaultSeoKeywords',
-      'favicon',
-      'ogImage',
-      'googleAnalyticsId',
-      'facebookPixelId',
-      'customTrackingScripts',
-      'enableCookieConsent',
-      'cookieConsentText',
-      'privacyPolicyUrl',
-      'termsOfServiceUrl',
-      'language',
-      'timezone',
-      'dateFormat'
+      "defaultSeoTitle",
+      "defaultSeoDescription",
+      "defaultSeoKeywords",
+      "favicon",
+      "ogImage",
+      "googleAnalyticsId",
+      "facebookPixelId",
+      "customTrackingScripts",
+      "enableCookieConsent",
+      "cookieConsentText",
+      "privacyPolicyUrl",
+      "termsOfServiceUrl",
+      "language",
+      "timezone",
+      "dateFormat",
     ];
 
     const updateData: any = {};
-    
-    updateFields.forEach(field => {
+
+    updateFields.forEach((field) => {
       if (field in data) {
-        updateData[field] = validatedData[field as keyof UpdateFunnelSettingsRequest];
+        updateData[field] =
+          validatedData[field as keyof UpdateFunnelSettingsRequest];
       }
     });
 
     if (Object.keys(updateData).length === 0) {
-      throw new Error("Nothing to update. Please provide at least one field to update.");
+      throw new Error(
+        "Nothing to update. Please provide at least one field to update."
+      );
     }
 
     const updatedSettings = await prisma.funnelSettings.update({
@@ -123,17 +129,16 @@ export const updateFunnelSettings = async (
       data: updateData,
     });
 
-    // Update cache
     try {
       const cacheKey = `funnel:${validatedData.funnelId}:settings:full`;
-      
-      // Cache the full settings data
-      await cacheService.set(cacheKey, updatedSettings, { ttl: 0 });
-      
-      // Also invalidate related funnel cache to ensure consistency
-      await cacheService.del(`workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`);
+
+      await cacheService.del(cacheKey);
+
+      await cacheService.del(
+        `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`
+      );
     } catch (cacheError) {
-      console.warn("Cache update failed but settings were updated:", cacheError);
+      console.warn("Failed to clear cache for funnel settings:", cacheError);
     }
 
     const response = {
