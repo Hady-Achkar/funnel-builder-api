@@ -93,8 +93,15 @@ export const getWorkspaceResponse = z.object({
     joinedAt: z.date(),
   }),
 
-  // All members
   members: z.array(workspaceMemberSchema),
+
+  // Pending invitations (email addresses of invited but not registered users)
+  pendingInvitations: z.array(z.object({
+    email: z.string(),
+    role: z.enum(WorkspaceRole),
+    invitedAt: z.date(),
+    invitedBy: z.number().nullable(),
+  })).optional(),
 
   // Domains
   domains: z.array(workspaceDomainSchema),

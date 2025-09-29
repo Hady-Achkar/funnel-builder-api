@@ -203,18 +203,23 @@ export class GetWorkspaceService {
         [WorkspaceRole.VIEWER]: rolePermTemplates.find(t => t.role === WorkspaceRole.VIEWER)?.permissions || rolePermissionPresets[WorkspaceRole.VIEWER] || [],
       };
 
-      const membersWithJoinedAt = workspace.members.map((member) => ({
-        ...member,
-        userId: member.userId || 0,
-        joinedAt: member.joinedAt || member.invitedAt || workspace.createdAt,
-        user: member.user || {
-          id: 0,
-          firstName: "Pending",
-          lastName: "Invitation",
-          email: member.email || "pending@invitation",
-          username: "pending",
-        },
-      }));
+      // Separate registered members from pending invitations
+      const registeredMembers = workspace.members
+        .filter((member) => member.user !== null && member.userId !== null)
+        .map((member) => ({
+          ...member,
+          joinedAt: member.joinedAt || member.invitedAt || workspace.createdAt,
+        }));
+
+      // Extract pending invitations (invited but not registered users)
+      const pendingInvitations = workspace.members
+        .filter((member) => member.user === null || member.userId === null)
+        .map((member) => ({
+          email: member.email || "",
+          role: member.role,
+          invitedAt: member.invitedAt,
+          invitedBy: member.invitedBy,
+        }));
 
       const response: GetWorkspaceResponse = {
         id: workspace.id,
@@ -227,7 +232,8 @@ export class GetWorkspaceService {
         updatedAt: workspace.updatedAt,
         owner: workspace.owner,
         currentUserMember,
-        members: membersWithJoinedAt,
+        members: registeredMembers,
+        pendingInvitations: pendingInvitations.length > 0 ? pendingInvitations : undefined,
         domains,
         funnels,
         usage,
