@@ -278,7 +278,7 @@ export class UpdateWorkspaceService {
                   data: updateData,
                 });
 
-                changes.members.updated.push(member.user.email);
+                changes.members.updated.push(member.user?.email || member.email || 'Unknown');
                 changes.permissions.affectedMembers.push(member.userId);
                 changes.permissions.updated = true;
               }
@@ -312,7 +312,7 @@ export class UpdateWorkspaceService {
                 where: { id: member.id },
               });
 
-              changes.members.removed.push(member.user.email);
+              changes.members.removed.push(member.user?.email || member.email || 'Unknown');
             }
           }
         }
