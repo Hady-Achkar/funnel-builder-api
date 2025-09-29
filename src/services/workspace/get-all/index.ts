@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { $Enums } from "../../../generated/prisma-client";
+import { $Enums, MembershipStatus } from "../../../generated/prisma-client";
 import {
   getAllWorkspacesResponse,
   GetAllWorkspacesResponse,
@@ -19,7 +19,17 @@ export const getAllWorkspaces = async (
 
     const workspaces = await prisma.workspace.findMany({
       where: {
-        OR: [{ ownerId: userId }, { members: { some: { userId: userId } } }],
+        OR: [
+          { ownerId: userId },
+          {
+            members: {
+              some: {
+                userId: userId,
+                status: MembershipStatus.ACTIVE
+              }
+            }
+          }
+        ],
       },
       select: {
         id: true,
@@ -34,6 +44,7 @@ export const getAllWorkspaces = async (
             userId: true,
             role: true,
             permissions: true,
+            status: true,
             user: {
               select: {
                 id: true,
@@ -97,6 +108,7 @@ export const getAllWorkspaces = async (
           username: workspace.owner.username,
           role: $Enums.WorkspaceRole.OWNER,
           permissions: Object.values($Enums.WorkspacePermission),
+          status: MembershipStatus.ACTIVE, // Owner is always active
         },
         ...workspace.members
           .filter((m) => m.userId !== workspace.ownerId && m.user !== null)
@@ -108,6 +120,7 @@ export const getAllWorkspaces = async (
             username: member.user.username,
             role: member.role,
             permissions: member.permissions || [],
+            status: member.status,
           })),
       ];
 

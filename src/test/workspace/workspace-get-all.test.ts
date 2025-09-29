@@ -7,6 +7,7 @@ import { getPrisma } from "../../lib/prisma";
 import {
   WorkspaceRole,
   WorkspacePermission,
+  MembershipStatus,
 } from "../../generated/prisma-client";
 
 // Mock dependencies
@@ -115,7 +116,17 @@ describe("Get All Workspaces Tests", () => {
         // Verify database query
         expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith({
           where: {
-            OR: [{ ownerId: userId }, { members: { some: { userId: userId } } }],
+            OR: [
+              { ownerId: userId },
+              {
+                members: {
+                  some: {
+                    userId: userId,
+                    status: MembershipStatus.ACTIVE
+                  }
+                }
+              }
+            ],
           },
           select: {
             id: true,
@@ -130,6 +141,7 @@ describe("Get All Workspaces Tests", () => {
                 userId: true,
                 role: true,
                 permissions: true,
+                status: true,
                 user: {
                   select: {
                     id: true,
