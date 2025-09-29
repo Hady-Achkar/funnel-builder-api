@@ -99,7 +99,7 @@ export const getAllWorkspaces = async (
           permissions: Object.values($Enums.WorkspacePermission),
         },
         ...workspace.members
-          .filter((m) => m.userId !== workspace.ownerId)
+          .filter((m) => m.userId !== workspace.ownerId && m.user !== null)
           .map((member) => ({
             id: member.user.id,
             firstName: member.user.firstName,
