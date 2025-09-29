@@ -124,11 +124,6 @@ export const updateFunnelSettings = async (
       );
     }
 
-    const updatedSettings = await prisma.funnelSettings.update({
-      where: { id: existingSettings.id },
-      data: updateData,
-    });
-
     try {
       const cacheKey = `funnel:${validatedData.funnelId}:settings:full`;
 

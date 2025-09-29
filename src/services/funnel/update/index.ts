@@ -10,10 +10,10 @@ import {
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
 import { hasPermissionToUpdateFunnel } from "../../../helpers/funnel/update";
-import { 
-  generateSlug, 
+import {
+  generateSlug,
   generateUniqueSlug,
-  validateSlugFormat 
+  validateSlugFormat,
 } from "../../../helpers/funnel/shared";
 
 export const updateFunnel = async (
@@ -99,14 +99,19 @@ export const updateFunnel = async (
     }
 
     // Handle slug update
-    if (validatedData.slug !== undefined && validatedData.slug.trim() !== existingFunnel.slug) {
+    if (
+      validatedData.slug !== undefined &&
+      validatedData.slug.trim() !== existingFunnel.slug
+    ) {
       const newSlug = validatedData.slug.trim();
-      
+
       // Validate slug format
       if (!validateSlugFormat(newSlug)) {
-        throw new Error("Funnel name contains invalid characters. Please use letters, numbers, and hyphens only.");
+        throw new Error(
+          "Funnel name contains invalid characters. Please use letters, numbers, and hyphens only."
+        );
       }
-      
+
       // Check if slug is unique in workspace
       const slugExists = await prisma.funnel.findFirst({
         where: {
@@ -116,11 +121,13 @@ export const updateFunnel = async (
         },
         select: { id: true },
       });
-      
+
       if (slugExists) {
-        throw new Error("This funnel name is already in use in your workspace. Please choose a different name.");
+        throw new Error(
+          "This funnel name is already in use in your workspace. Please choose a different name."
+        );
       }
-      
+
       updates.slug = newSlug;
       changed.push("slug");
     }
@@ -128,7 +135,11 @@ export const updateFunnel = async (
     // Auto-update slug when name changes (if slug wasn't explicitly provided)
     if (updates.name && !validatedData.slug) {
       const autoSlug = generateSlug(updates.name);
-      const uniqueSlug = await generateUniqueSlug(autoSlug, existingFunnel.workspaceId, validatedParams.funnelId);
+      const uniqueSlug = await generateUniqueSlug(
+        autoSlug,
+        existingFunnel.workspaceId,
+        validatedParams.funnelId
+      );
       updates.slug = uniqueSlug;
       changed.push("slug");
     }
@@ -214,6 +225,8 @@ export const updateFunnel = async (
       await cacheService.del(
         `user:${userId}:workspace:${existingFunnel.workspaceId}:funnels`
       );
+
+      await cacheService.del(`funnel:${updatedFunnel.id}:settings:full`);
     } catch (cacheError) {
       console.warn(
         "Funnel updated, but cache couldn't be refreshed:",
@@ -240,7 +253,9 @@ export const updateFunnel = async (
         error.message.includes("P2002")
       ) {
         if (error.message.includes("slug")) {
-          throw new Error("This funnel name is already in use in your workspace. Please choose a different name.");
+          throw new Error(
+            "This funnel name is already in use in your workspace. Please choose a different name."
+          );
         }
         throw new Error(
           `A funnel with the name "${validatedData.name}" already exists in this workspace. Please choose a different name.`
