@@ -99,7 +99,14 @@ export const getAllFunnels = async (
         status: funnel.status,
         workspaceId: funnel.workspaceId,
         createdBy: funnel.createdBy,
-        settings: funnel.settings,
+        settings: funnel.settings ? {
+          ...funnel.settings,
+          customTrackingScripts: Array.isArray(funnel.settings.customTrackingScripts)
+            ? funnel.settings.customTrackingScripts
+            : funnel.settings.customTrackingScripts
+              ? [funnel.settings.customTrackingScripts]
+              : []
+        } : null,
         createdAt: funnel.createdAt,
         updatedAt: funnel.updatedAt,
       }));
