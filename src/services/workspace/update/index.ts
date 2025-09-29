@@ -435,8 +435,8 @@ export class UpdateWorkspaceService {
         // Invalidate workspace cache by ID
         await cacheService.invalidateWorkspaceCache(workspace.id);
 
-        // Invalidate workspace cache by slug (all user-specific entries)
-        await cacheService.invalidatePattern(`${workspace.slug}:*`, "workspace");
+        // Invalidate workspace cache by slug (new pattern without userId)
+        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
 
         // Invalidate user workspaces cache for owner
         await cacheService.invalidateUserWorkspacesCache(workspace.ownerId);

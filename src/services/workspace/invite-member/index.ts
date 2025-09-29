@@ -16,6 +16,7 @@ import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
 } from "../../../helpers/workspace/invite-member";
+import { cacheService } from "../../cache/cache.service";
 
 export class InviteMemberService {
   static async inviteMember(
@@ -105,6 +106,15 @@ export class InviteMemberService {
           data.role,
           invitationToken
         );
+      }
+
+      // Invalidate workspace cache since member list changed
+      try {
+        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
+        console.log(`[Cache] Invalidated workspace cache for ${workspace.slug} after member invited`);
+      } catch (cacheError) {
+        console.error("Failed to invalidate workspace cache:", cacheError);
+        // Don't fail the operation if cache invalidation fails
       }
 
       return {

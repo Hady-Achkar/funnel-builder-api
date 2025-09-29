@@ -27,18 +27,18 @@ export class GetWorkspaceService {
     try {
       const validatedParams = getWorkspaceParams.parse({ slug });
 
+      // Cache key without userId - workspace data is the same for all users
+      const cacheKey = `slug:${slug}`;
+
       // Try to get from cache first
-      const cacheKey = `${slug}:user:${userId}`;
-      const cached = await cacheService.getWorkspaceBySlugCache<GetWorkspaceResponse>(cacheKey, {
-        ttl: 300 // 5 minutes
-      });
+      const cached = await cacheService.getWorkspaceBySlugCache<GetWorkspaceResponse>(cacheKey);
 
       if (cached) {
-        console.log(`[Cache HIT] Workspace ${slug} for user ${userId}`);
+        console.log(`[Cache HIT] Workspace ${slug}`);
         return cached;
       }
 
-      console.log(`[Cache MISS] Workspace ${slug} for user ${userId}`);
+      console.log(`[Cache MISS] Workspace ${slug}`);
       const prisma = getPrisma();
 
       const workspace = await prisma.workspace.findUnique({
@@ -117,7 +117,7 @@ export class GetWorkspaceService {
         : {
             role: userMember!.role,
             permissions: userMember!.permissions,
-            joinedAt: userMember!.joinedAt,
+            joinedAt: userMember!.joinedAt || userMember!.invitedAt || workspace.createdAt,
           };
 
       // Calculate usage statistics
@@ -203,6 +203,11 @@ export class GetWorkspaceService {
         [WorkspaceRole.VIEWER]: rolePermTemplates.find(t => t.role === WorkspaceRole.VIEWER)?.permissions || rolePermissionPresets[WorkspaceRole.VIEWER] || [],
       };
 
+      const membersWithJoinedAt = workspace.members.map((member) => ({
+        ...member,
+        joinedAt: member.joinedAt || member.invitedAt || workspace.createdAt,
+      }));
+
       const response: GetWorkspaceResponse = {
         id: workspace.id,
         name: workspace.name,
@@ -214,7 +219,7 @@ export class GetWorkspaceService {
         updatedAt: workspace.updatedAt,
         owner: workspace.owner,
         currentUserMember,
-        members: workspace.members,
+        members: membersWithJoinedAt,
         domains,
         funnels,
         usage,
@@ -224,9 +229,8 @@ export class GetWorkspaceService {
 
       const validatedResponse = getWorkspaceResponse.parse(response);
 
-      // Cache the response for 5 minutes
       await cacheService.setWorkspaceBySlugCache(cacheKey, validatedResponse, {
-        ttl: 300, // 5 minutes
+        ttl: 0,
       });
 
       return validatedResponse;

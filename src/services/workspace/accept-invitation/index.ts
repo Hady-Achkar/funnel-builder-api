@@ -10,8 +10,8 @@ import {
   ForbiddenError,
 } from "../../../errors";
 import jwt from "jsonwebtoken";
-import { AllocationService } from "../../../utils/allocations";
 import { MembershipStatus } from "../../../generated/prisma-client";
+import { cacheService } from "../../cache/cache.service";
 
 export class AcceptInvitationService {
   async acceptInvitation(
@@ -97,6 +97,15 @@ export class AcceptInvitationService {
               joinedAt: new Date(),
             },
           });
+
+          // Invalidate workspace cache since member status changed
+          try {
+            await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
+            console.log(`[Cache] Invalidated workspace cache for ${workspace.slug} after invitation accepted`);
+          } catch (cacheError) {
+            console.error("Failed to invalidate workspace cache:", cacheError);
+            // Don't fail the operation if cache invalidation fails
+          }
 
           return {
             message: "Invitation accepted successfully",

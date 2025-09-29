@@ -76,8 +76,8 @@ export class DeleteWorkspaceService {
         // Invalidate workspace cache by ID
         await cacheService.invalidateWorkspaceCache(workspace.id);
 
-        // Invalidate workspace cache by slug
-        await cacheService.invalidatePattern(`${workspace.slug}:*`, "workspace");
+        // Invalidate workspace cache by slug (new pattern without userId)
+        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
 
         // Invalidate user workspaces cache for owner
         await cacheService.invalidateUserWorkspacesCache(workspace.owner.id);
@@ -86,8 +86,6 @@ export class DeleteWorkspaceService {
         for (const member of workspace.members) {
           await cacheService.invalidateUserWorkspacesCache(member.userId);
         }
-
-        console.log(`[Cache] Invalidated all caches for deleted workspace ${workspace.slug}`);
       } catch (cacheError) {
         console.error("Failed to invalidate workspace cache:", cacheError);
         // Don't fail the delete operation if cache invalidation fails
