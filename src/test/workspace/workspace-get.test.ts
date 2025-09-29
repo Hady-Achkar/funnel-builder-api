@@ -15,6 +15,7 @@ import {
   DomainType,
   DomainStatus,
   SslStatus,
+  MembershipStatus,
 } from "../../generated/prisma-client";
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../middleware/auth";
@@ -72,6 +73,7 @@ describe("Workspace Get Tests", () => {
               workspaceId: 1,
               role: WorkspaceRole.EDITOR,
               permissions: [WorkspacePermission.EDIT_FUNNELS],
+              status: MembershipStatus.ACTIVE,
               joinedAt: new Date("2024-01-02"),
               updatedAt: new Date("2024-01-02"),
               user: {
@@ -200,6 +202,7 @@ describe("Workspace Get Tests", () => {
                 WorkspacePermission.MANAGE_WORKSPACE,
                 WorkspacePermission.MANAGE_MEMBERS,
               ],
+              status: MembershipStatus.ACTIVE,
               joinedAt: new Date("2024-01-02"),
               updatedAt: new Date("2024-01-02"),
               user: {

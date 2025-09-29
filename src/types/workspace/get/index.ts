@@ -6,6 +6,7 @@ import {
   DomainStatus,
   SslStatus,
   UserPlan,
+  MembershipStatus,
 } from "../../../generated/prisma-client";
 
 // Request parameters
@@ -18,9 +19,10 @@ export type GetWorkspaceParams = z.infer<typeof getWorkspaceParams>;
 // Workspace member schema
 export const workspaceMemberSchema = z.object({
   id: z.number(),
-  userId: z.number(),
+  userId: z.number().nullable(),
   role: z.enum(WorkspaceRole),
   permissions: z.array(z.enum(WorkspacePermission)),
+  status: z.enum(MembershipStatus),
   joinedAt: z.date(),
   updatedAt: z.date(),
   user: z.object({
@@ -29,7 +31,7 @@ export const workspaceMemberSchema = z.object({
     lastName: z.string(),
     email: z.string(),
     username: z.string(),
-  }),
+  }).nullable(),
 });
 
 export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;

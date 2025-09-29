@@ -205,7 +205,15 @@ export class GetWorkspaceService {
 
       const membersWithJoinedAt = workspace.members.map((member) => ({
         ...member,
+        userId: member.userId || 0,
         joinedAt: member.joinedAt || member.invitedAt || workspace.createdAt,
+        user: member.user || {
+          id: 0,
+          firstName: "Pending",
+          lastName: "Invitation",
+          email: member.email || "pending@invitation",
+          username: "pending",
+        },
       }));
 
       const response: GetWorkspaceResponse = {
