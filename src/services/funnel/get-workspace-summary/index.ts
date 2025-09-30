@@ -3,10 +3,7 @@ import { NotFoundError, ForbiddenError, BadRequestError } from "../../../errors/
 import { ZodError } from "zod";
 import { hasPermissionToViewFunnels } from "../../../helpers/funnel/getAll/permissions.helper";
 import {
-  GetWorkspaceFunnelsSummaryRequest,
-  GetWorkspaceFunnelsSummaryResponse,
   GetWorkspaceFunnelsSummaryRequestSchema,
-  GetWorkspaceFunnelsSummaryResponseSchema,
   WorkspaceFunnel,
 } from "../../../types/funnel/get-workspace-summary/get-workspace-summary.types";
 
@@ -14,7 +11,7 @@ export class GetWorkspaceFunnelsSummaryService {
   static async getWorkspaceFunnelsSummary(
     userId: number,
     requestData: unknown
-  ): Promise<GetWorkspaceFunnelsSummaryResponse> {
+  ): Promise<WorkspaceFunnel[]> {
     try {
       const validatedData = GetWorkspaceFunnelsSummaryRequestSchema.parse(requestData);
       const { workspaceSlug } = validatedData;
@@ -70,11 +67,7 @@ export class GetWorkspaceFunnelsSummaryService {
         name: funnel.name,
       }));
 
-      const response: GetWorkspaceFunnelsSummaryResponse = {
-        funnels: workspaceFunnels,
-      };
-
-      return GetWorkspaceFunnelsSummaryResponseSchema.parse(response);
+      return workspaceFunnels;
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         throw new BadRequestError(

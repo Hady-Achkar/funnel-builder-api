@@ -10,9 +10,7 @@ import {
   WorkspacePermission,
 } from "../../../generated/prisma-client";
 import {
-  GetWorkspaceDomainsSummaryResponse,
   GetWorkspaceDomainsSummaryRequestSchema,
-  GetWorkspaceDomainsSummaryResponseSchema,
   WorkspaceDomain,
 } from "../../../types/domain/get-workspace-summary/get-workspace-summary.types";
 
@@ -20,7 +18,7 @@ export class GetWorkspaceDomainsSummaryService {
   static async getWorkspaceDomainsSummary(
     userId: number,
     requestData: unknown
-  ): Promise<GetWorkspaceDomainsSummaryResponse> {
+  ): Promise<WorkspaceDomain[]> {
     try {
       const validatedData =
         GetWorkspaceDomainsSummaryRequestSchema.parse(requestData);
@@ -83,11 +81,7 @@ export class GetWorkspaceDomainsSummaryService {
         hostname: domain.hostname,
       }));
 
-      const response: GetWorkspaceDomainsSummaryResponse = {
-        domains: workspaceDomains,
-      };
-
-      return GetWorkspaceDomainsSummaryResponseSchema.parse(response);
+      return workspaceDomains;
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         throw new BadRequestError(

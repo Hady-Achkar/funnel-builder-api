@@ -68,12 +68,10 @@ describe("Get Workspace Domains Summary Tests", () => {
             { workspaceSlug }
           );
 
-        expect(result).toEqual({
-          domains: [
-            { id: 1, hostname: "example.com" },
-            { id: 2, hostname: "test.com" },
-          ],
-        });
+        expect(result).toEqual([
+          { id: 1, hostname: "example.com" },
+          { id: 2, hostname: "test.com" },
+        ]);
 
         expect(mockPrisma.workspace.findUnique).toHaveBeenCalledWith({
           where: { slug: workspaceSlug },
@@ -122,9 +120,7 @@ describe("Get Workspace Domains Summary Tests", () => {
             { workspaceSlug }
           );
 
-        expect(result).toEqual({
-          domains: [{ id: 1, hostname: "example.com" }],
-        });
+        expect(result).toEqual([{ id: 1, hostname: "example.com" }]);
       });
 
       it("should return domains for user with CONNECT_DOMAINS permission", async () => {
@@ -158,9 +154,7 @@ describe("Get Workspace Domains Summary Tests", () => {
             { workspaceSlug }
           );
 
-        expect(result).toEqual({
-          domains: [{ id: 1, hostname: "example.com" }],
-        });
+        expect(result).toEqual([{ id: 1, hostname: "example.com" }]);
       });
 
       it("should return empty array when no domains exist", async () => {
@@ -179,9 +173,7 @@ describe("Get Workspace Domains Summary Tests", () => {
             { workspaceSlug }
           );
 
-        expect(result).toEqual({
-          domains: [],
-        });
+        expect(result).toEqual([]);
       });
     });
 
@@ -284,9 +276,7 @@ describe("Get Workspace Domains Summary Tests", () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        domains: [{ id: 1, hostname: "example.com" }],
-      });
+      expect(mockResponse.json).toHaveBeenCalledWith([{ id: 1, hostname: "example.com" }]);
       expect(mockNext).not.toHaveBeenCalled();
     });
 

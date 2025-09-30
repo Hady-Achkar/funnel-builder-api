@@ -64,12 +64,10 @@ describe("Get Workspace Funnels Summary Tests", () => {
           { workspaceSlug }
         );
 
-        expect(result).toEqual({
-          funnels: [
-            { id: 1, name: "Sales Funnel" },
-            { id: 2, name: "Lead Gen Funnel" },
-          ],
-        });
+        expect(result).toEqual([
+          { id: 1, name: "Sales Funnel" },
+          { id: 2, name: "Lead Gen Funnel" },
+        ]);
 
         expect(mockPrisma.workspace.findUnique).toHaveBeenCalledWith({
           where: { slug: workspaceSlug },
@@ -116,9 +114,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
           { workspaceSlug }
         );
 
-        expect(result).toEqual({
-          funnels: [{ id: 1, name: "Sales Funnel" }],
-        });
+        expect(result).toEqual([{ id: 1, name: "Sales Funnel" }]);
       });
 
       it("should return funnels for workspace viewer (all roles can view)", async () => {
@@ -150,9 +146,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
           { workspaceSlug }
         );
 
-        expect(result).toEqual({
-          funnels: [{ id: 1, name: "Sales Funnel" }],
-        });
+        expect(result).toEqual([{ id: 1, name: "Sales Funnel" }]);
       });
 
       it("should return empty array when no funnels exist", async () => {
@@ -170,9 +164,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
           { workspaceSlug }
         );
 
-        expect(result).toEqual({
-          funnels: [],
-        });
+        expect(result).toEqual([]);
       });
     });
 
@@ -251,9 +243,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        funnels: [{ id: 1, name: "Sales Funnel" }],
-      });
+      expect(mockResponse.json).toHaveBeenCalledWith([{ id: 1, name: "Sales Funnel" }]);
       expect(mockNext).not.toHaveBeenCalled();
     });
 
