@@ -40,6 +40,7 @@ export const duplicateFunnel = async (
       where: { id: validatedParams.funnelId },
       include: {
         theme: true,
+        settings: true,
         pages: {
           orderBy: { order: "asc" },
         },
@@ -250,6 +251,32 @@ export const duplicateFunnel = async (
         },
       });
 
+      // Duplicate funnel settings if they exist (excluding tracking IDs)
+      if (originalFunnel.settings) {
+        await tx.funnelSettings.create({
+          data: {
+            funnelId: newFunnel.id,
+            defaultSeoTitle: originalFunnel.settings.defaultSeoTitle,
+            defaultSeoDescription: originalFunnel.settings.defaultSeoDescription,
+            defaultSeoKeywords: originalFunnel.settings.defaultSeoKeywords,
+            favicon: originalFunnel.settings.favicon,
+            ogImage: originalFunnel.settings.ogImage,
+            googleAnalyticsId: null,  // Don't copy tracking ID
+            facebookPixelId: null,    // Don't copy pixel ID
+            customTrackingScripts: originalFunnel.settings.customTrackingScripts,
+            enableCookieConsent: originalFunnel.settings.enableCookieConsent,
+            cookieConsentText: originalFunnel.settings.cookieConsentText,
+            privacyPolicyUrl: originalFunnel.settings.privacyPolicyUrl,
+            termsOfServiceUrl: originalFunnel.settings.termsOfServiceUrl,
+            language: originalFunnel.settings.language,
+            timezone: originalFunnel.settings.timezone,
+            dateFormat: originalFunnel.settings.dateFormat,
+            isPasswordProtected: originalFunnel.settings.isPasswordProtected,
+            passwordHash: originalFunnel.settings.passwordHash,
+          },
+        });
+      }
+
       // Duplicate pages with updated linking IDs and content
       const createdPages = [];
       for (const originalPage of originalFunnel.pages) {
@@ -279,90 +306,41 @@ export const duplicateFunnel = async (
         createdPages.push(newPage);
       }
 
-      return { funnel: newFunnel, pages: createdPages };
+      // Fetch the new funnel with settings for the result
+      const newFunnelWithSettings = await tx.funnel.findUnique({
+        where: { id: newFunnel.id },
+        include: {
+          theme: true,
+          settings: true,
+        },
+      });
+
+      return { funnel: newFunnelWithSettings, pages: createdPages };
     });
 
-    // Cache management
+    // Invalidate cache after successful duplication
     try {
-      // Cache the individual funnel with full data including pages (without content)
-      const fullFunnelCacheKey = `workspace:${targetWorkspaceId}:funnel:${result.funnel.id}:full`;
-      const pagesWithoutContent = result.pages.map((page) => ({
-        id: page.id,
-        name: page.name,
-        order: page.order,
-        linkingId: page.linkingId,
-        seoTitle: page.seoTitle,
-        seoDescription: page.seoDescription,
-        seoKeywords: page.seoKeywords,
-      }));
+      const cacheKeysToInvalidate = [
+        // Workspace's all funnels cache (includes settings)
+        `workspace:${targetWorkspaceId}:funnels:all`,
+        // Legacy cache keys
+        `workspace:${targetWorkspaceId}:funnels:list`,
+        `user:${userId}:workspace:${targetWorkspaceId}:funnels`,
+      ];
 
-      const fullFunnelData = {
-        id: result.funnel.id,
-        name: result.funnel.name,
-        slug: result.funnel.slug,
-        status: result.funnel.status,
-        workspaceId: result.funnel.workspaceId,
-        createdBy: result.funnel.createdBy,
-        themeId: result.funnel.themeId,
-        createdAt: result.funnel.createdAt,
-        updatedAt: result.funnel.updatedAt,
-        theme: result.funnel.theme,
-        pages: pagesWithoutContent,
-      };
-      await cacheService.set(fullFunnelCacheKey, fullFunnelData, { ttl: 0 });
-
-      // Update the workspace's all funnels cache
-      const allFunnelsCacheKey = `workspace:${targetWorkspaceId}:funnels:all`;
-      const existingFunnels =
-        (await cacheService.get<any[]>(allFunnelsCacheKey)) || [];
-
-      // Add new funnel summary to the list
-      const funnelSummary = {
-        id: result.funnel.id,
-        name: result.funnel.name,
-        slug: result.funnel.slug,
-        status: result.funnel.status,
-        workspaceId: result.funnel.workspaceId,
-        createdBy: result.funnel.createdBy,
-        themeId: result.funnel.themeId,
-        createdAt: result.funnel.createdAt,
-        updatedAt: result.funnel.updatedAt,
-        theme: result.funnel.theme,
-      };
-
-      const updatedFunnels = [...existingFunnels, funnelSummary];
-      await cacheService.set(allFunnelsCacheKey, updatedFunnels, { ttl: 0 });
-
-      // Cache each page content separately
-      for (const page of result.pages) {
-        const pageCacheKey = `funnel:${result.funnel.id}:page:${page.id}:full`;
-        const pageData = {
-          id: page.id,
-          name: page.name,
-          content: page.content,
-          order: page.order,
-          funnelId: page.funnelId,
-          linkingId: page.linkingId,
-          seoTitle: page.seoTitle,
-          seoDescription: page.seoDescription,
-          seoKeywords: page.seoKeywords,
-          createdAt: page.createdAt,
-          updatedAt: page.updatedAt,
-        };
-        await cacheService.set(pageCacheKey, pageData, { ttl: 0 });
-      }
-
-      // Invalidate old list caches
-      await cacheService.del(`workspace:${targetWorkspaceId}:funnels:list`);
-
-      await cacheService.del(
-        `user:${userId}:workspace:${targetWorkspaceId}:funnels`
+      // Delete all cache keys in parallel
+      await Promise.all(
+        cacheKeysToInvalidate.map(key =>
+          cacheService.del(key).catch(err =>
+            console.warn(`Failed to invalidate cache key ${key}:`, err)
+          )
+        )
       );
+
+      console.log(`[Cache] Invalidated funnel caches after duplication for workspace ${targetWorkspaceId}`);
     } catch (cacheError) {
-      console.warn(
-        "Cache update failed but funnel was duplicated:",
-        cacheError
-      );
+      console.error("Failed to invalidate funnel cache:", cacheError);
+      // Don't fail the operation if cache invalidation fails
     }
 
     const response = {
