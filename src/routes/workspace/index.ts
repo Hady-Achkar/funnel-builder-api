@@ -11,6 +11,7 @@ import { uploadWorkspaceImageController } from "../../controllers/workspace/uplo
 import { UpdateWorkspaceController } from "../../controllers/workspace/update";
 import { DeleteWorkspaceController } from "../../controllers/workspace/delete";
 import { LeaveWorkspaceController } from "../../controllers/workspace/leave";
+import { GetUserWorkspacesSummaryController } from "../../controllers/workspace/get-user-summary";
 
 const router: Router = express.Router();
 
@@ -25,6 +26,9 @@ router.post("/", CreateWorkspaceController.create);
 
 // Get all workspaces for user
 router.get("/", getAllWorkspacesController);
+
+// Get user workspaces summary
+router.get("/summary", GetUserWorkspacesSummaryController.getUserWorkspacesSummary);
 
 // Get single workspace by slug
 router.get("/:slug", GetWorkspaceController.getBySlug);
