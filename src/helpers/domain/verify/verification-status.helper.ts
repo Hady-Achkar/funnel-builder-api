@@ -37,6 +37,7 @@ export function determineVerificationStatus(
       message = `Domain ownership verified. SSL certificate is being processed. Status: "${sslStatus}".`;
     }
     shouldUpdateVerified = true;
+    shouldUpdateActive = true;
   } else {
     message = `Verification is still in progress. Status: "${hostnameStatus}", SSL: "${sslStatus}".`;
 
