@@ -8,7 +8,10 @@ import {
   replaceLinkingIdsInContent,
   getNewLinkingIdForPage,
 } from "../../../helpers/funnel/duplicate";
-import { generateSlug, generateUniqueSlug } from "../../../helpers/funnel/shared";
+import {
+  generateSlug,
+  generateUniqueSlug,
+} from "../../../helpers/funnel/shared";
 import {
   duplicateFunnelParams,
   DuplicateFunnelParams,
@@ -60,17 +63,17 @@ export const duplicateFunnel = async (
 
     // Determine target workspace (same workspace if not provided)
     let targetWorkspaceId = originalFunnel.workspaceId;
-    
+
     if (validatedData.workspaceSlug) {
       const targetWorkspaceBySlug = await prisma.workspace.findUnique({
         where: { slug: validatedData.workspaceSlug },
         select: { id: true },
       });
-      
+
       if (!targetWorkspaceBySlug) {
         throw new Error("Target workspace not found");
       }
-      
+
       targetWorkspaceId = targetWorkspaceBySlug.id;
     }
 
@@ -179,8 +182,7 @@ export const duplicateFunnel = async (
       );
     }
 
-    // Generate unique funnel name
-    finalFunnelName = validatedData.name || `Copy of ${originalFunnel.name}`;
+    finalFunnelName = `${originalFunnel.name} - copy`;
 
     // Check if name already exists in target workspace and generate unique name
     const existingFunnels = await prisma.funnel.findMany({
@@ -257,13 +259,15 @@ export const duplicateFunnel = async (
           data: {
             funnelId: newFunnel.id,
             defaultSeoTitle: originalFunnel.settings.defaultSeoTitle,
-            defaultSeoDescription: originalFunnel.settings.defaultSeoDescription,
+            defaultSeoDescription:
+              originalFunnel.settings.defaultSeoDescription,
             defaultSeoKeywords: originalFunnel.settings.defaultSeoKeywords,
             favicon: originalFunnel.settings.favicon,
             ogImage: originalFunnel.settings.ogImage,
-            googleAnalyticsId: null,  // Don't copy tracking ID
-            facebookPixelId: null,    // Don't copy pixel ID
-            customTrackingScripts: originalFunnel.settings.customTrackingScripts,
+            googleAnalyticsId: null, // Don't copy tracking ID
+            facebookPixelId: null, // Don't copy pixel ID
+            customTrackingScripts:
+              originalFunnel.settings.customTrackingScripts,
             enableCookieConsent: originalFunnel.settings.enableCookieConsent,
             cookieConsentText: originalFunnel.settings.cookieConsentText,
             privacyPolicyUrl: originalFunnel.settings.privacyPolicyUrl,
@@ -330,14 +334,18 @@ export const duplicateFunnel = async (
 
       // Delete all cache keys in parallel
       await Promise.all(
-        cacheKeysToInvalidate.map(key =>
-          cacheService.del(key).catch(err =>
-            console.warn(`Failed to invalidate cache key ${key}:`, err)
-          )
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
         )
       );
 
-      console.log(`[Cache] Invalidated funnel caches after duplication for workspace ${targetWorkspaceId}`);
+      console.log(
+        `[Cache] Invalidated funnel caches after duplication for workspace ${targetWorkspaceId}`
+      );
     } catch (cacheError) {
       console.error("Failed to invalidate funnel cache:", cacheError);
       // Don't fail the operation if cache invalidation fails
