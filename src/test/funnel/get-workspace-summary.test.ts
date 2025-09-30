@@ -1,18 +1,15 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { GetWorkspaceDomainsSummaryService } from "../../services/domain/get-workspace-summary";
-import { GetWorkspaceDomainsSummaryController } from "../../controllers/domain/get-workspace-summary";
+import { GetWorkspaceFunnelsSummaryService } from "../../services/funnel/get-workspace-summary";
+import { GetWorkspaceFunnelsSummaryController } from "../../controllers/funnel/get-workspace-summary";
 import { getPrisma } from "../../lib/prisma";
 import { NotFoundError, ForbiddenError } from "../../errors/http-errors";
-import {
-  WorkspaceRole,
-  WorkspacePermission,
-} from "../../generated/prisma-client";
+import { WorkspaceRole } from "../../generated/prisma-client";
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../middleware/auth";
 
 vi.mock("../../lib/prisma");
 
-describe("Get Workspace Domains Summary Tests", () => {
+describe("Get Workspace Funnels Summary Tests", () => {
   let mockPrisma: any;
   const userId = 1;
   const workspaceSlug = "test-workspace";
@@ -27,7 +24,7 @@ describe("Get Workspace Domains Summary Tests", () => {
       workspaceMember: {
         findUnique: vi.fn(),
       },
-      domain: {
+      funnel: {
         findMany: vi.fn(),
       },
     };
@@ -39,39 +36,38 @@ describe("Get Workspace Domains Summary Tests", () => {
     vi.restoreAllMocks();
   });
 
-  describe("GetWorkspaceDomainsSummaryService", () => {
+  describe("GetWorkspaceFunnelsSummaryService", () => {
     describe("Success Cases", () => {
-      it("should return domains with only id and hostname for workspace owner", async () => {
+      it("should return funnels with only id and name for workspace owner", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
           ownerId: userId,
         };
 
-        const domainsData = [
+        const funnelsData = [
           {
             id: 1,
-            hostname: "example.com",
+            name: "Sales Funnel",
           },
           {
             id: 2,
-            hostname: "test.com",
+            name: "Lead Gen Funnel",
           },
         ];
 
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
-        mockPrisma.domain.findMany.mockResolvedValue(domainsData);
+        mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result =
-          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
-            userId,
-            { workspaceSlug }
-          );
+        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+          userId,
+          { workspaceSlug }
+        );
 
         expect(result).toEqual({
-          domains: [
-            { id: 1, hostname: "example.com" },
-            { id: 2, hostname: "test.com" },
+          funnels: [
+            { id: 1, name: "Sales Funnel" },
+            { id: 2, name: "Lead Gen Funnel" },
           ],
         });
 
@@ -81,17 +77,17 @@ describe("Get Workspace Domains Summary Tests", () => {
 
         expect(mockPrisma.workspaceMember.findUnique).not.toHaveBeenCalled();
 
-        expect(mockPrisma.domain.findMany).toHaveBeenCalledWith({
+        expect(mockPrisma.funnel.findMany).toHaveBeenCalledWith({
           where: { workspaceId: 1 },
           select: {
             id: true,
-            hostname: true,
+            name: true,
           },
           orderBy: { createdAt: "desc" },
         });
       });
 
-      it("should return domains for workspace admin", async () => {
+      it("should return funnels for workspace admin", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
@@ -102,32 +98,30 @@ describe("Get Workspace Domains Summary Tests", () => {
           userId,
           workspaceId: 1,
           role: WorkspaceRole.ADMIN,
-          permissions: [],
         };
 
-        const domainsData = [
+        const funnelsData = [
           {
             id: 1,
-            hostname: "example.com",
+            name: "Sales Funnel",
           },
         ];
 
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
-        mockPrisma.domain.findMany.mockResolvedValue(domainsData);
+        mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result =
-          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
-            userId,
-            { workspaceSlug }
-          );
+        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+          userId,
+          { workspaceSlug }
+        );
 
         expect(result).toEqual({
-          domains: [{ id: 1, hostname: "example.com" }],
+          funnels: [{ id: 1, name: "Sales Funnel" }],
         });
       });
 
-      it("should return domains for user with CONNECT_DOMAINS permission", async () => {
+      it("should return funnels for workspace viewer (all roles can view)", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
@@ -137,33 +131,31 @@ describe("Get Workspace Domains Summary Tests", () => {
         const memberData = {
           userId,
           workspaceId: 1,
-          role: WorkspaceRole.EDITOR,
-          permissions: [WorkspacePermission.CONNECT_DOMAINS],
+          role: WorkspaceRole.VIEWER,
         };
 
-        const domainsData = [
+        const funnelsData = [
           {
             id: 1,
-            hostname: "example.com",
+            name: "Sales Funnel",
           },
         ];
 
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
-        mockPrisma.domain.findMany.mockResolvedValue(domainsData);
+        mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result =
-          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
-            userId,
-            { workspaceSlug }
-          );
+        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+          userId,
+          { workspaceSlug }
+        );
 
         expect(result).toEqual({
-          domains: [{ id: 1, hostname: "example.com" }],
+          funnels: [{ id: 1, name: "Sales Funnel" }],
         });
       });
 
-      it("should return empty array when no domains exist", async () => {
+      it("should return empty array when no funnels exist", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
@@ -171,16 +163,15 @@ describe("Get Workspace Domains Summary Tests", () => {
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
-        mockPrisma.domain.findMany.mockResolvedValue([]);
+        mockPrisma.funnel.findMany.mockResolvedValue([]);
 
-        const result =
-          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
-            userId,
-            { workspaceSlug }
-          );
+        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+          userId,
+          { workspaceSlug }
+        );
 
         expect(result).toEqual({
-          domains: [],
+          funnels: [],
         });
       });
     });
@@ -190,7 +181,7 @@ describe("Get Workspace Domains Summary Tests", () => {
         mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
         await expect(
-          GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(userId, {
+          GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(userId, {
             workspaceSlug,
           })
         ).rejects.toThrow(NotFoundError);
@@ -211,31 +202,7 @@ describe("Get Workspace Domains Summary Tests", () => {
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
         await expect(
-          GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(userId, {
-            workspaceSlug,
-          })
-        ).rejects.toThrow(ForbiddenError);
-      });
-
-      it("should throw ForbiddenError when user lacks CONNECT_DOMAINS permission", async () => {
-        const workspaceData = {
-          id: 1,
-          slug: workspaceSlug,
-          ownerId: 999, // Different owner
-        };
-
-        const memberData = {
-          userId,
-          workspaceId: 1,
-          role: WorkspaceRole.VIEWER,
-          permissions: [], // No CONNECT_DOMAINS permission
-        };
-
-        mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
-        mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
-
-        await expect(
-          GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(userId, {
+          GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(userId, {
             workspaceSlug,
           })
         ).rejects.toThrow(ForbiddenError);
@@ -243,7 +210,7 @@ describe("Get Workspace Domains Summary Tests", () => {
     });
   });
 
-  describe("GetWorkspaceDomainsSummaryController", () => {
+  describe("GetWorkspaceFunnelsSummaryController", () => {
     let mockRequest: Partial<AuthRequest>;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
@@ -260,24 +227,24 @@ describe("Get Workspace Domains Summary Tests", () => {
       mockNext = vi.fn();
     });
 
-    it("should return 200 with domains data on success", async () => {
+    it("should return 200 with funnels data on success", async () => {
       const workspaceData = {
         id: 1,
         slug: workspaceSlug,
         ownerId: userId,
       };
 
-      const domainsData = [
+      const funnelsData = [
         {
           id: 1,
-          hostname: "example.com",
+          name: "Sales Funnel",
         },
       ];
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
-      mockPrisma.domain.findMany.mockResolvedValue(domainsData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-      await GetWorkspaceDomainsSummaryController.getWorkspaceDomainsSummary(
+      await GetWorkspaceFunnelsSummaryController.getWorkspaceFunnelsSummary(
         mockRequest as AuthRequest,
         mockResponse as Response,
         mockNext
@@ -285,7 +252,7 @@ describe("Get Workspace Domains Summary Tests", () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        domains: [{ id: 1, hostname: "example.com" }],
+        funnels: [{ id: 1, name: "Sales Funnel" }],
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -294,7 +261,7 @@ describe("Get Workspace Domains Summary Tests", () => {
       const error = new NotFoundError("Workspace not found");
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
-      await GetWorkspaceDomainsSummaryController.getWorkspaceDomainsSummary(
+      await GetWorkspaceFunnelsSummaryController.getWorkspaceFunnelsSummary(
         mockRequest as AuthRequest,
         mockResponse as Response,
         mockNext

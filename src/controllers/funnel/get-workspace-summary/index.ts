@@ -1,9 +1,9 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { GetWorkspaceDomainsSummaryService } from "../../../services/domain/get-workspace-summary";
+import { GetWorkspaceFunnelsSummaryService } from "../../../services/funnel/get-workspace-summary";
 
-export class GetWorkspaceDomainsSummaryController {
-  static async getWorkspaceDomainsSummary(
+export class GetWorkspaceFunnelsSummaryController {
+  static async getWorkspaceFunnelsSummary(
     req: AuthRequest,
     res: Response,
     next: NextFunction
@@ -12,11 +12,10 @@ export class GetWorkspaceDomainsSummaryController {
       const { workspaceSlug } = req.params;
       const userId = req.userId!;
 
-      const result =
-        await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
-          userId,
-          { workspaceSlug }
-        );
+      const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+        userId,
+        { workspaceSlug }
+      );
 
       res.status(200).json(result);
     } catch (error) {

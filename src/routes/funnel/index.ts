@@ -7,6 +7,7 @@ import { getFunnelController } from "../../controllers/funnel/get";
 import { deleteFunnelController } from "../../controllers/funnel/delete";
 import { createFromTemplateController } from "../../controllers/funnel/createFromTemplate";
 import { duplicateFunnelController } from "../../controllers/funnel/duplicate";
+import { GetWorkspaceFunnelsSummaryController } from "../../controllers/funnel/get-workspace-summary";
 
 const router: Router = express.Router();
 
@@ -15,6 +16,7 @@ router.use(authenticateToken);
 router.post("/", createFunnelController);
 router.post("/from-template/:templateId", createFromTemplateController);
 router.post("/:id/duplicate", duplicateFunnelController);
+router.get("/workspace/:workspaceSlug/summary", GetWorkspaceFunnelsSummaryController.getWorkspaceFunnelsSummary);
 router.get("/workspace/:workspaceSlug", getAllFunnelsController);
 router.get("/:id", getFunnelController);
 router.put("/:id", updateFunnelController);
