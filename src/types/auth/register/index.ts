@@ -50,7 +50,7 @@ export const registerRequest = z.object({
       message: "Plan must be BUSINESS or AGENCY",
     })
     .default($Enums.UserPlan.BUSINESS),
-  invitationToken: z
+  workspaceInvitationToken: z
     .string()
     .optional(),
 });

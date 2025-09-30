@@ -8,6 +8,7 @@ import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 import { generateVerificationToken } from "../utils";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
+import { TokenValidator } from "./utils/token-validator";
 
 export class RegisterService {
   static async register(userData: RegisterRequest): Promise<RegisterResponse> {
@@ -20,10 +21,26 @@ export class RegisterService {
         password,
         isAdmin,
         plan,
-        invitationToken,
+        workspaceInvitationToken,
       } = userData;
 
       const prisma = getPrisma();
+
+      // Early token validation if invitation token is provided
+      if (workspaceInvitationToken) {
+        // Validate token and check email match
+        const tokenPayload = await TokenValidator.validateInvitationToken(
+          workspaceInvitationToken,
+          email
+        );
+
+        // Check if pending invitation exists
+        await TokenValidator.checkPendingInvitation(
+          email,
+          tokenPayload.workspaceId,
+          prisma
+        );
+      }
 
       const existingUserByEmail = await prisma.user.findUnique({
         where: { email },
@@ -73,21 +90,16 @@ export class RegisterService {
         console.error("Failed to send verification email:", emailError);
       }
 
-      // Process invitation token if provided
+      // Process invitation token if provided (already validated)
       let workspaceData = undefined;
-      if (invitationToken) {
-        try {
-          workspaceData =
-            await WorkspaceInvitationProcessor.processWorkspaceInvitation(
-              user.id,
-              email,
-              invitationToken,
-              prisma
-            );
-        } catch (invitationError) {
-          console.error("Failed to process invitation token:", invitationError);
-          // Continue with registration even if invitation fails
-        }
+      if (workspaceInvitationToken) {
+        workspaceData =
+          await WorkspaceInvitationProcessor.processWorkspaceInvitation(
+            user.id,
+            email,
+            workspaceInvitationToken,
+            prisma
+          );
       }
 
       return {

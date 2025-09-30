@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
-import { AllocationService } from "../../../../utils/allocations";
 import { MembershipStatus } from "../../../../generated/prisma-client";
 
 export class WorkspaceInvitationProcessor {
   /**
    * Processes a workspace invitation token during user registration
-   * Validates the token, checks workspace limits, and adds the user as a member
+   * Updates the pending membership to active (validation already done in early validation)
    */
   static async processWorkspaceInvitation(
     userId: number,
@@ -13,18 +12,8 @@ export class WorkspaceInvitationProcessor {
     token: string,
     prisma: any
   ) {
-    // Decode and verify invitation token
+    // Decode token (already validated in early validation, but needed for data)
     const tokenPayload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-
-    // Verify token type
-    if (tokenPayload.type !== "workspace_invitation") {
-      throw new Error("Invalid invitation token type");
-    }
-
-    // Verify email matches
-    if (tokenPayload.email !== userEmail) {
-      throw new Error("Email mismatch in invitation token");
-    }
 
     // Get workspace
     const workspace = await prisma.workspace.findUnique({
@@ -36,13 +25,7 @@ export class WorkspaceInvitationProcessor {
       throw new Error("Workspace not found");
     }
 
-    // Check allocation limits (use workspace owner's plan)
-    const canAddMember = await AllocationService.canAddMember(workspace.ownerId, workspace.id);
-    if (!canAddMember) {
-      throw new Error("Workspace member limit reached");
-    }
-
-    // Find existing PENDING membership by email
+    // Find existing PENDING membership by email (already validated in early validation)
     const existingMember = await prisma.workspaceMember.findFirst({
       where: {
         email: userEmail,
