@@ -117,6 +117,84 @@ Retrieves all domain-funnel connections for a specific workspace, showing which 
 
 ---
 
+### 3. Get Funnel Connection
+
+**Route:** `GET /api/domain-funnel/funnel/:funnelId/connection`
+**Authentication:** Required
+**Permission:** `VIEW_FUNNELS`
+
+Gets the connected domain for a specific funnel by funnel ID. Returns the funnel information along with the connected domain details, or null if no domain is connected.
+
+### URL Parameters
+
+| Parameter  | Type   | Required | Description                   |
+| ---------- | ------ | -------- | ----------------------------- |
+| `funnelId` | number | Yes      | Funnel ID (positive integer)  |
+
+### Response - With Connected Domain
+
+```json
+{
+  "funnel": {
+    "id": 123,
+    "name": "Landing Page Funnel"
+  },
+  "domain": {
+    "id": 456,
+    "hostname": "example.com"
+  },
+  "isActive": true
+}
+```
+
+### Response - No Domain Connected
+
+```json
+{
+  "funnel": {
+    "id": 123,
+    "name": "Landing Page Funnel"
+  },
+  "domain": null,
+  "isActive": false
+}
+```
+
+### Response Fields
+
+| Field             | Type    | Description                                      |
+| ----------------- | ------- | ------------------------------------------------ |
+| `funnel.id`       | number  | ID of the funnel                                 |
+| `funnel.name`     | string  | Name of the funnel                               |
+| `domain.id`       | number  | ID of the connected domain (null if none)       |
+| `domain.hostname` | string  | Hostname of the connected domain                 |
+| `isActive`        | boolean | Whether the connection is active                 |
+
+### Error Responses
+
+#### 404 - Funnel Not Found
+```json
+{
+  "error": "Funnel not found"
+}
+```
+
+#### 403 - Access Denied
+```json
+{
+  "error": "You don't have access to this funnel"
+}
+```
+
+#### 403 - Permission Denied
+```json
+{
+  "error": "You don't have permission to view this funnel"
+}
+```
+
+---
+
 ## Business Logic
 
 ### Connection Rules
