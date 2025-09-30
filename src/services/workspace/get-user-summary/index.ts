@@ -29,6 +29,7 @@ export class GetUserWorkspacesSummaryService {
       select: {
         id: true,
         name: true,
+        slug: true,
         image: true,
         ownerId: true,
         members: {
@@ -60,6 +61,7 @@ export class GetUserWorkspacesSummaryService {
       return {
         id: workspace.id,
         name: workspace.name,
+        slug: workspace.slug,
         image: workspace.image,
         role: currentUserRole,
       };

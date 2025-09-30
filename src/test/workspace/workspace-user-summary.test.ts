@@ -35,6 +35,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Owned Workspace",
+            slug: "owned-workspace",
             image: "https://example.com/image1.png",
             ownerId: userId,
             members: [],
@@ -42,6 +43,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 2,
             name: "Member Workspace",
+            slug: "member-workspace",
             image: null,
             ownerId: 999,
             members: [
@@ -62,12 +64,14 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Owned Workspace",
+            slug: "owned-workspace",
             image: "https://example.com/image1.png",
             role: WorkspaceRole.OWNER,
           },
           {
             id: 2,
             name: "Member Workspace",
+            slug: "member-workspace",
             image: null,
             role: WorkspaceRole.EDITOR,
           },
@@ -90,6 +94,7 @@ describe("Get User Workspaces Summary Tests", () => {
           select: {
             id: true,
             name: true,
+            slug: true,
             image: true,
             ownerId: true,
             members: {
@@ -110,6 +115,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Owned Workspace",
+            slug: "owned-workspace",
             image: null,
             ownerId: userId,
             members: [],
@@ -117,6 +123,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 2,
             name: "Active Member Workspace",
+            slug: "active-member-workspace",
             image: "https://example.com/image2.png",
             ownerId: 999,
             members: [
@@ -138,12 +145,14 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Owned Workspace",
+            slug: "owned-workspace",
             image: null,
             role: WorkspaceRole.OWNER,
           },
           {
             id: 2,
             name: "Active Member Workspace",
+            slug: "active-member-workspace",
             image: "https://example.com/image2.png",
             role: WorkspaceRole.VIEWER,
           },
@@ -163,6 +172,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Admin Workspace",
+            slug: "admin-workspace",
             image: "https://example.com/admin.png",
             ownerId: 999,
             members: [
@@ -176,6 +186,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 2,
             name: "Editor Workspace",
+            slug: "editor-workspace",
             image: null,
             ownerId: 888,
             members: [
@@ -189,6 +200,7 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 3,
             name: "Viewer Workspace",
+            slug: "viewer-workspace",
             image: "https://example.com/viewer.png",
             ownerId: 777,
             members: [
@@ -209,18 +221,21 @@ describe("Get User Workspaces Summary Tests", () => {
           {
             id: 1,
             name: "Admin Workspace",
+            slug: "admin-workspace",
             image: "https://example.com/admin.png",
             role: WorkspaceRole.ADMIN,
           },
           {
             id: 2,
             name: "Editor Workspace",
+            slug: "editor-workspace",
             image: null,
             role: WorkspaceRole.EDITOR,
           },
           {
             id: 3,
             name: "Viewer Workspace",
+            slug: "viewer-workspace",
             image: "https://example.com/viewer.png",
             role: WorkspaceRole.VIEWER,
           },
@@ -250,6 +265,7 @@ describe("Get User Workspaces Summary Tests", () => {
         {
           id: 1,
           name: "Test Workspace",
+          slug: "test-workspace",
           image: "https://example.com/test.png",
           ownerId: userId,
           members: [],
@@ -269,6 +285,7 @@ describe("Get User Workspaces Summary Tests", () => {
         {
           id: 1,
           name: "Test Workspace",
+          slug: "test-workspace",
           image: "https://example.com/test.png",
           role: WorkspaceRole.OWNER,
         },
