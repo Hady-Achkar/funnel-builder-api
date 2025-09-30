@@ -44,9 +44,18 @@ export class AcceptInvitationService {
         throw new NotFoundError("User not found");
       }
 
-      if (user.email !== tokenPayload.email) {
+      // Check if a pending invitation exists for the email in the token
+      const pendingInvitation = await prisma.workspaceMember.findFirst({
+        where: {
+          email: tokenPayload.email,
+          workspaceId: tokenPayload.workspaceId,
+          status: MembershipStatus.PENDING,
+        },
+      });
+
+      if (!pendingInvitation) {
         throw new ForbiddenError(
-          "This invitation is not for your email address"
+          "No pending invitation found for this email address. Please contact the workspace administrator."
         );
       }
 
@@ -59,74 +68,35 @@ export class AcceptInvitationService {
         throw new NotFoundError("Workspace not found");
       }
 
-      // Find existing membership (could be PENDING or ACTIVE)
-      const existingMember = await prisma.workspaceMember.findFirst({
-        where: {
-          email: user.email,
-          workspaceId: workspace.id,
-        },
-        include: {
-          workspace: {
-            select: { name: true, slug: true },
-          },
+      // Update the pending invitation to active
+      const updatedMember = await prisma.workspaceMember.update({
+        where: { id: pendingInvitation.id },
+        data: {
+          userId: user.id,
+          status: MembershipStatus.ACTIVE,
+          joinedAt: new Date(),
         },
       });
 
-      if (existingMember) {
-        // If already active, return success message
-        if (existingMember.status === MembershipStatus.ACTIVE) {
-          return {
-            message: "Invitation already accepted",
-            workspace: {
-              id: workspace.id,
-              name: workspace.name,
-              slug: workspace.slug,
-              role: existingMember.role,
-              permissions: existingMember.permissions,
-            },
-          };
-        }
-
-        // If pending, update to active (no need to check allocation since user is already counted)
-        if (existingMember.status === MembershipStatus.PENDING) {
-          const updatedMember = await prisma.workspaceMember.update({
-            where: { id: existingMember.id },
-            data: {
-              userId: user.id,
-              status: MembershipStatus.ACTIVE,
-              joinedAt: new Date(),
-            },
-          });
-
-          // Invalidate workspace cache since member status changed
-          try {
-            await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
-            console.log(`[Cache] Invalidated workspace cache for ${workspace.slug} after invitation accepted`);
-          } catch (cacheError) {
-            console.error("Failed to invalidate workspace cache:", cacheError);
-            // Don't fail the operation if cache invalidation fails
-          }
-
-          return {
-            message: "Invitation accepted successfully",
-            workspace: {
-              id: workspace.id,
-              name: workspace.name,
-              slug: workspace.slug,
-              role: updatedMember.role,
-              permissions: updatedMember.permissions,
-            },
-          };
-        }
-
-        // If rejected, throw error
-        if (existingMember.status === MembershipStatus.REJECTED) {
-          throw new BadRequestError("This invitation has been rejected");
-        }
+      // Invalidate workspace cache since member status changed
+      try {
+        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
+        console.log(`[Cache] Invalidated workspace cache for ${workspace.slug} after invitation accepted`);
+      } catch (cacheError) {
+        console.error("Failed to invalidate workspace cache:", cacheError);
+        // Don't fail the operation if cache invalidation fails
       }
 
-      // No pending invitation found
-      throw new NotFoundError("No pending invitation found for this workspace");
+      return {
+        message: "Invitation accepted successfully",
+        workspace: {
+          id: workspace.id,
+          name: workspace.name,
+          slug: workspace.slug,
+          role: updatedMember.role,
+          permissions: updatedMember.permissions,
+        },
+      };
     } catch (error) {
       throw error;
     }
