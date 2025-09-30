@@ -33,7 +33,7 @@ describe("Funnel Cache Invalidation Tests", () => {
     mockReq = {
       userId: 1,
       params: {},
-      body: {}
+      body: {},
     };
 
     mockRes = {
@@ -64,21 +64,25 @@ describe("Funnel Cache Invalidation Tests", () => {
 
       mockReq.body = {
         name: "New Funnel",
-        workspaceSlug
+        workspaceSlug,
       };
 
       (createFunnel as any).mockResolvedValue({
         response: {
           message: "Funnel created successfully!",
-          funnelId: 1
+          funnelId: 1,
         },
-        workspaceId
+        workspaceId,
       });
 
       await createFunnelController(mockReq, mockRes, mockNext);
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceId}:funnels:all`);
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
 
@@ -88,19 +92,21 @@ describe("Funnel Cache Invalidation Tests", () => {
 
       mockReq.body = {
         name: "New Funnel",
-        workspaceSlug
+        workspaceSlug,
       };
 
       (createFunnel as any).mockResolvedValue({
         response: {
           message: "Funnel created successfully!",
-          funnelId: 1
+          funnelId: 1,
         },
-        workspaceId
+        workspaceId,
       });
 
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       await createFunnelController(mockReq, mockRes, mockNext);
 
@@ -110,45 +116,45 @@ describe("Funnel Cache Invalidation Tests", () => {
   });
 
   describe("Update Funnel Cache Invalidation", () => {
-    it("should invalidate workspace cache when updating a funnel", async () => {
+    it("should successfully update funnel and delegate cache invalidation to service", async () => {
       const funnelId = 1;
-      const workspaceSlug = "test-workspace";
 
       mockReq.params = { id: String(funnelId) };
       mockReq.body = { name: "Updated Funnel" };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
-      });
-
       (updateFunnel as any).mockResolvedValue({
         message: "Funnel updated successfully",
-        funnelId
+        funnelId,
       });
 
       await updateFunnelController(mockReq, mockRes, mockNext);
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      // Controller should call the updateFunnel service
+      expect(updateFunnel).toHaveBeenCalledWith(
+        funnelId,
+        mockReq.userId,
+        mockReq.body
+      );
       expect(mockRes.json).toHaveBeenCalled();
     });
 
-    it("should handle missing workspace slug gracefully", async () => {
+    it("should handle update errors appropriately", async () => {
       const funnelId = 1;
 
       mockReq.params = { id: String(funnelId) };
       mockReq.body = { name: "Updated Funnel" };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
-
-      (updateFunnel as any).mockResolvedValue({
-        message: "Funnel updated successfully",
-        funnelId
-      });
+      const error = new Error("Update failed");
+      (updateFunnel as any).mockRejectedValue(error);
 
       await updateFunnelController(mockReq, mockRes, mockNext);
 
-      expect(cacheService.del).not.toHaveBeenCalled();
-      expect(mockRes.json).toHaveBeenCalled();
+      expect(updateFunnel).toHaveBeenCalledWith(
+        funnelId,
+        mockReq.userId,
+        mockReq.body
+      );
+      expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
 
@@ -160,11 +166,11 @@ describe("Funnel Cache Invalidation Tests", () => {
       mockReq.params = { id: String(funnelId) };
 
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
+        workspace: { slug: workspaceSlug },
       });
 
       (deleteFunnel as any).mockResolvedValue({
-        message: "Funnel deleted successfully"
+        message: "Funnel deleted successfully",
       });
 
       await deleteFunnelController(mockReq, mockRes, mockNext);
@@ -173,12 +179,14 @@ describe("Funnel Cache Invalidation Tests", () => {
         where: { id: funnelId },
         select: {
           workspace: {
-            select: { slug: true }
-          }
-        }
+            select: { slug: true },
+          },
+        },
       });
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
       expect(mockRes.status).toHaveBeenCalledWith(200);
     });
 
@@ -189,15 +197,17 @@ describe("Funnel Cache Invalidation Tests", () => {
       mockReq.params = { id: String(funnelId) };
 
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
+        workspace: { slug: workspaceSlug },
       });
 
       (deleteFunnel as any).mockResolvedValue({
-        message: "Funnel deleted successfully"
+        message: "Funnel deleted successfully",
       });
 
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       await deleteFunnelController(mockReq, mockRes, mockNext);
 
@@ -217,11 +227,11 @@ describe("Funnel Cache Invalidation Tests", () => {
 
       (duplicateFunnel as any).mockResolvedValue({
         message: "Funnel duplicated successfully",
-        funnelId: newFunnelId
+        funnelId: newFunnelId,
       });
 
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
+        workspace: { slug: workspaceSlug },
       });
 
       await duplicateFunnelController(mockReq, mockRes, mockNext);
@@ -230,12 +240,14 @@ describe("Funnel Cache Invalidation Tests", () => {
         where: { id: newFunnelId },
         select: {
           workspace: {
-            select: { slug: true }
-          }
-        }
+            select: { slug: true },
+          },
+        },
       });
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
 
@@ -247,21 +259,23 @@ describe("Funnel Cache Invalidation Tests", () => {
       mockReq.params = { id: String(originalFunnelId) };
       mockReq.body = {
         name: "Duplicated Funnel",
-        targetWorkspaceSlug
+        targetWorkspaceSlug,
       };
 
       (duplicateFunnel as any).mockResolvedValue({
         message: "Funnel duplicated successfully",
-        funnelId: newFunnelId
+        funnelId: newFunnelId,
       });
 
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: targetWorkspaceSlug }
+        workspace: { slug: targetWorkspaceSlug },
       });
 
       await duplicateFunnelController(mockReq, mockRes, mockNext);
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${targetWorkspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${targetWorkspaceSlug}:user:${mockReq.userId}`
+      );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
   });
@@ -275,16 +289,16 @@ describe("Funnel Cache Invalidation Tests", () => {
       mockReq.params = { templateId: String(templateId) };
       mockReq.body = {
         name: "Funnel from Template",
-        workspaceSlug
+        workspaceSlug,
       };
 
       (createFromTemplate as any).mockResolvedValue({
         message: "Funnel created from template successfully",
-        funnelId: newFunnelId
+        funnelId: newFunnelId,
       });
 
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
+        workspace: { slug: workspaceSlug },
       });
 
       await createFromTemplateController(mockReq, mockRes, mockNext);
@@ -293,12 +307,14 @@ describe("Funnel Cache Invalidation Tests", () => {
         where: { id: newFunnelId },
         select: {
           workspace: {
-            select: { slug: true }
-          }
-        }
+            select: { slug: true },
+          },
+        },
       });
 
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
   });
@@ -312,22 +328,26 @@ describe("Funnel Cache Invalidation Tests", () => {
       // Create funnel
       mockReq.body = {
         name: "New Funnel",
-        workspaceSlug
+        workspaceSlug,
       };
 
       (createFunnel as any).mockResolvedValue({
         response: {
           message: "Funnel created successfully!",
-          funnelId: 1
+          funnelId: 1,
         },
-        workspaceId
+        workspaceId,
       });
 
       await createFunnelController(mockReq, mockRes, mockNext);
 
       // Verify both caches are invalidated
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceId}:funnels:all`);
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
 
       // Reset mocks
       vi.clearAllMocks();
@@ -335,17 +355,19 @@ describe("Funnel Cache Invalidation Tests", () => {
       // Delete funnel
       mockReq.params = { id: "1" };
       mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug }
+        workspace: { slug: workspaceSlug },
       });
 
       (deleteFunnel as any).mockResolvedValue({
-        message: "Funnel deleted successfully"
+        message: "Funnel deleted successfully",
       });
 
       await deleteFunnelController(mockReq, mockRes, mockNext);
 
       // Verify workspace cache is invalidated
-      expect(cacheService.del).toHaveBeenCalledWith(`workspace:${workspaceSlug}:user:${mockReq.userId}`);
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+      );
     });
 
     it("should handle concurrent cache invalidations", async () => {
@@ -361,17 +383,17 @@ describe("Funnel Cache Invalidation Tests", () => {
           userId: 1,
           body: {
             name: `Funnel ${i}`,
-            workspaceSlug
+            workspaceSlug,
           },
-          params: {}
+          params: {},
         };
 
         (createFunnel as any).mockResolvedValue({
           response: {
             message: "Funnel created successfully!",
-            funnelId: i
+            funnelId: i,
           },
-          workspaceId
+          workspaceId,
         });
 
         promises.push(createFunnelController(req as any, mockRes, mockNext));

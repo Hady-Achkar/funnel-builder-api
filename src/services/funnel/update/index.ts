@@ -160,78 +160,43 @@ export const updateFunnel = async (
     const updatedFunnel = await prisma.funnel.update({
       where: { id: validatedParams.funnelId },
       data: updates,
-      include: {
-        theme: true,
-        pages: {
-          omit: { content: true },
-          orderBy: { order: "asc" },
-        },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        status: true,
+        workspaceId: true,
       },
     });
 
-    // Update cache
+    // Invalidate cache after successful update
     try {
-      // Update the individual funnel full cache with pages (without content)
-      const fullFunnelCacheKey = `workspace:${existingFunnel.workspaceId}:funnel:${updatedFunnel.id}:full`;
-      const fullFunnelData = {
-        id: updatedFunnel.id,
-        name: updatedFunnel.name,
-        slug: updatedFunnel.slug,
-        status: updatedFunnel.status,
-        workspaceId: updatedFunnel.workspaceId,
-        createdBy: updatedFunnel.createdBy,
-        themeId: updatedFunnel.themeId,
-        createdAt: updatedFunnel.createdAt,
-        updatedAt: updatedFunnel.updatedAt,
-        theme: updatedFunnel.theme,
-        pages: updatedFunnel.pages,
-      };
-      await cacheService.set(fullFunnelCacheKey, fullFunnelData, { ttl: 0 });
+      // Invalidate all relevant cache keys
+      const cacheKeysToInvalidate = [
+        // Individual funnel full cache
+        `workspace:${existingFunnel.workspaceId}:funnel:${updatedFunnel.id}:full`,
+        // Workspace's all funnels cache
+        `workspace:${existingFunnel.workspaceId}:funnels:all`,
+        // Legacy cache keys (for backward compatibility)
+        `workspace:${existingFunnel.workspaceId}:funnels:list`,
+        `user:${userId}:workspace:${existingFunnel.workspaceId}:funnels`,
+        // Funnel settings cache
+        `funnel:${updatedFunnel.id}:settings:full`
+      ];
 
-      // Update the workspace's all funnels cache
-      const allFunnelsCacheKey = `workspace:${existingFunnel.workspaceId}:funnels:all`;
-      const existingFunnels =
-        (await cacheService.get<any[]>(allFunnelsCacheKey)) || [];
-
-      // Update the funnel in the list
-      const funnelSummary = {
-        id: updatedFunnel.id,
-        name: updatedFunnel.name,
-        slug: updatedFunnel.slug,
-        status: updatedFunnel.status,
-        workspaceId: updatedFunnel.workspaceId,
-        createdBy: updatedFunnel.createdBy,
-        themeId: updatedFunnel.themeId,
-        createdAt: updatedFunnel.createdAt,
-        updatedAt: updatedFunnel.updatedAt,
-        theme: updatedFunnel.theme,
-      };
-
-      const updatedFunnels = existingFunnels.map((f) =>
-        f.id === updatedFunnel.id ? funnelSummary : f
+      // Delete all cache keys in parallel
+      await Promise.all(
+        cacheKeysToInvalidate.map(key =>
+          cacheService.del(key).catch(err =>
+            console.warn(`Failed to invalidate cache key ${key}:`, err)
+          )
+        )
       );
 
-      // If funnel wasn't in the list, add it
-      if (!existingFunnels.find((f) => f.id === updatedFunnel.id)) {
-        updatedFunnels.push(funnelSummary);
-      }
-
-      await cacheService.set(allFunnelsCacheKey, updatedFunnels, { ttl: 0 });
-
-      // Invalidate old list caches
-      await cacheService.del(
-        `workspace:${existingFunnel.workspaceId}:funnels:list`
-      );
-      await cacheService.del(
-        `user:${userId}:workspace:${existingFunnel.workspaceId}:funnels`
-      );
-
-      await cacheService.del(`funnel:${updatedFunnel.id}:settings:full`);
+      console.log(`[Cache] Invalidated funnel caches for funnel ${updatedFunnel.id} in workspace ${existingFunnel.workspaceId}`);
     } catch (cacheError) {
-      console.warn(
-        "Funnel updated, but cache couldn't be refreshed:",
-        cacheError
-      );
+      console.error("Failed to invalidate funnel cache:", cacheError);
+      // Don't fail the operation if cache invalidation fails
     }
 
     const response = {
