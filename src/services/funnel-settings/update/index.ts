@@ -124,16 +124,36 @@ export const updateFunnelSettings = async (
       );
     }
 
+    // Update the funnel settings in the database
+    const updatedSettings = await prisma.funnelSettings.update({
+      where: { funnelId: validatedData.funnelId },
+      data: updateData,
+    });
+
+    // Invalidate relevant cache keys
     try {
-      const cacheKey = `funnel:${validatedData.funnelId}:settings:full`;
+      const cacheKeysToInvalidate = [
+        // Funnel settings cache
+        `funnel:${validatedData.funnelId}:settings:full`,
+        // Full funnel cache (includes settings)
+        `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+        // All funnels cache (includes settings)
+        `workspace:${funnel.workspaceId}:funnels:all`,
+      ];
 
-      await cacheService.del(cacheKey);
-
-      await cacheService.del(
-        `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`
+      // Delete all cache keys in parallel
+      await Promise.all(
+        cacheKeysToInvalidate.map(key =>
+          cacheService.del(key).catch(err =>
+            console.warn(`Failed to invalidate cache key ${key}:`, err)
+          )
+        )
       );
+
+      console.log(`[Cache] Invalidated funnel settings caches for funnel ${funnel.id}`);
     } catch (cacheError) {
-      console.warn("Failed to clear cache for funnel settings:", cacheError);
+      console.error("Failed to invalidate funnel settings cache:", cacheError);
+      // Don't fail the operation if cache invalidation fails
     }
 
     const response = {
