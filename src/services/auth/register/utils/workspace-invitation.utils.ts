@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { MembershipStatus } from "../../../../generated/prisma-client";
+import { cacheService } from "../../../cache/cache.service";
 
 export class WorkspaceInvitationProcessor {
   /**
@@ -47,6 +48,14 @@ export class WorkspaceInvitationProcessor {
         joinedAt: new Date(),
       },
     });
+
+    // Invalidate workspace cache since member status changed
+    try {
+      await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
+    } catch (cacheError) {
+      console.error("Failed to invalidate workspace cache:", cacheError);
+      // Don't fail the operation if cache invalidation fails
+    }
 
     return {
       id: workspace.id,
