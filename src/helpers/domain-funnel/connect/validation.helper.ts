@@ -18,12 +18,6 @@ export const validateFunnelExists = async (funnelId: number) => {
     throw new NotFoundError("Funnel not found");
   }
 
-  if (funnel.status !== $Enums.FunnelStatus.LIVE) {
-    throw new BadRequestError(
-      "Funnel must be LIVE before connecting to a domain"
-    );
-  }
-
   return funnel;
 };
 
