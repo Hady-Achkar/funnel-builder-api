@@ -32,9 +32,8 @@ const extractTokenDataFromUser = (user: User) => {
     firstName: user.firstName,
     lastName: user.lastName,
     isAdmin: user.isAdmin || false,
-    balance: user.balance,
+    avatar: user.avatar,
     plan: user.plan || "FREE",
-    maximumWorkspaces: user.maximumWorkspaces,
   };
 };
 

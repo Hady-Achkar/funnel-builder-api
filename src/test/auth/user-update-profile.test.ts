@@ -4,6 +4,9 @@ import { UpdateUserProfileService } from "../../services/auth/update-user-profil
 
 // Mock dependencies
 vi.mock("../../lib/prisma");
+vi.mock("../../services/auth/utils", () => ({
+  generateToken: vi.fn(() => "mock-jwt-token"),
+}));
 
 describe("User Update Profile Tests", () => {
   let mockPrisma: any;
@@ -51,7 +54,7 @@ describe("User Update Profile Tests", () => {
       ).rejects.toThrow("User not found");
     });
 
-    it("should successfully update profile for valid user", async () => {
+    it("should successfully update profile for valid user and return token", async () => {
       const mockUpdatedUser = createMockUser({ firstName: "Updated" });
       mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
 
@@ -62,18 +65,8 @@ describe("User Update Profile Tests", () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: { firstName: "Updated" },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          avatar: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
-      expect(result.firstName).toBe("Updated");
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
   });
 
@@ -84,12 +77,12 @@ describe("User Update Profile Tests", () => {
       });
     });
 
-    it("should update firstName successfully", async () => {
+    it("should update firstName successfully and return token", async () => {
       const result = await UpdateUserProfileService.updateUserProfile(1, {
         firstName: "Jane",
       });
 
-      expect(result.firstName).toBe("Jane");
+      expect(result).toEqual({ token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { firstName: "Jane" },
@@ -97,12 +90,12 @@ describe("User Update Profile Tests", () => {
       );
     });
 
-    it("should update lastName successfully", async () => {
+    it("should update lastName successfully and return token", async () => {
       const result = await UpdateUserProfileService.updateUserProfile(1, {
         lastName: "Smith",
       });
 
-      expect(result.lastName).toBe("Smith");
+      expect(result).toEqual({ token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { lastName: "Smith" },
@@ -112,14 +105,18 @@ describe("User Update Profile Tests", () => {
 
     it("should prevent email updates", async () => {
       await expect(
-        UpdateUserProfileService.updateUserProfile(1, { email: "new@example.com" } as any)
+        UpdateUserProfileService.updateUserProfile(1, {
+          email: "new@example.com",
+        } as any)
       ).rejects.toThrow("Email updates are not allowed");
     });
 
     it("should update username successfully", async () => {
-      const result = await UpdateUserProfileService.updateUserProfile(1, { username: "newuser" });
+      const result = await UpdateUserProfileService.updateUserProfile(1, {
+        username: "newuser",
+      });
 
-      expect(result.username).toBe("newuser");
+      expect(result).toEqual({ token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { username: "newuser" },
@@ -133,7 +130,7 @@ describe("User Update Profile Tests", () => {
         avatar: avatarUrl,
       });
 
-      expect(result.avatar).toBe(avatarUrl);
+      expect(result).toEqual({ token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { avatar: avatarUrl },
@@ -149,12 +146,12 @@ describe("User Update Profile Tests", () => {
         avatar: "https://example.com/jane.jpg",
       };
 
-      const result = await UpdateUserProfileService.updateUserProfile(1, updateData);
+      const result = await UpdateUserProfileService.updateUserProfile(
+        1,
+        updateData
+      );
 
-      expect(result.firstName).toBe("Jane");
-      expect(result.lastName).toBe("Smith");
-      expect(result.username).toBe("janesmith");
-      expect(result.avatar).toBe("https://example.com/jane.jpg");
+      expect(result).toEqual({ token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: updateData,
@@ -172,14 +169,16 @@ describe("User Update Profile Tests", () => {
           data: { firstName: "Partial" },
         })
       );
-      expect(result.firstName).toBe("Partial");
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
   });
 
   describe("Email Update Prevention Tests", () => {
     it("should prevent email updates alone", async () => {
       await expect(
-        UpdateUserProfileService.updateUserProfile(1, { email: "new@example.com" } as any)
+        UpdateUserProfileService.updateUserProfile(1, {
+          email: "new@example.com",
+        } as any)
       ).rejects.toThrow("Email updates are not allowed");
     });
 
@@ -203,12 +202,15 @@ describe("User Update Profile Tests", () => {
 
       mockPrisma.user.update.mockResolvedValue(createMockUser(updateData));
 
-      const result = await UpdateUserProfileService.updateUserProfile(1, updateData);
+      const result = await UpdateUserProfileService.updateUserProfile(
+        1,
+        updateData
+      );
 
-      expect(result.firstName).toBe("John");
-      expect(result.lastName).toBe("Doe");
-      expect(result.username).toBe("johndoe");
-      expect(result.avatar).toBe("https://example.com/avatar.jpg");
+      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
   });
 
@@ -218,9 +220,11 @@ describe("User Update Profile Tests", () => {
         createMockUser({ firstName: "" })
       );
 
-      const result = await UpdateUserProfileService.updateUserProfile(1, { firstName: "" });
+      const result = await UpdateUserProfileService.updateUserProfile(1, {
+        firstName: "",
+      });
 
-      expect(result.firstName).toBe("");
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should handle special characters in names", async () => {
@@ -233,7 +237,7 @@ describe("User Update Profile Tests", () => {
         firstName: specialName,
       });
 
-      expect(result.firstName).toBe(specialName);
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should validate avatar URL format", async () => {
@@ -247,8 +251,10 @@ describe("User Update Profile Tests", () => {
         mockPrisma.user.update.mockResolvedValue(
           createMockUser({ avatar: url })
         );
-        const result = await UpdateUserProfileService.updateUserProfile(1, { avatar: url });
-        expect(result.avatar).toBe(url);
+        const result = await UpdateUserProfileService.updateUserProfile(1, {
+          avatar: url,
+        });
+        expect(result).toEqual({ token: "mock-jwt-token" });
       }
     });
 
@@ -257,9 +263,11 @@ describe("User Update Profile Tests", () => {
         createMockUser({ avatar: null })
       );
 
-      const result = await UpdateUserProfileService.updateUserProfile(1, { avatar: null });
+      const result = await UpdateUserProfileService.updateUserProfile(1, {
+        avatar: null,
+      });
 
-      expect(result.avatar).toBeNull();
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
   });
 
@@ -276,7 +284,9 @@ describe("User Update Profile Tests", () => {
 
     it("should reject email updates with clear error message", async () => {
       await expect(
-        UpdateUserProfileService.updateUserProfile(1, { email: "any@example.com" } as any)
+        UpdateUserProfileService.updateUserProfile(1, {
+          email: "any@example.com",
+        } as any)
       ).rejects.toThrow("Email updates are not allowed");
     });
 
@@ -288,7 +298,9 @@ describe("User Update Profile Tests", () => {
       mockPrisma.user.update.mockRejectedValue(duplicateUsernameError);
 
       await expect(
-        UpdateUserProfileService.updateUserProfile(1, { username: "existinguser" })
+        UpdateUserProfileService.updateUserProfile(1, {
+          username: "existinguser",
+        })
       ).rejects.toEqual(duplicateUsernameError);
     });
 
@@ -314,7 +326,7 @@ describe("User Update Profile Tests", () => {
   });
 
   describe("Response Format Tests", () => {
-    it("should return updated user profile with all expected fields", async () => {
+    it("should return JWT token with updated user data", async () => {
       const mockUpdatedUser = createMockUser({
         firstName: "Updated",
         avatar: "https://example.com/new-avatar.jpg",
@@ -326,19 +338,10 @@ describe("User Update Profile Tests", () => {
         avatar: "https://example.com/new-avatar.jpg",
       });
 
-      expect(result).toEqual({
-        id: 1,
-        email: "test@example.com",
-        username: "testuser",
-        firstName: "Updated",
-        lastName: "Doe",
-        avatar: "https://example.com/new-avatar.jpg",
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
-    it("should include avatar in response when present", async () => {
+    it("should return token when avatar is updated", async () => {
       const avatarUrl = "https://example.com/avatar.jpg";
       mockPrisma.user.update.mockResolvedValue(
         createMockUser({ avatar: avatarUrl })
@@ -348,8 +351,7 @@ describe("User Update Profile Tests", () => {
         avatar: avatarUrl,
       });
 
-      expect(result.avatar).toBe(avatarUrl);
-      expect(result).toHaveProperty("avatar");
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should maintain null avatar when not updated", async () => {
@@ -361,29 +363,18 @@ describe("User Update Profile Tests", () => {
         firstName: "Test",
       });
 
-      expect(result.avatar).toBeNull();
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
-    it("should return all expected fields", async () => {
+    it("should return token response format", async () => {
       mockPrisma.user.update.mockResolvedValue(createMockUser());
 
       const result = await UpdateUserProfileService.updateUserProfile(1, {
         firstName: "Test",
       });
 
-      const expectedFields = [
-        "id",
-        "email",
-        "username",
-        "firstName",
-        "lastName",
-        "avatar",
-        "createdAt",
-        "updatedAt",
-      ];
-      expectedFields.forEach((field) => {
-        expect(result).toHaveProperty(field);
-      });
+      expect(result).toHaveProperty("token");
+      expect(typeof result.token).toBe("string");
     });
   });
 
@@ -398,7 +389,7 @@ describe("User Update Profile Tests", () => {
         firstName: longName,
       });
 
-      expect(result.firstName).toBe(longName);
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should handle international characters", async () => {
@@ -411,7 +402,7 @@ describe("User Update Profile Tests", () => {
         firstName: internationalName,
       });
 
-      expect(result.firstName).toBe(internationalName);
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should preserve unchanged fields", async () => {
@@ -431,10 +422,7 @@ describe("User Update Profile Tests", () => {
         firstName: "Updated",
       });
 
-      expect(result.firstName).toBe("Updated");
-      expect(result.lastName).toBe("User");
-      expect(result.email).toBe("original@example.com");
-      expect(result.avatar).toBe("https://example.com/original.jpg");
+      expect(result).toEqual({ token: "mock-jwt-token" });
     });
 
     it("should handle undefined values appropriately", async () => {

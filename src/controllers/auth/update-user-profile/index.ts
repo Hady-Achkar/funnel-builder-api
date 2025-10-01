@@ -23,14 +23,14 @@ export class UpdateUserProfileController {
 
       const validatedData = updateUserProfileRequest.parse(req.body);
 
-      const updatedUser = await UpdateUserProfileService.updateUserProfile(
+      const response = await UpdateUserProfileService.updateUserProfile(
         userId,
         validatedData
       );
 
-      const response = updateUserProfileResponse.parse({ user: updatedUser });
+      const validatedResponse = updateUserProfileResponse.parse(response);
 
-      res.status(200).json(response);
+      res.status(200).json(validatedResponse);
     } catch (error) {
       if (error instanceof ZodError) {
         const firstError = error.issues[0];
