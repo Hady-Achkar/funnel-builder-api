@@ -12,6 +12,8 @@ import { UpdateWorkspaceController } from "../../controllers/workspace/update";
 import { DeleteWorkspaceController } from "../../controllers/workspace/delete";
 import { LeaveWorkspaceController } from "../../controllers/workspace/leave";
 import { GetUserWorkspacesSummaryController } from "../../controllers/workspace/get-user-summary";
+import { GenerateInviteLinkController } from "../../controllers/workspace/generate-invite-link";
+import { JoinByLinkController } from "../../controllers/workspace/join-by-link";
 
 const router: Router = express.Router();
 
@@ -44,6 +46,12 @@ router.post("/invite-member/:slug", InviteMemberController.inviteMember);
 
 // Accept workspace invitation
 router.post("/accept-invitation", AcceptInvitationController.acceptInvitation);
+
+// Generate workspace invite link
+router.post("/generate-invite-link/:slug", GenerateInviteLinkController.generateInviteLink);
+
+// Join workspace via direct link
+router.post("/join-by-link", JoinByLinkController.joinByLink);
 
 // Upload workspace image
 router.post(
