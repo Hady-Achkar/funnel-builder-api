@@ -10,12 +10,16 @@ export class GetWorkspaceDomainsSummaryController {
   ): Promise<void> {
     try {
       const { workspaceSlug } = req.params;
+      const { search } = req.query;
       const userId = req.userId!;
 
       const result =
         await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
           userId,
-          { workspaceSlug }
+          {
+            workspaceSlug,
+            search: search as string,
+          }
         );
 
       res.status(200).json(result);

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const GetWorkspaceDomainsSummaryRequestSchema = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  search: z.string().min(1).optional(),
 });
 
 export type GetWorkspaceDomainsSummaryRequest = z.infer<

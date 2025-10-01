@@ -175,6 +175,66 @@ describe("Get Workspace Domains Summary Tests", () => {
 
         expect(result).toEqual([]);
       });
+
+      it("should filter domains by search query (case-insensitive)", async () => {
+        const workspaceData = {
+          id: 1,
+          slug: workspaceSlug,
+          ownerId: userId,
+        };
+
+        const domainsData = [
+          {
+            id: 1,
+            hostname: "example.com",
+          },
+        ];
+
+        mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+        mockPrisma.domain.findMany.mockResolvedValue(domainsData);
+
+        const result =
+          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
+            userId,
+            { workspaceSlug, search: "example" }
+          );
+
+        expect(result).toEqual([{ id: 1, hostname: "example.com" }]);
+
+        expect(mockPrisma.domain.findMany).toHaveBeenCalledWith({
+          where: {
+            workspaceId: 1,
+            hostname: {
+              contains: "example",
+              mode: "insensitive",
+            },
+          },
+          select: {
+            id: true,
+            hostname: true,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+      });
+
+      it("should return empty array when search matches no domains", async () => {
+        const workspaceData = {
+          id: 1,
+          slug: workspaceSlug,
+          ownerId: userId,
+        };
+
+        mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+        mockPrisma.domain.findMany.mockResolvedValue([]);
+
+        const result =
+          await GetWorkspaceDomainsSummaryService.getWorkspaceDomainsSummary(
+            userId,
+            { workspaceSlug, search: "nonexistent" }
+          );
+
+        expect(result).toEqual([]);
+      });
     });
 
     describe("Error Cases", () => {
@@ -244,6 +304,7 @@ describe("Get Workspace Domains Summary Tests", () => {
       mockRequest = {
         userId,
         params: { workspaceSlug },
+        query: {},
       };
       mockResponse = {
         status: vi.fn().mockReturnThis(),

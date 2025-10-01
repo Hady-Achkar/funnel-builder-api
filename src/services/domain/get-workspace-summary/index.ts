@@ -22,7 +22,7 @@ export class GetWorkspaceDomainsSummaryService {
     try {
       const validatedData =
         GetWorkspaceDomainsSummaryRequestSchema.parse(requestData);
-      const { workspaceSlug } = validatedData;
+      const { workspaceSlug, search } = validatedData;
 
       // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
@@ -68,7 +68,15 @@ export class GetWorkspaceDomainsSummaryService {
 
       // Get domains for the workspace
       const domains = await getPrisma().domain.findMany({
-        where: { workspaceId: workspace.id },
+        where: {
+          workspaceId: workspace.id,
+          ...(search && {
+            hostname: {
+              contains: search,
+              mode: "insensitive",
+            },
+          }),
+        },
         select: {
           id: true,
           hostname: true,
