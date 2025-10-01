@@ -34,6 +34,12 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
+vi.mock("../../utils/allocations", () => ({
+  AllocationService: {
+    canAddMember: vi.fn(),
+  },
+}));
+
 describe("Workspace Join by Link Controller Tests", () => {
   let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
@@ -45,6 +51,7 @@ describe("Workspace Join by Link Controller Tests", () => {
   beforeEach(async () => {
     const jwt = await import("jsonwebtoken");
     const { cacheService } = await import("../../services/cache/cache.service");
+    const { AllocationService } = await import("../../utils/allocations");
 
     mockPrisma = mockPrismaInstance;
     mockJwt = jwt.default;
@@ -102,6 +109,11 @@ describe("Workspace Join by Link Controller Tests", () => {
     });
 
     mockCacheService.del.mockResolvedValue(undefined);
+    mockCacheService.invalidateWorkspaceCache.mockResolvedValue(undefined);
+    mockCacheService.invalidateUserWorkspacesCache.mockResolvedValue(undefined);
+
+    // Mock allocation service to allow adding members by default
+    (AllocationService.canAddMember as any).mockResolvedValue(true);
   });
 
   describe("Successful Join Operations", () => {
@@ -492,6 +504,51 @@ describe("Workspace Join by Link Controller Tests", () => {
       expect(mockNext).toHaveBeenCalledWith(
         expect.any(NotFoundError)
       );
+    });
+  });
+
+  describe("Member Allocation Limit", () => {
+    it("should reject when workspace has reached member limit", async () => {
+      const { BadRequestError } = await import("../../errors");
+      const { AllocationService } = await import("../../utils/allocations");
+
+      // Mock allocation service to reject (member limit reached)
+      (AllocationService.canAddMember as any).mockResolvedValue(false);
+
+      mockReq.body = {
+        token: "valid-jwt-token",
+      };
+
+      await JoinByLinkController.joinByLink(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Cannot add more members. Workspace member limit reached.",
+        })
+      );
+      expect(mockNext).toHaveBeenCalledWith(expect.any(BadRequestError));
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
+
+    it("should check allocation limit with correct workspace owner and ID", async () => {
+      const { AllocationService } = await import("../../utils/allocations");
+
+      mockReq.body = {
+        token: "valid-jwt-token",
+      };
+
+      await JoinByLinkController.joinByLink(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      // Verify canAddMember was called with workspace owner ID and workspace ID
+      expect(AllocationService.canAddMember).toHaveBeenCalledWith(1, 1);
     });
   });
 

@@ -12,6 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import { MembershipStatus } from "../../../generated/prisma-client";
 import { cacheService } from "../../cache/cache.service";
+import { validateMemberAllocationLimit } from "../../../helpers/workspace/invite-member/validation";
 
 export class JoinByLinkService {
   async joinByLink(
@@ -74,6 +75,9 @@ export class JoinByLinkService {
           );
         }
       }
+
+      // Check if workspace has reached member allocation limit
+      await validateMemberAllocationLimit(workspace.ownerId, workspace.id);
 
       const rolePermTemplate =
         await prisma.workspaceRolePermTemplate.findUnique({
