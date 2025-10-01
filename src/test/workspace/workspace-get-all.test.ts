@@ -29,6 +29,275 @@ describe("Get All Workspaces Tests", () => {
   });
 
   describe("getAllWorkspaces Service", () => {
+    describe("Search Functionality", () => {
+      it("should search workspaces by name (case-insensitive)", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Marketing Workspace",
+            slug: "marketing-workspace",
+            description: "Marketing team workspace",
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: {
+              funnels: 5,
+              members: 1,
+              domains: 3,
+            },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          search: "marketing",
+        });
+
+        expect(result.workspaces).toHaveLength(1);
+        expect(result.workspaces[0].name).toBe("Marketing Workspace");
+        expect(result.pagination.total).toBe(1);
+      });
+
+      it("should search workspaces by slug (case-insensitive)", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Test Workspace",
+            slug: "test-workspace",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: {
+              funnels: 2,
+              members: 1,
+              domains: 1,
+            },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          search: "TEST",
+        });
+
+        expect(result.workspaces).toHaveLength(1);
+        expect(result.workspaces[0].slug).toBe("test-workspace");
+      });
+
+      it("should return empty array when search yields no results", async () => {
+        const userId = 1;
+        mockPrisma.workspace.findMany.mockResolvedValue([]);
+
+        const result = await getAllWorkspaces(userId, {
+          search: "nonexistent",
+        });
+
+        expect(result.workspaces).toHaveLength(0);
+        expect(result.pagination.total).toBe(0);
+      });
+
+      it("should paginate results correctly", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = Array.from({ length: 15 }, (_, i) => ({
+          id: i + 1,
+          name: `Workspace ${i + 1}`,
+          slug: `workspace-${i + 1}`,
+          description: null,
+          image: null,
+          ownerId: 1,
+          createdAt: new Date(`2024-01-${String(i + 1).padStart(2, '0')}`),
+          members: [],
+          owner: {
+            id: 1,
+            firstName: "John",
+            lastName: "Doe",
+            email: "john@example.com",
+            username: "johndoe",
+          },
+          _count: {
+            funnels: 0,
+            members: 1,
+            domains: 0,
+          },
+        }));
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          page: 2,
+          limit: 5,
+        });
+
+        expect(result.workspaces).toHaveLength(5);
+        expect(result.pagination.page).toBe(2);
+        expect(result.pagination.limit).toBe(5);
+        expect(result.pagination.total).toBe(15);
+        expect(result.pagination.totalPages).toBe(3);
+        expect(result.pagination.hasNext).toBe(true);
+        expect(result.pagination.hasPrev).toBe(true);
+      });
+
+      it("should filter by role", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Owner Workspace",
+            slug: "owner-workspace",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: {
+              funnels: 0,
+              members: 1,
+              domains: 0,
+            },
+          },
+          {
+            id: 2,
+            name: "Member Workspace",
+            slug: "member-workspace",
+            description: null,
+            image: null,
+            ownerId: 2,
+            createdAt: new Date("2024-01-02"),
+            members: [
+              {
+                userId: 1,
+                role: WorkspaceRole.EDITOR,
+                permissions: [WorkspacePermission.EDIT_FUNNELS],
+                status: MembershipStatus.ACTIVE,
+                user: {
+                  id: 1,
+                  firstName: "John",
+                  lastName: "Doe",
+                  email: "john@example.com",
+                  username: "johndoe",
+                },
+              },
+            ],
+            owner: {
+              id: 2,
+              firstName: "Jane",
+              lastName: "Smith",
+              email: "jane@example.com",
+              username: "janesmith",
+            },
+            _count: {
+              funnels: 0,
+              members: 2,
+              domains: 0,
+            },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          role: WorkspaceRole.OWNER,
+        });
+
+        expect(result.workspaces).toHaveLength(1);
+        expect(result.workspaces[0].role).toBe(WorkspaceRole.OWNER);
+        expect(result.workspaces[0].name).toBe("Owner Workspace");
+      });
+
+      it("should sort by name ascending", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Zebra Workspace",
+            slug: "zebra",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: {
+              funnels: 0,
+              members: 1,
+              domains: 0,
+            },
+          },
+          {
+            id: 2,
+            name: "Alpha Workspace",
+            slug: "alpha",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-02"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: {
+              funnels: 0,
+              members: 1,
+              domains: 0,
+            },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          sortBy: "name",
+          sortOrder: "asc",
+        });
+
+        expect(result.workspaces[0].name).toBe("Alpha Workspace");
+        expect(result.workspaces[1].name).toBe("Zebra Workspace");
+      });
+    });
+
     describe("Successful Scenarios", () => {
       it("should return workspaces from database", async () => {
         const userId = 1;
@@ -113,7 +382,10 @@ describe("Get All Workspaces Tests", () => {
 
         mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
 
-        const result = await getAllWorkspaces(userId);
+        const result = await getAllWorkspaces(userId, {
+          sortBy: "createdAt",
+          sortOrder: "asc", // Sort ascending so Workspace One comes first
+        });
 
         // Verify database query
         expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith({
@@ -176,10 +448,11 @@ describe("Get All Workspaces Tests", () => {
 
 
         // Verify response structure
-        expect(result).toHaveLength(2);
+        expect(result.workspaces).toHaveLength(2);
+        expect(result.pagination.total).toBe(2);
 
         // First workspace (user is owner)
-        expect(result[0]).toEqual({
+        expect(result.workspaces[0]).toEqual({
           id: 1,
           name: "Workspace One",
           slug: "workspace-one",
@@ -223,7 +496,7 @@ describe("Get All Workspaces Tests", () => {
         });
 
         // Second workspace (user is member)
-        expect(result[1]).toEqual({
+        expect(result.workspaces[1]).toEqual({
           id: 2,
           name: "Workspace Two",
           slug: "workspace-two",
@@ -304,8 +577,8 @@ describe("Get All Workspaces Tests", () => {
 
         const result = await getAllWorkspaces(userId);
 
-        expect(result[0].image).toBeNull();
-        expect(result[0]).toHaveProperty('image');
+        expect(result.workspaces[0].image).toBeNull();
+        expect(result.workspaces[0]).toHaveProperty('image');
       });
 
       it("should return empty array when user has no workspaces", async () => {
@@ -315,7 +588,8 @@ describe("Get All Workspaces Tests", () => {
 
         const result = await getAllWorkspaces(userId);
 
-        expect(result).toEqual([]);
+        expect(result.workspaces).toEqual([]);
+        expect(result.pagination.total).toBe(0);
       });
     });
 
@@ -338,6 +612,7 @@ describe("Get All Workspaces Tests", () => {
     beforeEach(() => {
       mockReq = {
         userId: 1,
+        query: {},
       };
       mockRes = {
         status: vi.fn().mockReturnThis(),
@@ -379,7 +654,16 @@ describe("Get All Workspaces Tests", () => {
       );
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(expect.any(Array));
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspaces: expect.any(Array),
+          pagination: expect.objectContaining({
+            page: expect.any(Number),
+            limit: expect.any(Number),
+            total: expect.any(Number),
+          }),
+        })
+      );
       expect(mockNext).not.toHaveBeenCalled();
     });
 
