@@ -66,7 +66,7 @@ describe("User Update Profile Tests", () => {
         where: { id: 1 },
         data: { firstName: "Updated" },
       });
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
   });
 
@@ -82,7 +82,7 @@ describe("User Update Profile Tests", () => {
         firstName: "Jane",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { firstName: "Jane" },
@@ -95,7 +95,7 @@ describe("User Update Profile Tests", () => {
         lastName: "Smith",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { lastName: "Smith" },
@@ -116,7 +116,7 @@ describe("User Update Profile Tests", () => {
         username: "newuser",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { username: "newuser" },
@@ -130,7 +130,7 @@ describe("User Update Profile Tests", () => {
         avatar: avatarUrl,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { avatar: avatarUrl },
@@ -151,7 +151,7 @@ describe("User Update Profile Tests", () => {
         updateData
       );
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       expect(mockPrisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: updateData,
@@ -169,7 +169,7 @@ describe("User Update Profile Tests", () => {
           data: { firstName: "Partial" },
         })
       );
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
   });
 
@@ -207,10 +207,10 @@ describe("User Update Profile Tests", () => {
         updateData
       );
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
-      expect(result).toEqual({ token: "mock-jwt-token" });
-      expect(result).toEqual({ token: "mock-jwt-token" });
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
   });
 
@@ -224,7 +224,7 @@ describe("User Update Profile Tests", () => {
         firstName: "",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should handle special characters in names", async () => {
@@ -237,7 +237,7 @@ describe("User Update Profile Tests", () => {
         firstName: specialName,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should validate avatar URL format", async () => {
@@ -254,7 +254,7 @@ describe("User Update Profile Tests", () => {
         const result = await UpdateUserProfileService.updateUserProfile(1, {
           avatar: url,
         });
-        expect(result).toEqual({ token: "mock-jwt-token" });
+        expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
       }
     });
 
@@ -267,7 +267,7 @@ describe("User Update Profile Tests", () => {
         avatar: null,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
   });
 
@@ -338,7 +338,7 @@ describe("User Update Profile Tests", () => {
         avatar: "https://example.com/new-avatar.jpg",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should return token when avatar is updated", async () => {
@@ -351,7 +351,7 @@ describe("User Update Profile Tests", () => {
         avatar: avatarUrl,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should maintain null avatar when not updated", async () => {
@@ -363,7 +363,7 @@ describe("User Update Profile Tests", () => {
         firstName: "Test",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should return token response format", async () => {
@@ -389,7 +389,7 @@ describe("User Update Profile Tests", () => {
         firstName: longName,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should handle international characters", async () => {
@@ -402,7 +402,7 @@ describe("User Update Profile Tests", () => {
         firstName: internationalName,
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should preserve unchanged fields", async () => {
@@ -422,7 +422,7 @@ describe("User Update Profile Tests", () => {
         firstName: "Updated",
       });
 
-      expect(result).toEqual({ token: "mock-jwt-token" });
+      expect(result).toEqual({ message: "Profile updated successfully", token: "mock-jwt-token" });
     });
 
     it("should handle undefined values appropriately", async () => {

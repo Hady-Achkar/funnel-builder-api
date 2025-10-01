@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { ResetPasswordService } from "../../../services/auth/reset-password";
-import { setAuthCookie } from "../../../lib/cookies";
 
 export const resetPasswordController = async (
   req: Request,
@@ -9,14 +8,8 @@ export const resetPasswordController = async (
 ) => {
   try {
     const result = await ResetPasswordService.resetPassword(req.body);
-    
-    // Set HTTP-only cookie with the JWT token
-    setAuthCookie(res, result.token);
-    
-    // Return response without token
-    const { token, ...responseWithoutToken } = result;
 
-    return res.status(200).json(responseWithoutToken);
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }

@@ -24,7 +24,10 @@ export class UpdateUserProfileService {
       // Generate new JWT token with updated user data
       const token = generateToken(user);
 
-      return { token };
+      return {
+        message: "Profile updated successfully",
+        token
+      };
     } catch (error) {
       throw error;
     }

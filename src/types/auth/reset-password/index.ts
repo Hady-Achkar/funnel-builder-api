@@ -19,13 +19,11 @@ export const resetPasswordRequest = z.object({
 
 export const resetPasswordResponse = z.object({
   message: z.string(),
-});
-
-// Internal service response includes token for cookie setting
-export const resetPasswordServiceResponse = z.object({
-  message: z.string(),
   token: z.string(),
 });
+
+// Service response is same as controller response
+export const resetPasswordServiceResponse = resetPasswordResponse;
 
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequest>;
 export type ResetPasswordResponse = z.infer<typeof resetPasswordResponse>;

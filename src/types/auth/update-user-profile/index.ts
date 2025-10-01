@@ -47,6 +47,7 @@ export const updateUserProfileRequest = z
 export type UpdateUserProfileRequest = z.infer<typeof updateUserProfileRequest>;
 
 export const updateUserProfileResponse = z.object({
+  message: z.string(),
   token: z.string(),
 });
 
