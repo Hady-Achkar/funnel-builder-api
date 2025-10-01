@@ -17,8 +17,7 @@ export const getAllWorkspaces = async (
     if (!userId) {
       throw new Error("User ID is required");
     }
-    const { search, page, limit, sortBy, sortOrder, role } =
-      getAllWorkspacesRequest.parse(requestData || {});
+    const { search } = getAllWorkspacesRequest.parse(requestData || {});
 
     const prisma = getPrisma();
 
@@ -36,20 +35,10 @@ export const getAllWorkspaces = async (
           },
         ],
         ...(search && {
-          OR: [
-            {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              slug: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          ],
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
         }),
       },
       select: {
@@ -97,7 +86,7 @@ export const getAllWorkspaces = async (
     });
 
     // Process and format workspaces
-    let result = workspaces.map((workspace) => {
+    const result = workspaces.map((workspace) => {
       const isOwner = workspace.ownerId === userId;
 
       // Get current user's role and permissions
@@ -173,57 +162,7 @@ export const getAllWorkspaces = async (
       };
     });
 
-    // Filter by role if specified
-    if (role) {
-      result = result.filter((w) => w.role === role);
-    }
-
-    // Sort workspaces
-    result.sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortBy) {
-        case "name":
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case "memberCount":
-          comparison = a.memberCount - b.memberCount;
-          break;
-        case "funnelCount":
-          comparison = a.funnelCount - b.funnelCount;
-          break;
-        case "domainCount":
-          comparison = a.domainCount - b.domainCount;
-          break;
-        case "createdAt":
-        default:
-          comparison = a.createdAt.getTime() - b.createdAt.getTime();
-          break;
-      }
-
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-
-    // Calculate pagination
-    const total = result.length;
-    const totalPages = Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedResults = result.slice(startIndex, endIndex);
-
-    const pagination = {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-    };
-
-    return getAllWorkspacesResponse.parse({
-      workspaces: paginatedResults,
-      pagination,
-    });
+    return getAllWorkspacesResponse.parse(result);
   } catch (error: unknown) {
     if (error instanceof ZodError) {
       const message = error.issues[0]?.message || "Invalid data provided";
