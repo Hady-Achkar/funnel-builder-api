@@ -15,10 +15,12 @@ export const getAllWorkspacesController = async (
       throw new UnauthorizedError("Please log in to view workspaces");
     }
 
-    const { search } = req.query;
+    const { search, sortBy, sortOrder } = req.query;
 
     const validatedQuery = getAllWorkspacesRequest.parse({
       search,
+      sortBy,
+      sortOrder,
     });
 
     const result = await getAllWorkspaces(userId, validatedQuery);

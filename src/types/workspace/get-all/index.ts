@@ -19,6 +19,11 @@ export const getAllWorkspacesRequest = z.object({
     })
     .min(1, { message: "Search cannot be empty" })
     .optional(),
+  sortBy: z
+    .enum(["createdAt", "name", "memberCount", "funnelCount", "domainCount"])
+    .optional()
+    .default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export type GetAllWorkspacesRequest = z.infer<typeof getAllWorkspacesRequest>;

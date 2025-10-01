@@ -120,6 +120,193 @@ describe("Get All Workspaces Tests", () => {
       });
     });
 
+    describe("Sorting Functionality", () => {
+      it("should sort workspaces by name ascending", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Zebra Workspace",
+            slug: "zebra",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 1, domains: 1 },
+          },
+          {
+            id: 2,
+            name: "Alpha Workspace",
+            slug: "alpha",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-02"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 1, domains: 1 },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          sortBy: "name",
+          sortOrder: "asc",
+        });
+
+        expect(result[0].name).toBe("Alpha Workspace");
+        expect(result[1].name).toBe("Zebra Workspace");
+      });
+
+      it("should sort workspaces by createdAt descending (default)", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Old Workspace",
+            slug: "old",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 1, domains: 1 },
+          },
+          {
+            id: 2,
+            name: "New Workspace",
+            slug: "new",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-15"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 1, domains: 1 },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {});
+
+        expect(result[0].name).toBe("New Workspace");
+        expect(result[1].name).toBe("Old Workspace");
+      });
+
+      it("should sort workspaces by memberCount descending", async () => {
+        const userId = 1;
+
+        const mockWorkspaces = [
+          {
+            id: 1,
+            name: "Small Team",
+            slug: "small",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-01"),
+            members: [],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 1, domains: 1 },
+          },
+          {
+            id: 2,
+            name: "Large Team",
+            slug: "large",
+            description: null,
+            image: null,
+            ownerId: 1,
+            createdAt: new Date("2024-01-02"),
+            members: [
+              {
+                userId: 2,
+                role: WorkspaceRole.EDITOR,
+                permissions: [],
+                status: MembershipStatus.ACTIVE,
+                user: {
+                  id: 2,
+                  firstName: "Jane",
+                  lastName: "Smith",
+                  email: "jane@example.com",
+                  username: "janesmith",
+                },
+              },
+              {
+                userId: 3,
+                role: WorkspaceRole.VIEWER,
+                permissions: [],
+                status: MembershipStatus.ACTIVE,
+                user: {
+                  id: 3,
+                  firstName: "Bob",
+                  lastName: "Wilson",
+                  email: "bob@example.com",
+                  username: "bobwilson",
+                },
+              },
+            ],
+            owner: {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+            },
+            _count: { funnels: 1, members: 3, domains: 1 },
+          },
+        ];
+
+        mockPrisma.workspace.findMany.mockResolvedValue(mockWorkspaces);
+
+        const result = await getAllWorkspaces(userId, {
+          sortBy: "memberCount",
+          sortOrder: "desc",
+        });
+
+        expect(result[0].name).toBe("Large Team");
+        expect(result[0].memberCount).toBe(3);
+        expect(result[1].name).toBe("Small Team");
+        expect(result[1].memberCount).toBe(1);
+      });
+    });
+
     describe("Successful Scenarios", () => {
       it("should return workspaces from database", async () => {
         const userId = 1;
@@ -269,52 +456,8 @@ describe("Get All Workspaces Tests", () => {
         expect(result).toHaveLength(2);
         expect(result.length).toBe(2);
 
-        // First workspace (user is owner)
+        // First workspace (sorted by createdAt desc - Workspace Two is newer)
         expect(result[0]).toEqual({
-          id: 1,
-          name: "Workspace One",
-          slug: "workspace-one",
-          description: "First workspace",
-          image: "https://example.com/workspace1.jpg",
-          role: WorkspaceRole.OWNER,
-          permissions: Object.values(WorkspacePermission),
-          owner: {
-            id: 1,
-            firstName: "John",
-            lastName: "Doe",
-            email: "john@example.com",
-            username: "johndoe",
-          },
-          members: [
-            {
-              id: 1,
-              firstName: "John",
-              lastName: "Doe",
-              email: "john@example.com",
-              username: "johndoe",
-              role: WorkspaceRole.OWNER,
-              permissions: Object.values(WorkspacePermission),
-              status: MembershipStatus.ACTIVE,
-            },
-            {
-              id: 2,
-              firstName: "Jane",
-              lastName: "Smith",
-              email: "jane@example.com",
-              username: "janesmith",
-              role: WorkspaceRole.EDITOR,
-              permissions: [WorkspacePermission.EDIT_FUNNELS],
-              status: MembershipStatus.ACTIVE,
-            },
-          ],
-          memberCount: 2,
-          funnelCount: 5,
-          domainCount: 3,
-          createdAt: new Date("2024-01-01"),
-        });
-
-        // Second workspace (user is member)
-        expect(result[1]).toEqual({
           id: 2,
           name: "Workspace Two",
           slug: "workspace-two",
@@ -361,6 +504,50 @@ describe("Get All Workspaces Tests", () => {
           funnelCount: 2,
           domainCount: 1,
           createdAt: new Date("2024-01-15"),
+        });
+
+        // Second workspace (sorted by createdAt desc - Workspace One is older)
+        expect(result[1]).toEqual({
+          id: 1,
+          name: "Workspace One",
+          slug: "workspace-one",
+          description: "First workspace",
+          image: "https://example.com/workspace1.jpg",
+          role: WorkspaceRole.OWNER,
+          permissions: Object.values(WorkspacePermission),
+          owner: {
+            id: 1,
+            firstName: "John",
+            lastName: "Doe",
+            email: "john@example.com",
+            username: "johndoe",
+          },
+          members: [
+            {
+              id: 1,
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              username: "johndoe",
+              role: WorkspaceRole.OWNER,
+              permissions: Object.values(WorkspacePermission),
+              status: MembershipStatus.ACTIVE,
+            },
+            {
+              id: 2,
+              firstName: "Jane",
+              lastName: "Smith",
+              email: "jane@example.com",
+              username: "janesmith",
+              role: WorkspaceRole.EDITOR,
+              permissions: [WorkspacePermission.EDIT_FUNNELS],
+              status: MembershipStatus.ACTIVE,
+            },
+          ],
+          memberCount: 2,
+          funnelCount: 5,
+          domainCount: 3,
+          createdAt: new Date("2024-01-01"),
         });
       });
 

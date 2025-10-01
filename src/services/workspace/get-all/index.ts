@@ -17,7 +17,9 @@ export const getAllWorkspaces = async (
     if (!userId) {
       throw new Error("User ID is required");
     }
-    const { search } = getAllWorkspacesRequest.parse(requestData || {});
+    const { search, sortBy, sortOrder } = getAllWorkspacesRequest.parse(
+      requestData || {}
+    );
 
     const prisma = getPrisma();
 
@@ -86,7 +88,7 @@ export const getAllWorkspaces = async (
     });
 
     // Process and format workspaces
-    const result = workspaces.map((workspace) => {
+    let result = workspaces.map((workspace) => {
       const isOwner = workspace.ownerId === userId;
 
       // Get current user's role and permissions
@@ -160,6 +162,26 @@ export const getAllWorkspaces = async (
         domainCount: workspace._count.domains,
         createdAt: workspace.createdAt,
       };
+    });
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let compareValue = 0;
+
+      if (sortBy === "name") {
+        compareValue = a.name.localeCompare(b.name);
+      } else if (sortBy === "memberCount") {
+        compareValue = a.memberCount - b.memberCount;
+      } else if (sortBy === "funnelCount") {
+        compareValue = a.funnelCount - b.funnelCount;
+      } else if (sortBy === "domainCount") {
+        compareValue = a.domainCount - b.domainCount;
+      } else {
+        // Default to createdAt
+        compareValue = a.createdAt.getTime() - b.createdAt.getTime();
+      }
+
+      return sortOrder === "asc" ? compareValue : -compareValue;
     });
 
     return getAllWorkspacesResponse.parse(result);
