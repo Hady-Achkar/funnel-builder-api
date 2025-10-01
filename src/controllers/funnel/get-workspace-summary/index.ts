@@ -10,11 +10,15 @@ export class GetWorkspaceFunnelsSummaryController {
   ): Promise<void> {
     try {
       const { workspaceSlug } = req.params;
+      const { search } = req.query;
       const userId = req.userId!;
 
       const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
         userId,
-        { workspaceSlug }
+        {
+          workspaceSlug,
+          search: search as string,
+        }
       );
 
       res.status(200).json(result);

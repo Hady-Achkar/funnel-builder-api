@@ -211,6 +211,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
       mockRequest = {
         userId,
         params: { workspaceSlug },
+        query: {},
       };
       mockResponse = {
         status: vi.fn().mockReturnThis(),

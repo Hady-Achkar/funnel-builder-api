@@ -1,5 +1,9 @@
 import { getPrisma } from "../../../lib/prisma";
-import { NotFoundError, ForbiddenError, BadRequestError } from "../../../errors/http-errors";
+import {
+  NotFoundError,
+  ForbiddenError,
+  BadRequestError,
+} from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import { hasPermissionToViewFunnels } from "../../../helpers/funnel/getAll/permissions.helper";
 import {
@@ -13,8 +17,9 @@ export class GetWorkspaceFunnelsSummaryService {
     requestData: unknown
   ): Promise<WorkspaceFunnel[]> {
     try {
-      const validatedData = GetWorkspaceFunnelsSummaryRequestSchema.parse(requestData);
-      const { workspaceSlug } = validatedData;
+      const validatedData =
+        GetWorkspaceFunnelsSummaryRequestSchema.parse(requestData);
+      const { workspaceSlug, search } = validatedData;
 
       // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
@@ -52,9 +57,16 @@ export class GetWorkspaceFunnelsSummaryService {
         }
       }
 
-      // Get funnels for the workspace
       const funnels = await getPrisma().funnel.findMany({
-        where: { workspaceId: workspace.id },
+        where: {
+          workspaceId: workspace.id,
+          ...(search && {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          }),
+        },
         select: {
           id: true,
           name: true,

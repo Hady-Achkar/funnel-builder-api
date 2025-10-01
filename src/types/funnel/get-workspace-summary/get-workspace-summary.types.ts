@@ -2,6 +2,12 @@ import { z } from "zod";
 
 export const GetWorkspaceFunnelsSummaryRequestSchema = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  search: z
+    .string({
+      message: "Search must be a string",
+    })
+    .min(1, { message: "Search cannot be empty" })
+    .optional(),
 });
 
 export type GetWorkspaceFunnelsSummaryRequest = z.infer<typeof GetWorkspaceFunnelsSummaryRequestSchema>;
