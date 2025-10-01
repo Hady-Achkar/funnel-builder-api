@@ -45,6 +45,12 @@ export const GetAllDomainsRequestSchema = z.object({
     })
     .optional()
     .default({}),
+  search: z
+    .string({
+      message: "Search must be a string",
+    })
+    .min(1, { message: "Search cannot be empty" })
+    .optional(),
   sortBy: z
     .enum(["createdAt", "hostname", "status"], {
       message: "Sort by must be one of: createdAt, hostname, status",

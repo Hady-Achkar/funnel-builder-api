@@ -25,6 +25,7 @@ export class GetAllDomainsController {
           type: req.query.type as string,
           hostname: req.query.hostname as string,
         },
+        search: req.query.search as string,
         sortBy: req.query.sortBy as string,
         sortOrder: req.query.sortOrder as string,
       });

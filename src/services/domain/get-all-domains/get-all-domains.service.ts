@@ -22,7 +22,7 @@ export class GetAllDomainsService {
   ): Promise<GetAllDomainsResponse> {
     try {
       const validatedData = GetAllDomainsRequestSchema.parse(requestData);
-      const { workspaceSlug, page, limit, filters, sortBy, sortOrder } = validatedData;
+      const { workspaceSlug, page, limit, filters, search, sortBy, sortOrder } = validatedData;
 
       // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
@@ -38,6 +38,12 @@ export class GetAllDomainsService {
       const whereClause = {
         workspaceId: workspace.id,
         ...buildDomainFilters(filters),
+        ...(search && {
+          hostname: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        }),
       };
 
       const orderBy = buildDomainSorting(sortBy, sortOrder);
