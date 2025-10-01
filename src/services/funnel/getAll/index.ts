@@ -30,6 +30,8 @@ export const getAllFunnels = async (
       sortBy: query?.sortBy,
       sortOrder: query?.sortOrder,
       status: query?.status,
+      search: query?.search ? String(query.search) : undefined,
+      createdBy: query?.createdBy ? parseInt(String(query.createdBy), 10) : undefined,
     };
 
     validatedQuery = getAllFunnelsRequest.parse(parsedQuery);
@@ -99,14 +101,18 @@ export const getAllFunnels = async (
         status: funnel.status,
         workspaceId: funnel.workspaceId,
         createdBy: funnel.createdBy,
-        settings: funnel.settings ? {
-          ...funnel.settings,
-          customTrackingScripts: Array.isArray(funnel.settings.customTrackingScripts)
-            ? funnel.settings.customTrackingScripts
-            : funnel.settings.customTrackingScripts
-              ? [funnel.settings.customTrackingScripts]
-              : []
-        } : null,
+        settings: funnel.settings
+          ? {
+              ...funnel.settings,
+              customTrackingScripts: Array.isArray(
+                funnel.settings.customTrackingScripts
+              )
+                ? funnel.settings.customTrackingScripts
+                : funnel.settings.customTrackingScripts
+                ? [funnel.settings.customTrackingScripts]
+                : [],
+            }
+          : null,
         createdAt: funnel.createdAt,
         updatedAt: funnel.updatedAt,
       }));
@@ -116,9 +122,27 @@ export const getAllFunnels = async (
 
     let filteredFunnels = [...allFunnels];
 
+    // Filter by status
     if (validatedQuery.status) {
       filteredFunnels = filteredFunnels.filter(
         (f) => f.status === validatedQuery.status
+      );
+    }
+
+    // Filter by creator
+    if (validatedQuery.createdBy) {
+      filteredFunnels = filteredFunnels.filter(
+        (f) => f.createdBy === validatedQuery.createdBy
+      );
+    }
+
+    // Search by name or slug (case-insensitive)
+    if (validatedQuery.search) {
+      const searchLower = validatedQuery.search.toLowerCase();
+      filteredFunnels = filteredFunnels.filter(
+        (f) =>
+          f.name.toLowerCase().includes(searchLower) ||
+          f.slug.toLowerCase().includes(searchLower)
       );
     }
 

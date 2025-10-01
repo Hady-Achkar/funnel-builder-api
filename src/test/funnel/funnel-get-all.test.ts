@@ -408,6 +408,278 @@ describe("Get All Funnels Tests", () => {
     });
   });
 
+  describe("Search Functionality", () => {
+    it("should search funnels by name (case-insensitive)", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Marketing Funnel",
+          slug: "marketing-funnel",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 2,
+          name: "Sales Funnel",
+          slug: "sales-funnel",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 3,
+          name: "Product Launch",
+          slug: "product-launch",
+          status: $Enums.FunnelStatus.DRAFT,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        search: "marketing"
+      });
+
+      expect(result.funnels).toHaveLength(1);
+      expect(result.funnels[0].name).toBe("Marketing Funnel");
+    });
+
+    it("should search funnels by slug (case-insensitive)", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Marketing Funnel",
+          slug: "marketing-funnel",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 2,
+          name: "Sales Funnel",
+          slug: "sales-funnel-2024",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        search: "2024"
+      });
+
+      expect(result.funnels).toHaveLength(1);
+      expect(result.funnels[0].slug).toBe("sales-funnel-2024");
+    });
+
+    it("should handle search with mixed case", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Product Launch Funnel",
+          slug: "product-launch",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        search: "PRODUCT"
+      });
+
+      expect(result.funnels).toHaveLength(1);
+      expect(result.funnels[0].name).toBe("Product Launch Funnel");
+    });
+
+    it("should return empty array when no matches found", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Marketing Funnel",
+          slug: "marketing-funnel",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        search: "nonexistent"
+      });
+
+      expect(result.funnels).toHaveLength(0);
+    });
+  });
+
+  describe("Creator Filtering", () => {
+    it("should filter funnels by creator", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Funnel by User 1",
+          slug: "funnel-user-1",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 2,
+          name: "Funnel by User 2",
+          slug: "funnel-user-2",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: 2,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 3,
+          name: "Another Funnel by User 1",
+          slug: "another-funnel-user-1",
+          status: $Enums.FunnelStatus.DRAFT,
+          workspaceId: 1,
+          createdBy: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        createdBy: 1
+      });
+
+      expect(result.funnels).toHaveLength(2);
+      expect(result.funnels.every(f => f.createdBy === 1)).toBe(true);
+    });
+
+    it("should return empty array when creator has no funnels", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Funnel by User 1",
+          slug: "funnel-user-1",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        createdBy: 999
+      });
+
+      expect(result.funnels).toHaveLength(0);
+    });
+  });
+
+  describe("Combined Filters", () => {
+    it("should combine search, status, and creator filters", async () => {
+      const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };
+      const funnelsData = [
+        {
+          id: 1,
+          name: "Marketing Funnel",
+          slug: "marketing-funnel",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 2,
+          name: "Marketing Campaign",
+          slug: "marketing-campaign",
+          status: $Enums.FunnelStatus.DRAFT,
+          workspaceId: 1,
+          createdBy: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        },
+        {
+          id: 3,
+          name: "Marketing Launch",
+          slug: "marketing-launch",
+          status: $Enums.FunnelStatus.LIVE,
+          workspaceId: 1,
+          createdBy: 2,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          settings: null
+        }
+      ];
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
+      mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
+
+      const result = await getAllFunnels(workspaceSlug, userId, {
+        search: "marketing",
+        status: $Enums.FunnelStatus.LIVE,
+        createdBy: 1
+      });
+
+      expect(result.funnels).toHaveLength(1);
+      expect(result.funnels[0].id).toBe(1);
+    });
+  });
+
   describe("Caching", () => {
     it.skip("should return cached data if available", async () => {
       const workspaceData = { id: 1, name: "Test Workspace", ownerId: userId };

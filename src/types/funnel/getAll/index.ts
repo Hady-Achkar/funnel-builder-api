@@ -11,6 +11,8 @@ export const getAllFunnelsRequest = z.object({
   sortBy: z.enum(["createdAt", "updatedAt", "name"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   status: z.enum($Enums.FunnelStatus).optional(),
+  search: z.string().min(1).optional(),
+  createdBy: z.number().int().positive().optional(),
 });
 
 export const getAllFunnelsResponse = z.object({
