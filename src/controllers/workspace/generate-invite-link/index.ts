@@ -19,7 +19,7 @@ export class GenerateInviteLinkController {
       }
 
       const { slug } = req.params;
-      const requestData = { ...req.body, workspaceSlug: slug };
+      const requestData = { ...req.query, workspaceSlug: slug };
 
       const validatedData = GenerateInviteLinkRequestSchema.parse(requestData);
 

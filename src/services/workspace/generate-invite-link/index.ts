@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 import {
   GenerateInviteLinkRequest,
   GenerateInviteLinkResponse,
@@ -18,17 +19,20 @@ export class GenerateInviteLinkService {
 
       validateInviterPermissions(workspace, creatorUserId);
 
-      const invitationToken = jwt.sign(
-        {
-          workspaceId: workspace.id,
-          workspaceSlug: workspace.slug,
-          role: data.role,
-          type: "workspace_direct_link",
-          createdBy: creatorUserId,
-        },
-        process.env.JWT_SECRET!,
-        { expiresIn: "7d" }
-      );
+      const linkId = uuidv4();
+
+      const payload = {
+        workspaceId: workspace.id,
+        workspaceSlug: workspace.slug,
+        role: String(data.role),
+        type: "workspace_direct_link" as const,
+        linkId,
+        createdBy: creatorUserId,
+      };
+
+      const invitationToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+        expiresIn: data.expiresIn,
+      } as jwt.SignOptions);
 
       const link = `${process.env.FRONTEND_URL}/join-workspace?token=${invitationToken}`;
 

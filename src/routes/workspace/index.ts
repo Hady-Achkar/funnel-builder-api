@@ -30,7 +30,10 @@ router.post("/", CreateWorkspaceController.create);
 router.get("/", getAllWorkspacesController);
 
 // Get user workspaces summary
-router.get("/summary", GetUserWorkspacesSummaryController.getUserWorkspacesSummary);
+router.get(
+  "/summary",
+  GetUserWorkspacesSummaryController.getUserWorkspacesSummary
+);
 
 // Get single workspace by slug
 router.get("/:slug", GetWorkspaceController.getBySlug);
@@ -48,7 +51,10 @@ router.post("/invite-member/:slug", InviteMemberController.inviteMember);
 router.post("/accept-invitation", AcceptInvitationController.acceptInvitation);
 
 // Generate workspace invite link
-router.post("/generate-invite-link/:slug", GenerateInviteLinkController.generateInviteLink);
+router.get(
+  "/generate-invite-link/:slug",
+  GenerateInviteLinkController.generateInviteLink
+);
 
 // Join workspace via direct link
 router.post("/join-by-link", JoinByLinkController.joinByLink);
