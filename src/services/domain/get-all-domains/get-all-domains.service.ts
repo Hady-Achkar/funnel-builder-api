@@ -57,6 +57,7 @@ export class GetAllDomainsService {
             type: true,
             status: true,
             workspaceId: true,
+            createdAt: true,
           },
           orderBy,
           skip: getPaginationOffset(page, limit),
@@ -73,6 +74,7 @@ export class GetAllDomainsService {
         type: domain.type,
         status: domain.status,
         workspaceId: domain.workspaceId,
+        createdAt: domain.createdAt,
       }));
 
       const pagination = calculatePagination(page, limit, total);

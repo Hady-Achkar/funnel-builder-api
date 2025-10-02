@@ -55,6 +55,7 @@ describe("Get All Domains Tests", () => {
       type: $Enums.DomainType.CUSTOM_DOMAIN,
       status: $Enums.DomainStatus.ACTIVE,
       workspaceId: 1,
+      createdAt: new Date("2024-01-01"),
     },
     {
       id: 2,
@@ -62,6 +63,7 @@ describe("Get All Domains Tests", () => {
       type: $Enums.DomainType.SUBDOMAIN,
       status: $Enums.DomainStatus.ACTIVE,
       workspaceId: 1,
+      createdAt: new Date("2024-01-02"),
     },
     {
       id: 3,
@@ -69,6 +71,7 @@ describe("Get All Domains Tests", () => {
       type: $Enums.DomainType.SUBDOMAIN,
       status: $Enums.DomainStatus.PENDING,
       workspaceId: 1,
+      createdAt: new Date("2024-01-03"),
     },
   ];
 

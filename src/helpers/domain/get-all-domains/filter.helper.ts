@@ -20,7 +20,7 @@ export const buildDomainFilters = (filters: any = {}) => {
 };
 
 export const buildDomainSorting = (sortBy: string = 'createdAt', sortOrder: string = 'desc') => {
-  const validSortFields = ['createdAt', 'hostname', 'status'];
+  const validSortFields = ['createdAt', 'hostname', 'status', 'type'];
   const validSortOrders = ['asc', 'desc'];
 
   const field = validSortFields.includes(sortBy) ? sortBy : 'createdAt';

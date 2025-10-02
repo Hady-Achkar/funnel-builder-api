@@ -52,8 +52,8 @@ export const GetAllDomainsRequestSchema = z.object({
     .min(1, { message: "Search cannot be empty" })
     .optional(),
   sortBy: z
-    .enum(["createdAt", "hostname", "status"], {
-      message: "Sort by must be one of: createdAt, hostname, status",
+    .enum(["createdAt", "hostname", "status", "type"], {
+      message: "Sort by must be one of: createdAt, hostname, status, type",
     })
     .optional()
     .default("createdAt"),
@@ -81,6 +81,7 @@ export const DomainSummarySchema = z.object({
     ).join(", ")}`,
   }),
   workspaceId: z.number({ message: "Workspace ID must be a number" }),
+  createdAt: z.coerce.date({ message: "Created at must be a date" }),
 });
 
 export type DomainSummary = z.infer<typeof DomainSummarySchema>;
