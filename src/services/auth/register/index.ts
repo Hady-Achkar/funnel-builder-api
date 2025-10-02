@@ -4,7 +4,8 @@ import {
   RegisterRequest,
   RegisterResponse,
 } from "../../../types/auth/register";
-import { PlanLimitsHelper } from "../../../helpers/auth/register";
+import { UserWorkspaceAllocations } from "../../../utils/user-workspace-allocations";
+import { TrialPeriodCalculator } from "../../../utils/trial-period";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 import { generateVerificationToken } from "../utils";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
@@ -21,6 +22,7 @@ export class RegisterService {
         password,
         isAdmin,
         plan,
+        trialPeriod,
         workspaceInvitationToken,
       } = userData;
 
@@ -60,7 +62,12 @@ export class RegisterService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {});
+      // Get workspace allocation based on plan (no add-ons at registration)
+      const maximumWorkspaces = UserWorkspaceAllocations.getBaseAllocation(plan);
+
+      // Calculate trial dates (defaults to 6 years if not specified)
+      const { trialStartDate, trialEndDate } = TrialPeriodCalculator.getTrialDates(trialPeriod);
+      console.log("Trial dates calculated:", { trialStartDate, trialEndDate, trialPeriod });
 
       const verificationToken = generateVerificationToken(userData);
       const verificationTokenExpiresAt = new Date();
@@ -80,7 +87,13 @@ export class RegisterService {
           verificationTokenExpiresAt,
           isAdmin,
           plan,
-          maximumWorkspaces: finalLimits.maximumWorkspaces,
+          maximumWorkspaces,
+          trialStartDate,
+          trialEndDate,
+          // Partner fields will use database defaults:
+          // partnerLevel: 1
+          // totalSales: 0
+          // commissionPercentage: 5
         },
       });
 

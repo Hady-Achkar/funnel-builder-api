@@ -27,6 +27,12 @@ enum IntervalUnit {
   YEAR
 }
 
+enum PaymentType {
+  PLAN_PURCHASE    // One-time plan purchase (Business $299, Agency $50)
+  ADDON_PURCHASE   // Add-on purchase (extra admins, etc.)
+  ADDON_RENEWAL    // Recurring add-on renewal
+}
+
 model User {
   id                         Int               @id @default(autoincrement())
   email                      String            @unique
@@ -47,9 +53,14 @@ model User {
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
   maximumWorkspaces          Int               @default(1) // Maximum workspaces based on plan
-  maximumAdmins              Int               @default(1) // Total admin budget for the user
   trialStartDate             DateTime? // Trial start date
   trialEndDate               DateTime? // Trial end date
+
+  // Partner/Agency fields
+  partnerLevel               Int               @default(1) // Partner level (1-3) for commission tiers
+  totalSales                 Int               @default(0) // Total sales count for level progression
+  commissionPercentage       Float             @default(5) // Current commission percentage for add-ons
+  
   workspaceMembers           WorkspaceMember[]
   sentInvitations            WorkspaceMember[] @relation("InvitationSender")
   ownedWorkspaces            Workspace[]       @relation("WorkspaceOwner")
@@ -61,6 +72,7 @@ model User {
   referralLinkUsed           AffiliateLink?    @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
   payments                   Payment[]         @relation("UserPayments")
   subscriptions              Subscription[]    @relation("UserSubscriptions")
+  addOns                     AddOn[]           @relation("UserAddOns")
 
   @@map("users")
 }
@@ -89,23 +101,31 @@ model AffiliateLink {
 }
 
 model Payment {
-  id                    Int      @id @default(autoincrement())
-  transactionId         String   @unique
+  id                    Int          @id @default(autoincrement())
+  transactionId         String       @unique
   amount                Float?
   currency              String
   status                String
-  itemType              UserPlan
+  itemType              UserPlan     // Which plan (BUSINESS, AGENCY, FREE)
+  paymentType           PaymentType  @default(PLAN_PURCHASE) // Type of payment
+
+  // Add-on specific fields
+  addOnId               Int?         // Links to AddOn if this is an add-on payment
+  addOnType             AddOnType?   // Type of add-on (EXTRA_ADMIN, etc.)
+  addOnQuantity         Int?         // Quantity of add-on purchased
+
   buyerId               Int?
   affiliateLinkId       Int?
   level1AffiliateAmount Float?
-  affiliatePaid         Boolean  @default(false)
-  rawData               Json?    @default("{}")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  affiliatePaid         Boolean      @default(false)
+  rawData               Json?        @default("{}")
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 
   // Relations
   buyer         User?          @relation("UserPayments", fields: [buyerId], references: [id])
   affiliateLink AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
+  addOn         AddOn?         @relation(fields: [addOnId], references: [id])
 
   @@index([buyerId])
   @@index([affiliateLinkId])
@@ -147,12 +167,22 @@ model Workspace {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
   image                  String?
+  status                 WorkspaceStatus @default(ACTIVE) // Workspace status (ACTIVE or DRAFT)
+
+  // Plan-based resource limits
+  adminBudget            Int      @default(1)   // Number of admins allocated to this workspace
+  funnelLimit            Int      @default(3)   // Maximum funnels this workspace can have
+  pageLimit              Int      @default(35)  // Maximum pages per funnel in this workspace
+  customDomainLimit      Int      @default(1)   // Maximum custom domains this workspace can have
+  subdomainLimit         Int      @default(1)   // Maximum subdomains this workspace can have
+  planType               UserPlan @default(FREE) // Plan type for this workspace
 
   owner             User                        @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members           WorkspaceMember[]
   funnels           Funnel[]
   domains           Domain[]
   rolePermTemplates WorkspaceRolePermTemplate[]
+  addOns            AddOn[]                     @relation("WorkspaceAddOns")
 
   @@map("workspaces")
 }
@@ -207,6 +237,11 @@ enum MembershipStatus {
   PENDING
   ACTIVE
   REJECTED
+}
+
+enum WorkspaceStatus {
+  ACTIVE  // Fully functional workspace
+  DRAFT   // Draft workspace (limited functionality)
 }
 
 model WorkspaceRolePermTemplate {
@@ -614,4 +649,45 @@ model FunnelSettings {
 
   @@index([funnelId])
   @@map("funnel_settings")
+}
+
+// Add-on System for Agency Plans
+model AddOn {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  workspaceId   Int?
+  type          AddOnType    // Type of add-on (EXTRA_ADMIN, etc.)
+  quantity      Int          @default(1)
+  pricePerUnit  Float        // Price per unit (e.g., $5 per admin)
+  status        AddOnStatus  @default(ACTIVE)
+  billingCycle  IntervalUnit @default(MONTH) // Uses existing IntervalUnit enum
+  startDate     DateTime     @default(now())
+  endDate       DateTime?    // When the add-on expires or was cancelled
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  user      User       @relation("UserAddOns", fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation("WorkspaceAddOns", fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments  Payment[]  // Payments for this add-on (purchases and renewals)
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([status])
+  @@map("addons")
+}
+
+enum AddOnType {
+  EXTRA_ADMIN     // Additional admin slots
+  EXTRA_FUNNEL    // Additional funnels
+  EXTRA_PAGE      // Additional pages
+  EXTRA_DOMAIN    // Additional domains
+  EXTRA_WORKSPACE // Additional workspaces
+}
+
+enum AddOnStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
 }

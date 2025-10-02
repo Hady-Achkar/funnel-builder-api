@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { $Enums, WorkspaceRole, WorkspacePermission } from "../../../generated/prisma-client";
+import {
+  $Enums,
+  WorkspaceRole,
+  WorkspacePermission,
+} from "../../../generated/prisma-client";
 
 export const registerRequest = z.object({
   email: z
@@ -47,12 +51,17 @@ export const registerRequest = z.object({
     .default(false),
   plan: z
     .enum($Enums.UserPlan, {
-      message: "Plan must be BUSINESS or AGENCY",
+      message: "Plan must be FREE, BUSINESS or AGENCY",
     })
-    .default($Enums.UserPlan.BUSINESS),
-  workspaceInvitationToken: z
+    .default($Enums.UserPlan.FREE),
+  trialPeriod: z
     .string()
-    .optional(),
+    .regex(/^\d+[ymwd]$/i, {
+      message: "Trial period must be in format: 1y, 2m, 3w, 30d (year/month/week/day)",
+    })
+    .optional()
+    .describe("Optional trial period. Format: 1y, 2m, 3w, 30d. Defaults to 6y if not provided"),
+  workspaceInvitationToken: z.string().optional(),
 });
 
 export type RegisterRequest = z.infer<typeof registerRequest>;
@@ -69,13 +78,15 @@ export const registerResponse = z.object({
     plan: z.enum($Enums.UserPlan),
     verified: z.boolean(),
   }),
-  workspace: z.object({
-    id: z.number(),
-    name: z.string(),
-    slug: z.string(),
-    role: z.enum(WorkspaceRole),
-    permissions: z.array(z.enum(WorkspacePermission)),
-  }).optional(),
+  workspace: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      slug: z.string(),
+      role: z.enum(WorkspaceRole),
+      permissions: z.array(z.enum(WorkspacePermission)),
+    })
+    .optional(),
 });
 
 export type RegisterResponse = z.infer<typeof registerResponse>;
