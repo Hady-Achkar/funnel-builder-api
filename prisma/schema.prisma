@@ -231,13 +231,14 @@ model Funnel {
   status            FunnelStatus    @default(DRAFT)
   workspaceId       Int
   createdBy         Int
+  activeThemeId     Int?
   workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   creator           User            @relation("FunnelCreator", fields: [createdBy], references: [id])
+  activeTheme       Theme?          @relation("ActiveTheme", fields: [activeThemeId], references: [id])
+  customTheme       Theme?          @relation("CustomTheme")
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
-  themeId           Int?            @unique
   domainConnections FunnelDomain[]
-  theme             Theme?          @relation(fields: [themeId], references: [id])
   pages             Page[]
   settings          FunnelSettings?
   insights          Insight[]
@@ -247,6 +248,7 @@ model Funnel {
   @@index([workspaceId])
   @@index([createdBy])
   @@index([status])
+  @@index([activeThemeId])
   @@map("funnels")
 }
 
@@ -379,11 +381,17 @@ model Theme {
   optionColor     String       @default("#16331b")
   fontFamily      String       @default("Inter, sans-serif")
   borderRadius    BorderRadius @default(SOFT)
+  type            ThemeType    @default(CUSTOM)
+  funnelId        Int?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  funnel Funnel?
+  funnel  Funnel?   @relation("CustomTheme", fields: [funnelId], references: [id], onDelete: Cascade)
+  funnels Funnel[]  @relation("ActiveTheme")
 
+  @@unique([funnelId])
+  @@index([funnelId])
+  @@index([type])
   @@map("themes")
 }
 
@@ -391,6 +399,11 @@ enum BorderRadius {
   NONE
   SOFT
   ROUNDED
+}
+
+enum ThemeType {
+  GLOBAL
+  CUSTOM
 }
 
 enum InsightType {

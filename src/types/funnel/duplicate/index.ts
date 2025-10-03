@@ -16,17 +16,6 @@ export const duplicateFunnelRequest = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required").optional(),
 });
 
-// Helper function to generate default name with timestamp
-export const generateDefaultFunnelName = (): string => {
-  const now = new Date();
-  const day = now.getDate().toString().padStart(2, '0');
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const year = now.getFullYear();
-  const hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  return `Copy ${day}.${month}.${year} ${hours}:${minutes}`;
-};
-
 export const duplicateFunnelResponse = z.object({
   message: z.string(),
   funnelId: z.number(),

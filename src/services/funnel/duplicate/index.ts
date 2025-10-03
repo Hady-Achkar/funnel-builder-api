@@ -1,236 +1,85 @@
-import { z } from "zod";
-import { cacheService } from "../../cache/cache.service";
-import { getPrisma } from "../../../lib/prisma";
 import {
-  hasPermissionToViewFunnel,
-  hasPermissionToCreateFunnel,
-  generateLinkingIdMap,
-  replaceLinkingIdsInContent,
-  getNewLinkingIdForPage,
-} from "../../../helpers/funnel/duplicate";
-import {
-  generateSlug,
-  generateUniqueSlug,
-} from "../../../helpers/funnel/shared";
-import {
-  duplicateFunnelParams,
-  DuplicateFunnelParams,
-  duplicateFunnelRequest,
   DuplicateFunnelRequest,
-  duplicateFunnelResponse,
   DuplicateFunnelResponse,
 } from "../../../types/funnel/duplicate";
+import { getPrisma } from "../../../lib/prisma";
+import { $Enums } from "../../../generated/prisma-client";
+import { validateOriginalFunnel } from "./utils/validateOriginalFunnel";
+import { validateTargetWorkspace } from "./utils/validateTargetWorkspace";
+import { checkWorkspaceFunnelLimit } from "./utils/checkWorkspaceFunnelLimit";
+import { validateUserPermissions } from "./utils/validateUserPermissions";
+import { generateUniqueFunnelName } from "./utils/generateUniqueFunnelName";
+import { generateLinkingIdMap } from "./utils/generateLinkingIdMap";
+import { replaceLinkingIdsInContent } from "./utils/replaceLinkingIdsInContent";
+import { getNewLinkingIdForPage } from "./utils/getNewLinkingIdForPage";
+import { generateSlug } from "./utils/generateSlug";
+import { generateUniqueSlug } from "./utils/generateUniqueSlug";
 
 export const duplicateFunnel = async (
   funnelId: number,
   userId: number,
-  data: Partial<DuplicateFunnelRequest>
-): Promise<DuplicateFunnelResponse> => {
-  let validatedParams: DuplicateFunnelParams;
-  let validatedData: DuplicateFunnelRequest;
-  let finalFunnelName: string;
-
+  data: DuplicateFunnelRequest
+): Promise<{ response: DuplicateFunnelResponse; workspaceId: number }> => {
   try {
-    if (!userId) throw new Error("User ID is required");
-
-    validatedParams = duplicateFunnelParams.parse({ funnelId });
-    validatedData = duplicateFunnelRequest.parse(data);
-
     const prisma = getPrisma();
 
     // Get the original funnel with all its data
-    const originalFunnel = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
-      include: {
-        theme: true,
-        settings: true,
-        pages: {
-          orderBy: { order: "asc" },
-        },
-        workspace: {
-          select: {
-            id: true,
-            name: true,
-            ownerId: true,
-          },
-        },
-      },
-    });
-
-    if (!originalFunnel) {
-      throw new Error("Funnel not found");
-    }
+    const originalFunnel = await validateOriginalFunnel(prisma, funnelId);
 
     // Determine target workspace (same workspace if not provided)
     let targetWorkspaceId = originalFunnel.workspaceId;
 
-    if (validatedData.workspaceSlug) {
-      const targetWorkspaceBySlug = await prisma.workspace.findUnique({
-        where: { slug: validatedData.workspaceSlug },
-        select: { id: true },
-      });
-
-      if (!targetWorkspaceBySlug) {
-        throw new Error("Target workspace not found");
-      }
-
-      targetWorkspaceId = targetWorkspaceBySlug.id;
-    }
-
-    // Check permission to view original funnel
-    const isOriginalOwner = originalFunnel.workspace.ownerId === userId;
-
-    if (!isOriginalOwner) {
-      const originalMember = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: originalFunnel.workspaceId,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!originalMember) {
-        throw new Error(
-          `You don't have access to the original funnel. Please ask the workspace owner to invite you.`
-        );
-      }
-
-      const canViewOriginal = hasPermissionToViewFunnel(
-        originalMember.role,
-        originalMember.permissions
+    if (data.workspaceSlug) {
+      const targetWorkspaceBySlug = await validateTargetWorkspace(
+        prisma,
+        data.workspaceSlug
       );
 
-      if (!canViewOriginal) {
-        throw new Error(
-          `You don't have permission to view the original funnel.`
-        );
+      if (targetWorkspaceBySlug) {
+        targetWorkspaceId = targetWorkspaceBySlug.id;
       }
     }
 
-    // If duplicating to a different workspace, check target workspace permissions
-    let targetWorkspace: { id: number; name: string; ownerId: number } | null =
-      null;
-    if (targetWorkspaceId !== originalFunnel.workspaceId) {
-      targetWorkspace = await prisma.workspace.findUnique({
-        where: { id: targetWorkspaceId },
-        select: {
-          id: true,
-          name: true,
-          ownerId: true,
-        },
-      });
-
-      if (!targetWorkspace) {
-        throw new Error("Target workspace does not exist");
-      }
-
-      const isTargetOwner = targetWorkspace.ownerId === userId;
-
-      if (!isTargetOwner) {
-        const targetMember = await prisma.workspaceMember.findUnique({
-          where: {
-            userId_workspaceId: {
-              userId: userId,
-              workspaceId: targetWorkspaceId,
-            },
-          },
-          select: {
-            role: true,
-            permissions: true,
-          },
-        });
-
-        if (!targetMember) {
-          throw new Error(
-            `You don't have access to the target workspace ${targetWorkspace.name}. Please ask the workspace owner to invite you.`
-          );
-        }
-
-        const canCreateInTarget = hasPermissionToCreateFunnel(
-          targetMember.role,
-          targetMember.permissions
-        );
-
-        if (!canCreateInTarget) {
-          throw new Error(
-            `You don't have permission to create funnels in the target workspace ${targetWorkspace.name}.`
-          );
-        }
-      }
-    } else {
-      targetWorkspace = {
-        id: originalFunnel.workspace.id,
-        name: originalFunnel.workspace.name,
-        ownerId: originalFunnel.workspace.ownerId,
-      };
-    }
+    // Validate user permissions
+    await validateUserPermissions(
+      prisma,
+      userId,
+      originalFunnel,
+      targetWorkspaceId
+    );
 
     // Check against fixed workspace limit of 3 funnels
-    const WORKSPACE_FUNNEL_LIMIT = 3;
-    const currentFunnelCount = await prisma.funnel.count({
-      where: { workspaceId: targetWorkspaceId },
-    });
+    await checkWorkspaceFunnelLimit(prisma, targetWorkspaceId);
 
-    if (currentFunnelCount >= WORKSPACE_FUNNEL_LIMIT) {
-      throw new Error(
-        `This workspace has reached its maximum limit of ${WORKSPACE_FUNNEL_LIMIT} funnels.`
-      );
-    }
-
-    finalFunnelName = `${originalFunnel.name} - copy`;
-
-    // Check if name already exists in target workspace and generate unique name
-    const existingFunnels = await prisma.funnel.findMany({
-      where: {
-        workspaceId: targetWorkspaceId,
-        name: {
-          startsWith: finalFunnelName,
-        },
-      },
-      select: {
-        name: true,
-      },
-    });
-
-    if (existingFunnels.length > 0) {
-      const existingNames = existingFunnels.map((f) => f.name);
-
-      // If exact name exists, start looking for numbered versions
-      if (existingNames.includes(finalFunnelName)) {
-        let counter = 2;
-        let newName = `${finalFunnelName} (${counter})`;
-
-        while (existingNames.includes(newName)) {
-          counter++;
-          newName = `${finalFunnelName} (${counter})`;
-        }
-
-        finalFunnelName = newName;
-      }
-    }
+    // Generate unique funnel name
+    const finalFunnelName = await generateUniqueFunnelName(
+      prisma,
+      originalFunnel.name,
+      targetWorkspaceId
+    );
 
     // Generate new linking ID mapping for all pages
     const linkingMap = generateLinkingIdMap(originalFunnel.pages);
 
     // Duplicate funnel and pages in transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create new theme (copy of original)
+      // Create new custom theme (copy of original active theme or default)
       const newTheme = await tx.theme.create({
         data: {
-          name: originalFunnel.theme?.name || "Default Theme",
-          backgroundColor: originalFunnel.theme?.backgroundColor || "#0e1e12",
-          textColor: originalFunnel.theme?.textColor || "#d4ecd0",
-          buttonColor: originalFunnel.theme?.buttonColor || "#387e3d",
-          buttonTextColor: originalFunnel.theme?.buttonTextColor || "#e8f5e9",
-          borderColor: originalFunnel.theme?.borderColor || "#214228",
-          optionColor: originalFunnel.theme?.optionColor || "#16331b",
-          fontFamily: originalFunnel.theme?.fontFamily || "Inter, sans-serif",
-          borderRadius: originalFunnel.theme?.borderRadius || "SOFT",
+          name: originalFunnel.activeTheme?.name ,
+          backgroundColor:
+            originalFunnel.activeTheme?.backgroundColor ,
+          textColor: originalFunnel.activeTheme?.textColor ,
+          buttonColor: originalFunnel.activeTheme?.buttonColor ,
+          buttonTextColor:
+            originalFunnel.activeTheme?.buttonTextColor ,
+          borderColor: originalFunnel.activeTheme?.borderColor ,
+          optionColor: originalFunnel.activeTheme?.optionColor ,
+          fontFamily:
+            originalFunnel.activeTheme?.fontFamily ,
+          borderRadius: originalFunnel.activeTheme?.borderRadius,
+          type: $Enums.ThemeType.CUSTOM,
+          funnelId: null, // Will be set after funnel creation
         },
       });
 
@@ -238,19 +87,25 @@ export const duplicateFunnel = async (
       const baseSlug = generateSlug(finalFunnelName);
       const uniqueSlug = await generateUniqueSlug(baseSlug, targetWorkspaceId);
 
-      // Create the new funnel
+      // Create the new funnel (always set status to DRAFT for duplicates)
       const newFunnel = await tx.funnel.create({
         data: {
           name: finalFunnelName,
           slug: uniqueSlug,
-          status: originalFunnel.status,
+          status: $Enums.FunnelStatus.DRAFT,
           workspaceId: targetWorkspaceId,
           createdBy: userId,
-          themeId: newTheme.id,
+          activeThemeId: newTheme.id,
         },
         include: {
-          theme: true,
+          activeTheme: true,
         },
+      });
+
+      // Update theme to link it to the funnel
+      await tx.theme.update({
+        where: { id: newTheme.id },
+        data: { funnelId: newFunnel.id },
       });
 
       // Duplicate funnel settings if they exist (excluding tracking IDs)
@@ -314,7 +169,7 @@ export const duplicateFunnel = async (
       const newFunnelWithSettings = await tx.funnel.findUnique({
         where: { id: newFunnel.id },
         include: {
-          theme: true,
+          activeTheme: true,
           settings: true,
         },
       });
@@ -322,61 +177,13 @@ export const duplicateFunnel = async (
       return { funnel: newFunnelWithSettings, pages: createdPages };
     });
 
-    // Invalidate cache after successful duplication
-    try {
-      const cacheKeysToInvalidate = [
-        // Workspace's all funnels cache (includes settings)
-        `workspace:${targetWorkspaceId}:funnels:all`,
-        // Legacy cache keys
-        `workspace:${targetWorkspaceId}:funnels:list`,
-        `user:${userId}:workspace:${targetWorkspaceId}:funnels`,
-      ];
-
-      // Delete all cache keys in parallel
-      await Promise.all(
-        cacheKeysToInvalidate.map((key) =>
-          cacheService
-            .del(key)
-            .catch((err) =>
-              console.warn(`Failed to invalidate cache key ${key}:`, err)
-            )
-        )
-      );
-
-      console.log(
-        `[Cache] Invalidated funnel caches after duplication for workspace ${targetWorkspaceId}`
-      );
-    } catch (cacheError) {
-      console.error("Failed to invalidate funnel cache:", cacheError);
-      // Don't fail the operation if cache invalidation fails
-    }
-
-    const response = {
+    const response: DuplicateFunnelResponse = {
       message: "Funnel duplicated successfully",
-      funnelId: result.funnel.id,
+      funnelId: result.funnel!.id,
     };
 
-    return duplicateFunnelResponse.parse(response);
-  } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      const firstError = error.issues[0];
-      throw new Error(`Invalid input: ${firstError.message}`);
-    }
-
-    if (error instanceof Error) {
-      if (
-        error.message.includes("Unique constraint failed") ||
-        error.message.includes("duplicate key value") ||
-        error.message.includes("P2002")
-      ) {
-        throw new Error(
-          `A funnel with the name ${finalFunnelName} already exists in this workspace. Please choose a different name.`
-        );
-      }
-
-      throw new Error(`Failed to duplicate funnel: ${error.message}`);
-    }
-
-    throw new Error("Couldn't duplicate the funnel. Please try again.");
+    return { response, workspaceId: targetWorkspaceId };
+  } catch (error) {
+    throw error;
   }
 };
