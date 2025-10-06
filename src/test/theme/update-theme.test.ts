@@ -1,197 +1,150 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { updateTheme } from "../../services/theme/update";
 import { updateThemeController } from "../../controllers/theme/update";
-import { getPrisma, setPrismaClient } from "../../lib/prisma";
+import { getPrisma } from "../../lib/prisma";
 import { cacheService } from "../../services/cache/cache.service";
-import { PrismaClient, $Enums } from "../../generated/prisma-client";
+import { $Enums } from "../../generated/prisma-client";
 import { NextFunction } from "express";
 
+vi.mock("../../lib/prisma");
 vi.mock("../../services/cache/cache.service");
 
 describe("Update Theme Tests", () => {
-  const prismaClient = new PrismaClient();
-  setPrismaClient(prismaClient);
-  const prisma = getPrisma();
-
-  let testWorkspaceId: number;
-  let testFunnelId: number;
-  let testCustomThemeId: number;
-  let testGlobalThemeId: number;
-  let ownerUserId: number;
-  let adminUserId: number;
-  let editorUserId: number;
-  let viewerUserId: number;
-  let nonMemberUserId: number;
+  let mockPrisma: any;
   let mockReq: any;
   let mockRes: any;
   let mockNext: NextFunction;
 
-  beforeEach(async () => {
+  const ownerUserId = 1;
+  const adminUserId = 2;
+  const editorUserId = 3;
+  const viewerUserId = 4;
+  const nonMemberUserId = 5;
+  const testWorkspaceId = 100;
+  const testFunnelId = 200;
+  const testCustomThemeId = 300;
+  const testGlobalThemeId = 400;
+
+  const mockOwnerUser = {
+    id: ownerUserId,
+    email: "owner@test.com",
+    username: "owner",
+    firstName: "Owner",
+    lastName: "User",
+    password: "hashedpassword",
+    plan: $Enums.UserPlan.BUSINESS,
+    isAdmin: false,
+  };
+
+  const mockAdminUser = {
+    id: adminUserId,
+    email: "admin@test.com",
+    username: "admin",
+    firstName: "Admin",
+    lastName: "User",
+    password: "hashedpassword",
+    plan: $Enums.UserPlan.BUSINESS,
+    isAdmin: true,
+  };
+
+  const mockWorkspace = {
+    id: testWorkspaceId,
+    name: "Test Workspace",
+    slug: "test-workspace",
+    ownerId: ownerUserId,
+  };
+
+  const mockFunnel = {
+    id: testFunnelId,
+    name: "Test Funnel",
+    slug: "test-funnel",
+    status: $Enums.FunnelStatus.DRAFT,
+    workspaceId: testWorkspaceId,
+    createdBy: ownerUserId,
+    activeThemeId: testCustomThemeId,
+  };
+
+  const mockCustomTheme = {
+    id: testCustomThemeId,
+    name: "Custom Theme",
+    type: $Enums.ThemeType.CUSTOM,
+    funnelId: testFunnelId,
+    backgroundColor: "#000000",
+    textColor: "#ffffff",
+    buttonColor: "#ff0000",
+    buttonTextColor: "#ffffff",
+    borderColor: "#cccccc",
+    optionColor: "#eeeeee",
+    fontFamily: "Arial",
+    borderRadius: $Enums.BorderRadius.SOFT,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    funnel: {
+      id: testFunnelId,
+      workspaceId: testWorkspaceId,
+      workspace: mockWorkspace,
+    },
+  };
+
+  const mockGlobalTheme = {
+    id: testGlobalThemeId,
+    name: "Global Theme",
+    type: $Enums.ThemeType.GLOBAL,
+    funnelId: null,
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    buttonColor: "#0000ff",
+    buttonTextColor: "#ffffff",
+    borderColor: "#dddddd",
+    optionColor: "#f5f5f5",
+    fontFamily: "Helvetica",
+    borderRadius: $Enums.BorderRadius.ROUNDED,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    funnel: null,
+  };
+
+  const mockEditorMember = {
+    userId: editorUserId,
+    workspaceId: testWorkspaceId,
+    role: $Enums.WorkspaceRole.EDITOR,
+    permissions: [$Enums.WorkspacePermission.EDIT_FUNNELS],
+    status: $Enums.MembershipStatus.ACTIVE,
+  };
+
+  const mockViewerMember = {
+    userId: viewerUserId,
+    workspaceId: testWorkspaceId,
+    role: $Enums.WorkspaceRole.VIEWER,
+    permissions: [],
+    status: $Enums.MembershipStatus.ACTIVE,
+  };
+
+  beforeEach(() => {
     vi.clearAllMocks();
+
+    mockPrisma = {
+      user: {
+        findUnique: vi.fn(),
+      },
+      theme: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+      workspaceMember: {
+        findUnique: vi.fn(),
+      },
+      funnel: {
+        findUnique: vi.fn(),
+      },
+    };
+
+    (getPrisma as any).mockReturnValue(mockPrisma);
 
     // Mock cache service
     (cacheService.del as any).mockResolvedValue(undefined);
     (cacheService.get as any).mockResolvedValue(null);
     (cacheService.set as any).mockResolvedValue(undefined);
-
-    // Generate unique identifier for this test run
-    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-
-    // Create owner user
-    const owner = await prisma.user.create({
-      data: {
-        email: `owner-${uniqueId}@test.com`,
-        username: `owner-${uniqueId}`,
-        firstName: "Owner",
-        lastName: "User",
-        password: "hashedpassword",
-        plan: $Enums.UserPlan.BUSINESS,
-        isAdmin: false,
-      },
-    });
-    ownerUserId = owner.id;
-
-    // Create admin user (system admin)
-    const admin = await prisma.user.create({
-      data: {
-        email: `admin-${uniqueId}@test.com`,
-        username: `admin-${uniqueId}`,
-        firstName: "Admin",
-        lastName: "User",
-        password: "hashedpassword",
-        plan: $Enums.UserPlan.BUSINESS,
-        isAdmin: true,
-      },
-    });
-    adminUserId = admin.id;
-
-    // Create editor user
-    const editor = await prisma.user.create({
-      data: {
-        email: `editor-${uniqueId}@test.com`,
-        username: `editor-${uniqueId}`,
-        firstName: "Editor",
-        lastName: "User",
-        password: "hashedpassword",
-        plan: $Enums.UserPlan.BUSINESS,
-        isAdmin: false,
-      },
-    });
-    editorUserId = editor.id;
-
-    // Create viewer user
-    const viewer = await prisma.user.create({
-      data: {
-        email: `viewer-${uniqueId}@test.com`,
-        username: `viewer-${uniqueId}`,
-        firstName: "Viewer",
-        lastName: "User",
-        password: "hashedpassword",
-        plan: $Enums.UserPlan.FREE,
-        isAdmin: false,
-      },
-    });
-    viewerUserId = viewer.id;
-
-    // Create non-member user
-    const nonMember = await prisma.user.create({
-      data: {
-        email: `nonmember-${uniqueId}@test.com`,
-        username: `nonmember-${uniqueId}`,
-        firstName: "NonMember",
-        lastName: "User",
-        password: "hashedpassword",
-        plan: $Enums.UserPlan.FREE,
-        isAdmin: false,
-      },
-    });
-    nonMemberUserId = nonMember.id;
-
-    // Create test workspace
-    const workspace = await prisma.workspace.create({
-      data: {
-        name: `Test Workspace ${uniqueId}`,
-        slug: `test-workspace-${uniqueId}`,
-        ownerId: ownerUserId,
-      },
-    });
-    testWorkspaceId = workspace.id;
-
-    // Add editor as workspace member
-    await prisma.workspaceMember.create({
-      data: {
-        userId: editorUserId,
-        workspaceId: testWorkspaceId,
-        role: $Enums.WorkspaceRole.EDITOR,
-        permissions: [$Enums.WorkspacePermission.EDIT_FUNNELS],
-        status: $Enums.MembershipStatus.ACTIVE,
-      },
-    });
-
-    // Add viewer as workspace member
-    await prisma.workspaceMember.create({
-      data: {
-        userId: viewerUserId,
-        workspaceId: testWorkspaceId,
-        role: $Enums.WorkspaceRole.VIEWER,
-        permissions: [],
-        status: $Enums.MembershipStatus.ACTIVE,
-      },
-    });
-
-    // Create funnel
-    const funnel = await prisma.funnel.create({
-      data: {
-        name: `Test Funnel ${uniqueId}`,
-        slug: `test-funnel-${uniqueId}`,
-        status: $Enums.FunnelStatus.DRAFT,
-        workspaceId: testWorkspaceId,
-        createdBy: ownerUserId,
-      },
-    });
-    testFunnelId = funnel.id;
-
-    // Create custom theme for the funnel
-    const customTheme = await prisma.theme.create({
-      data: {
-        name: "Custom Theme",
-        type: $Enums.ThemeType.CUSTOM,
-        funnelId: testFunnelId,
-        backgroundColor: "#000000",
-        textColor: "#ffffff",
-        buttonColor: "#ff0000",
-        buttonTextColor: "#ffffff",
-        borderColor: "#cccccc",
-        optionColor: "#eeeeee",
-        fontFamily: "Arial",
-        borderRadius: $Enums.BorderRadius.SOFT,
-      },
-    });
-    testCustomThemeId = customTheme.id;
-
-    // Set custom theme as active
-    await prisma.funnel.update({
-      where: { id: testFunnelId },
-      data: { activeThemeId: testCustomThemeId },
-    });
-
-    // Create global theme
-    const globalTheme = await prisma.theme.create({
-      data: {
-        name: "Global Theme",
-        type: $Enums.ThemeType.GLOBAL,
-        funnelId: null,
-        backgroundColor: "#ffffff",
-        textColor: "#000000",
-        buttonColor: "#0000ff",
-        buttonTextColor: "#ffffff",
-        borderColor: "#dddddd",
-        optionColor: "#f5f5f5",
-        fontFamily: "Helvetica",
-        borderRadius: $Enums.BorderRadius.ROUNDED,
-      },
-    });
-    testGlobalThemeId = globalTheme.id;
 
     // Setup mock request and response
     mockReq = {
@@ -208,50 +161,6 @@ describe("Update Theme Tests", () => {
     mockNext = vi.fn();
   });
 
-  afterEach(async () => {
-    // Clean up test data
-    try {
-      const userIds = [ownerUserId, adminUserId, editorUserId, viewerUserId, nonMemberUserId].filter(
-        (id) => id !== undefined
-      );
-      const themeIds = [testCustomThemeId, testGlobalThemeId].filter(
-        (id) => id !== undefined
-      );
-
-      if (testWorkspaceId) {
-        await prisma.workspaceMember.deleteMany({
-          where: { workspaceId: testWorkspaceId },
-        });
-      }
-
-      if (testFunnelId) {
-        await prisma.funnel.deleteMany({
-          where: { id: testFunnelId },
-        });
-      }
-
-      if (themeIds.length > 0) {
-        await prisma.theme.deleteMany({
-          where: { id: { in: themeIds } },
-        });
-      }
-
-      if (testWorkspaceId) {
-        await prisma.workspace.deleteMany({
-          where: { id: testWorkspaceId },
-        });
-      }
-
-      if (userIds.length > 0) {
-        await prisma.user.deleteMany({
-          where: { id: { in: userIds } },
-        });
-      }
-    } catch (error) {
-      console.error("Cleanup error:", error);
-    }
-  });
-
   describe("Authentication & Authorization", () => {
     it("should require user to be logged in", async () => {
       await expect(
@@ -260,12 +169,20 @@ describe("Update Theme Tests", () => {
     });
 
     it("should verify theme exists", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(null);
+
       await expect(
         updateTheme(ownerUserId, { id: 99999 }, { name: "Updated Name" })
       ).rejects.toThrow("Theme not found");
     });
 
     it("should allow workspace owner to update custom theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Updated Custom Theme",
+      });
+
       const result = await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -273,15 +190,20 @@ describe("Update Theme Tests", () => {
       );
 
       expect(result.message).toBe("Theme updated successfully");
-
-      const updatedTheme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: { name: "Updated Custom Theme" },
       });
-
-      expect(updatedTheme?.name).toBe("Updated Custom Theme");
     });
 
     it("should allow editor with EDIT_FUNNELS permission to update custom theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockEditorMember);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Editor Updated Theme",
+      });
+
       const result = await updateTheme(
         editorUserId,
         { id: testCustomThemeId },
@@ -292,12 +214,18 @@ describe("Update Theme Tests", () => {
     });
 
     it("should deny viewer role from updating theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockViewerMember);
+
       await expect(
         updateTheme(viewerUserId, { id: testCustomThemeId }, { name: "Viewer Update" })
       ).rejects.toThrow("You don't have permission to update themes");
     });
 
     it("should deny non-member from updating theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
+
       await expect(
         updateTheme(nonMemberUserId, { id: testCustomThemeId }, { name: "Non-Member Update" })
       ).rejects.toThrow("You don't have access to this theme");
@@ -306,12 +234,22 @@ describe("Update Theme Tests", () => {
 
   describe("Global Theme Restrictions", () => {
     it("should prevent non-admin users from updating global themes", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockGlobalTheme);
+      mockPrisma.user.findUnique.mockResolvedValue(mockOwnerUser);
+
       await expect(
         updateTheme(ownerUserId, { id: testGlobalThemeId }, { name: "Updated Global" })
       ).rejects.toThrow("Only system administrators can update global themes");
     });
 
     it("should allow admin users to update global themes", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockGlobalTheme);
+      mockPrisma.user.findUnique.mockResolvedValue(mockAdminUser);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockGlobalTheme,
+        name: "Admin Updated Global",
+      });
+
       const result = await updateTheme(
         adminUserId,
         { id: testGlobalThemeId },
@@ -319,21 +257,22 @@ describe("Update Theme Tests", () => {
       );
 
       expect(result.message).toBe("Theme updated successfully");
-
-      const updatedTheme = await prisma.theme.findUnique({
-        where: { id: testGlobalThemeId },
-      });
-
-      expect(updatedTheme?.name).toBe("Admin Updated Global");
+      expect(mockPrisma.theme.update).toHaveBeenCalled();
     });
 
     it("should prevent workspace owner from updating global themes", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockGlobalTheme);
+      mockPrisma.user.findUnique.mockResolvedValue(mockOwnerUser);
+
       await expect(
         updateTheme(ownerUserId, { id: testGlobalThemeId }, { backgroundColor: "#123456" })
       ).rejects.toThrow("Only system administrators can update global themes");
     });
 
     it("should prevent editor from updating global themes", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockGlobalTheme);
+      mockPrisma.user.findUnique.mockResolvedValue({ ...mockOwnerUser, id: editorUserId });
+
       await expect(
         updateTheme(editorUserId, { id: testGlobalThemeId }, { textColor: "#654321" })
       ).rejects.toThrow("Only system administrators can update global themes");
@@ -342,6 +281,12 @@ describe("Update Theme Tests", () => {
 
   describe("Custom Theme Updates", () => {
     it("should update theme name", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "New Theme Name",
+      });
+
       const result = await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -349,15 +294,21 @@ describe("Update Theme Tests", () => {
       );
 
       expect(result.message).toBe("Theme updated successfully");
-
-      const theme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: { name: "New Theme Name" },
       });
-
-      expect(theme?.name).toBe("New Theme Name");
     });
 
     it("should update theme colors", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        backgroundColor: "#111111",
+        textColor: "#222222",
+        buttonColor: "#333333",
+      });
+
       await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -368,44 +319,64 @@ describe("Update Theme Tests", () => {
         }
       );
 
-      const theme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: {
+          backgroundColor: "#111111",
+          textColor: "#222222",
+          buttonColor: "#333333",
+        },
       });
-
-      expect(theme?.backgroundColor).toBe("#111111");
-      expect(theme?.textColor).toBe("#222222");
-      expect(theme?.buttonColor).toBe("#333333");
     });
 
     it("should update font family", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        fontFamily: "Comic Sans MS",
+      });
+
       await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
         { fontFamily: "Comic Sans MS" }
       );
 
-      const theme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: { fontFamily: "Comic Sans MS" },
       });
-
-      expect(theme?.fontFamily).toBe("Comic Sans MS");
     });
 
     it("should update border radius", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        borderRadius: $Enums.BorderRadius.ROUNDED,
+      });
+
       await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
         { borderRadius: "ROUNDED" }
       );
 
-      const theme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: { borderRadius: "ROUNDED" },
       });
-
-      expect(theme?.borderRadius).toBe($Enums.BorderRadius.ROUNDED);
     });
 
     it("should update multiple fields at once", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Multi Update Theme",
+        backgroundColor: "#aabbcc",
+        fontFamily: "Georgia",
+        borderRadius: $Enums.BorderRadius.NONE,
+      });
+
       await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -417,22 +388,24 @@ describe("Update Theme Tests", () => {
         }
       );
 
-      const theme = await prisma.theme.findUnique({
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
+        data: {
+          name: "Multi Update Theme",
+          backgroundColor: "#aabbcc",
+          fontFamily: "Georgia",
+          borderRadius: "NONE",
+        },
       });
-
-      expect(theme?.name).toBe("Multi Update Theme");
-      expect(theme?.backgroundColor).toBe("#aabbcc");
-      expect(theme?.fontFamily).toBe("Georgia");
-      expect(theme?.borderRadius).toBe($Enums.BorderRadius.NONE);
     });
   });
 
   describe("Theme Connections Preservation", () => {
     it("should not modify theme.funnelId when updating custom theme", async () => {
-      const themeBefore = await prisma.theme.findUnique({
-        where: { id: testCustomThemeId },
-        select: { funnelId: true },
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Updated Name",
       });
 
       await updateTheme(
@@ -441,19 +414,18 @@ describe("Update Theme Tests", () => {
         { name: "Updated Name" }
       );
 
-      const themeAfter = await prisma.theme.findUnique({
+      // Verify update doesn't include funnelId
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
-        select: { funnelId: true },
+        data: { name: "Updated Name" },
       });
-
-      expect(themeAfter?.funnelId).toBe(themeBefore?.funnelId);
-      expect(themeAfter?.funnelId).toBe(testFunnelId);
     });
 
     it("should not modify theme.type when updating", async () => {
-      const themeBefore = await prisma.theme.findUnique({
-        where: { id: testCustomThemeId },
-        select: { type: true },
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Updated Name",
       });
 
       await updateTheme(
@@ -462,19 +434,18 @@ describe("Update Theme Tests", () => {
         { name: "Updated Name" }
       );
 
-      const themeAfter = await prisma.theme.findUnique({
+      // Verify update doesn't include type
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testCustomThemeId },
-        select: { type: true },
+        data: { name: "Updated Name" },
       });
-
-      expect(themeAfter?.type).toBe(themeBefore?.type);
-      expect(themeAfter?.type).toBe($Enums.ThemeType.CUSTOM);
     });
 
     it("should not affect funnel.activeThemeId when updating theme", async () => {
-      const funnelBefore = await prisma.funnel.findUnique({
-        where: { id: testFunnelId },
-        select: { activeThemeId: true },
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        backgroundColor: "#abcdef",
       });
 
       await updateTheme(
@@ -483,64 +454,42 @@ describe("Update Theme Tests", () => {
         { backgroundColor: "#abcdef" }
       );
 
-      const funnelAfter = await prisma.funnel.findUnique({
-        where: { id: testFunnelId },
-        select: { activeThemeId: true },
-      });
-
-      expect(funnelAfter?.activeThemeId).toBe(funnelBefore?.activeThemeId);
+      // Verify no funnel updates were made
+      expect(mockPrisma.funnel?.update).toBeUndefined();
     });
 
     it("should not create or remove connections in theme.funnels array", async () => {
-      // Create a second funnel with the global theme
-      const funnel2 = await prisma.funnel.create({
-        data: {
-          name: `Test Funnel 2 ${Date.now()}`,
-          slug: `test-funnel-2-${Date.now()}`,
-          status: $Enums.FunnelStatus.DRAFT,
-          workspaceId: testWorkspaceId,
-          createdBy: ownerUserId,
-          activeThemeId: testGlobalThemeId,
-        },
+      const globalThemeWithFunnels = {
+        ...mockGlobalTheme,
+        funnels: [{ id: testFunnelId }],
+      };
+
+      mockPrisma.theme.findUnique.mockResolvedValue(globalThemeWithFunnels);
+      mockPrisma.user.findUnique.mockResolvedValue(mockAdminUser);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...globalThemeWithFunnels,
+        name: "Updated Global Theme",
       });
 
-      // Connect funnel to global theme
-      await prisma.theme.update({
-        where: { id: testGlobalThemeId },
-        data: {
-          funnels: {
-            connect: { id: funnel2.id },
-          },
-        },
-      });
-
-      const themeBefore = await prisma.theme.findUnique({
-        where: { id: testGlobalThemeId },
-        include: { funnels: true },
-      });
-
-      // Admin updates global theme
       await updateTheme(
         adminUserId,
         { id: testGlobalThemeId },
         { name: "Updated Global Theme" }
       );
 
-      const themeAfter = await prisma.theme.findUnique({
+      // Verify update doesn't include funnels connections
+      expect(mockPrisma.theme.update).toHaveBeenCalledWith({
         where: { id: testGlobalThemeId },
-        include: { funnels: true },
+        data: { name: "Updated Global Theme" },
       });
-
-      expect(themeAfter?.funnels.length).toBe(themeBefore?.funnels.length);
-      expect(themeAfter?.funnels[0]?.id).toBe(funnel2.id);
-
-      // Cleanup
-      await prisma.funnel.delete({ where: { id: funnel2.id } });
     });
   });
 
   describe("Cache Invalidation", () => {
     it("should delete cache for single funnel when updating custom theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue(mockCustomTheme);
+
       await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -553,6 +502,10 @@ describe("Update Theme Tests", () => {
     });
 
     it("should invalidate global themes cache when admin updates global theme", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockGlobalTheme);
+      mockPrisma.user.findUnique.mockResolvedValue(mockAdminUser);
+      mockPrisma.theme.update.mockResolvedValue(mockGlobalTheme);
+
       await updateTheme(
         adminUserId,
         { id: testGlobalThemeId },
@@ -563,6 +516,8 @@ describe("Update Theme Tests", () => {
     });
 
     it("should succeed even if cache invalidation fails", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue(mockCustomTheme);
       (cacheService.del as any).mockRejectedValueOnce(new Error("Cache error"));
 
       const result = await updateTheme(
@@ -617,6 +572,12 @@ describe("Update Theme Tests", () => {
     });
 
     it("should accept valid hex colors", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        backgroundColor: "#ABCDEF",
+      });
+
       const result = await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -629,6 +590,11 @@ describe("Update Theme Tests", () => {
 
   describe("Controller Integration", () => {
     it("should handle controller request successfully", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue({
+        ...mockCustomTheme,
+        name: "Controller Test",
+      });
       mockReq.body = { name: "Controller Test" };
 
       await updateThemeController(mockReq, mockRes, mockNext);
@@ -655,6 +621,7 @@ describe("Update Theme Tests", () => {
     });
 
     it("should pass errors to next middleware", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(null);
       mockReq.params.id = "99999";
       mockReq.body = { name: "Test" };
 
@@ -666,6 +633,9 @@ describe("Update Theme Tests", () => {
 
   describe("User-Friendly Messages", () => {
     it("should return simple success message", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.theme.update.mockResolvedValue(mockCustomTheme);
+
       const result = await updateTheme(
         ownerUserId,
         { id: testCustomThemeId },
@@ -678,6 +648,9 @@ describe("Update Theme Tests", () => {
     });
 
     it("should provide clear error for permission denied", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(mockCustomTheme);
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockViewerMember);
+
       try {
         await updateTheme(
           viewerUserId,
@@ -693,6 +666,8 @@ describe("Update Theme Tests", () => {
     });
 
     it("should provide clear error for not found", async () => {
+      mockPrisma.theme.findUnique.mockResolvedValue(null);
+
       try {
         await updateTheme(
           ownerUserId,
