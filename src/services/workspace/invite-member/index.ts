@@ -8,15 +8,15 @@ import { MembershipStatus } from "../../../generated/prisma-client";
 import {
   validateWorkspaceExists,
   validateInviterPermissions,
-  validateMemberAllocationLimit,
   validateInvitationRequest,
-  checkExistingMembership,
 } from "../../../helpers/workspace/invite-member/validation";
 import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
 } from "../../../helpers/workspace/invite-member";
 import { cacheService } from "../../cache/cache.service";
+import { WorkspaceMemberAllocations } from "../../../utils/workspace-member-allocations";
+import { BadRequestError } from "../../../errors";
 
 export class InviteMemberService {
   static async inviteMember(
@@ -30,7 +30,63 @@ export class InviteMemberService {
 
       validateInviterPermissions(workspace, inviterUserId);
 
-      await validateMemberAllocationLimit(workspace.ownerId, workspace.id);
+      // Check member allocation limit using WorkspaceMemberAllocations
+      const workspaceWithLimits = await prisma.workspace.findUnique({
+        where: { id: workspace.id },
+        select: {
+          planType: true,
+          addOns: {
+            where: { status: 'ACTIVE' },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspaceWithLimits!.planType,
+          addOns: workspaceWithLimits!.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot add more members. Workspace member limit reached."
+        );
+      }
+
+      // Check if this email has already been invited (PENDING) or is already a member (ACTIVE)
+      const existingMemberByEmail = await prisma.workspaceMember.findFirst({
+        where: {
+          workspaceId: workspace.id,
+          email: data.email,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      if (existingMemberByEmail) {
+        if (existingMemberByEmail.status === MembershipStatus.ACTIVE) {
+          throw new BadRequestError("User is already a member of this workspace");
+        } else {
+          throw new BadRequestError("This email has already been invited to the workspace");
+        }
+      }
 
       const userToInvite = await prisma.user.findUnique({
         where: { email: data.email },
@@ -85,9 +141,7 @@ export class InviteMemberService {
           invitationToken
         );
       } else {
-        // For existing users: Check membership then create pending membership
-        await checkExistingMembership(userToInvite.id, workspace.id);
-
+        // For existing users: Create pending membership
         await prisma.workspaceMember.create({
           data: {
             userId: userToInvite.id,

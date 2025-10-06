@@ -1,6 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
 import { WorkspacePermissions } from "../../workspace-permissions";
-import { AllocationService } from "../../../utils/allocations";
 import {
   BadRequestError,
   ForbiddenError,
@@ -82,22 +81,6 @@ export function validateInviterPermissions(
     })
   ) {
     throw new ForbiddenError("You don't have permission to invite members");
-  }
-}
-
-export async function validateMemberAllocationLimit(
-  workspaceOwnerId: number,
-  workspaceId: number
-): Promise<void> {
-  const canAddMember = await AllocationService.canAddMember(
-    workspaceOwnerId,
-    workspaceId
-  );
-
-  if (!canAddMember) {
-    throw new BadRequestError(
-      "Cannot add more members. Workspace member limit reached."
-    );
   }
 }
 
