@@ -7,7 +7,7 @@ import {
 import {
   validateWorkspaceExists,
   validateInviterPermissions,
-} from "../../../utils/workspace-validation";
+} from "../../../utils/workspace-utils/workspace-validation";
 
 export class GenerateInviteLinkService {
   static async generateInviteLink(

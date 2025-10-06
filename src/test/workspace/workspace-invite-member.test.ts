@@ -39,7 +39,7 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../utils/workspace-validation", () => ({
+vi.mock("../../utils/workspace-utils/workspace-validation", () => ({
   validateWorkspaceExists: vi.fn(),
   validateInviterPermissions: vi.fn(),
   validateInvitationRequest: vi.fn(),
@@ -54,7 +54,7 @@ describe("Workspace Invite Member Controller Tests", () => {
 
   beforeEach(async () => {
     const validationHelpers = await import(
-      "../../utils/workspace-validation"
+      "../../utils/workspace-utils/workspace-validation"
     );
 
     mockPrisma = mockPrismaInstance;

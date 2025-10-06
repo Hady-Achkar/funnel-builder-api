@@ -12,7 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import { MembershipStatus } from "../../../generated/prisma-client";
 import { cacheService } from "../../cache/cache.service";
-import { WorkspaceMemberAllocations } from "../../../utils/workspace-member-allocations";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
 
 export class JoinByLinkService {
   async joinByLink(

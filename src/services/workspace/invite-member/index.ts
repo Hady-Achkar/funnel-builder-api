@@ -9,13 +9,13 @@ import {
   validateWorkspaceExists,
   validateInviterPermissions,
   validateInvitationRequest,
-} from "../../../utils/workspace-validation";
+} from "../../../utils/workspace-utils/workspace-validation";
 import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
 } from "./utils/send-emails";
 import { cacheService } from "../../cache/cache.service";
-import { WorkspaceMemberAllocations } from "../../../utils/workspace-member-allocations";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
 import { BadRequestError } from "../../../errors";
 
 export class InviteMemberService {

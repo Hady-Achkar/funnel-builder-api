@@ -27,7 +27,7 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../utils/workspace-validation", () => ({
+vi.mock("../../utils/workspace-utils/workspace-validation", () => ({
   validateWorkspaceExists: vi.fn(),
   validateInviterPermissions: vi.fn(),
 }));
@@ -42,7 +42,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
   beforeEach(async () => {
     const validationHelpers = await import(
-      "../../utils/workspace-validation"
+      "../../utils/workspace-utils/workspace-validation"
     );
     const jwt = await import("jsonwebtoken");
 
