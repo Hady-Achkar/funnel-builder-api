@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DeleteWorkspaceService } from "../../services/workspace/delete";
 import { getPrisma } from "../../lib/prisma";
-import { BadRequestError, ForbiddenError, NotFoundError } from "../../errors/http-errors";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../../errors/http-errors";
 import { FunnelStatus, DomainStatus } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
@@ -62,7 +66,7 @@ describe("Workspace Deletion Tests", () => {
 
       expect(result).toEqual({
         success: true,
-        message: 'Workspace "Test Workspace" has been successfully deleted',
+        message: "Workspace has been deleted successfully",
       });
 
       expect(mockPrisma.workspace.findUnique).toHaveBeenCalledWith({
@@ -143,7 +147,9 @@ describe("Workspace Deletion Tests", () => {
 
       await expect(
         DeleteWorkspaceService.deleteBySlug(userId, slug)
-      ).rejects.toThrow("Cannot delete workspace with existing funnels. Please delete all funnels first.");
+      ).rejects.toThrow(
+        "Cannot delete workspace with existing funnels. Please delete all funnels first."
+      );
     });
 
     it("should throw BadRequestError when workspace has existing domains", async () => {
@@ -173,7 +179,9 @@ describe("Workspace Deletion Tests", () => {
 
       await expect(
         DeleteWorkspaceService.deleteBySlug(userId, slug)
-      ).rejects.toThrow("Cannot delete workspace with existing domains. Please remove all domains first.");
+      ).rejects.toThrow(
+        "Cannot delete workspace with existing domains. Please remove all domains first."
+      );
     });
 
     it("should delete workspace members before deleting workspace", async () => {

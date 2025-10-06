@@ -1,4 +1,4 @@
-import { UserPlan, AddOnType } from "../../generated/prisma-client";
+import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 /**
  * Centralized utility for calculating workspace allocations based on user plan and add-ons

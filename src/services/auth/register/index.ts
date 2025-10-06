@@ -5,7 +5,7 @@ import {
   RegisterUserResponse,
   RegisterWorkspaceResponse,
 } from "../../../types/auth/register";
-import { UserWorkspaceAllocations } from "../../../utils/user-workspace-allocations";
+import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
 import { TrialPeriodCalculator } from "../../../utils/trial-period";
 import { hashPassword } from "./utils/hash-password";
 import {

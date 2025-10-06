@@ -41,7 +41,9 @@ export class DeleteWorkspaceService {
       }
 
       if (workspace.owner.id !== userId) {
-        throw new ForbiddenError("Only workspace owner can delete the workspace");
+        throw new ForbiddenError(
+          "Only workspace owner can delete the workspace"
+        );
       }
 
       if (workspace.funnels.length > 0) {
@@ -77,7 +79,9 @@ export class DeleteWorkspaceService {
         await cacheService.invalidateWorkspaceCache(workspace.id);
 
         // Invalidate workspace cache by slug (new pattern without userId)
-        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
+        await cacheService.del(`slug:${workspace.slug}`, {
+          prefix: "workspace",
+        });
 
         // Invalidate user workspaces cache for owner
         await cacheService.invalidateUserWorkspacesCache(workspace.owner.id);
@@ -93,7 +97,7 @@ export class DeleteWorkspaceService {
 
       const response: DeleteWorkspaceResponse = {
         success: true,
-        message: `Workspace "${workspace.name}" has been successfully deleted`,
+        message: "Workspace has been deleted successfully",
       };
 
       return deleteWorkspaceResponse.parse(response);

@@ -12,7 +12,7 @@ import { rolePermissionPresets } from "../../../types/workspace/update";
 import { cacheService } from "../../cache/cache.service";
 import { determineWorkspacePlanType } from "./utils/workspace-plan";
 import { isSlugReserved } from "./utils/reserved-slugs";
-import { UserWorkspaceAllocations } from "../../../utils/user-workspace-allocations";
+import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
 export class CreateWorkspaceService {
   static async create(
     userId: number,
