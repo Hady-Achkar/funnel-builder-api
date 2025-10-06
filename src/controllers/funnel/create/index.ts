@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
 import { createFunnel } from "../../../services/funnel/create";
 import { createFunnelRequest } from "../../../types/funnel/create";
@@ -10,7 +10,7 @@ export const createFunnelController = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<Response | void> => {
   try {
     const validatedData = createFunnelRequest.parse(req.body);
 
@@ -22,11 +22,9 @@ export const createFunnelController = async (
     const { response, workspaceId } = await createFunnel(userId, validatedData);
 
     try {
-      // Invalidate funnel list cache
       const funnelsCacheKey = `workspace:${workspaceId}:funnels:all`;
       await cacheService.del(funnelsCacheKey);
 
-      // Invalidate workspace cache (includes funnel list)
       const workspaceSlug = validatedData.workspaceSlug;
       const workspaceCacheKey = `workspace:${workspaceSlug}:user:${userId}`;
       await cacheService.del(workspaceCacheKey);
@@ -43,15 +41,14 @@ export const createFunnelController = async (
       "[FUNNEL_CREATE_CONTROLLER_ERROR] Error in funnel create controller:",
       error
     );
-    if (error instanceof z.ZodError) {
+
+    if (error instanceof ZodError) {
+      const firstError = error.issues[0];
       return res.status(400).json({
-        error: "Validation failed",
-        details:
-          error.issues.length > 0
-            ? error.issues.map((issue) => issue.message)
-            : ["Invalid request data"],
+        error: firstError?.message || "Invalid request data",
       });
     }
+
     return next(error);
   }
 };

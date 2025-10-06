@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { 
-  hasPermissionToCreateFunnel, 
-  generateLinkingIdMap, 
-  replaceLinkingIdsInContent, 
-  getNewLinkingIdForPage 
+import {
+  hasPermissionToCreateFunnel,
+  generateLinkingIdMap,
+  replaceLinkingIdsInContent,
+  getNewLinkingIdForPage
 } from "../../../helpers/funnel/createFromTemplate";
-import { 
-  generateSlug, 
-  generateUniqueSlug 
+import {
+  generateSlug,
+  generateUniqueSlug
 } from "../../../helpers/funnel/shared";
 import {
   createFromTemplateParams,
@@ -19,6 +19,7 @@ import {
   createFromTemplateResponse,
   CreateFromTemplateResponse,
 } from "../../../types/funnel/createFromTemplate";
+import { AllocationService } from "../../../utils/allocations";
 
 export const createFromTemplate = async (
   templateId: number,
@@ -52,6 +53,15 @@ export const createFromTemplate = async (
 
     if (!workspace) {
       throw new Error("The selected workspace does not exist");
+    }
+
+    // Check workspace funnel allocation limit
+    const canCreate = await AllocationService.canCreateFunnel(userId, workspace.id);
+    if (!canCreate) {
+      const allocations = await AllocationService.checkAllocations(userId, workspace.id);
+      throw new Error(
+        `You've reached the maximum of ${allocations.allocations.workspaceAllocations.maxFunnels} funnels for this workspace. Please upgrade your plan to create more funnels.`
+      );
     }
 
     // Check permissions
@@ -143,15 +153,37 @@ export const createFromTemplate = async (
         },
       });
 
-      // Create theme
-      const theme = await tx.theme.create({ data: {} });
+      // Create theme with funnelId to establish customTheme relation
+      const theme = await tx.theme.create({
+        data: {
+          funnelId: funnel.id,
+          type: 'CUSTOM',
+        },
+      });
 
-      // Update funnel with theme
+      // Set the active theme for the funnel
       const funnelWithTheme = await tx.funnel.update({
         where: { id: funnel.id },
-        data: { themeId: theme.id },
+        data: { activeThemeId: theme.id },
         include: {
-          theme: true,
+          activeTheme: true,
+        },
+      });
+
+      // Create funnel settings
+      await tx.funnelSettings.create({
+        data: {
+          funnelId: funnel.id,
+          defaultSeoTitle: null,
+          defaultSeoDescription: null,
+          defaultSeoKeywords: null,
+          favicon: null,
+          ogImage: null,
+          googleAnalyticsId: null,
+          facebookPixelId: null,
+          cookieConsentText: null,
+          privacyPolicyUrl: null,
+          termsOfServiceUrl: null,
         },
       });
 
@@ -195,98 +227,13 @@ export const createFromTemplate = async (
       return { funnel: funnelWithTheme, pages: createdPages, updatedTemplate };
     });
 
-    // Cache management
+    // Invalidate caches
     try {
-      // Cache the individual funnel with full data including pages (without content)
-      const fullFunnelCacheKey = `workspace:${workspace.id}:funnel:${result.funnel.id}:full`;
-      const pagesWithoutContent = result.pages.map(page => ({
-        id: page.id,
-        name: page.name,
-        order: page.order,
-        linkingId: page.linkingId,
-        seoTitle: page.seoTitle,
-        seoDescription: page.seoDescription,
-        seoKeywords: page.seoKeywords,
-      }));
-
-      const fullFunnelData = {
-        id: result.funnel.id,
-        name: result.funnel.name,
-        slug: result.funnel.slug,
-        status: result.funnel.status,
-        workspaceId: result.funnel.workspaceId,
-        createdBy: result.funnel.createdBy,
-        themeId: result.funnel.themeId,
-        createdAt: result.funnel.createdAt,
-        updatedAt: result.funnel.updatedAt,
-        theme: result.funnel.theme,
-        pages: pagesWithoutContent,
-      };
-      await cacheService.set(fullFunnelCacheKey, fullFunnelData, { ttl: 0 });
-
-      // Update the workspace's all funnels cache
-      const allFunnelsCacheKey = `workspace:${workspace.id}:funnels:all`;
-      const existingFunnels = await cacheService.get<any[]>(allFunnelsCacheKey) || [];
-      
-      // Add new funnel summary to the list
-      const funnelSummary = {
-        id: result.funnel.id,
-        name: result.funnel.name,
-        slug: result.funnel.slug,
-        status: result.funnel.status,
-        workspaceId: result.funnel.workspaceId,
-        createdBy: result.funnel.createdBy,
-        themeId: result.funnel.themeId,
-        createdAt: result.funnel.createdAt,
-        updatedAt: result.funnel.updatedAt,
-        theme: result.funnel.theme,
-      };
-      
-      const updatedFunnels = [...existingFunnels, funnelSummary];
-      await cacheService.set(allFunnelsCacheKey, updatedFunnels, { ttl: 0 });
-
-      // Cache each page content separately
-      for (const page of result.pages) {
-        const pageCacheKey = `funnel:${result.funnel.id}:page:${page.id}:full`;
-        const pageData = {
-          id: page.id,
-          name: page.name,
-          content: page.content,
-          order: page.order,
-          funnelId: page.funnelId,
-          linkingId: page.linkingId,
-          seoTitle: page.seoTitle,
-          seoDescription: page.seoDescription,
-          seoKeywords: page.seoKeywords,
-          createdAt: page.createdAt,
-          updatedAt: page.updatedAt,
-        };
-        await cacheService.set(pageCacheKey, pageData, { ttl: 0 });
-      }
-
-      // Invalidate old list caches
-      await cacheService.del(
-        `workspace:${workspace.id}:funnels:list`
-      );
-
-      await cacheService.del(
-        `user:${userId}:workspace:${workspace.id}:funnels`
-      );
-
-      // Update template cache with new usage count
-      const templateCacheKey = `template:${validatedParams.templateId}:full`;
-      const cachedTemplate = await cacheService.get(templateCacheKey);
-      
-      if (cachedTemplate && typeof cachedTemplate === 'object') {
-        const updatedTemplateCache = {
-          ...cachedTemplate,
-          usageCount: result.updatedTemplate.usageCount,
-          updatedAt: new Date(),
-        };
-        await cacheService.set(templateCacheKey, updatedTemplateCache, { ttl: 0 });
-      }
+      await cacheService.del(`workspace:${workspace.id}:funnels:all`);
+      await cacheService.del(`workspace:${workspace.id}:funnels:list`);
+      await cacheService.del(`user:${userId}:workspace:${workspace.id}:funnels`);
     } catch (cacheError) {
-      console.warn("Cache update failed but funnel was created from template:", cacheError);
+      console.warn("Cache invalidation failed but funnel was created from template:", cacheError);
     }
 
     const response = {

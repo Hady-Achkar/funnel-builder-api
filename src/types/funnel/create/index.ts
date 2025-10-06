@@ -4,25 +4,25 @@ import { $Enums } from "../../../generated/prisma-client";
 
 export const createFunnelRequest = z.object({
   name: z
-    .string({ message: "Funnel name must be a string" })
+    .string({ message: "Please enter a funnel name" })
     .trim()
-    .min(1, "Funnel name cannot be empty")
-    .max(100, "Funnel name must be less than 100 characters")
+    .min(1, "Your funnel needs a name")
+    .max(100, "Funnel name is too long. Please keep it under 100 characters")
     .optional()
     .default(() => format(new Date(), "dd.MM.yyyy HH:mm:ss")),
   slug: z
-    .string({ message: "Funnel slug must be a string" })
+    .string({ message: "Please provide a valid slug" })
     .trim()
-    .min(1, "Funnel slug cannot be empty")
-    .max(100, "Funnel slug must be less than 100 characters")
+    .min(1, "Slug cannot be empty")
+    .max(100, "Slug is too long. Please keep it under 100 characters")
     .optional(),
   status: z
     .enum($Enums.FunnelStatus, {
-      message: "Status must be DRAFT, LIVE, ARCHIVED, or SHARED",
+      message: "Please choose a valid status (Draft, Live, Archived, or Shared)",
     })
     .optional()
     .default($Enums.FunnelStatus.DRAFT),
-  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  workspaceSlug: z.string().min(1, "Please select a workspace"),
 });
 
 export const createFunnelResponse = z.object({
@@ -32,41 +32,41 @@ export const createFunnelResponse = z.object({
 
 export const workspacePayload = z.object(
   {
-    id: z.number({ message: "Workspace ID must be a valid number" }),
-    name: z.string({ message: "Workspace name must be a string" }),
-    ownerId: z.number({ message: "Owner ID must be a valid number" }),
+    id: z.number({ message: "Invalid workspace" }),
+    name: z.string({ message: "Workspace name is required" }),
+    ownerId: z.number({ message: "Workspace owner information is missing" }),
   },
-  { message: "Workspace data is required" }
+  { message: "Workspace information is required" }
 );
 
 export const workspaceMemberPayload = z.object({
-  role: z.enum($Enums.WorkspaceRole, "Member role must be valid"),
+  role: z.enum($Enums.WorkspaceRole, "Invalid member role"),
   permissions: z.array(z.enum($Enums.WorkspacePermission)),
 });
 
 export const createFunnelPayload = z.object(
   {
     name: z
-      .string({ message: "Funnel name must be a string" })
-      .min(1, "Funnel name cannot be empty")
-      .max(100, "Funnel name must be less than 100 characters"),
+      .string({ message: "Please enter a funnel name" })
+      .min(1, "Your funnel needs a name")
+      .max(100, "Funnel name is too long. Please keep it under 100 characters"),
     slug: z
-      .string({ message: "Funnel slug must be a string" })
-      .min(1, "Funnel slug cannot be empty")
-      .max(100, "Funnel slug must be less than 100 characters"),
+      .string({ message: "Please provide a valid slug" })
+      .min(1, "Slug cannot be empty")
+      .max(100, "Slug is too long. Please keep it under 100 characters"),
     status: z.enum(
       $Enums.FunnelStatus,
-      "Status must be DRAFT, LIVE, ARCHIVED, or SHARED"
+      "Please choose a valid status (Draft, Live, Archived, or Shared)"
     ),
-    workspaceId: z.number({ message: "Workspace ID must be a valid number" }),
-    createdBy: z.number({ message: "Creator ID must be a valid number" }),
+    workspaceId: z.number({ message: "Invalid workspace" }),
+    createdBy: z.number({ message: "User information is missing" }),
   },
-  { message: "Funnel creation data is required" }
+  { message: "Funnel information is required" }
 );
 
 export const createFunnelSettingsPayload = z.object(
   {
-    funnelId: z.number({ message: "Funnel ID must be a valid number" }),
+    funnelId: z.number({ message: "Invalid funnel" }),
     defaultSeoTitle: z.string().nullable().optional(),
     defaultSeoDescription: z.string().nullable().optional(),
     defaultSeoKeywords: z.string().nullable().optional(),
@@ -78,33 +78,33 @@ export const createFunnelSettingsPayload = z.object(
     privacyPolicyUrl: z.string().nullable().optional(),
     termsOfServiceUrl: z.string().nullable().optional(),
   },
-  { message: "Funnel settings data is required" }
+  { message: "Funnel settings information is required" }
 );
 
 export const updateFunnelWithThemePayload = z.object(
   {
-    themeId: z.number({ message: "Theme ID must be a valid number" }),
+    activeThemeId: z.number({ message: "Invalid theme" }),
   },
-  { message: "Theme update data is required" }
+  { message: "Theme information is required" }
 );
 
 export const createHomePagePayload = z.object(
   {
     name: z
-      .string({ message: "Page name must be a string" })
-      .min(1, "Page name cannot be empty")
-      .max(100, "Page name must be less than 100 characters"),
-    content: z.string({ message: "Page content must be a string" }),
+      .string({ message: "Please enter a page name" })
+      .min(1, "Your page needs a name")
+      .max(100, "Page name is too long. Please keep it under 100 characters"),
+    content: z.string({ message: "Page content is required" }),
     order: z
-      .number({ message: "Page order must be a valid number" })
+      .number({ message: "Please provide a valid page order" })
       .min(1, "Page order must be at least 1"),
-    funnelId: z.number({ message: "Funnel ID must be a valid number" }),
+    funnelId: z.number({ message: "Invalid funnel" }),
     linkingId: z
-      .string({ message: "Linking ID must be a string" })
-      .min(1, "Linking ID cannot be empty"),
+      .string({ message: "Please provide a valid page link" })
+      .min(1, "Page link cannot be empty"),
     type: z.enum($Enums.PageType),
   },
-  { message: "Home page creation data is required" }
+  { message: "Page information is required" }
 );
 
 export type CreateFunnelRequest = z.infer<typeof createFunnelRequest>;
