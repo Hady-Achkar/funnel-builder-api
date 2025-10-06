@@ -168,14 +168,7 @@ model Workspace {
   updatedAt              DateTime @updatedAt
   image                  String?
   status                 WorkspaceStatus @default(ACTIVE) // Workspace status (ACTIVE or DRAFT)
-
-  // Plan-based resource limits
-  adminBudget            Int      @default(1)   // Number of admins allocated to this workspace
-  funnelLimit            Int      @default(3)   // Maximum funnels this workspace can have
-  pageLimit              Int      @default(35)  // Maximum pages per funnel in this workspace
-  customDomainLimit      Int      @default(1)   // Maximum custom domains this workspace can have
-  subdomainLimit         Int      @default(1)   // Maximum subdomains this workspace can have
-  planType               UserPlan @default(FREE) // Plan type for this workspace
+  planType               UserPlan @default(FREE) // Plan type for this workspace (limits calculated from planType + addOns)
 
   owner             User                        @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members           WorkspaceMember[]

@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   WorkspaceRole,
   WorkspacePermission,
+  UserPlan,
 } from "../../../generated/prisma-client";
 
 // Request schema for creating a workspace
@@ -38,6 +39,8 @@ export const createWorkspaceRequest = z.object({
       }
     }, "Image must be a valid URL")
     .optional(),
+
+  planType: z.nativeEnum(UserPlan).optional(),
 });
 
 export type CreateWorkspaceRequest = z.infer<typeof createWorkspaceRequest>;
