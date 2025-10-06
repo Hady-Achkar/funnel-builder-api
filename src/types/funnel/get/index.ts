@@ -15,7 +15,7 @@ export const getFunnelResponse = z.object({
   activeThemeId: z.number().nullable(),
   createdAt: z.union([z.date(), z.string()]),
   updatedAt: z.union([z.date(), z.string()]),
-  activeTheme: z.object({
+  customTheme: z.object({
     id: z.number(),
     name: z.string(),
     backgroundColor: z.string(),
@@ -26,6 +26,7 @@ export const getFunnelResponse = z.object({
     optionColor: z.string(),
     fontFamily: z.string(),
     borderRadius: z.nativeEnum($Enums.BorderRadius),
+    type: z.nativeEnum($Enums.ThemeType),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),
   }).nullable(),

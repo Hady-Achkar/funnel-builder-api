@@ -81,7 +81,7 @@ export const getFunnel = async (
       const funnelFromDb = await prisma.funnel.findUnique({
         where: { id: validatedParams.funnelId },
         include: {
-          activeTheme: true,
+          customTheme: true,
           pages: {
             orderBy: { order: "asc" },
             select: {
@@ -111,7 +111,7 @@ export const getFunnel = async (
         activeThemeId: funnelFromDb.activeThemeId,
         createdAt: funnelFromDb.createdAt,
         updatedAt: funnelFromDb.updatedAt,
-        activeTheme: funnelFromDb.activeTheme,
+        customTheme: funnelFromDb.customTheme,
         pages: funnelFromDb.pages,
       };
 
