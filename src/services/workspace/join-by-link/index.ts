@@ -12,7 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import { MembershipStatus } from "../../../generated/prisma-client";
 import { cacheService } from "../../cache/cache.service";
-import { validateMemberAllocationLimit } from "../../../helpers/workspace/invite-member/validation";
+import { WorkspaceMemberAllocations } from "../../../utils/workspace-member-allocations";
 
 export class JoinByLinkService {
   async joinByLink(
@@ -76,8 +76,44 @@ export class JoinByLinkService {
         }
       }
 
-      // Check if workspace has reached member allocation limit
-      await validateMemberAllocationLimit(workspace.ownerId, workspace.id);
+      // Check if workspace has reached member allocation limit using WorkspaceMemberAllocations
+      const workspaceWithLimits = await prisma.workspace.findUnique({
+        where: { id: workspace.id },
+        select: {
+          planType: true,
+          addOns: {
+            where: { status: 'ACTIVE' },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspaceWithLimits!.planType,
+          addOns: workspaceWithLimits!.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot add more members. Workspace member limit reached."
+        );
+      }
 
       const rolePermTemplate =
         await prisma.workspaceRolePermTemplate.findUnique({

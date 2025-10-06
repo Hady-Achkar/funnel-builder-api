@@ -28,7 +28,7 @@ vi.mock("../../lib/prisma", () => ({
   getPrisma: vi.fn(() => mockPrismaInstance),
 }));
 
-vi.mock("../../helpers/workspace/invite-member", () => ({
+vi.mock("../../services/workspace/invite-member/utils/send-emails", () => ({
   sendWorkspaceInvitationEmail: vi.fn(),
   sendWorkspaceRegisterInvitationEmail: vi.fn(),
 }));
@@ -39,7 +39,7 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../helpers/workspace/invite-member/validation", () => ({
+vi.mock("../../utils/workspace-validation", () => ({
   validateWorkspaceExists: vi.fn(),
   validateInviterPermissions: vi.fn(),
   validateInvitationRequest: vi.fn(),
@@ -54,7 +54,7 @@ describe("Workspace Invite Member Controller Tests", () => {
 
   beforeEach(async () => {
     const validationHelpers = await import(
-      "../../helpers/workspace/invite-member/validation"
+      "../../utils/workspace-validation"
     );
 
     mockPrisma = mockPrismaInstance;

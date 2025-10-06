@@ -9,11 +9,11 @@ import {
   validateWorkspaceExists,
   validateInviterPermissions,
   validateInvitationRequest,
-} from "../../../helpers/workspace/invite-member/validation";
+} from "../../../utils/workspace-validation";
 import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
-} from "../../../helpers/workspace/invite-member";
+} from "./utils/send-emails";
 import { cacheService } from "../../cache/cache.service";
 import { WorkspaceMemberAllocations } from "../../../utils/workspace-member-allocations";
 import { BadRequestError } from "../../../errors";

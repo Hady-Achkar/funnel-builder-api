@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
-import { WORKSPACE_INVITATION_EMAIL } from "../../../constants/emails/workspace/invitation";
-import { WORKSPACE_REGISTER_INVITATION_EMAIL } from "../../../constants/emails/workspace/register-invitation";
+import { WORKSPACE_INVITATION_EMAIL } from "../../../../constants/emails/workspace/invitation";
+import { WORKSPACE_REGISTER_INVITATION_EMAIL } from "../../../../constants/emails/workspace/register-invitation";
 
 let initialized = false;
 
@@ -92,4 +92,3 @@ export async function sendWorkspaceRegisterInvitationEmail(
     throw new Error("Failed to send workspace register invitation email");
   }
 }
-
