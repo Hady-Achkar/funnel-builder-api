@@ -18,7 +18,6 @@ export class GetUserDataService {
           isAdmin: true,
           plan: true,
           balance: true,
-          maximumAdmins: true,
           trialStartDate: true,
           trialEndDate: true,
           createdAt: true,

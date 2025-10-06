@@ -124,7 +124,6 @@ export class SubscriptionCreateService {
           isAdmin: false,
           plan: details.planType,
           maximumWorkspaces: finalLimits.maximumWorkspaces,
-          maximumAdmins: details.admins,
           trialStartDate,
           trialEndDate,
           referralLinkUsedId: affiliateLink?.id || null,

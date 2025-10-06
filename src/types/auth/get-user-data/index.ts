@@ -12,7 +12,6 @@ export type GetUserDataResponse = Pick<
   | "isAdmin"
   | "plan"
   | "balance"
-  | "maximumAdmins"
   | "trialStartDate"
   | "trialEndDate"
   | "createdAt"
@@ -30,7 +29,6 @@ export const getUserDataResponse = z.object({
     isAdmin: z.boolean(),
     plan: z.nativeEnum(UserPlan),
     balance: z.number(),
-    maximumAdmins: z.number(),
     trialStartDate: z.date().nullable(),
     trialEndDate: z.date().nullable(),
     createdAt: z.date(),
