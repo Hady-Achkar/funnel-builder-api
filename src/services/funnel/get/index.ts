@@ -81,7 +81,7 @@ export const getFunnel = async (
       const funnelFromDb = await prisma.funnel.findUnique({
         where: { id: validatedParams.funnelId },
         include: {
-          theme: true,
+          activeTheme: true,
           pages: {
             orderBy: { order: "asc" },
             select: {
@@ -108,23 +108,22 @@ export const getFunnel = async (
         status: funnelFromDb.status,
         workspaceId: funnelFromDb.workspaceId,
         createdBy: funnelFromDb.createdBy,
-        themeId: funnelFromDb.themeId,
+        activeThemeId: funnelFromDb.activeThemeId,
         createdAt: funnelFromDb.createdAt,
         updatedAt: funnelFromDb.updatedAt,
-        theme: funnelFromDb.theme,
+        activeTheme: funnelFromDb.activeTheme,
         pages: funnelFromDb.pages,
       };
 
       // Cache the result
-      await cacheService.set(fullFunnelCacheKey, funnel, { ttl: 0 });
+      try {
+        await cacheService.set(fullFunnelCacheKey, funnel, { ttl: 0 });
+      } catch (cacheError) {
+        console.warn("Failed to cache funnel:", cacheError);
+      }
     }
 
-    const response = {
-      message: `Successfully retrieved funnel ${funnel.name}`,
-      funnel: funnel,
-    };
-
-    return getFunnelResponse.parse(response);
+    return getFunnelResponse.parse(funnel);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const firstError = error.issues[0];

@@ -170,6 +170,23 @@ export const createFromTemplate = async (
         },
       });
 
+      // Create funnel settings
+      await tx.funnelSettings.create({
+        data: {
+          funnelId: funnel.id,
+          defaultSeoTitle: null,
+          defaultSeoDescription: null,
+          defaultSeoKeywords: null,
+          favicon: null,
+          ogImage: null,
+          googleAnalyticsId: null,
+          facebookPixelId: null,
+          cookieConsentText: null,
+          privacyPolicyUrl: null,
+          termsOfServiceUrl: null,
+        },
+      });
+
       // Create pages with updated linking IDs and content
       const createdPages = [];
       for (const templatePage of template.pages) {
