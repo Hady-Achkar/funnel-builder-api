@@ -9,6 +9,9 @@ const mockPrismaInstance = {
   workspace: {
     findUnique: vi.fn(),
   },
+  workspaceMember: {
+    count: vi.fn(),
+  },
   workspaceRolePermTemplate: {
     findUnique: vi.fn(),
   },
@@ -74,6 +77,14 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       undefined
     );
     mockJwt.sign.mockReturnValue("mock-jwt-token");
+
+    // Set up default allocation mocks (workspace has space for members)
+    mockPrisma.workspace.findUnique.mockResolvedValue({
+      id: 1,
+      planType: 'FREE',
+      addOns: [],
+    });
+    mockPrisma.workspaceMember.count.mockResolvedValue(0);
   });
 
   describe("Successful Link Generation", () => {
@@ -315,6 +326,44 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       );
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ForbiddenError));
+    });
+  });
+
+  describe("Member Allocation Limit", () => {
+    it("should prevent link generation when workspace member limit is reached", async () => {
+      const { GenerateInviteLinkService } = await import(
+        "../../services/workspace/generate-invite-link"
+      );
+      const { BadRequestError } = await import("../../errors");
+
+      const serviceSpy = vi
+        .spyOn(GenerateInviteLinkService, "generateInviteLink")
+        .mockRejectedValue(
+          new BadRequestError(
+            "Cannot generate invite link. Workspace member limit reached."
+          )
+        );
+
+      mockReq.userId = 1;
+      mockReq.params = { slug: "test-workspace" };
+      mockReq.query = {
+        role: WorkspaceRole.EDITOR,
+      };
+
+      await GenerateInviteLinkController.generateInviteLink(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Cannot generate invite link. Workspace member limit reached.",
+        })
+      );
+      expect(mockRes.json).not.toHaveBeenCalled();
+
+      serviceSpy.mockRestore();
     });
   });
 

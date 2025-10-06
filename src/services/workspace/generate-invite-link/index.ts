@@ -8,6 +8,9 @@ import {
   validateWorkspaceExists,
   validateInviterPermissions,
 } from "../../../utils/workspace-utils/workspace-validation";
+import { getPrisma } from "../../../lib/prisma";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
+import { BadRequestError } from "../../../errors";
 
 export class GenerateInviteLinkService {
   static async generateInviteLink(
@@ -18,6 +21,46 @@ export class GenerateInviteLinkService {
       const workspace = await validateWorkspaceExists(data.workspaceSlug);
 
       validateInviterPermissions(workspace, creatorUserId);
+
+      // Check member allocation limit using WorkspaceMemberAllocations
+      const prisma = getPrisma();
+      const workspaceWithLimits = await prisma.workspace.findUnique({
+        where: { id: workspace.id },
+        select: {
+          planType: true,
+          addOns: {
+            where: { status: 'ACTIVE' },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspaceWithLimits!.planType,
+          addOns: workspaceWithLimits!.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot generate invite link. Workspace member limit reached."
+        );
+      }
 
       const linkId = uuidv4();
 
