@@ -220,33 +220,29 @@ describe("Funnel Cache Invalidation Tests", () => {
     it("should invalidate workspace cache when duplicating a funnel", async () => {
       const originalFunnelId = 1;
       const newFunnelId = 2;
-      const workspaceSlug = "test-workspace";
+      const workspaceId = 1;
 
       mockReq.params = { id: String(originalFunnelId) };
       mockReq.body = { name: "Duplicated Funnel" };
 
       (duplicateFunnel as any).mockResolvedValue({
-        message: "Funnel duplicated successfully",
-        funnelId: newFunnelId,
-      });
-
-      mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: workspaceSlug },
+        response: {
+          message: "Funnel duplicated successfully",
+          funnelId: newFunnelId,
+        },
+        workspaceId: workspaceId,
       });
 
       await duplicateFunnelController(mockReq, mockRes, mockNext);
 
-      expect(mockPrisma.funnel.findUnique).toHaveBeenCalledWith({
-        where: { id: newFunnelId },
-        select: {
-          workspace: {
-            select: { slug: true },
-          },
-        },
-      });
-
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceSlug}:user:${mockReq.userId}`
+        `workspace:${workspaceId}:funnels:all`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:list`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `user:${mockReq.userId}:workspace:${workspaceId}:funnels`
       );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
@@ -254,6 +250,7 @@ describe("Funnel Cache Invalidation Tests", () => {
     it("should handle duplicate to different workspace", async () => {
       const originalFunnelId = 1;
       const newFunnelId = 2;
+      const targetWorkspaceId = 2;
       const targetWorkspaceSlug = "target-workspace";
 
       mockReq.params = { id: String(originalFunnelId) };
@@ -263,18 +260,23 @@ describe("Funnel Cache Invalidation Tests", () => {
       };
 
       (duplicateFunnel as any).mockResolvedValue({
-        message: "Funnel duplicated successfully",
-        funnelId: newFunnelId,
-      });
-
-      mockPrisma.funnel.findUnique.mockResolvedValue({
-        workspace: { slug: targetWorkspaceSlug },
+        response: {
+          message: "Funnel duplicated successfully",
+          funnelId: newFunnelId,
+        },
+        workspaceId: targetWorkspaceId,
       });
 
       await duplicateFunnelController(mockReq, mockRes, mockNext);
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${targetWorkspaceSlug}:user:${mockReq.userId}`
+        `workspace:${targetWorkspaceId}:funnels:all`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${targetWorkspaceId}:funnels:list`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `user:${mockReq.userId}:workspace:${targetWorkspaceId}:funnels`
       );
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });

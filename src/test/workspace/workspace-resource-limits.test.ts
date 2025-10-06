@@ -126,7 +126,7 @@ describe("Workspace Resource Limits Tests", () => {
       mockPrisma.funnel.count.mockResolvedValue(3);
 
       await expect(createFunnel(userId, funnelData as any)).rejects.toThrow(
-        "This workspace has reached its maximum limit of 3 funnels."
+        "You've reached the maximum of 3 funnels for this workspace"
       );
     });
 
@@ -156,7 +156,7 @@ describe("Workspace Resource Limits Tests", () => {
       mockPrisma.funnel.count.mockResolvedValue(3);
 
       await expect(createFunnel(userId, funnelData as any)).rejects.toThrow(
-        "This workspace has reached its maximum limit of 3 funnels."
+        "You've reached the maximum of 3 funnels for this workspace"
       );
     });
   });
@@ -300,7 +300,7 @@ describe("Workspace Resource Limits Tests", () => {
           workspaceSlug: "test-workspace",
           status: "DRAFT",
         } as any)
-      ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels.");
+      ).rejects.toThrow("You've reached the maximum of 3 funnels for this workspace");
 
       // Same limit applies for BUSINESS plan user
       mockPrisma.workspace.findUnique.mockResolvedValue({
@@ -315,7 +315,7 @@ describe("Workspace Resource Limits Tests", () => {
           workspaceSlug: "business-workspace",
           status: "DRAFT",
         } as any)
-      ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels.");
+      ).rejects.toThrow("You've reached the maximum of 3 funnels for this workspace");
 
       // Same limit applies for AGENCY plan user
       mockPrisma.workspace.findUnique.mockResolvedValue({
@@ -330,7 +330,7 @@ describe("Workspace Resource Limits Tests", () => {
           workspaceSlug: "agency-workspace",
           status: "DRAFT",
         } as any)
-      ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels.");
+      ).rejects.toThrow("You've reached the maximum of 3 funnels for this workspace");
     });
   });
 });
