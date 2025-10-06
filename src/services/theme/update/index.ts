@@ -40,11 +40,11 @@ export const updateTheme = async (
       data: validatedRequest,
     });
 
-    // Update theme in cache using the helper
+    // Invalidate cache using the helper
     await updateThemeInCache(
-      permissionResult.workspace.id,
-      permissionResult.theme.funnel.id,
-      updatedTheme
+      permissionResult.workspace?.id || null,
+      permissionResult.theme.funnel?.id || null,
+      permissionResult.isGlobalTheme
     );
 
     const response = {

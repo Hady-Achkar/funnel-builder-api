@@ -8,7 +8,6 @@ import { deleteFunnelController } from "../../controllers/funnel/delete";
 import { createFromTemplateController } from "../../controllers/funnel/createFromTemplate";
 import { duplicateFunnelController } from "../../controllers/funnel/duplicate";
 import { GetWorkspaceFunnelsSummaryController } from "../../controllers/funnel/get-workspace-summary";
-
 const router: Router = express.Router();
 
 router.use(authenticateToken);
