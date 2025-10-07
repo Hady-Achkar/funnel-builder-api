@@ -1,15 +1,19 @@
 import {
   CreateFunnelRequest,
-  WorkspacePayload,
   WorkspaceMemberPayload,
 } from "../../../types/funnel/create";
+import { WorkspaceWithAllocation } from "../../../utils/workspace-utils/workspace-existence-validation";
 import { $Enums } from "../../../generated/prisma-client";
 
 // Workspace fixtures (used in funnel creation tests)
-export const mockWorkspace: WorkspacePayload = {
+export const mockWorkspace: WorkspaceWithAllocation = {
   id: 8,
   name: "Test Workspace",
   ownerId: 1,
+  owner: {
+    plan: $Enums.UserPlan.BUSINESS,
+    addOns: [],
+  },
 };
 
 export const mockWorkspaceMember: WorkspaceMemberPayload = {

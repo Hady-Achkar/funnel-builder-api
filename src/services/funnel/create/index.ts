@@ -3,12 +3,13 @@ import {
   CreateFunnelResponse,
 } from "../../../types/funnel/create";
 import { getPrisma } from "../../../lib/prisma";
-import { validateWorkspace } from "./utils/validateWorkspace";
-import { checkWorkspaceFunnelLimit } from "./utils/checkWorkspaceFunnelLimit";
-import { validateUserPermissions } from "./utils/validateUserPermissions";
 import { generateFunnelSlug } from "./utils/generateFunnelSlug";
 import { generateUniqueName } from "./utils/generateUniqueName";
 import { createFunnelInTransaction } from "./utils/createFunnelInTransaction";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
+import { WorkspaceValidator } from "../../../utils/workspace-utils/workspace-existence-validation";
 
 export const createFunnel = async (
   userId: number,
@@ -20,11 +21,48 @@ export const createFunnel = async (
 
   const prisma = getPrisma();
 
-  const workspace = await validateWorkspace(prisma, data.workspaceSlug);
+  // Validate workspace existence and get allocation data
+  const workspace = await WorkspaceValidator.validateWithAllocation(
+    prisma,
+    data.workspaceSlug
+  );
 
-  await checkWorkspaceFunnelLimit(prisma, workspace.id);
+  // Check permission using centralized PermissionManager
+  await PermissionManager.requirePermission({
+    userId,
+    workspaceId: workspace.id,
+    action: PermissionAction.CREATE_FUNNEL,
+  });
 
-  await validateUserPermissions(prisma, userId, workspace);
+  // Check funnel allocation limit using centralized allocation system
+  const currentFunnelCount = await prisma.funnel.count({
+    where: { workspaceId: workspace.id },
+  });
+
+  const canCreateFunnel = WorkspaceFunnelAllocations.canCreateFunnel(
+    currentFunnelCount,
+    {
+      workspacePlanType: workspace.owner.plan,
+      addOns: workspace.owner.addOns,
+    }
+  );
+
+  if (!canCreateFunnel) {
+    const summary = WorkspaceFunnelAllocations.getAllocationSummary(
+      currentFunnelCount,
+      {
+        workspacePlanType: workspace.owner.plan,
+        addOns: workspace.owner.addOns,
+      }
+    );
+
+    throw new Error(
+      `You've reached the maximum of ${summary.totalAllocation} ${
+        summary.totalAllocation === 1 ? "funnel" : "funnels"
+      } for this workspace. ` +
+        `To create more funnels, upgrade your plan or add extra funnel slots.`
+    );
+  }
 
   // Generate unique name (adds -1, -2, etc. if duplicate)
   const uniqueName = await generateUniqueName(data.name, workspace.id);

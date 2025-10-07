@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "../../../../generated/prisma-client";
+import { PrismaClient } from "../../../../generated/prisma-client";
 import {
   CreateFunnelPayload,
   CreateFunnelSettingsPayload,
