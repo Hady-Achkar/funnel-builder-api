@@ -2,12 +2,14 @@ import { z } from "zod";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
 import {
-  hasPermissionToCreateFunnel,
   generateLinkingIdMap,
   replaceLinkingIdsInContent,
   getNewLinkingIdForPage
-} from "../../../helpers/funnel/createFromTemplate";
+} from "../../../utils/funnel-utils/linking-id-replacement";
 import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
 import {
   createFromTemplateParams,
   CreateFromTemplateParams,
@@ -16,7 +18,6 @@ import {
   createFromTemplateResponse,
   CreateFromTemplateResponse,
 } from "../../../types/funnel/createFromTemplate";
-import { AllocationService } from "../../../utils/allocations";
 
 export const createFromTemplate = async (
   templateId: number,
@@ -38,13 +39,19 @@ export const createFromTemplate = async (
 
     const prisma = getPrisma();
 
-    // Check workspace exists
+    // Check workspace exists and get allocation data
     const workspace = await prisma.workspace.findUnique({
       where: { slug: validatedData.workspaceSlug },
       select: {
         id: true,
         name: true,
         ownerId: true,
+        owner: {
+          select: {
+            plan: true,
+            addOns: true,
+          },
+        },
       },
     });
 
@@ -52,48 +59,41 @@ export const createFromTemplate = async (
       throw new Error("The selected workspace does not exist");
     }
 
-    // Check workspace funnel allocation limit
-    const canCreate = await AllocationService.canCreateFunnel(userId, workspace.id);
-    if (!canCreate) {
-      const allocations = await AllocationService.checkAllocations(userId, workspace.id);
+    // Check permission using centralized PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: workspace.id,
+      action: PermissionAction.CREATE_FUNNEL,
+    });
+
+    // Check funnel allocation limit using centralized allocation system
+    const currentFunnelCount = await prisma.funnel.count({
+      where: { workspaceId: workspace.id },
+    });
+
+    const canCreateFunnel = WorkspaceFunnelAllocations.canCreateFunnel(
+      currentFunnelCount,
+      {
+        workspacePlanType: workspace.owner.plan,
+        addOns: workspace.owner.addOns,
+      }
+    );
+
+    if (!canCreateFunnel) {
+      const summary = WorkspaceFunnelAllocations.getAllocationSummary(
+        currentFunnelCount,
+        {
+          workspacePlanType: workspace.owner.plan,
+          addOns: workspace.owner.addOns,
+        }
+      );
+
       throw new Error(
-        `You've reached the maximum of ${allocations.allocations.workspaceAllocations.maxFunnels} funnels for this workspace. Please upgrade your plan to create more funnels.`
+        `You've reached the maximum of ${summary.totalAllocation} ${
+          summary.totalAllocation === 1 ? "funnel" : "funnels"
+        } for this workspace. ` +
+          `To create more funnels, upgrade your plan or add extra funnel slots.`
       );
-    }
-
-    // Check permissions
-    const isOwner = workspace.ownerId === userId;
-
-    if (!isOwner) {
-      const member = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: workspace.id,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!member) {
-        throw new Error(
-          `You don't have access to the ${workspace.name} workspace. Please ask the workspace owner to invite you.`
-        );
-      }
-
-      const canCreateFunnel = hasPermissionToCreateFunnel(
-        member.role,
-        member.permissions
-      );
-
-      if (!canCreateFunnel) {
-        throw new Error(
-          `You don't have permission to create funnels in this workspace. Please contact your workspace admin.`
-        );
-      }
     }
 
     // Get template with all pages
@@ -213,6 +213,7 @@ export const createFromTemplate = async (
 
     // Invalidate caches
     try {
+      await cacheService.del(`workspace:${workspace.id}:funnel:${result.funnel.id}:full`);
       await cacheService.del(`workspace:${workspace.id}:funnels:all`);
       await cacheService.del(`workspace:${workspace.id}:funnels:list`);
       await cacheService.del(`user:${userId}:workspace:${workspace.id}:funnels`);

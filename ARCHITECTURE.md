@@ -266,7 +266,7 @@ describe("Create Workspace", () => {
 | Method | Path                                          | Controller                    | Status  |
 | ------ | --------------------------------------------- | ----------------------------- | ------- |
 | POST   | `/api/funnel`                                 | createFunnelController        | ❌ TODO |
-| POST   | `/api/funnel/from-template/:templateId`       | createFromTemplateController  | ❌ TODO |
+| POST   | `/api/funnel/from-template/:templateId`       | createFromTemplateController  | ✅ DONE |
 | POST   | `/api/funnel/:id/duplicate`                   | duplicateFunnelController     | ❌ TODO |
 | GET    | `/api/funnel/workspace/:workspaceSlug/public` | getPublicFunnelPageController | ❌ TODO |
 | GET    | `/api/funnel/workspace/:workspaceSlug`        | getAllFunnelsController       | ❌ TODO |
@@ -412,11 +412,11 @@ describe("Create Workspace", () => {
 
 **Total Routes**: 87
 
-- ❌ TODO: 85
-- ✅ DONE: 2
+- ❌ TODO: 84
+- ✅ DONE: 3
 - 🚧 WIP: 0
 
-**Completion**: 2.30%
+**Completion**: 3.45%
 
 ---
 
