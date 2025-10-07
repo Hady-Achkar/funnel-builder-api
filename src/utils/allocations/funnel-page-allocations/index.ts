@@ -7,13 +7,13 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base page allocations per funnel (same for all workspace plan types)
 const BASE_PAGE_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 35,       // Free workspace: 35 pages per funnel
-  [UserPlan.BUSINESS]: 35,   // Business workspace: 35 pages per funnel
-  [UserPlan.AGENCY]: 35,     // Agency workspace: 35 pages per funnel
+  [UserPlan.FREE]: 35, // Free workspace: 35 pages per funnel
+  [UserPlan.BUSINESS]: 35, // Business workspace: 35 pages per funnel
+  [UserPlan.AGENCY]: 35, // Agency workspace: 35 pages per funnel
 };
 
 export interface PageAllocationInput {
-  workspacePlanType: UserPlan;  // The plan type of the workspace (not user)
+  workspacePlanType: UserPlan; // The plan type of the workspace (not user)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -26,7 +26,10 @@ export class FunnelPageAllocations {
    * Get base page allocation for a workspace plan type (without add-ons)
    */
   static getBaseAllocation(workspacePlanType: UserPlan): number {
-    return BASE_PAGE_ALLOCATIONS[workspacePlanType] || BASE_PAGE_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_PAGE_ALLOCATIONS[workspacePlanType] ||
+      BASE_PAGE_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -42,11 +45,11 @@ export class FunnelPageAllocations {
     // Add extra pages from active EXTRA_PAGE add-ons
     // Each add-on quantity represents units, where each unit gives 5 extra pages
     const extraPages = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_PAGE &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_PAGE && addon.status === "ACTIVE"
       )
-      .reduce((sum, addon) => sum + (addon.quantity * 5), 0); // 5 pages per add-on unit
+      .reduce((sum, addon) => sum + addon.quantity * 5, 0); // 5 pages per add-on unit
 
     totalPages += extraPages;
 
