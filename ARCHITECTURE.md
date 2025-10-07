@@ -272,7 +272,7 @@ describe("Create Workspace", () => {
 | GET    | `/api/funnel/workspace/:workspaceSlug`        | getAllFunnelsController       | ❌ TODO |
 | GET    | `/api/funnel/:id`                             | getFunnelController           | ❌ TODO |
 | PUT    | `/api/funnel/:id`                             | updateFunnelController        | ❌ TODO |
-| DELETE | `/api/funnel/:id`                             | deleteFunnelController        | ❌ TODO |
+| DELETE | `/api/funnel/:id`                             | deleteFunnelController        | ✅ DONE |
 
 ### Page Routes (8 routes)
 
@@ -412,11 +412,11 @@ describe("Create Workspace", () => {
 
 **Total Routes**: 87
 
-- ❌ TODO: 86
-- ✅ DONE: 1
+- ❌ TODO: 85
+- ✅ DONE: 2
 - 🚧 WIP: 0
 
-**Completion**: 1.15%
+**Completion**: 2.30%
 
 ---
 

@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { hasPermissionToDeleteFunnel } from "../../../helpers/funnel/delete";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   deleteFunnelParams,
   DeleteFunnelParams,
@@ -47,39 +48,12 @@ export const deleteFunnel = async (
       throw new Error("Funnel not found");
     }
 
-    const isOwner = funnelToDelete.workspace.ownerId === userId;
-
-    if (!isOwner) {
-      const member = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: funnelToDelete.workspaceId,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!member) {
-        throw new Error(
-          `You don't have access to this funnel. Please ask the workspace owner to invite you.`
-        );
-      }
-
-      const canDeleteFunnel = hasPermissionToDeleteFunnel(
-        member.role,
-        member.permissions
-      );
-
-      if (!canDeleteFunnel) {
-        throw new Error(
-          `You don't have permission to delete funnels in this workspace. Please contact your workspace admin.`
-        );
-      }
-    }
+    // Check permission using PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnelToDelete.workspaceId,
+      action: PermissionAction.DELETE_FUNNEL,
+    });
 
     await prisma.funnel.delete({
       where: { id: validatedParams.funnelId },
