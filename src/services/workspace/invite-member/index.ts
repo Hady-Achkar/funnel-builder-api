@@ -5,18 +5,15 @@ import {
   InviteMemberResponse,
 } from "../../../types/workspace/invite-member";
 import { MembershipStatus } from "../../../generated/prisma-client";
-import {
-  validateWorkspaceExists,
-  validateInviterPermissions,
-  validateInvitationRequest,
-} from "../../../utils/workspace-utils/workspace-validation";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
 } from "./utils/send-emails";
 import { cacheService } from "../../cache/cache.service";
 import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
-import { BadRequestError } from "../../../errors";
+import { BadRequestError, NotFoundError } from "../../../errors";
 
 export class InviteMemberService {
   static async inviteMember(
@@ -26,9 +23,27 @@ export class InviteMemberService {
     try {
       const prisma = getPrisma();
 
-      const workspace = await validateWorkspaceExists(data.workspaceSlug);
+      // Check if workspace exists
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: data.workspaceSlug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          ownerId: true,
+        },
+      });
 
-      await validateInviterPermissions(workspace, inviterUserId);
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
+
+      // Check if user has permission to invite members
+      await PermissionManager.requirePermission({
+        userId: inviterUserId,
+        workspaceId: workspace.id,
+        action: PermissionAction.INVITE_MEMBER,
+      });
 
       // Check member allocation limit using WorkspaceMemberAllocations
       const workspaceWithLimits = await prisma.workspace.findUnique({
@@ -93,7 +108,10 @@ export class InviteMemberService {
         select: { id: true, email: true },
       });
 
-      validateInvitationRequest(userToInvite, workspace.ownerId);
+      // Prevent inviting workspace owner as a member
+      if (userToInvite && userToInvite.id === workspace.ownerId) {
+        throw new BadRequestError("Cannot invite the workspace owner as a member");
+      }
 
       const invitationToken = jwt.sign(
         {

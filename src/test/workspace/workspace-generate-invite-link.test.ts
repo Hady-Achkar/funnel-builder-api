@@ -30,9 +30,10 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../utils/workspace-utils/workspace-validation", () => ({
-  validateWorkspaceExists: vi.fn(),
-  validateInviterPermissions: vi.fn(),
+vi.mock("../../utils/workspace-utils/workspace-permission-manager", () => ({
+  PermissionManager: {
+    requirePermission: vi.fn(),
+  },
 }));
 
 describe("Workspace Generate Invite Link Controller Tests", () => {
@@ -40,17 +41,17 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
   let mockPrisma: any;
-  let mockValidationHelpers: any;
+  let mockPermissionManager: any;
   let mockJwt: any;
 
   beforeEach(async () => {
-    const validationHelpers = await import(
-      "../../utils/workspace-utils/workspace-validation"
+    const permissionManager = await import(
+      "../../utils/workspace-utils/workspace-permission-manager"
     );
     const jwt = await import("jsonwebtoken");
 
     mockPrisma = mockPrismaInstance;
-    mockValidationHelpers = validationHelpers;
+    mockPermissionManager = permissionManager.PermissionManager;
     mockJwt = jwt.default;
 
     mockReq = {
@@ -67,23 +68,18 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
     vi.clearAllMocks();
 
     // Set up default successful mocks
-    mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+    mockPrisma.workspace.findUnique.mockResolvedValue({
       id: 1,
       name: "Test Workspace",
       slug: "test-workspace",
       ownerId: 1,
-    });
-    mockValidationHelpers.validateInviterPermissions.mockResolvedValue(
-      undefined
-    );
-    mockJwt.sign.mockReturnValue("mock-jwt-token");
-
-    // Set up default allocation mocks (workspace has space for members)
-    mockPrisma.workspace.findUnique.mockResolvedValue({
-      id: 1,
       planType: 'FREE',
       addOns: [],
     });
+    mockPermissionManager.requirePermission.mockResolvedValue(undefined);
+    mockJwt.sign.mockReturnValue("mock-jwt-token");
+
+    // Set up default allocation mocks (workspace has space for members)
     mockPrisma.workspaceMember.count.mockResolvedValue(0);
   });
 
@@ -96,7 +92,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
@@ -128,7 +124,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 2, // Different owner
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
@@ -159,7 +155,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
@@ -197,7 +193,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
@@ -235,7 +231,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
@@ -267,7 +263,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       vi.clearAllMocks();
 
       // Set up workspace validation to succeed
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+      mockPrisma.workspace.findUnique.mockResolvedValue({
         id: 1,
         name: "Test Workspace",
         slug: "test-workspace",
@@ -275,7 +271,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       });
 
       // Set up permission validation to fail
-      mockValidationHelpers.validateInviterPermissions.mockRejectedValue(
+      mockPermissionManager.requirePermission.mockRejectedValue(
         new ForbiddenError("Insufficient permissions")
       );
 
@@ -301,7 +297,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       vi.clearAllMocks();
 
       // Set up workspace validation to succeed
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+      mockPrisma.workspace.findUnique.mockResolvedValue({
         id: 1,
         name: "Test Workspace",
         slug: "test-workspace",
@@ -309,7 +305,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       });
 
       // Set up permission validation to fail
-      mockValidationHelpers.validateInviterPermissions.mockRejectedValue(
+      mockPermissionManager.requirePermission.mockRejectedValue(
         new ForbiddenError("You are not a member of this workspace")
       );
 
@@ -370,9 +366,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
   describe("Workspace Validation", () => {
     it("should reject when workspace doesn't exist", async () => {
       const { NotFoundError } = await import("../../errors");
-      mockValidationHelpers.validateWorkspaceExists.mockRejectedValue(
-        new NotFoundError("Workspace not found")
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
       mockReq.userId = 1;
       mockReq.params = { slug: "non-existent-workspace" };

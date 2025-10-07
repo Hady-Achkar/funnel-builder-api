@@ -4,13 +4,11 @@ import {
   GenerateInviteLinkRequest,
   GenerateInviteLinkResponse,
 } from "../../../types/workspace/generate-invite-link";
-import {
-  validateWorkspaceExists,
-  validateInviterPermissions,
-} from "../../../utils/workspace-utils/workspace-validation";
 import { getPrisma } from "../../../lib/prisma";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
-import { BadRequestError } from "../../../errors";
+import { BadRequestError, NotFoundError } from "../../../errors";
 
 export class GenerateInviteLinkService {
   static async generateInviteLink(
@@ -18,18 +16,37 @@ export class GenerateInviteLinkService {
     data: GenerateInviteLinkRequest
   ): Promise<GenerateInviteLinkResponse> {
     try {
-      const workspace = await validateWorkspaceExists(data.workspaceSlug);
+      const prisma = getPrisma();
 
-      validateInviterPermissions(workspace, creatorUserId);
+      // Check if workspace exists
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: data.workspaceSlug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          ownerId: true,
+        },
+      });
+
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
+
+      // Check if user has permission to invite members
+      await PermissionManager.requirePermission({
+        userId: creatorUserId,
+        workspaceId: workspace.id,
+        action: PermissionAction.INVITE_MEMBER,
+      });
 
       // Check member allocation limit using WorkspaceMemberAllocations
-      const prisma = getPrisma();
       const workspaceWithLimits = await prisma.workspace.findUnique({
         where: { id: workspace.id },
         select: {
           planType: true,
           addOns: {
-            where: { status: 'ACTIVE' },
+            where: { status: "ACTIVE" },
             select: {
               type: true,
               quantity: true,
@@ -43,7 +60,7 @@ export class GenerateInviteLinkService {
         where: {
           workspaceId: workspace.id,
           status: {
-            in: ['ACTIVE', 'PENDING'],
+            in: ["ACTIVE", "PENDING"],
           },
         },
       });

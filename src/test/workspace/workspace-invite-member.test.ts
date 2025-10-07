@@ -39,10 +39,10 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../utils/workspace-utils/workspace-validation", () => ({
-  validateWorkspaceExists: vi.fn(),
-  validateInviterPermissions: vi.fn(),
-  validateInvitationRequest: vi.fn(),
+vi.mock("../../utils/workspace-utils/workspace-permission-manager", () => ({
+  PermissionManager: {
+    requirePermission: vi.fn(),
+  },
 }));
 
 describe("Workspace Invite Member Controller Tests", () => {
@@ -50,15 +50,15 @@ describe("Workspace Invite Member Controller Tests", () => {
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
   let mockPrisma: any;
-  let mockValidationHelpers: any;
+  let mockPermissionManager: any;
 
   beforeEach(async () => {
-    const validationHelpers = await import(
-      "../../utils/workspace-utils/workspace-validation"
+    const permissionManager = await import(
+      "../../utils/workspace-utils/workspace-permission-manager"
     );
 
     mockPrisma = mockPrismaInstance;
-    mockValidationHelpers = validationHelpers;
+    mockPermissionManager = permissionManager.PermissionManager;
 
     mockReq = {
       userId: 1,
@@ -77,7 +77,7 @@ describe("Workspace Invite Member Controller Tests", () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.workspace.findUnique.mockResolvedValue({
       id: 1,
-      planType: 'FREE',
+      planType: "FREE",
       addOns: [],
     });
     mockPrisma.workspaceMember.count.mockResolvedValue(0); // No members yet
@@ -92,7 +92,7 @@ describe("Workspace Invite Member Controller Tests", () => {
       permissions: [],
     });
 
-    mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+    mockPrisma.workspace.findUnique.mockResolvedValue({
       id: 1,
       name: "Test Workspace",
       slug: "test-workspace",
@@ -100,12 +100,7 @@ describe("Workspace Invite Member Controller Tests", () => {
       members: [],
       owner: { id: 1, firstName: "John", lastName: "Doe" },
     });
-    mockValidationHelpers.validateInviterPermissions.mockResolvedValue(
-      undefined
-    );
-    mockValidationHelpers.validateInvitationRequest.mockResolvedValue(
-      undefined
-    );
+    mockPermissionManager.requirePermission.mockResolvedValue(undefined);
   });
 
   describe("Successful Invitations", () => {
@@ -119,9 +114,7 @@ describe("Workspace Invite Member Controller Tests", () => {
         owner: { id: 1, firstName: "John", lastName: "Doe" },
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
-        workspace
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
@@ -158,9 +151,7 @@ describe("Workspace Invite Member Controller Tests", () => {
         email: "existing@example.com",
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
-        workspace
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
       mockPrisma.user.findUnique.mockResolvedValue(existingUser);
 
       mockReq.userId = 1;
@@ -175,7 +166,6 @@ describe("Workspace Invite Member Controller Tests", () => {
         mockRes as Response,
         mockNext
       );
-
 
       expect(mockPrisma.workspaceMember.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -200,9 +190,7 @@ describe("Workspace Invite Member Controller Tests", () => {
         owner: { id: 1, firstName: "John", lastName: "Doe" },
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
-        workspace
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
       mockPrisma.user.findUnique.mockResolvedValue(null); // User doesn't exist
 
       mockReq.userId = 1;
@@ -234,10 +222,7 @@ describe("Workspace Invite Member Controller Tests", () => {
 
   describe("Input Validation Errors", () => {
     it("should handle workspace not found error", async () => {
-      const { NotFoundError } = await import("../../errors");
-      mockValidationHelpers.validateWorkspaceExists.mockRejectedValue(
-        new NotFoundError("Workspace not found")
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
       mockReq.userId = 1;
       mockReq.params = { slug: "non-existent" };
@@ -348,7 +333,9 @@ describe("Workspace Invite Member Controller Tests", () => {
       const serviceSpy = vi
         .spyOn(InviteMemberService, "inviteMember")
         .mockRejectedValue(
-          new BadRequestError("This email has already been invited to the workspace")
+          new BadRequestError(
+            "This email has already been invited to the workspace"
+          )
         );
 
       mockReq.userId = 1;
