@@ -17,6 +17,9 @@ describe("Get Funnel Connection Tests", () => {
       funnel: {
         findUnique: vi.fn(),
       },
+      workspace: {
+        findUnique: vi.fn(),
+      },
       workspaceMember: {
         findUnique: vi.fn(),
       },
@@ -53,6 +56,10 @@ describe("Get Funnel Connection Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        id: 1,
+        ownerId: userId,
+      });
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(connectionData);
 
       const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
@@ -110,6 +117,10 @@ describe("Get Funnel Connection Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        id: 1,
+        ownerId: userId,
+      });
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(null);
 
       const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
@@ -148,6 +159,10 @@ describe("Get Funnel Connection Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        id: 1,
+        ownerId: 999, // Different owner
+      });
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(connectionData);
 
