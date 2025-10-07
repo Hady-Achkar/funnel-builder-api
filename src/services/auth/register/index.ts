@@ -7,7 +7,7 @@ import {
 } from "../../../types/auth/register";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
 import { TrialPeriodCalculator } from "../../../utils/trial-period";
-import { hashPassword } from "./utils/hash-password";
+import bcrypt from "bcryptjs";
 import {
   generateVerificationToken,
   getVerificationTokenExpiry,
@@ -21,7 +21,7 @@ export class RegisterService {
     try {
       const prisma = getPrisma();
 
-      const hashedPassword = await hashPassword(data.password);
+      const hashedPassword = await bcrypt.hash(data.password, 10);
       const maximumWorkspaces = UserWorkspaceAllocations.getBaseAllocation(
         data.plan
       );

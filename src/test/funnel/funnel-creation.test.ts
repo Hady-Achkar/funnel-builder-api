@@ -1434,4 +1434,294 @@ describe("Funnel Creation Tests", () => {
       expect(typeof result.workspaceId).toBe("number");
     });
   });
+
+  describe("Password Protection for DRAFT Workspaces", () => {
+    it("should create funnel WITHOUT password protection in ACTIVE workspace", async () => {
+      const workspace = {
+        id: workspaceId,
+        name: "Test Workspace",
+        slug: workspaceSlug,
+        ownerId: userId,
+        status: $Enums.WorkspaceStatus.ACTIVE, // ACTIVE workspace
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
+      mockPrisma.funnel.count.mockResolvedValue(0);
+
+      let funnelSettingsData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const tx = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Test Funnel",
+              slug: "test-funnel",
+              status: $Enums.FunnelStatus.DRAFT,
+              workspaceId,
+              createdBy: userId,
+            }),
+            update: vi.fn().mockResolvedValue({
+              id: 1,
+              activeThemeId: 1,
+            }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1, type: $Enums.ThemeType.CUSTOM }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockImplementation((data: any) => {
+              funnelSettingsData = data.data;
+              return Promise.resolve({ id: 1, funnelId: 1 });
+            }),
+          },
+          page: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Home",
+              order: 1,
+              linkingId: "home",
+              type: $Enums.PageType.PAGE,
+              seoTitle: null,
+              seoDescription: null,
+              seoKeywords: null,
+            }),
+          },
+        };
+
+        return await callback(tx);
+      });
+
+      await createFunnel(userId, {
+        name: "Test Funnel",
+        workspaceSlug,
+        status: $Enums.FunnelStatus.DRAFT,
+      });
+
+      expect(funnelSettingsData).not.toBeNull();
+      expect(funnelSettingsData.isPasswordProtected).toBe(false);
+      expect(funnelSettingsData.passwordHash).toBeNull();
+    });
+
+    it("should create funnel WITH password protection in DRAFT workspace", async () => {
+      const workspace = {
+        id: workspaceId,
+        name: "Test Workspace",
+        slug: workspaceSlug,
+        ownerId: userId,
+        status: $Enums.WorkspaceStatus.DRAFT, // DRAFT workspace
+        owner: {
+          plan: $Enums.UserPlan.AGENCY,
+          addOns: [],
+        },
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
+      mockPrisma.funnel.count.mockResolvedValue(0);
+
+      let funnelSettingsData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const tx = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Test Funnel",
+              slug: "test-funnel",
+              status: $Enums.FunnelStatus.DRAFT,
+              workspaceId,
+              createdBy: userId,
+            }),
+            update: vi.fn().mockResolvedValue({
+              id: 1,
+              activeThemeId: 1,
+            }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1, type: $Enums.ThemeType.CUSTOM }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockImplementation((data: any) => {
+              funnelSettingsData = data.data;
+              return Promise.resolve({ id: 1, funnelId: 1 });
+            }),
+          },
+          page: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Home",
+              order: 1,
+              linkingId: "home",
+              type: $Enums.PageType.PAGE,
+              seoTitle: null,
+              seoDescription: null,
+              seoKeywords: null,
+            }),
+          },
+        };
+
+        return await callback(tx);
+      });
+
+      await createFunnel(userId, {
+        name: "Test Funnel",
+        workspaceSlug,
+        status: $Enums.FunnelStatus.DRAFT,
+      });
+
+      expect(funnelSettingsData).not.toBeNull();
+      expect(funnelSettingsData.isPasswordProtected).toBe(true);
+      expect(funnelSettingsData.passwordHash).not.toBeNull();
+      expect(typeof funnelSettingsData.passwordHash).toBe("string");
+    });
+
+    it("should hash the default password when workspace is DRAFT", async () => {
+      const workspace = {
+        id: workspaceId,
+        name: "Test Workspace",
+        slug: workspaceSlug,
+        ownerId: userId,
+        status: $Enums.WorkspaceStatus.DRAFT,
+        owner: {
+          plan: $Enums.UserPlan.AGENCY,
+          addOns: [],
+        },
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
+      mockPrisma.funnel.count.mockResolvedValue(0);
+
+      let funnelSettingsData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const tx = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Test Funnel",
+              slug: "test-funnel",
+              status: $Enums.FunnelStatus.DRAFT,
+              workspaceId,
+              createdBy: userId,
+            }),
+            update: vi.fn().mockResolvedValue({
+              id: 1,
+              activeThemeId: 1,
+            }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1, type: $Enums.ThemeType.CUSTOM }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockImplementation((data: any) => {
+              funnelSettingsData = data.data;
+              return Promise.resolve({ id: 1, funnelId: 1 });
+            }),
+          },
+          page: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Home",
+              order: 1,
+              linkingId: "home",
+              type: $Enums.PageType.PAGE,
+              seoTitle: null,
+              seoDescription: null,
+              seoKeywords: null,
+            }),
+          },
+        };
+
+        return await callback(tx);
+      });
+
+      await createFunnel(userId, {
+        name: "Test Funnel",
+        workspaceSlug,
+        status: $Enums.FunnelStatus.DRAFT,
+      });
+
+      // Verify password hash is not plain text
+      expect(funnelSettingsData.passwordHash).not.toBeNull();
+      expect(funnelSettingsData.passwordHash).not.toBe("FunnelDefault123!");
+      // Verify it's a bcrypt hash (starts with $2a$ or $2b$)
+      expect(funnelSettingsData.passwordHash).toMatch(/^\$2[ab]\$/);
+    });
+
+    it("should verify password hash format is correct for DRAFT workspace", async () => {
+      const workspace = {
+        id: workspaceId,
+        name: "Test Workspace",
+        slug: workspaceSlug,
+        ownerId: userId,
+        status: $Enums.WorkspaceStatus.DRAFT,
+        owner: {
+          plan: $Enums.UserPlan.AGENCY,
+          addOns: [],
+        },
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
+      mockPrisma.funnel.count.mockResolvedValue(0);
+
+      let funnelSettingsData: any = null;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const tx = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Test Funnel",
+              slug: "test-funnel",
+              status: $Enums.FunnelStatus.DRAFT,
+              workspaceId,
+              createdBy: userId,
+            }),
+            update: vi.fn().mockResolvedValue({
+              id: 1,
+              activeThemeId: 1,
+            }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1, type: $Enums.ThemeType.CUSTOM }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockImplementation((data: any) => {
+              funnelSettingsData = data.data;
+              return Promise.resolve({ id: 1, funnelId: 1 });
+            }),
+          },
+          page: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: "Home",
+              order: 1,
+              linkingId: "home",
+              type: $Enums.PageType.PAGE,
+              seoTitle: null,
+              seoDescription: null,
+              seoKeywords: null,
+            }),
+          },
+        };
+
+        return await callback(tx);
+      });
+
+      await createFunnel(userId, {
+        name: "Test Funnel",
+        workspaceSlug,
+        status: $Enums.FunnelStatus.DRAFT,
+      });
+
+      // Verify hash length (bcrypt hashes are 60 characters)
+      expect(funnelSettingsData.passwordHash?.length).toBe(60);
+      // Verify it contains expected bcrypt structure
+      expect(funnelSettingsData.passwordHash).toMatch(/^\$2[ab]\$\d{2}\$/);
+    });
+  });
 });

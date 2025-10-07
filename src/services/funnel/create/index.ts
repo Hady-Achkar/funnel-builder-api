@@ -107,6 +107,7 @@ export const createFunnel = async (
     status: data.status,
     workspaceId: workspace.id,
     userId,
+    workspaceStatus: workspace.status,
   });
 
   const response: CreateFunnelResponse = {

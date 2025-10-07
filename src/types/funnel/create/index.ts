@@ -68,6 +68,8 @@ export const createFunnelSettingsPayload = z.object(
     cookieConsentText: z.string().nullable().optional(),
     privacyPolicyUrl: z.string().nullable().optional(),
     termsOfServiceUrl: z.string().nullable().optional(),
+    isPasswordProtected: z.boolean().optional().default(false),
+    passwordHash: z.string().nullable().optional(),
   },
   { message: "Funnel settings information is required" }
 );

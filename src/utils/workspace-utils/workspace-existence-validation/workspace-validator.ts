@@ -153,6 +153,7 @@ export class WorkspaceValidator {
       id: true,
       name: true,
       ownerId: true,
+      status: true,
     };
 
     // Include owner data if plan or add-ons requested

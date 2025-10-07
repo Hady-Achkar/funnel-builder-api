@@ -1,4 +1,4 @@
-import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { UserPlan, AddOnType, WorkspaceStatus } from "../../../generated/prisma-client";
 
 /**
  * Workspace existence validation types
@@ -36,6 +36,7 @@ export interface BaseWorkspaceInfo {
   id: number;
   name: string;
   ownerId: number;
+  status: WorkspaceStatus;
 }
 
 /**
