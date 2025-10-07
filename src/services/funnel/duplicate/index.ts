@@ -6,13 +6,16 @@ import { getPrisma } from "../../../lib/prisma";
 import { $Enums } from "../../../generated/prisma-client";
 import { validateOriginalFunnel } from "./utils/validateOriginalFunnel";
 import { validateTargetWorkspace } from "./utils/validateTargetWorkspace";
-import { checkWorkspaceFunnelLimit } from "./utils/checkWorkspaceFunnelLimit";
-import { validateUserPermissions } from "./utils/validateUserPermissions";
 import { generateUniqueFunnelName } from "./utils/generateUniqueFunnelName";
-import { generateLinkingIdMap } from "./utils/generateLinkingIdMap";
-import { replaceLinkingIdsInContent } from "./utils/replaceLinkingIdsInContent";
-import { getNewLinkingIdForPage } from "./utils/getNewLinkingIdForPage";
+import {
+  generateLinkingIdMap,
+  replaceLinkingIdsInContent,
+  getNewLinkingIdForPage,
+} from "../../../utils/funnel-utils/linking-id-replacement";
 import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
 
 export const duplicateFunnel = async (
   funnelId: number,
@@ -40,15 +43,71 @@ export const duplicateFunnel = async (
     }
 
     // Validate user permissions
-    await validateUserPermissions(
-      prisma,
+    // Check permission to view original funnel
+    await PermissionManager.requirePermission({
       userId,
-      originalFunnel,
-      targetWorkspaceId
+      workspaceId: originalFunnel.workspaceId,
+      action: PermissionAction.VIEW_FUNNEL,
+    });
+
+    // If duplicating to a different workspace, check target workspace create permission
+    if (targetWorkspaceId !== originalFunnel.workspaceId) {
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: targetWorkspaceId,
+        action: PermissionAction.CREATE_FUNNEL,
+      });
+    }
+
+    // Check workspace funnel limit using centralized allocation system
+    // Get workspace with owner plan and add-ons
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: targetWorkspaceId },
+      select: {
+        id: true,
+        owner: {
+          select: {
+            plan: true,
+            addOns: true,
+          },
+        },
+      },
+    });
+
+    if (!workspace) {
+      throw new Error("Target workspace does not exist");
+    }
+
+    // Check current funnel count
+    const currentFunnelCount = await prisma.funnel.count({
+      where: { workspaceId: targetWorkspaceId },
+    });
+
+    // Check if workspace can create more funnels
+    const canCreateFunnel = WorkspaceFunnelAllocations.canCreateFunnel(
+      currentFunnelCount,
+      {
+        workspacePlanType: workspace.owner.plan,
+        addOns: workspace.owner.addOns,
+      }
     );
 
-    // Check against fixed workspace limit of 3 funnels
-    await checkWorkspaceFunnelLimit(prisma, targetWorkspaceId);
+    if (!canCreateFunnel) {
+      const summary = WorkspaceFunnelAllocations.getAllocationSummary(
+        currentFunnelCount,
+        {
+          workspacePlanType: workspace.owner.plan,
+          addOns: workspace.owner.addOns,
+        }
+      );
+
+      throw new Error(
+        `You've reached the maximum of ${summary.totalAllocation} ${
+          summary.totalAllocation === 1 ? "funnel" : "funnels"
+        } for this workspace. ` +
+          `To duplicate more funnels, upgrade your plan or add extra funnel slots.`
+      );
+    }
 
     // Generate unique funnel name
     const finalFunnelName = await generateUniqueFunnelName(

@@ -221,7 +221,7 @@ describe("Create Workspace", () => {
 
 ## 🚦 Route Migration Tracking
 
-### Status Legend:
+### Status Legend
 
 - ❌ TODO - Needs refactoring to new architecture
 - ✅ DONE - Follows new architecture
@@ -267,7 +267,7 @@ describe("Create Workspace", () => {
 | ------ | --------------------------------------------- | ----------------------------- | ------- |
 | POST   | `/api/funnel`                                 | createFunnelController        | ❌ TODO |
 | POST   | `/api/funnel/from-template/:templateId`       | createFromTemplateController  | ✅ DONE |
-| POST   | `/api/funnel/:id/duplicate`                   | duplicateFunnelController     | ❌ TODO |
+| POST   | `/api/funnel/:id/duplicate`                   | duplicateFunnelController     | ✅ DONE |
 | GET    | `/api/funnel/workspace/:workspaceSlug/public` | getPublicFunnelPageController | ❌ TODO |
 | GET    | `/api/funnel/workspace/:workspaceSlug`        | getAllFunnelsController       | ❌ TODO |
 | GET    | `/api/funnel/:id`                             | getFunnelController           | ❌ TODO |
@@ -412,11 +412,11 @@ describe("Create Workspace", () => {
 
 **Total Routes**: 87
 
-- ❌ TODO: 84
-- ✅ DONE: 3
+- ❌ TODO: 83
+- ✅ DONE: 4
 - 🚧 WIP: 0
 
-**Completion**: 3.45%
+**Completion**: 4.60%
 
 ---
 
