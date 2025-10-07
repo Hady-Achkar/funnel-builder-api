@@ -1,17 +1,9 @@
 import { getPrisma } from "../../../lib/prisma";
 import { $Enums } from "../../../generated/prisma-client";
 import { ZodError } from "zod";
-import {
-  configureWorkspaceRequest,
-  RoleChangeAttempt,
-  PermissionChangeAttempt,
-} from "../../../types/workspace/configure";
-import {
-  canUserModifyRole,
-  canUserAssignPermissions,
-  validateRoleHierarchy,
-  getPermissionError,
-} from "./utils";
+import { configureWorkspaceRequest } from "../../../types/workspace/configure";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { RoleChangeContext } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   BadRequestError,
   ForbiddenError,
@@ -119,7 +111,7 @@ export const configureWorkspace = async (
 
     // Handle role change (only if targetMember exists)
     if (targetMember && newRole && newRole !== targetMember.role) {
-      const roleChangeAttempt: RoleChangeAttempt = {
+      const roleChangeContext: RoleChangeContext = {
         requesterId,
         requesterRole,
         requesterPermissions,
@@ -129,20 +121,12 @@ export const configureWorkspace = async (
         isOwner,
       };
 
-      // Validate role hierarchy
-      const hierarchyError = validateRoleHierarchy(
-        requesterRole,
-        targetMember.role,
-        newRole
-      );
-      if (hierarchyError) {
-        throw new BadRequestError(hierarchyError);
-      }
+      // Validate role change using PermissionManager
+      const validation = PermissionManager.validateRoleChange(roleChangeContext);
 
-      // Check if requester can modify this role
-      if (!canUserModifyRole(roleChangeAttempt)) {
+      if (!validation.valid) {
         throw new ForbiddenError(
-          getPermissionError(requesterRole, requesterPermissions, "role")
+          validation.reason || "You don't have permission to modify this member's role"
         );
       }
 
@@ -158,7 +142,7 @@ export const configureWorkspace = async (
 
     // Handle permission changes (only if targetMember exists)
     if (targetMember && (addPermissions?.length || removePermissions?.length)) {
-      const permissionChangeAttempt: PermissionChangeAttempt = {
+      const permissionChangeContext = {
         requesterId,
         requesterRole,
         requesterPermissions,
@@ -169,10 +153,12 @@ export const configureWorkspace = async (
         isOwner,
       };
 
-      // Check if requester can assign/remove permissions
-      if (!canUserAssignPermissions(permissionChangeAttempt)) {
+      // Validate permission change using PermissionManager
+      const validation = PermissionManager.validatePermissionChange(permissionChangeContext);
+
+      if (!validation.valid) {
         throw new ForbiddenError(
-          getPermissionError(requesterRole, requesterPermissions, "permissions")
+          validation.reason || "You don't have permission to modify member permissions"
         );
       }
 

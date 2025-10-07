@@ -28,7 +28,7 @@ export class InviteMemberService {
 
       const workspace = await validateWorkspaceExists(data.workspaceSlug);
 
-      validateInviterPermissions(workspace, inviterUserId);
+      await validateInviterPermissions(workspace, inviterUserId);
 
       // Check member allocation limit using WorkspaceMemberAllocations
       const workspaceWithLimits = await prisma.workspace.findUnique({
