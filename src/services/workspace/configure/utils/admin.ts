@@ -1,5 +1,5 @@
-import { $Enums } from "../../../generated/prisma-client";
-import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../types/workspace/configure";
+import { $Enums } from "../../../../generated/prisma-client";
+import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../../types/workspace/configure";
 
 export const adminCanModifyRole = (attempt: RoleChangeAttempt): boolean => {
   // Admin cannot modify other admins or owner

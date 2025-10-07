@@ -1,4 +1,4 @@
-import { WorkspaceRole, WorkspacePermission } from "../generated/prisma-client";
+import { WorkspaceRole, WorkspacePermission } from "../../../generated/prisma-client";
 
 export interface WorkspaceMember {
   role: WorkspaceRole;

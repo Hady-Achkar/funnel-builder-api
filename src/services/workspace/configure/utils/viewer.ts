@@ -1,5 +1,5 @@
-import { $Enums } from "../../../generated/prisma-client";
-import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../types/workspace/configure";
+import { $Enums } from "../../../../generated/prisma-client";
+import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../../types/workspace/configure";
 
 export const viewerCanModifyRole = (attempt: RoleChangeAttempt): boolean => {
   // Viewer needs MANAGE_MEMBERS permission to modify roles

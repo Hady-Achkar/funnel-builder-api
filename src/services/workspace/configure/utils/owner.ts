@@ -1,12 +1,12 @@
-import { $Enums } from "../../../generated/prisma-client";
-import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../types/workspace/configure";
+import { $Enums } from "../../../../generated/prisma-client";
+import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../../types/workspace/configure";
 
 export const ownerCanModifyRole = (attempt: RoleChangeAttempt): boolean => {
   // Owner cannot promote anyone else to OWNER (there can only be one owner)
   if (attempt.newRole === $Enums.WorkspaceRole.OWNER) {
     return false; // Cannot promote others to owner
   }
-  
+
   // Owner cannot demote themselves from owner
   if (
     attempt.requesterId === attempt.targetMemberId &&
@@ -14,7 +14,7 @@ export const ownerCanModifyRole = (attempt: RoleChangeAttempt): boolean => {
   ) {
     return false; // Cannot demote self from owner
   }
-  
+
   return true; // Owner can modify other roles (ADMIN, EDITOR, VIEWER)
 };
 

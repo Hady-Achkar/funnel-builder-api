@@ -11,7 +11,7 @@ import {
   canUserAssignPermissions,
   validateRoleHierarchy,
   getPermissionError,
-} from "../../../helpers/workspace/configure";
+} from "./utils";
 import {
   BadRequestError,
   ForbiddenError,

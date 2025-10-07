@@ -1,5 +1,5 @@
-import { $Enums } from "../../../generated/prisma-client";
-import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../types/workspace/configure";
+import { $Enums } from "../../../../generated/prisma-client";
+import { RoleChangeAttempt, PermissionChangeAttempt } from "../../../../types/workspace/configure";
 import { ownerCanModifyRole, ownerCanAssignPermissions, ownerCanManageAllocations } from "./owner";
 import { adminCanModifyRole, adminCanAssignPermissions, adminCanManageAllocations } from "./admin";
 import { editorCanModifyRole, editorCanAssignPermissions, editorCanManageAllocations } from "./editor";

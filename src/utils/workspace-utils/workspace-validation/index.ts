@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { WorkspacePermissions } from "../../../helpers/workspace-permissions";
+import { WorkspacePermissions } from "../workspace-permissions";
 import { BadRequestError, ForbiddenError, NotFoundError } from "../../../errors";
 
 export interface WorkspaceWithMembers {
