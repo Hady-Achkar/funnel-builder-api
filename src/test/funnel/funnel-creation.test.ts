@@ -102,6 +102,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId, // User is owner
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -166,6 +170,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: 999, // Different owner
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       const member = {
@@ -247,6 +255,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: 999, // Different owner
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       const member = {
@@ -264,7 +276,7 @@ describe("Funnel Creation Tests", () => {
           status: $Enums.FunnelStatus.DRAFT,
         })
       ).rejects.toThrow(
-        "You don't have permission to create funnels here"
+        "You don't have permission to create funnel"
       );
     });
 
@@ -274,6 +286,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: 999, // Different owner
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -285,7 +301,7 @@ describe("Funnel Creation Tests", () => {
           workspaceSlug,
           status: $Enums.FunnelStatus.DRAFT,
         })
-      ).rejects.toThrow("Ask the owner to invite you first");
+      ).rejects.toThrow("You don't have access to this workspace");
     });
   });
 
@@ -296,10 +312,14 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
-      mockPrisma.funnel.count.mockResolvedValue(2); // 2 out of 3 funnels
+      mockPrisma.funnel.count.mockResolvedValue(0); // 0 out of 1 funnel (BUSINESS plan)
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
@@ -356,16 +376,20 @@ describe("Funnel Creation Tests", () => {
       });
     });
 
-    it("should reject when workspace limit reached (3 funnels)", async () => {
+    it("should reject when workspace limit reached (BUSINESS plan: 1 funnel)", async () => {
       const workspace = {
         id: workspaceId,
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
-      mockPrisma.funnel.count.mockResolvedValue(3); // At limit
+      mockPrisma.funnel.count.mockResolvedValue(1); // At limit (BUSINESS = 1 funnel)
 
       await expect(
         createFunnel(userId, {
@@ -373,7 +397,7 @@ describe("Funnel Creation Tests", () => {
           workspaceSlug,
           status: $Enums.FunnelStatus.DRAFT,
         })
-      ).rejects.toThrow("You've reached the maximum of 3 funnels for this workspace");
+      ).rejects.toThrow("You've reached the maximum of 1 funnel for this workspace");
     });
   });
 
@@ -384,6 +408,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -452,6 +480,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -522,6 +554,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -594,6 +630,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -663,6 +703,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -734,6 +778,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -819,6 +867,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -850,6 +902,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -920,6 +976,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -986,6 +1046,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -1056,6 +1120,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -1129,6 +1197,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
@@ -1200,10 +1272,14 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
-      mockPrisma.funnel.count.mockResolvedValue(1); // 1 existing funnel
+      mockPrisma.funnel.count.mockResolvedValue(0); // 0 existing funnels (BUSINESS allows 1)
 
       const createdFunnel = {
         id: 2,
@@ -1291,6 +1367,10 @@ describe("Funnel Creation Tests", () => {
         name: "Test Workspace",
         slug: workspaceSlug,
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.BUSINESS,
+          addOns: [],
+        },
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);

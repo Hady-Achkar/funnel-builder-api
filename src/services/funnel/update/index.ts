@@ -10,11 +10,7 @@ import {
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
 import { hasPermissionToUpdateFunnel } from "../../../helpers/funnel/update";
-import {
-  generateSlug,
-  generateUniqueSlug,
-  validateSlugFormat,
-} from "../../../helpers/funnel/shared";
+import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 
 export const updateFunnel = async (
   funnelId: number,
@@ -103,44 +99,23 @@ export const updateFunnel = async (
       validatedData.slug !== undefined &&
       validatedData.slug.trim() !== existingFunnel.slug
     ) {
-      const newSlug = validatedData.slug.trim();
-
-      // Validate slug format
-      if (!validateSlugFormat(newSlug)) {
-        throw new Error(
-          "Funnel name contains invalid characters. Please use letters, numbers, and hyphens only."
-        );
-      }
-
-      // Check if slug is unique in workspace
-      const slugExists = await prisma.funnel.findFirst({
-        where: {
-          workspaceId: existingFunnel.workspaceId,
-          slug: newSlug,
-          id: { not: validatedParams.funnelId },
-        },
-        select: { id: true },
-      });
-
-      if (slugExists) {
-        throw new Error(
-          "This funnel name is already in use in your workspace. Please choose a different name."
-        );
-      }
-
-      updates.slug = newSlug;
+      updates.slug = await generateSlug(
+        prisma,
+        validatedData.slug.trim(),
+        existingFunnel.workspaceId,
+        validatedParams.funnelId
+      );
       changed.push("slug");
     }
 
     // Auto-update slug when name changes (if slug wasn't explicitly provided)
     if (updates.name && !validatedData.slug) {
-      const autoSlug = generateSlug(updates.name);
-      const uniqueSlug = await generateUniqueSlug(
-        autoSlug,
+      updates.slug = await generateSlug(
+        prisma,
+        updates.name,
         existingFunnel.workspaceId,
         validatedParams.funnelId
       );
-      updates.slug = uniqueSlug;
       changed.push("slug");
     }
 

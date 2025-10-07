@@ -12,8 +12,7 @@ import { generateUniqueFunnelName } from "./utils/generateUniqueFunnelName";
 import { generateLinkingIdMap } from "./utils/generateLinkingIdMap";
 import { replaceLinkingIdsInContent } from "./utils/replaceLinkingIdsInContent";
 import { getNewLinkingIdForPage } from "./utils/getNewLinkingIdForPage";
-import { generateSlug } from "./utils/generateSlug";
-import { generateUniqueSlug } from "./utils/generateUniqueSlug";
+import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 
 export const duplicateFunnel = async (
   funnelId: number,
@@ -84,8 +83,7 @@ export const duplicateFunnel = async (
       });
 
       // Generate unique slug for duplicated funnel
-      const baseSlug = generateSlug(finalFunnelName);
-      const uniqueSlug = await generateUniqueSlug(baseSlug, targetWorkspaceId);
+      const uniqueSlug = await generateSlug(prisma, finalFunnelName, targetWorkspaceId);
 
       // Create the new funnel (always set status to DRAFT for duplicates)
       const newFunnel = await tx.funnel.create({

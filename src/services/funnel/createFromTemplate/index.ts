@@ -7,10 +7,7 @@ import {
   replaceLinkingIdsInContent,
   getNewLinkingIdForPage
 } from "../../../helpers/funnel/createFromTemplate";
-import {
-  generateSlug,
-  generateUniqueSlug
-} from "../../../helpers/funnel/shared";
+import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 import {
   createFromTemplateParams,
   CreateFromTemplateParams,
@@ -120,25 +117,12 @@ export const createFromTemplate = async (
     // Generate linking ID mapping for all template pages
     const linkingMap = generateLinkingIdMap(template.pages);
 
-    // Generate slug based on name or user-provided slug
-    let slug: string;
-    
-    if (validatedData.slug) {
-      // User provided a slug, make it unique
-      slug = await generateUniqueSlug(validatedData.slug, workspace.id);
-    } else {
-      // Auto-generate slug from name
-      try {
-        const baseSlug = generateSlug(validatedData.name);
-        slug = await generateUniqueSlug(baseSlug, workspace.id);
-      } catch (slugError) {
-        // If slug generation fails due to invalid characters, throw user-friendly error
-        if (slugError instanceof Error && slugError.message.includes("invalid characters")) {
-          throw new Error("Funnel name contains invalid characters. Please use letters, numbers, spaces, and hyphens only.");
-        }
-        throw slugError;
-      }
-    }
+    // Generate unique slug from provided slug or name
+    const slug = await generateSlug(
+      prisma,
+      validatedData.slug || validatedData.name,
+      workspace.id
+    );
 
     // Create funnel and pages in transaction
     const result = await prisma.$transaction(async (tx) => {
