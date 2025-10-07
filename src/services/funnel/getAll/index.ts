@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { hasPermissionToViewFunnels } from "../../../helpers/funnel/getAll";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   getAllFunnelsParams,
   GetAllFunnelsParams,
@@ -51,35 +52,18 @@ export const getAllFunnels = async (
       throw new Error("The workspace does not exist");
     }
 
-    const isOwner = workspace.ownerId === userId;
+    // Check if user has permission to view funnels in this workspace
+    const permissionCheck = await PermissionManager.can({
+      userId,
+      workspaceId: workspace.id,
+      action: PermissionAction.VIEW_FUNNEL,
+    });
 
-    if (!isOwner) {
-      const member = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: workspace.id,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!member) {
-        throw new Error(
-          `You don't have access to the ${workspace.name} workspace. Please ask the workspace owner to invite you.`
-        );
-      }
-
-      const canViewFunnels = hasPermissionToViewFunnels(member.role);
-
-      if (!canViewFunnels) {
-        throw new Error(
-          `You don't have permission to view funnels in this workspace. Please contact your workspace admin.`
-        );
-      }
+    if (!permissionCheck.allowed) {
+      throw new Error(
+        permissionCheck.reason ||
+        `You don't have permission to view funnels in this workspace. Please contact your workspace admin.`
+      );
     }
 
     const allFunnelsCacheKey = `workspace:${workspace.id}:funnels:all`;

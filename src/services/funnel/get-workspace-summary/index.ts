@@ -5,7 +5,8 @@ import {
   BadRequestError,
 } from "../../../errors/http-errors";
 import { ZodError } from "zod";
-import { hasPermissionToViewFunnels } from "../../../helpers/funnel/getAll/permissions.helper";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   GetWorkspaceFunnelsSummaryRequestSchema,
   WorkspaceFunnel,
@@ -30,31 +31,17 @@ export class GetWorkspaceFunnelsSummaryService {
         throw new NotFoundError("Workspace not found");
       }
 
-      // Check if user is workspace owner
-      const isOwner = workspace.ownerId === userId;
+      // Check if user has permission to view funnels in this workspace
+      const permissionCheck = await PermissionManager.can({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.VIEW_FUNNEL,
+      });
 
-      if (!isOwner) {
-        // Check if user is a workspace member and get their role
-        const member = await getPrisma().workspaceMember.findUnique({
-          where: {
-            userId_workspaceId: {
-              userId,
-              workspaceId: workspace.id,
-            },
-          },
-          select: {
-            role: true,
-          },
-        });
-
-        if (!member) {
-          throw new ForbiddenError("Access denied");
-        }
-
-        // Check if user has permission to view funnels (all roles can view funnels)
-        if (!hasPermissionToViewFunnels(member.role)) {
-          throw new ForbiddenError("Access denied");
-        }
+      if (!permissionCheck.allowed) {
+        throw new ForbiddenError(
+          permissionCheck.reason || "You don't have permission to view funnels in this workspace"
+        );
       }
 
       const funnels = await getPrisma().funnel.findMany({
