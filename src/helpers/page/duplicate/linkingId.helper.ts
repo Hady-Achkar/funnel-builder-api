@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { createSlug } from "../../../utils/slug";
+import { createSlug } from "../../../utils/common-functions/slug";
 
 export const generateDuplicateLinkingId = async (
   pageName: string,
@@ -8,15 +8,15 @@ export const generateDuplicateLinkingId = async (
   isSameFunnel: boolean
 ): Promise<string> => {
   const prisma = getPrisma();
-  
+
   // Base linkingId - for same funnel add -copy, for different funnel use original
-  let baseLinkingId = isSameFunnel 
+  let baseLinkingId = isSameFunnel
     ? `${originalLinkingId}-copy`
     : originalLinkingId;
 
   // Ensure the linkingId is properly slugified
   baseLinkingId = createSlug(baseLinkingId);
-  
+
   let linkingId = baseLinkingId;
   let counter = 1;
 

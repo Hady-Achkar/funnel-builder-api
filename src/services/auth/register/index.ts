@@ -6,7 +6,7 @@ import {
   RegisterWorkspaceResponse,
 } from "../../../types/auth/register";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
-import { TrialPeriodCalculator } from "../../../utils/trial-period";
+import { TrialPeriodCalculator } from "../../../utils/common-functions/trial-period";
 import bcrypt from "bcryptjs";
 import {
   generateVerificationToken,
