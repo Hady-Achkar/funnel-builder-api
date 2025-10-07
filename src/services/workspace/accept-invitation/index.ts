@@ -12,6 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import { MembershipStatus } from "../../../generated/prisma-client";
 import { cacheService } from "../../cache/cache.service";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
 
 export class AcceptInvitationService {
   async acceptInvitation(
@@ -61,11 +62,47 @@ export class AcceptInvitationService {
 
       const workspace = await prisma.workspace.findUnique({
         where: { id: tokenPayload.workspaceId },
-        select: { id: true, name: true, slug: true, ownerId: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          ownerId: true,
+          planType: true,
+          addOns: {
+            where: { status: 'ACTIVE' },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
       });
 
       if (!workspace) {
         throw new NotFoundError("Workspace not found");
+      }
+
+      // Check member allocation limit before accepting invitation
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: MembershipStatus.ACTIVE, // Only count ACTIVE members
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspace.planType,
+          addOns: workspace.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot accept invitation. Workspace member limit has been reached. Please contact the workspace administrator to upgrade their plan."
+        );
       }
 
       // Update the pending invitation to active
