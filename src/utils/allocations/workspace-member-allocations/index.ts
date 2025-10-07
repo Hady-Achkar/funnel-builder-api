@@ -7,13 +7,13 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base member allocations per workspace plan type
 const BASE_MEMBER_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 3,       // Free workspace: 3 members total
-  [UserPlan.BUSINESS]: 3,   // Business workspace: 3 members total
-  [UserPlan.AGENCY]: 500,   // Agency workspace: 500 members (can purchase EXTRA_ADMIN at $5/month)
+  [UserPlan.FREE]: 1, // Free workspace: 1 member total
+  [UserPlan.BUSINESS]: 2, // Business workspace: 2 members total
+  [UserPlan.AGENCY]: 1, // Agency workspace: 1 member total
 };
 
 export interface MemberAllocationInput {
-  workspacePlanType: UserPlan;  // The plan type of the workspace (not user)
+  workspacePlanType: UserPlan; // The plan type of the workspace (not user)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -26,7 +26,10 @@ export class WorkspaceMemberAllocations {
    * Get base member allocation for a workspace plan type (without add-ons)
    */
   static getBaseAllocation(workspacePlanType: UserPlan): number {
-    return BASE_MEMBER_ALLOCATIONS[workspacePlanType] || BASE_MEMBER_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_MEMBER_ALLOCATIONS[workspacePlanType] ||
+      BASE_MEMBER_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -40,9 +43,9 @@ export class WorkspaceMemberAllocations {
 
     // Add extra member slots from active EXTRA_ADMIN add-ons (mainly for Agency plan)
     const extraMembers = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_ADMIN &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_ADMIN && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

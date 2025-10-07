@@ -7,13 +7,13 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base custom domain allocations per workspace plan type
 const BASE_CUSTOM_DOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 1,       // Free workspace: 1 custom domain
-  [UserPlan.BUSINESS]: 1,   // Business workspace: 1 custom domain
-  [UserPlan.AGENCY]: 1,     // Agency workspace: 1 custom domain
+  [UserPlan.FREE]: 0, // Free workspace: 0 custom domains
+  [UserPlan.BUSINESS]: 1, // Business workspace: 1 custom domain
+  [UserPlan.AGENCY]: 0, // Agency workspace: 0 custom domains
 };
 
 export interface CustomDomainAllocationInput {
-  workspacePlanType: UserPlan;  // The plan type of the workspace (not user)
+  workspacePlanType: UserPlan; // The plan type of the workspace (not user)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -26,7 +26,10 @@ export class WorkspaceCustomDomainAllocations {
    * Get base custom domain allocation for a workspace plan type (without add-ons)
    */
   static getBaseAllocation(workspacePlanType: UserPlan): number {
-    return BASE_CUSTOM_DOMAIN_ALLOCATIONS[workspacePlanType] || BASE_CUSTOM_DOMAIN_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_CUSTOM_DOMAIN_ALLOCATIONS[workspacePlanType] ||
+      BASE_CUSTOM_DOMAIN_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -40,9 +43,9 @@ export class WorkspaceCustomDomainAllocations {
 
     // Add extra custom domains from active EXTRA_DOMAIN add-ons
     const extraCustomDomains = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_DOMAIN &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_DOMAIN && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 
@@ -98,12 +101,17 @@ export class WorkspaceCustomDomainAllocations {
       totalAllocation,
       currentUsage: currentCustomDomainCount,
       remainingSlots: this.getRemainingSlots(currentCustomDomainCount, input),
-      canCreateMore: this.canCreateCustomDomain(currentCustomDomainCount, input),
+      canCreateMore: this.canCreateCustomDomain(
+        currentCustomDomainCount,
+        input
+      ),
     };
   }
 }
 
 // Export for backward compatibility
-export const getCustomDomainAllocation = (workspacePlanType: UserPlan): number => {
+export const getCustomDomainAllocation = (
+  workspacePlanType: UserPlan
+): number => {
   return WorkspaceCustomDomainAllocations.getBaseAllocation(workspacePlanType);
 };

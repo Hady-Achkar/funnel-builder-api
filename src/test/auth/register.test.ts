@@ -369,7 +369,7 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.AGENCY,
         verified: false,
-        maximumWorkspaces: 3,
+        maximumWorkspaces: 10000,
         trialStartDate: new Date(),
         trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         partnerLevel: 1,
@@ -406,7 +406,7 @@ describe("Register Route - Complete Flow", () => {
 
       // Verify correct workspace allocation for AGENCY plan
       const createCall = mockPrisma.user.create.mock.calls[0][0];
-      expect(createCall.data.maximumWorkspaces).toBe(3);
+      expect(createCall.data.maximumWorkspaces).toBe(10000);
     });
 
     it("should set partner fields to default values", async () => {
@@ -419,7 +419,7 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.AGENCY,
         verified: false,
-        maximumWorkspaces: 3,
+        maximumWorkspaces: 10000,
         trialStartDate: new Date(),
         trialEndDate: new Date(),
         partnerLevel: 1,

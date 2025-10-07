@@ -7,9 +7,9 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base workspace allocations per plan
 const BASE_WORKSPACE_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 1,       // Free plan: 1 workspace
-  [UserPlan.BUSINESS]: 1,   // Business plan: 1 workspace
-  [UserPlan.AGENCY]: 3,     // Agency plan: 3 workspaces
+  [UserPlan.FREE]: 1, // Free plan: 1 workspace
+  [UserPlan.BUSINESS]: 1, // Business plan: 1 workspaces
+  [UserPlan.AGENCY]: 10000, // Agency plan: 10000 workspaces
 };
 
 export interface WorkspaceAllocationInput {
@@ -26,7 +26,10 @@ export class UserWorkspaceAllocations {
    * Get base workspace allocation for a plan (without add-ons)
    */
   static getBaseAllocation(plan: UserPlan): number {
-    return BASE_WORKSPACE_ALLOCATIONS[plan] || BASE_WORKSPACE_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_WORKSPACE_ALLOCATIONS[plan] ||
+      BASE_WORKSPACE_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -40,9 +43,9 @@ export class UserWorkspaceAllocations {
 
     // Add extra workspaces from active add-ons
     const extraWorkspaces = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_WORKSPACE &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_WORKSPACE && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

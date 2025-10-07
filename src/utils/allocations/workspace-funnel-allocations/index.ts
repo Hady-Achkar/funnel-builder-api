@@ -7,13 +7,13 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base funnel allocations per workspace plan type
 const BASE_FUNNEL_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 3,          // Free workspace: 3 funnels
-  [UserPlan.BUSINESS]: 1,      // Business workspace: 1 funnel
-  [UserPlan.AGENCY]: 999,      // Agency workspace: unlimited funnels (high limit)
+  [UserPlan.FREE]: 1, // Free workspace: 1 funnel
+  [UserPlan.BUSINESS]: 1, // Business workspace: 1 funnel
+  [UserPlan.AGENCY]: 10, // Agency workspace: 10 funnels
 };
 
 export interface FunnelAllocationInput {
-  workspacePlanType: UserPlan;  // The plan type of the workspace (not user)
+  workspacePlanType: UserPlan; // The plan type of the workspace (not user)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -26,7 +26,10 @@ export class WorkspaceFunnelAllocations {
    * Get base funnel allocation for a workspace plan type (without add-ons)
    */
   static getBaseAllocation(workspacePlanType: UserPlan): number {
-    return BASE_FUNNEL_ALLOCATIONS[workspacePlanType] || BASE_FUNNEL_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_FUNNEL_ALLOCATIONS[workspacePlanType] ||
+      BASE_FUNNEL_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -40,9 +43,9 @@ export class WorkspaceFunnelAllocations {
 
     // Add extra funnels from active add-ons
     const extraFunnels = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_FUNNEL &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_FUNNEL && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

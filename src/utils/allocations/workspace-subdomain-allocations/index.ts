@@ -7,13 +7,13 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base subdomain allocations per workspace plan type
 const BASE_SUBDOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
-  [UserPlan.FREE]: 1,       // Free workspace: 1 subdomain
-  [UserPlan.BUSINESS]: 1,   // Business workspace: 1 subdomain
-  [UserPlan.AGENCY]: 1,     // Agency workspace: 1 subdomain
+  [UserPlan.FREE]: 1, // Free workspace: 1 subdomain
+  [UserPlan.BUSINESS]: 1, // Business workspace: 1 subdomain
+  [UserPlan.AGENCY]: 1, // Agency workspace: 1 subdomain
 };
 
 export interface SubdomainAllocationInput {
-  workspacePlanType: UserPlan;  // The plan type of the workspace (not user)
+  workspacePlanType: UserPlan; // The plan type of the workspace (not user)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -26,7 +26,10 @@ export class WorkspaceSubdomainAllocations {
    * Get base subdomain allocation for a workspace plan type (without add-ons)
    */
   static getBaseAllocation(workspacePlanType: UserPlan): number {
-    return BASE_SUBDOMAIN_ALLOCATIONS[workspacePlanType] || BASE_SUBDOMAIN_ALLOCATIONS[UserPlan.FREE];
+    return (
+      BASE_SUBDOMAIN_ALLOCATIONS[workspacePlanType] ||
+      BASE_SUBDOMAIN_ALLOCATIONS[UserPlan.FREE]
+    );
   }
 
   /**
@@ -40,9 +43,9 @@ export class WorkspaceSubdomainAllocations {
 
     // Add extra subdomains from active EXTRA_DOMAIN add-ons
     const extraSubdomains = addOns
-      .filter(addon =>
-        addon.type === AddOnType.EXTRA_DOMAIN &&
-        addon.status === 'ACTIVE'
+      .filter(
+        (addon) =>
+          addon.type === AddOnType.EXTRA_DOMAIN && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

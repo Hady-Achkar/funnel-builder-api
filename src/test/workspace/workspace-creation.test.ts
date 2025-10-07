@@ -596,4 +596,156 @@ describe("Workspace Creation Tests", () => {
       );
     });
   });
+
+  describe("Workspace Status - DRAFT vs ACTIVE", () => {
+    it("should create workspace with DRAFT status for FREE plan users", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Free Workspace",
+        slug: "free-workspace",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.FREE,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceStatus: string | undefined;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation((data: any) => {
+              createdWorkspaceStatus = data.data.status;
+              return Promise.resolve({
+                id: 1,
+                name: workspaceData.name,
+                slug: workspaceData.slug,
+                ownerId: userId,
+                planType: UserPlan.FREE,
+                status: data.data.status,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(createdWorkspaceStatus).toBe("DRAFT");
+    });
+
+    it("should create workspace with ACTIVE status for BUSINESS plan users", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Business Workspace",
+        slug: "business-workspace",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceStatus: string | undefined;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation((data: any) => {
+              createdWorkspaceStatus = data.data.status;
+              return Promise.resolve({
+                id: 1,
+                name: workspaceData.name,
+                slug: workspaceData.slug,
+                ownerId: userId,
+                planType: UserPlan.BUSINESS,
+                status: data.data.status,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(createdWorkspaceStatus).toBe("ACTIVE");
+    });
+
+    it("should create workspace with DRAFT status for AGENCY plan users", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Agency Workspace",
+        slug: "agency-workspace",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.AGENCY,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      let createdWorkspaceStatus: string | undefined;
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockImplementation((data: any) => {
+              createdWorkspaceStatus = data.data.status;
+              return Promise.resolve({
+                id: 1,
+                name: workspaceData.name,
+                slug: workspaceData.slug,
+                ownerId: userId,
+                planType: UserPlan.AGENCY,
+                status: data.data.status,
+              });
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      expect(createdWorkspaceStatus).toBe("DRAFT");
+    });
+  });
 });

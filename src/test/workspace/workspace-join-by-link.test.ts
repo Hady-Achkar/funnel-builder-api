@@ -505,8 +505,8 @@ describe("Workspace Join by Link Controller Tests", () => {
     it("should reject when workspace has reached member limit", async () => {
       const { BadRequestError } = await import("../../errors");
 
-      // Mock workspace count to be at limit (3 for FREE plan)
-      mockPrisma.workspaceMember.count.mockResolvedValue(3);
+      // Mock workspace count to be at limit (1 for FREE plan)
+      mockPrisma.workspaceMember.count.mockResolvedValue(1);
 
       mockReq.body = {
         token: "valid-jwt-token",
@@ -528,8 +528,8 @@ describe("Workspace Join by Link Controller Tests", () => {
     });
 
     it("should allow joining when workspace has available slots", async () => {
-      // Mock workspace count below limit (2 members < 3 limit for FREE plan)
-      mockPrisma.workspaceMember.count.mockResolvedValue(2);
+      // Mock workspace count below limit (0 members < 1 limit for FREE plan)
+      mockPrisma.workspaceMember.count.mockResolvedValue(0);
 
       mockReq.body = {
         token: "valid-jwt-token",

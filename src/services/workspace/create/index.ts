@@ -7,6 +7,8 @@ import {
 import {
   WorkspaceRole,
   WorkspacePermission,
+  WorkspaceStatus,
+  UserPlan,
 } from "../../../generated/prisma-client";
 import { rolePermissionPresets } from "../../../types/workspace/update";
 import { cacheService } from "../../cache/cache.service";
@@ -124,9 +126,16 @@ export class CreateWorkspaceService {
         data.planType
       );
 
-      // 9. CREATE WORKSPACE IN TRANSACTION
+      // 9. DETERMINE WORKSPACE STATUS
+      // Set to DRAFT for FREE and AGENCY plans, ACTIVE for BUSINESS
+      const workspaceStatus =
+        user.plan === UserPlan.FREE || user.plan === UserPlan.AGENCY
+          ? WorkspaceStatus.DRAFT
+          : WorkspaceStatus.ACTIVE;
+
+      // 10. CREATE WORKSPACE IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
-        // Create workspace with planType
+        // Create workspace with planType and status
         const workspaceData: {
           name: string;
           slug: string;
@@ -134,12 +143,14 @@ export class CreateWorkspaceService {
           image?: string;
           ownerId: number;
           planType: typeof workspacePlanType;
+          status: typeof workspaceStatus;
         } = {
           name: data.name,
           slug: data.slug,
           description: data.description,
           ownerId: userId,
           planType: workspacePlanType,
+          status: workspaceStatus,
         };
 
         // Add image if provided
@@ -193,7 +204,7 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 10. INVALIDATE USER'S WORKSPACES CACHE
+      // 11. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {

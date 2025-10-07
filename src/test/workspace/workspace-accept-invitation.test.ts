@@ -85,8 +85,8 @@ describe("Accept Invitation Service - Allocation Tests", () => {
         addOns: [],
       });
 
-      // Current count: 2 ACTIVE members (limit is 3 for FREE)
-      mockPrisma.workspaceMember.count.mockResolvedValue(2);
+      // Current count: 0 ACTIVE members (limit is 1 for FREE)
+      mockPrisma.workspaceMember.count.mockResolvedValue(0);
 
       mockPrisma.workspaceMember.update.mockResolvedValue({
         id: 10,
@@ -145,8 +145,8 @@ describe("Accept Invitation Service - Allocation Tests", () => {
         addOns: [],
       });
 
-      // Current count: 3 ACTIVE members (limit is 3 for FREE)
-      mockPrisma.workspaceMember.count.mockResolvedValue(3);
+      // Current count: 1 ACTIVE member (limit is 1 for FREE)
+      mockPrisma.workspaceMember.count.mockResolvedValue(1);
 
       await expect(
         service.acceptInvitation(userId, { token })
@@ -196,8 +196,8 @@ describe("Accept Invitation Service - Allocation Tests", () => {
         ],
       });
 
-      // Current count: 4 ACTIVE members (base 3 + 2 from add-on = 5 total)
-      mockPrisma.workspaceMember.count.mockResolvedValue(4);
+      // Current count: 3 ACTIVE members (base 2 + 2 from add-on = 4 total)
+      mockPrisma.workspaceMember.count.mockResolvedValue(3);
 
       mockPrisma.workspaceMember.update.mockResolvedValue({
         id: 10,
@@ -249,8 +249,8 @@ describe("Accept Invitation Service - Allocation Tests", () => {
         addOns: [],
       });
 
-      // Current count: 499 ACTIVE members (limit is 500 for AGENCY)
-      mockPrisma.workspaceMember.count.mockResolvedValue(499);
+      // Current count: 0 ACTIVE members (limit is 1 for AGENCY)
+      mockPrisma.workspaceMember.count.mockResolvedValue(0);
 
       mockPrisma.workspaceMember.update.mockResolvedValue({
         id: 10,
@@ -302,8 +302,8 @@ describe("Accept Invitation Service - Allocation Tests", () => {
         addOns: [],
       });
 
-      // Current count: 500 ACTIVE members (at limit for AGENCY)
-      mockPrisma.workspaceMember.count.mockResolvedValue(500);
+      // Current count: 1 ACTIVE member (at limit for AGENCY)
+      mockPrisma.workspaceMember.count.mockResolvedValue(1);
 
       await expect(
         service.acceptInvitation(userId, { token })
