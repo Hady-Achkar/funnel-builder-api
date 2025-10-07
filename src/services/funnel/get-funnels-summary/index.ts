@@ -8,18 +8,18 @@ import { ZodError } from "zod";
 import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
-  GetWorkspaceFunnelsSummaryRequestSchema,
-  WorkspaceFunnel,
-} from "../../../types/funnel/get-workspace-summary/get-workspace-summary.types";
+  GetFunnelsSummaryRequestSchema,
+  FunnelSummary,
+} from "../../../types/funnel/get-funnels-summary/get-funnels-summary.types";
 
-export class GetWorkspaceFunnelsSummaryService {
-  static async getWorkspaceFunnelsSummary(
+export class GetFunnelsSummaryService {
+  static async getFunnelsSummary(
     userId: number,
     requestData: unknown
-  ): Promise<WorkspaceFunnel[]> {
+  ): Promise<FunnelSummary[]> {
     try {
       const validatedData =
-        GetWorkspaceFunnelsSummaryRequestSchema.parse(requestData);
+        GetFunnelsSummaryRequestSchema.parse(requestData);
       const { workspaceSlug, search } = validatedData;
 
       // Get workspace by slug
@@ -61,12 +61,12 @@ export class GetWorkspaceFunnelsSummaryService {
         orderBy: { createdAt: "desc" },
       });
 
-      const workspaceFunnels: WorkspaceFunnel[] = funnels.map((funnel) => ({
+      const funnelsSummary: FunnelSummary[] = funnels.map((funnel) => ({
         id: funnel.id,
         name: funnel.name,
       }));
 
-      return workspaceFunnels;
+      return funnelsSummary;
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         throw new BadRequestError(

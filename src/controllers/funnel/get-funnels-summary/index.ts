@@ -1,9 +1,9 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { GetWorkspaceFunnelsSummaryService } from "../../../services/funnel/get-workspace-summary";
+import { GetFunnelsSummaryService } from "../../../services/funnel/get-funnels-summary";
 
-export class GetWorkspaceFunnelsSummaryController {
-  static async getWorkspaceFunnelsSummary(
+export class GetFunnelsSummaryController {
+  static async getFunnelsSummary(
     req: AuthRequest,
     res: Response,
     next: NextFunction
@@ -13,7 +13,7 @@ export class GetWorkspaceFunnelsSummaryController {
       const { search } = req.query;
       const userId = req.userId!;
 
-      const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+      const result = await GetFunnelsSummaryService.getFunnelsSummary(
         userId,
         {
           workspaceSlug,

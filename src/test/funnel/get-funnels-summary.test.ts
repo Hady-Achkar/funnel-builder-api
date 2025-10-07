@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { GetWorkspaceFunnelsSummaryService } from "../../services/funnel/get-workspace-summary";
-import { GetWorkspaceFunnelsSummaryController } from "../../controllers/funnel/get-workspace-summary";
+import { GetFunnelsSummaryService } from "../../services/funnel/get-funnels-summary";
+import { GetFunnelsSummaryController } from "../../controllers/funnel/get-funnels-summary";
 import { getPrisma } from "../../lib/prisma";
 import { NotFoundError, ForbiddenError } from "../../errors/http-errors";
 import { WorkspaceRole } from "../../generated/prisma-client";
@@ -9,7 +9,7 @@ import { AuthRequest } from "../../middleware/auth";
 
 vi.mock("../../lib/prisma");
 
-describe("Get Workspace Funnels Summary Tests", () => {
+describe("Get Funnels Summary Tests", () => {
   let mockPrisma: any;
   const userId = 1;
   const workspaceSlug = "test-workspace";
@@ -36,7 +36,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
     vi.restoreAllMocks();
   });
 
-  describe("GetWorkspaceFunnelsSummaryService", () => {
+  describe("GetFunnelsSummaryService", () => {
     describe("Success Cases", () => {
       it("should return funnels with only id and name for workspace owner", async () => {
         const workspaceData = {
@@ -59,7 +59,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
         mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+        const result = await GetFunnelsSummaryService.getFunnelsSummary(
           userId,
           { workspaceSlug }
         );
@@ -109,7 +109,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
         mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+        const result = await GetFunnelsSummaryService.getFunnelsSummary(
           userId,
           { workspaceSlug }
         );
@@ -141,7 +141,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
         mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+        const result = await GetFunnelsSummaryService.getFunnelsSummary(
           userId,
           { workspaceSlug }
         );
@@ -159,7 +159,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
 
-        const result = await GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(
+        const result = await GetFunnelsSummaryService.getFunnelsSummary(
           userId,
           { workspaceSlug }
         );
@@ -173,7 +173,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
         await expect(
-          GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(userId, {
+          GetFunnelsSummaryService.getFunnelsSummary(userId, {
             workspaceSlug,
           })
         ).rejects.toThrow(NotFoundError);
@@ -194,7 +194,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
         mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
         await expect(
-          GetWorkspaceFunnelsSummaryService.getWorkspaceFunnelsSummary(userId, {
+          GetFunnelsSummaryService.getFunnelsSummary(userId, {
             workspaceSlug,
           })
         ).rejects.toThrow(ForbiddenError);
@@ -202,7 +202,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
     });
   });
 
-  describe("GetWorkspaceFunnelsSummaryController", () => {
+  describe("GetFunnelsSummaryController", () => {
     let mockRequest: Partial<AuthRequest>;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
@@ -237,7 +237,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
       mockPrisma.funnel.findMany.mockResolvedValue(funnelsData);
 
-      await GetWorkspaceFunnelsSummaryController.getWorkspaceFunnelsSummary(
+      await GetFunnelsSummaryController.getFunnelsSummary(
         mockRequest as AuthRequest,
         mockResponse as Response,
         mockNext
@@ -252,7 +252,7 @@ describe("Get Workspace Funnels Summary Tests", () => {
       const error = new NotFoundError("Workspace not found");
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
-      await GetWorkspaceFunnelsSummaryController.getWorkspaceFunnelsSummary(
+      await GetFunnelsSummaryController.getFunnelsSummary(
         mockRequest as AuthRequest,
         mockResponse as Response,
         mockNext
