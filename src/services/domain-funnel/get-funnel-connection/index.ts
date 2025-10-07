@@ -6,7 +6,8 @@ import {
   GetFunnelConnectionResponse,
   GetFunnelConnectionResponseSchema,
 } from "../../../types/domain-funnel/get-funnel-connection";
-import { hasPermissionToViewFunnel } from "../../../helpers/funnel/get";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 
 export class GetFunnelConnectionService {
   static async getFunnelConnection(
@@ -39,32 +40,17 @@ export class GetFunnelConnectionService {
         throw new NotFoundError("Funnel not found");
       }
 
-      // Check permissions
-      const isOwner = funnel.workspace.ownerId === userId;
+      // Check if user has permission to view this funnel
+      const permissionCheck = await PermissionManager.can({
+        userId,
+        workspaceId: funnel.workspaceId,
+        action: PermissionAction.VIEW_FUNNEL,
+      });
 
-      if (!isOwner) {
-        const member = await prisma.workspaceMember.findUnique({
-          where: {
-            userId_workspaceId: {
-              userId,
-              workspaceId: funnel.workspaceId,
-            },
-          },
-          select: {
-            role: true,
-          },
-        });
-
-        if (!member) {
-          throw new ForbiddenError("You don't have access to this funnel");
-        }
-
-        // Check if user has permission to view funnels
-        const canView = hasPermissionToViewFunnel(member.role);
-
-        if (!canView) {
-          throw new ForbiddenError("You don't have permission to view this funnel");
-        }
+      if (!permissionCheck.allowed) {
+        throw new ForbiddenError(
+          permissionCheck.reason || "You don't have permission to view this funnel"
+        );
       }
 
       // Get the connected domain for this funnel
