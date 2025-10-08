@@ -1,6 +1,6 @@
 import { getPrisma } from '../../../lib/prisma';
 import { BadRequestError, NotFoundError } from '../../../errors';
-import { verifyPassword } from '../../../helpers/funnel-settings/shared';
+import bcrypt from 'bcryptjs';
 import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
@@ -38,8 +38,8 @@ export const verifyFunnelPassword = async (
       return verifyPasswordResponse.parse(response);
     }
 
-    // Verify the password
-    const isValidPassword = await verifyPassword(validatedRequest.password, funnelSettings.passwordHash);
+    // Verify the password using bcrypt
+    const isValidPassword = await bcrypt.compare(validatedRequest.password, funnelSettings.passwordHash);
 
     const response = {
       valid: isValidPassword,
