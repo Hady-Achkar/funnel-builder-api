@@ -1,7 +1,7 @@
 import { getPrisma } from '../../../lib/prisma';
 import { BadRequestError } from '../../../errors';
-import { checkFunnelSettingsPermissions } from '../../../helpers/funnel-settings/lock-funnel';
-import { hashPassword } from '../../../helpers/funnel-settings/shared';
+import bcrypt from 'bcryptjs';
+import { PermissionManager, PermissionAction } from '../../../utils/workspace-utils/workspace-permission-manager';
 import {
   LockFunnelRequest,
   LockFunnelResponse,
@@ -20,10 +20,27 @@ export const lockFunnel = async (
 
     const validatedRequest = lockFunnelRequest.parse(data);
 
-    await checkFunnelSettingsPermissions(userId, validatedRequest.funnelId);
-
     const prisma = getPrisma();
-    const passwordHash = await hashPassword(validatedRequest.password.trim());
+
+    // Get funnel to retrieve workspaceId
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: validatedRequest.funnelId },
+      select: { id: true, workspaceId: true },
+    });
+
+    if (!funnel) {
+      throw new Error("Funnel not found");
+    }
+
+    // Check permissions using centralized PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.EDIT_FUNNEL,
+    });
+
+    // Hash password using bcrypt (10 salt rounds)
+    const passwordHash = await bcrypt.hash(validatedRequest.password.trim(), 10);
 
     await prisma.$transaction(async (tx) => {
       const existingSettings = await tx.funnelSettings.findUnique({
