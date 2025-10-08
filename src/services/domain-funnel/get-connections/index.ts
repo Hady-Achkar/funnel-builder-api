@@ -1,7 +1,10 @@
 import { getPrisma } from "../../../lib/prisma";
 import { BadRequestError, NotFoundError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
-import { validateWorkspaceAccess } from "../../../helpers/domain/shared";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 import {
   GetConnectionsRequestSchema,
   GetConnectionsResponse,
@@ -28,7 +31,12 @@ export class GetConnectionsService {
         throw new NotFoundError("Workspace not found");
       }
 
-      await validateWorkspaceAccess(userId, workspace.id, []);
+      // Check permissions using centralized PermissionManager
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.VIEW_WORKSPACE,
+      });
 
       const connections = await prisma.funnelDomain.findMany({
         where: {
