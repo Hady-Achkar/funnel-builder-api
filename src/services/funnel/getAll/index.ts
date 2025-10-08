@@ -150,7 +150,6 @@ export const getAllFunnels = async (
     );
 
     const response = {
-      message: `Successfully retrieved ${paginatedFunnels.length} funnels from workspace ${workspace.name}`,
       funnels: paginatedFunnels,
       pagination: {
         page: validatedQuery.page,

@@ -44,7 +44,7 @@ describe("Get All Funnels Tests", () => {
 
       const result = await getAllFunnels(workspaceSlug, userId, {});
 
-      expect(result.message).toContain("Successfully retrieved 0 funnels");
+      expect(result.funnels).toHaveLength(0);
       expect(result.pagination.page).toBe(1);
       expect(result.pagination.limit).toBe(10);
     });
@@ -56,7 +56,7 @@ describe("Get All Funnels Tests", () => {
 
       const result = await getAllFunnels(workspaceSlug, userId);
 
-      expect(result.message).toContain("Successfully retrieved 0 funnels");
+      expect(result.funnels).toHaveLength(0);
       expect(result.pagination.page).toBe(1);
       expect(result.pagination.limit).toBe(10);
     });
@@ -147,7 +147,6 @@ describe("Get All Funnels Tests", () => {
       const result = await getAllFunnels(workspaceSlug, userId, {});
 
       expect(result.funnels).toHaveLength(2);
-      expect(result.message).toContain("Successfully retrieved 2 funnels");
     });
 
     it.skip("should filter funnels for members based on permissions", async () => {
@@ -686,7 +685,6 @@ describe("Get All Funnels Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);
 
       const cachedData = {
-        message: "Cached funnels",
         funnels: [
           {
             id: 1,
