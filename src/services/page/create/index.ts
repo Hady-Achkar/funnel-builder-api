@@ -5,12 +5,14 @@ import {
 } from "../../../types/page/create";
 import { getPrisma } from "../../../lib/prisma";
 import { cacheService } from "../../cache/cache.service";
-import { BadRequestError, UnauthorizedError } from "../../../errors";
-import { ZodError } from "zod";
 import {
-  checkFunnelEditPermissions,
-  generateUniqueLinkingId,
-} from "../../../helpers/page/create";
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../../../errors";
+import { ZodError } from "zod";
+import { generateUniqueLinkingId } from "./utils/generate-linking-id";
+import { FunnelPageAllocations } from "../../../utils/allocations/funnel-page-allocations";
 
 export const createPage = async (
   userId: number,
@@ -23,11 +25,69 @@ export const createPage = async (
 
     const prisma = getPrisma();
 
-    const permissionCheck = await checkFunnelEditPermissions(
-      userId,
-      validatedRequest.funnelId
-    );
+    // Get funnel with workspace and addOns information
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: validatedRequest.funnelId },
+      select: {
+        id: true,
+        name: true,
+        workspaceId: true,
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+            ownerId: true,
+            planType: true,
+            addOns: {
+              select: {
+                type: true,
+                quantity: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
+    if (!funnel) {
+      throw new NotFoundError("Funnel not found");
+    }
+
+    if (!funnel.workspace) {
+      throw new NotFoundError("Workspace not found for this funnel");
+    }
+
+    // Check page allocation limits
+    const currentPageCount = await prisma.page.count({
+      where: { funnelId: validatedRequest.funnelId },
+    });
+
+    const canCreate = FunnelPageAllocations.canCreatePage(currentPageCount, {
+      workspacePlanType: funnel.workspace.planType,
+      addOns: funnel.workspace.addOns,
+    });
+
+    if (!canCreate) {
+      const summary = FunnelPageAllocations.getAllocationSummary(
+        currentPageCount,
+        {
+          workspacePlanType: funnel.workspace.planType,
+          addOns: funnel.workspace.addOns,
+        }
+      );
+
+      throw new BadRequestError(
+        `Your funnel has reached its page limit (${summary.totalAllocation} pages). ` +
+          `You have ${summary.baseAllocation} base pages` +
+          (summary.extraFromAddOns > 0
+            ? ` + ${summary.extraFromAddOns} from add-ons. `
+            : ". ") +
+          `Upgrade your plan or purchase page add-ons to create more pages.`
+      );
+    }
+
+    // Get the last page order
     const lastPage = await prisma.page.findFirst({
       where: { funnelId: validatedRequest.funnelId },
       select: { order: true },
@@ -58,59 +118,16 @@ export const createPage = async (
       return page;
     });
 
+    // Simplified cache invalidation - just delete the funnel full cache
     try {
-      const pageFullData = {
-        id: result.id,
-        name: result.name,
-        content: result.content,
-        order: result.order,
-        type: result.type,
-        linkingId: result.linkingId,
-        seoTitle: result.seoTitle,
-        seoDescription: result.seoDescription,
-        seoKeywords: result.seoKeywords,
-        funnelId: result.funnelId,
-        createdAt: result.createdAt,
-        updatedAt: result.updatedAt,
-      };
-
-      await cacheService.set(
-        `funnel:${result.funnelId}:page:${result.id}:full`,
-        pageFullData,
-        { ttl: 0 }
+      await cacheService.del(
+        `workspace:${funnel.workspace.id}:funnel:${validatedRequest.funnelId}:full`
       );
-
-      const funnelCacheKey = `workspace:${permissionCheck.workspace.id}:funnel:${validatedRequest.funnelId}:full`;
-      const cachedFunnel = await cacheService.get(funnelCacheKey);
-
-      if (cachedFunnel && typeof cachedFunnel === "object") {
-        const pageWithoutContent = {
-          id: result.id,
-          name: result.name,
-          order: result.order,
-          type: result.type,
-          linkingId: result.linkingId,
-          seoTitle: result.seoTitle,
-          seoDescription: result.seoDescription,
-          seoKeywords: result.seoKeywords,
-          visits: result.visits,
-          funnelId: result.funnelId,
-          createdAt: result.createdAt,
-          updatedAt: result.updatedAt,
-        };
-
-        const funnel = cachedFunnel as any;
-        const updatedFunnel = {
-          ...funnel,
-          pages: [...(funnel.pages || []), pageWithoutContent].sort(
-            (a: any, b: any) => a.order - b.order
-          ),
-        };
-
-        await cacheService.set(funnelCacheKey, updatedFunnel, { ttl: 0 });
-      }
     } catch (cacheError) {
-      console.warn("Cache update failed but page was created:", cacheError);
+      console.warn(
+        "Cache invalidation failed but page was created:",
+        cacheError
+      );
     }
 
     const response = {

@@ -1,4 +1,4 @@
-import { getPrisma } from "../../../lib/prisma";
+import { getPrisma } from "../../../../lib/prisma";
 
 /**
  * Generates a linking ID from a page name by converting to lowercase,
@@ -8,7 +8,7 @@ export const generateLinkingId = (name: string): string => {
   if (!name || typeof name !== 'string') {
     return 'page';
   }
-  
+
   return name
     .toLowerCase()
     .trim()
@@ -23,21 +23,21 @@ export const generateLinkingId = (name: string): string => {
  * If the generated ID already exists, appends a number to make it unique
  */
 export const generateUniqueLinkingId = async (
-  name: string, 
+  name: string,
   funnelId: number
 ): Promise<string> => {
   const prisma = getPrisma();
-  
+
   let baseLinkingId = generateLinkingId(name);
-  
+
   // Fallback if name generates empty linking ID
   if (!baseLinkingId) {
     baseLinkingId = 'page';
   }
-  
+
   let linkingId = baseLinkingId;
   let counter = 1;
-  
+
   // Check if linking ID already exists in the funnel
   while (true) {
     const existingPage = await prisma.page.findFirst({
@@ -47,14 +47,14 @@ export const generateUniqueLinkingId = async (
       },
       select: { id: true },
     });
-    
+
     if (!existingPage) {
       break; // Unique linking ID found
     }
-    
+
     counter++;
     linkingId = `${baseLinkingId}-${counter}`;
   }
-  
+
   return linkingId;
 };
