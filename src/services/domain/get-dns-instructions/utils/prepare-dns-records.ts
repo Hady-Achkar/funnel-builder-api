@@ -1,5 +1,5 @@
-import { getCloudFlareAPIHelper } from "../shared";
-import { DNSRecords, DNSRecordStatus } from "../../../types/domain/get-dns-instructions";
+import { getCloudFlareAPIHelper } from "../../../../utils/domain-utils/cloudflare-api";
+import { DNSRecords, DNSRecordStatus } from "../../../../types/domain/get-dns-instructions";
 
 export const prepareDNSRecords = (
   domainRecord: any,

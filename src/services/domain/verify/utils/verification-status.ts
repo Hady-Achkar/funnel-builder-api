@@ -2,7 +2,7 @@ import {
   CloudFlareHostnameStatus,
   CloudFlareSslStatus,
   SslValidationRecord,
-} from "../../../types/domain/verify";
+} from "../../../../types/domain/verify/verify.types";
 
 export interface VerificationStatusResult {
   message: string;

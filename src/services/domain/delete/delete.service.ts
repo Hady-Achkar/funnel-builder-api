@@ -1,7 +1,10 @@
-import { DomainType, $Enums } from "../../../generated/prisma-client";
+import { DomainType } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { deleteCustomHostname, deleteARecord } from "../../../helpers/domain/delete";
-import { validateWorkspaceAccess } from "../../../helpers/domain/shared";
+import { deleteCustomHostname, deleteARecord } from "./utils/cloudflare-cleanup";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 import {
   DeleteDomainResponse,
   deleteDomainResponse,
@@ -41,9 +44,11 @@ export class DeleteDomainService {
         );
       }
 
-      await validateWorkspaceAccess(userId, domainRecord.workspaceId, [
-        $Enums.WorkspacePermission.DELETE_DOMAINS,
-      ]);
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: domainRecord.workspaceId,
+        action: PermissionAction.DELETE_DOMAIN,
+      });
 
       let customHostnameDeleted = false;
       let dnsRecordsDeleted = false;

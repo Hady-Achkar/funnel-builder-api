@@ -2,18 +2,19 @@ import {
   DomainType,
   DomainStatus,
   SslStatus,
-  $Enums,
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
+import { validateHostname, parseDomain } from "./utils/domain-validation";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 import {
-  validateHostname,
-  parseDomain,
-  getCloudFlareAPIHelper,
   addCustomHostname,
   getCustomHostnameDetails,
-  validateWorkspaceAccess,
-} from "../../../helpers/domain/shared";
-import { checkWorkspaceDomainLimits } from "../../../helpers/domain/create-custom-domain";
+} from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
+import { WorkspaceCustomDomainAllocations } from "../../../utils/allocations/workspace-custom-domain-allocations";
 import {
   CreateCustomDomainResponse,
   CreateCustomDomainRequestSchema,
@@ -36,16 +37,60 @@ export class CreateCustomDomainService {
       // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
         where: { slug: workspaceSlug },
+        include: {
+          addOns: {
+            where: {
+              status: "ACTIVE",
+            },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
       });
 
       if (!workspace) {
         throw new BadRequestError("Workspace not found");
       }
 
-      await validateWorkspaceAccess(userId, workspace.id, [
-        $Enums.WorkspacePermission.CREATE_DOMAINS,
-      ]);
-      await checkWorkspaceDomainLimits(workspace.id);
+      // Check permission using centralized PermissionManager
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.CREATE_CUSTOM_DOMAIN,
+      });
+
+      // Check custom domain limit using centralized allocation utility
+      const currentCustomDomainCount = await getPrisma().domain.count({
+        where: {
+          workspaceId: workspace.id,
+          type: DomainType.CUSTOM_DOMAIN,
+        },
+      });
+
+      const canCreate = WorkspaceCustomDomainAllocations.canCreateCustomDomain(
+        currentCustomDomainCount,
+        {
+          workspacePlanType: workspace.planType,
+          addOns: workspace.addOns,
+        }
+      );
+
+      if (!canCreate) {
+        const summary = WorkspaceCustomDomainAllocations.getAllocationSummary(
+          currentCustomDomainCount,
+          {
+            workspacePlanType: workspace.planType,
+            addOns: workspace.addOns,
+          }
+        );
+
+        throw new BadRequestError(
+          `This workspace has reached its maximum limit of ${summary.totalAllocation} custom domain(s). You are currently using ${summary.currentUsage} custom domain(s).`
+        );
+      }
 
       const validatedHostname = validateHostname(hostname);
       const parsedDomain = parseDomain(validatedHostname);
@@ -68,7 +113,6 @@ export class CreateCustomDomainService {
           "This domain name is taken, please choose another one."
         );
       }
-
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();

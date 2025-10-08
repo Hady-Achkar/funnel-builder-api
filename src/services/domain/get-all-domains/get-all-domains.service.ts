@@ -1,4 +1,9 @@
 import { getPrisma } from "../../../lib/prisma";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
+import { calculatePagination, getPaginationOffset } from "../../../utils/pagination";
 import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import {
@@ -8,12 +13,9 @@ import {
   DomainSummary,
 } from "../../../types/domain/get-all-domains";
 import {
-  validateGetAllDomainsAccess,
   buildDomainFilters,
   buildDomainSorting,
-  calculatePagination,
-  getPaginationOffset,
-} from "../../../helpers/domain/get-all-domains";
+} from "./utils/build-filters";
 
 export class GetAllDomainsService {
   static async getAllDomains(
@@ -33,7 +35,11 @@ export class GetAllDomainsService {
         throw new NotFoundError("Workspace not found");
       }
 
-      await validateGetAllDomainsAccess(userId, workspace.id);
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.VIEW_DOMAINS,
+      });
 
       const whereClause = {
         workspaceId: workspace.id,

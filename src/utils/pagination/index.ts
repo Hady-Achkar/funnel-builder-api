@@ -1,4 +1,4 @@
-import { Pagination } from "../../../types/domain/get-all-domains";
+import { Pagination } from "../../types/domain/get-all-domains/get-all-domains.types";
 
 export const calculatePagination = (
   page: number,

@@ -1,4 +1,4 @@
-import { DNSRecords } from "../../../types/domain/get-dns-instructions";
+import { DNSRecords } from "../../../../types/domain/get-dns-instructions/get-dns-instructions.types";
 
 export const calculateProgress = (
   domainRecord: any,

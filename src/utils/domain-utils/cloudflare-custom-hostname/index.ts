@@ -1,4 +1,4 @@
-import { getCloudFlareAPIHelper } from "./cloudflare-api.helper";
+import { getCloudFlareAPIHelper } from "../cloudflare-api";
 import {
   CustomHostnamePayload,
   CustomHostnamePayloadSchema,

@@ -1,4 +1,4 @@
-import { getCloudFlareAPIHelper } from "../shared";
+import { getCloudFlareAPIHelper } from "../../../../utils/domain-utils/cloudflare-api";
 
 export const createARecord = async (
   subdomain: string,

@@ -2,11 +2,15 @@ import {
   DomainType,
   DomainStatus,
   SslStatus,
-  $Enums,
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper, validateWorkspaceAccess } from "../../../helpers/domain/shared";
-import { checkWorkspaceSubdomainLimits, createARecord } from "../../../helpers/domain/create-subdomain";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
+import { WorkspaceSubdomainAllocations } from "../../../utils/allocations/workspace-subdomain-allocations";
+import { createARecord } from "./utils/create-a-record";
 import {
   CreateSubdomainResponse,
   createSubdomainRequest,
@@ -29,16 +33,59 @@ export class CreateSubdomainService {
       // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
         where: { slug: workspaceSlug },
+        include: {
+          addOns: {
+            where: {
+              status: "ACTIVE",
+            },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
       });
 
       if (!workspace) {
         throw new BadRequestError("Workspace not found");
       }
 
-      await validateWorkspaceAccess(userId, workspace.id, [
-        $Enums.WorkspacePermission.CREATE_DOMAINS,
-      ]);
-      await checkWorkspaceSubdomainLimits(workspace.id);
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.CREATE_SUBDOMAIN,
+      });
+
+      // Check subdomain limit using centralized allocation utility
+      const currentSubdomainCount = await getPrisma().domain.count({
+        where: {
+          workspaceId: workspace.id,
+          type: DomainType.SUBDOMAIN,
+        },
+      });
+
+      const canCreate = WorkspaceSubdomainAllocations.canCreateSubdomain(
+        currentSubdomainCount,
+        {
+          workspacePlanType: workspace.planType,
+          addOns: workspace.addOns,
+        }
+      );
+
+      if (!canCreate) {
+        const summary = WorkspaceSubdomainAllocations.getAllocationSummary(
+          currentSubdomainCount,
+          {
+            workspacePlanType: workspace.planType,
+            addOns: workspace.addOns,
+          }
+        );
+
+        throw new BadRequestError(
+          `This workspace has reached its maximum limit of ${summary.totalAllocation} subdomain(s). You are currently using ${summary.currentUsage} subdomain(s).`
+        );
+      }
 
       // Use provided domain config or default to mydigitalsite.io
       const baseDomain = domainConfig?.baseDomain || "mydigitalsite.io";
