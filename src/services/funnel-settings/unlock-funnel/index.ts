@@ -7,8 +7,9 @@ import {
   unlockFunnelResponse,
 } from "../../../types/funnel-settings/unlock-funnel";
 import { ZodError } from "zod";
-import { checkFunnelSettingsPermissions } from "../../../helpers/funnel-settings/unlock-funnel";
+import { PermissionManager, PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { cacheService } from "../../cache/cache.service";
+import { WorkspaceStatus } from "../../../generated/prisma-client";
 
 export const unlockFunnel = async (
   userId: number,
@@ -19,9 +20,40 @@ export const unlockFunnel = async (
 
     const validatedRequest = unlockFunnelRequest.parse(data);
 
-    await checkFunnelSettingsPermissions(userId, validatedRequest.funnelId);
-
     const prisma = getPrisma();
+
+    // Get funnel with workspace information
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: validatedRequest.funnelId },
+      select: {
+        id: true,
+        workspaceId: true,
+        workspace: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!funnel) {
+      throw new Error("Funnel not found");
+    }
+
+    // Check permissions using centralized PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.EDIT_FUNNEL,
+    });
+
+    // Check if workspace has DRAFT status - prevent unlocking for DRAFT workspaces
+    if (funnel.workspace.status === WorkspaceStatus.DRAFT) {
+      throw new Error(
+        "Password protection cannot be removed from funnels in your current workspace plan. This feature is available for workspaces with enhanced access."
+      );
+    }
 
     await prisma.funnelSettings.update({
       where: { funnelId: validatedRequest.funnelId },
