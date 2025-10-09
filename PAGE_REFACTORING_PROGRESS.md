@@ -198,8 +198,8 @@ await cacheService.set(cacheKey, pageData, { ttl: 0 });
 **Status:** DONE
 **Started:** 2025-10-09
 **Completed:** 2025-10-09
-**Files Modified:** 2/2 (Service + shared utility)
-**Tests:** Not written (function refactored without new tests - existing tests maintained)
+**Files Modified:** 3/3 (Service + shared utility + types)
+**Tests Written:** 25/10+ (exceeded target by 150%!)
 
 ### Tasks
 - [x] Replace permission helper with PermissionManager
@@ -210,6 +210,35 @@ await cacheService.set(cacheKey, pageData, { ttl: 0 });
 - [x] Enhanced `generateUniqueLinkingId` to support update scenarios (excludePageId param)
 - [x] Delete old service-specific utility directory
 - [x] **BONUS:** Centralized linking-id utility now used by CREATE, UPDATE, and DUPLICATE
+- [x] Fix content field type to accept JSON (z.any())
+- [x] Create comprehensive tests: `src/test/page/update-page.test.ts`
+
+### Test Coverage Achieved (25 tests - ALL PASSING ✅)
+- [x] Should require authentication
+- [x] Should reject if page not found
+- [x] Allow workspace owner to update page
+- [x] Allow member with EDIT_PAGE permission
+- [x] Reject user without EDIT_PAGE permission
+- [x] Should update page name
+- [x] Should update page content (JSON array/object)
+- [x] Should update SEO fields
+- [x] Should update page type
+- [x] Should update multiple fields at once
+- [x] Should handle null SEO fields
+- [x] Should generate new linkingId when name is updated
+- [x] Should use provided linkingId if explicitly provided
+- [x] Should reject duplicate linkingId in same funnel
+- [x] Should validate linkingId format (lowercase, numbers, hyphens only)
+- [x] Should return existing page when no changes provided
+- [x] Should invalidate workspace funnel cache after update
+- [x] Should not invalidate cache when no changes made
+- [x] Should validate page ID is required
+- [x] Should validate page ID is a number
+- [x] Should validate name length (max 255 chars)
+- [x] Should validate SEO title length (max 60 chars)
+- [x] Should validate SEO description length (max 160 chars)
+- [x] Return 200 with updated page (controller)
+- [x] Handle errors through next middleware (controller)
 
 ### Key Changes Made
 - ✅ Replaced `checkFunnelEditPermissions` with `PermissionManager.requirePermission`
@@ -217,10 +246,13 @@ await cacheService.set(cacheKey, pageData, { ttl: 0 });
 - ✅ Now uses shared `generateUniqueLinkingId` from `utils/page-utils/linking-id`
 - ✅ Simplified cache: just `del()` instead of complex cache updates
 - ✅ Inline validation for page existence and linking ID uniqueness
+- ✅ Fixed content field type: `z.any()` to support JSON arrays/objects
 
 ### Files Modified
 1. **Service:** [src/services/page/update/index.ts](src/services/page/update/index.ts)
-2. **Shared Utility:** [src/utils/page-utils/linking-id/index.ts](src/utils/page-utils/linking-id/index.ts) (enhanced)
+2. **Types:** [src/types/page/update/index.ts](src/types/page/update/index.ts) (fixed content type)
+3. **Shared Utility:** [src/utils/page-utils/linking-id/index.ts](src/utils/page-utils/linking-id/index.ts) (enhanced)
+4. **Tests:** [src/test/page/update-page.test.ts](src/test/page/update-page.test.ts) (NEW - 25 tests)
 
 ### Files/Directories Deleted
 - `src/services/page/create/utils/` (old location, moved to shared)
@@ -702,8 +734,8 @@ src/helpers/page/ (DELETE ENTIRE DIRECTORY - 21 files)
 ## 📊 Statistics
 
 ### Progress Metrics
-- **Functions Completed:** 5/8 (62.5%) ⬆️ +12.5%
-- **Tests Written:** 63/60+ target (105%!) - 18 CREATE + 18 GET + 11 DUPLICATE + 16 GET_PUBLIC_PAGE
+- **Functions Completed:** 5/8 (62.5%)
+- **Tests Written:** 88/60+ target (147%!) - 18 CREATE + 18 GET + 25 UPDATE + 11 DUPLICATE + 16 GET_PUBLIC_PAGE
 - **Helper Files Deleted:** 9/21 (42.9%) - CREATE (3) + GET (2) + DUPLICATE (4) + GET_PUBLIC_PAGE (0 - none existed)
 - **Shared Utilities Created:** 1 (linking-id - used by 3 services)
 - **Services Refactored:** 5/8 (62.5%) - CREATE, GET, UPDATE, DUPLICATE, GET_PUBLIC_PAGE
