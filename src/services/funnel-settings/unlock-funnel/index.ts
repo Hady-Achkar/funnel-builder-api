@@ -63,12 +63,19 @@ export const unlockFunnel = async (
       },
     });
 
-    const cacheKey = `funnel:${validatedRequest.funnelId}:settings:full`;
-    try {
-      await cacheService.del(cacheKey);
-    } catch (cacheError) {
-      console.warn("Failed to invalidate funnel settings cache:", cacheError);
-    }
+    const cacheKeysToInvalidate = [
+      `funnel:${validatedRequest.funnelId}:settings:full`,
+      `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+      `workspace:${funnel.workspaceId}:funnels:all`,
+    ];
+
+    await Promise.all(
+      cacheKeysToInvalidate.map(key =>
+        cacheService.del(key).catch(err =>
+          console.warn(`Failed to invalidate cache key ${key}:`, err)
+        )
+      )
+    );
 
     const response = {
       message: "Funnel unlocked successfully",

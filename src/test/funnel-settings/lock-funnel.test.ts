@@ -484,11 +484,18 @@ describe("Lock Funnel Tests", () => {
       });
     });
 
-    it("should invalidate funnel settings cache", async () => {
+    it("should invalidate all relevant cache keys", async () => {
       await lockFunnel(userId, { funnelId, password });
 
+      expect(cacheService.del).toHaveBeenCalledTimes(3);
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${funnelId}:settings:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnel:${funnelId}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
       );
     });
 
@@ -503,9 +510,10 @@ describe("Lock Funnel Tests", () => {
 
     it("should invalidate cache with correct funnel ID", async () => {
       const customFunnelId = 999;
+      const customWorkspaceId = 888;
       const customFunnel = {
         id: customFunnelId,
-        workspaceId,
+        workspaceId: customWorkspaceId,
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(customFunnel);
@@ -525,6 +533,12 @@ describe("Lock Funnel Tests", () => {
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${customFunnelId}:settings:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${customWorkspaceId}:funnel:${customFunnelId}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${customWorkspaceId}:funnels:all`
       );
     });
   });

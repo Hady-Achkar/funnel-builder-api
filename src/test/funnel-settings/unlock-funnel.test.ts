@@ -358,11 +358,18 @@ describe("Unlock Funnel Tests", () => {
       });
     });
 
-    it("should invalidate funnel settings cache", async () => {
+    it("should invalidate all relevant cache keys", async () => {
       await unlockFunnel(userId, { funnelId });
 
+      expect(cacheService.del).toHaveBeenCalledTimes(3);
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${funnelId}:settings:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnel:${funnelId}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
       );
     });
 
@@ -377,11 +384,12 @@ describe("Unlock Funnel Tests", () => {
 
     it("should invalidate cache with correct funnel ID", async () => {
       const customFunnelId = 999;
+      const customWorkspaceId = 888;
       const customFunnel = {
         id: customFunnelId,
-        workspaceId,
+        workspaceId: customWorkspaceId,
         workspace: {
-          id: workspaceId,
+          id: customWorkspaceId,
           status: $Enums.WorkspaceStatus.ACTIVE,
         },
       };
@@ -398,6 +406,12 @@ describe("Unlock Funnel Tests", () => {
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${customFunnelId}:settings:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${customWorkspaceId}:funnel:${customFunnelId}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${customWorkspaceId}:funnels:all`
       );
     });
 
