@@ -70,6 +70,7 @@ export class CreatePaymentLinkService {
             lastName: validatedData.lastName,
             email: validatedData.email,
             planType: validatedData.planType,
+            paymentType: validatedData.paymentType,
             frequency: validatedData.frequency,
             frequencyInterval: validatedData.frequencyInterval,
             trialDays: validatedData.freeTrialPeriodInDays,

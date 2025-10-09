@@ -10,6 +10,7 @@ export const createPaymentLinkRequest = z.object({
       ", "
     )}`,
   }),
+  paymentType: z.enum($Enums.PaymentType).default("PLAN_PURCHASE"),
   planTitle: z.string().min(1, "Plan title is required"),
   planDescription: z.string().min(1, "Plan description is required"),
   amount: z.number().positive("Amount must be positive"),
