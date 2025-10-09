@@ -38,6 +38,7 @@ export const getPage = async (
         seoDescription: true,
         seoKeywords: true,
         funnelId: true,
+        visits: true,
         createdAt: true,
         updatedAt: true,
         funnel: {
@@ -80,6 +81,7 @@ export const getPage = async (
       seoDescription: page.seoDescription,
       seoKeywords: page.seoKeywords,
       funnelId: page.funnelId,
+      visits: page.visits ?? 0, // Explicitly set to 0 if null
       createdAt: page.createdAt,
       updatedAt: page.updatedAt,
     };

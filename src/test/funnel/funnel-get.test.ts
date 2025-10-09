@@ -316,6 +316,7 @@ describe("Get Funnel by ID Tests", () => {
         {
           id: 1,
           name: "Page 1",
+          type: $Enums.PageType.PAGE,
           order: 1,
           linkingId: "link1",
           seoTitle: "SEO Title",
@@ -364,6 +365,7 @@ describe("Get Funnel by ID Tests", () => {
           {
             id: 1,
             name: "Page 1",
+            type: $Enums.PageType.PAGE,
             order: 1,
             linkingId: "link1",
             seoTitle: null,
@@ -485,6 +487,7 @@ describe("Get Funnel by ID Tests", () => {
           {
             id: 1,
             name: "Homepage",
+            type: $Enums.PageType.PAGE,
             order: 1,
             linkingId: "home",
             seoTitle: "Home Page",
@@ -494,6 +497,7 @@ describe("Get Funnel by ID Tests", () => {
           {
             id: 2,
             name: "Contact",
+            type: $Enums.PageType.RESULT,
             order: 2,
             linkingId: "contact",
             seoTitle: null,

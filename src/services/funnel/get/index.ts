@@ -71,6 +71,7 @@ export const getFunnel = async (
             select: {
               id: true,
               name: true,
+              type: true,
               order: true,
               linkingId: true,
               seoTitle: true,

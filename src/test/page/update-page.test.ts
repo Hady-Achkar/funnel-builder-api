@@ -383,7 +383,7 @@ describe("Update Page Tests", () => {
   });
 
   describe("Cache Invalidation", () => {
-    it("should invalidate workspace funnel cache after update", async () => {
+    it("should invalidate both funnel and page cache after update", async () => {
       const mockPage = createMockPage();
       mockPrisma.page.findUnique.mockResolvedValue(mockPage);
       mockPrisma.page.update.mockResolvedValue(mockPage);
@@ -391,8 +391,12 @@ describe("Update Page Tests", () => {
 
       await updatePage({ id: String(pageId) }, { name: "New Name" }, userId);
 
+      expect(cacheService.del).toHaveBeenCalledTimes(2);
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${workspaceId}:funnel:${funnelId}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`
       );
     });
 

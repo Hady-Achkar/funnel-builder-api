@@ -34,6 +34,7 @@ describe("Get Page Tests", () => {
     seoDescription: "Test SEO Description",
     seoKeywords: "test, page, keywords",
     funnelId,
+    visits: 0,
     createdAt: new Date("2024-01-01"),
     updatedAt: new Date("2024-01-01"),
     funnel: {

@@ -22,6 +22,7 @@ export const getPageResponse = z.object({
   seoDescription: z.string().nullable(),
   seoKeywords: z.string().nullable(),
   funnelId: z.number(),
+  visits: z.number().default(0), // Number of page visits (explicitly 0 if none)
   createdAt: z.union([z.date(), z.string()]),
   updatedAt: z.union([z.date(), z.string()]),
 });

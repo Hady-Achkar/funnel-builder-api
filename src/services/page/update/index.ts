@@ -123,10 +123,15 @@ export const updatePage = async (
     data: updateData,
   });
 
-  // Simplified cache invalidation - just delete the funnel cache
-  await cacheService.del(
-    `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:full`
-  );
+  // Invalidate both funnel cache and individual page cache
+  await Promise.all([
+    cacheService.del(
+      `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:full`
+    ),
+    cacheService.del(
+      `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:page:${existingPage.id}:full`
+    ),
+  ]);
 
   return {
     message: "Page updated successfully",
