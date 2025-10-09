@@ -11,21 +11,21 @@ Refactor all 8 page operation functions to follow ARCHITECTURE.md standards:
 
 ## 📊 Overall Progress
 
-**Status:** ✅ Phases 1, 2, 3, 5, 6 & 7 COMPLETED - 6 of 8 functions done!
+**Status:** ✅ Phases 1, 2, 3, 4, 5, 6 & 7 COMPLETED - 7 of 8 functions done!
 **Started:** 2025-10-08
 **Last Updated:** 2025-10-09
-**Completion:** 75% (6/8 functions completed)
+**Completion:** 87.5% (7/8 functions completed)
 
 ### Statistics
-- **Total Tests Written:** 116/60+ (193% of target!)
-- **Helper Files Deleted:** 12/21 (57% reduction so far)
+- **Total Tests Written:** 142/68+ (209% of target!)
+- **Helper Files Deleted:** 15/21 (71% reduction!)
 - **Code Quality:** All tests passing ✅, TypeScript compilation clean ✅
 
 ### Functions Overview
 - [x] **1. CREATE** - Create new page in funnel (✅ COMPLETED - 18 tests)
 - [x] **2. GET** - Get single page by ID (✅ COMPLETED - 18 tests)
 - [x] **3. UPDATE** - Update page fields (✅ COMPLETED - 25 tests)
-- [ ] **4. DELETE** - Delete page and reorder (⏸️ NOT STARTED)
+- [x] **4. DELETE** - Delete page and reorder (✅ COMPLETED - 26 tests)
 - [x] **5. DUPLICATE** - Duplicate page within/across funnels (✅ COMPLETED - 11 tests)
 - [x] **6. REORDER** - Reorder multiple pages (✅ COMPLETED - 28 tests)
 - [x] **7. GET_PUBLIC_PAGE** - Public page access (✅ COMPLETED - 16 tests)
@@ -265,27 +265,151 @@ await cacheService.set(cacheKey, pageData, { ttl: 0 });
 
 ---
 
-## Phase 4: DELETE Function ⏸️ NOT STARTED
+## Phase 4: DELETE Function ✅ COMPLETED
 
-**Status:** Pending Phase 3 completion
+**Status:** DONE
+**Started:** 2025-10-09
+**Completed:** 2025-10-09
+**Files Modified:** 1/1 (Service only)
+**Tests Written:** 26/8+ (exceeded target by 225%!)
 
 ### Tasks
-- [ ] Replace permission helper with PermissionManager
-- [ ] Add "last page" validation with friendly error
-- [ ] Simplify cache invalidation
-- [ ] Update service and controller
-- [ ] Write 8+ tests
-- [ ] Delete helpers (3 files)
+- [x] Replace permission helper with PermissionManager
+- [x] Add "last page" validation with friendly error
+- [x] Simplify cache invalidation (delete vs complex update)
+- [x] Update service: `src/services/page/delete/index.ts`
+- [x] Controller unchanged (no modifications needed)
+- [x] Create tests: `src/test/page/delete-page.test.ts`
+- [x] Delete helpers: `src/helpers/page/delete/` (3 files removed - 140 lines!)
 
-### Test Coverage Requirements (8+ tests)
-- [ ] Authentication validation
-- [ ] Permission validation (DELETE_PAGE)
-- [ ] Page not found
-- [ ] Cannot delete last page in funnel (friendly error)
-- [ ] Delete and reorder remaining pages
-- [ ] Cache invalidation check
-- [ ] Transaction rollback on error
-- [ ] Success with reordering
+### Test Coverage Achieved (26 tests - ALL PASSING ✅)
+
+**Authentication & Permissions (6 tests):**
+- [x] Require authentication
+- [x] Reject if page not found
+- [x] Allow workspace owner to delete page
+- [x] Allow member with DELETE_PAGE permission
+- [x] Reject user without DELETE_PAGE permission
+- [x] Reject non-member user
+
+**Last Page Protection (3 tests):**
+- [x] Cannot delete last page in funnel
+- [x] Include helpful context in error message
+- [x] Allow deleting when 2+ pages exist
+
+**Delete & Reorder Logic (6 tests):**
+- [x] Delete page and reorder remaining pages
+- [x] Handle deleting first page (order 1)
+- [x] Handle deleting middle page
+- [x] Handle deleting last page (highest order)
+- [x] Ensure transaction atomicity
+- [x] Rollback on transaction error
+
+**Cache Invalidation (2 tests):**
+- [x] Invalidate workspace funnel cache after delete
+- [x] Handle cache errors gracefully
+
+**Input Validation (3 tests):**
+- [x] Validate pageId is required
+- [x] Validate pageId is a positive number
+- [x] Accept valid pageId
+
+**Controller Integration (3 tests):**
+- [x] Return 200 with success message
+- [x] Handle errors through next middleware
+- [x] Require authentication in controller
+
+**Complex Delete Scenarios (3 tests):**
+- [x] Correctly reorder when deleting page with multiple pages after it
+- [x] Handle two-page funnel correctly
+- [x] Verify permission check happens before deletion
+
+### Key Implementation Notes
+```typescript
+// Get page with funnel and workspace information
+const page = await prisma.page.findFirst({
+  where: { id: validatedRequest.pageId },
+  select: {
+    id: true,
+    funnelId: true,
+    order: true,
+    funnel: {
+      select: {
+        id: true,
+        workspaceId: true,
+      },
+    },
+  },
+});
+
+// Check permission using PermissionManager
+await PermissionManager.requirePermission({
+  userId,
+  workspaceId: page.funnel.workspaceId,
+  action: PermissionAction.DELETE_PAGE,
+});
+
+// Check if this is the last page in the funnel
+const pageCount = await prisma.page.count({
+  where: { funnelId: page.funnelId },
+});
+
+if (pageCount <= 1) {
+  throw new BadRequestError(
+    "Cannot delete the last page in a funnel. Every funnel must have at least one page."
+  );
+}
+
+// Delete page and reorder remaining pages in a transaction
+await prisma.$transaction(async (tx) => {
+  await tx.page.delete({
+    where: { id: validatedRequest.pageId },
+  });
+
+  const pagesToReorder = await tx.page.findMany({
+    where: {
+      funnelId: page.funnelId,
+      order: { gt: page.order },
+    },
+    orderBy: { order: "asc" },
+  });
+
+  if (pagesToReorder.length > 0) {
+    await Promise.all(
+      pagesToReorder.map((p) =>
+        tx.page.update({
+          where: { id: p.id },
+          data: { order: p.order - 1 },
+        })
+      )
+    );
+  }
+});
+
+// Simplified cache invalidation - just delete the funnel cache
+await cacheService.del(
+  `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:full`
+);
+```
+
+### Key Changes Made
+- ✅ Replaced `checkPageDeletePermission` (84 lines) with PermissionManager
+- ✅ Replaced `updateCacheAfterDelete` (54 lines) with simple `del()`
+- ✅ Fixed permission check: now uses `DELETE_PAGE` instead of `DELETE_FUNNELS`
+- ✅ Fixed cache key: now includes workspace prefix
+- ✅ User-friendly error message for last page protection
+- ✅ Transaction ensures atomic delete + reorder
+
+### Files Modified
+1. **Service:** [src/services/page/delete/index.ts](src/services/page/delete/index.ts)
+2. **Controller:** [src/controllers/page/delete/index.ts](src/controllers/page/delete/index.ts) (unchanged)
+3. **Tests:** [src/test/page/delete-page.test.ts](src/test/page/delete-page.test.ts) (NEW - 26 tests)
+
+### Files Deleted
+- [src/helpers/page/delete/permission.helper.ts](src/helpers/page/delete/permission.helper.ts) (84 lines)
+- [src/helpers/page/delete/cache.helper.ts](src/helpers/page/delete/cache.helper.ts) (54 lines)
+- [src/helpers/page/delete/index.ts](src/helpers/page/delete/index.ts) (2 lines)
+- **Total:** 140 lines of over-abstracted code eliminated!
 
 ---
 
