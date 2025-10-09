@@ -22,9 +22,6 @@ export class RegisterService {
       const prisma = getPrisma();
 
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const maximumWorkspaces = UserWorkspaceAllocations.getBaseAllocation(
-        data.plan
-      );
       const { trialStartDate, trialEndDate } =
         TrialPeriodCalculator.getTrialDates(data.trialPeriod);
       const verificationToken = generateVerificationToken(data);
@@ -41,7 +38,6 @@ export class RegisterService {
           verificationTokenExpiresAt,
           isAdmin: data.isAdmin,
           plan: data.plan,
-          maximumWorkspaces,
           trialStartDate,
           trialEndDate,
         },

@@ -84,7 +84,6 @@ export const getWorkspaceResponse = z.object({
     email: z.string(),
     username: z.string(),
     plan: z.enum(UserPlan),
-    maximumWorkspaces: z.number(),
   }),
 
   // Current user's role and permissions in this workspace

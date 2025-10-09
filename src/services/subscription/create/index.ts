@@ -6,7 +6,6 @@ import {
   subscriptionWebhookRequest,
   SubscriptionCreateResponse,
 } from "../../../types/subscription/create";
-import { PlanLimitsHelper } from "../../../helpers/auth/register";
 import { sendSubscriptionVerificationEmail } from "../../../helpers/subscription/emails/create";
 import { sendAffiliateCongratulationsEmail } from "../../../helpers/subscription/emails/affiliate/congratulations";
 import { UsernameGenerator } from "../../../helpers/subscription/username-generator";
@@ -96,12 +95,7 @@ export class SubscriptionCreateService {
         verificationTokenExpiresAt.getHours() + 24
       );
 
-      // 9. Calculate plan limits
-      const finalLimits = PlanLimitsHelper.calculateFinalLimits(
-        details.planType
-      );
-
-      // 10. Calculate trial dates based on subscription period
+      // 9. Calculate trial dates based on subscription period
       const paymentCreatedDate = parseCreatedDate(validatedData.created_date);
       const trialStartDate = paymentCreatedDate;
       const trialEndDate = calculateEndDate(
@@ -110,7 +104,7 @@ export class SubscriptionCreateService {
         details.frequencyInterval
       );
 
-      // 11. Create user
+      // 10. Create user
       const createdUser = await prisma.user.create({
         data: {
           email: details.email,
@@ -123,7 +117,6 @@ export class SubscriptionCreateService {
           verificationTokenExpiresAt,
           isAdmin: false,
           plan: details.planType,
-          maximumWorkspaces: finalLimits.maximumWorkspaces,
           trialStartDate,
           trialEndDate,
           referralLinkUsedId: affiliateLink?.id || null,

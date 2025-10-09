@@ -52,7 +52,6 @@ export class GetWorkspaceService {
               email: true,
               username: true,
               plan: true,
-              maximumWorkspaces: true,
             },
           },
           members: {

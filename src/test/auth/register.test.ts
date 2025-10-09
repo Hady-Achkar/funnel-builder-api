@@ -270,7 +270,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.FREE,
         verified: false,
-        maximumWorkspaces: 1,
         trialStartDate: new Date(),
         trialEndDate: new Date(Date.now() + 6 * 365 * 24 * 60 * 60 * 1000),
         partnerLevel: 1,
@@ -319,7 +318,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.BUSINESS,
         verified: false,
-        maximumWorkspaces: 1,
         trialStartDate: new Date(),
         trialEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         partnerLevel: 1,
@@ -354,9 +352,8 @@ describe("Register Route - Complete Flow", () => {
         })
       );
 
-      // Verify correct workspace allocation for BUSINESS plan
-      const createCall = mockPrisma.user.create.mock.calls[0][0];
-      expect(createCall.data.maximumWorkspaces).toBe(1);
+      // User created successfully
+      expect(mockPrisma.user.create).toHaveBeenCalled();
     });
 
     it("should successfully register user with AGENCY plan", async () => {
@@ -369,7 +366,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.AGENCY,
         verified: false,
-        maximumWorkspaces: 10000,
         trialStartDate: new Date(),
         trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         partnerLevel: 1,
@@ -404,9 +400,8 @@ describe("Register Route - Complete Flow", () => {
         })
       );
 
-      // Verify correct workspace allocation for AGENCY plan
-      const createCall = mockPrisma.user.create.mock.calls[0][0];
-      expect(createCall.data.maximumWorkspaces).toBe(10000);
+      // User created successfully
+      expect(mockPrisma.user.create).toHaveBeenCalled();
     });
 
     it("should set partner fields to default values", async () => {
@@ -419,7 +414,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.AGENCY,
         verified: false,
-        maximumWorkspaces: 10000,
         trialStartDate: new Date(),
         trialEndDate: new Date(),
         partnerLevel: 1,
@@ -467,7 +461,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.FREE,
         verified: false,
-        maximumWorkspaces: 1,
         trialStartDate: new Date(),
         trialEndDate: new Date(),
         partnerLevel: 1,
@@ -512,7 +505,6 @@ describe("Register Route - Complete Flow", () => {
         isAdmin: false,
         plan: UserPlan.FREE,
         verified: false,
-        maximumWorkspaces: 1,
         trialStartDate: new Date(),
         trialEndDate: new Date(),
         partnerLevel: 1,
