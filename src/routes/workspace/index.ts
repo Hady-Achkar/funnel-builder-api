@@ -51,7 +51,7 @@ router.post("/invite-member/:slug", InviteMemberController.inviteMember);
 router.post("/accept-invitation", AcceptInvitationController.acceptInvitation);
 
 // Generate workspace invite link
-router.get(
+router.post(
   "/generate-invite-link/:slug",
   GenerateInviteLinkController.generateInviteLink
 );

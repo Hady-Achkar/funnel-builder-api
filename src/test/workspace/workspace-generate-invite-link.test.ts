@@ -57,7 +57,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
     mockReq = {
       userId: 1,
       params: {},
-      query: {},
+      body: {},
     };
     mockRes = {
       status: vi.fn().mockReturnThis(),
@@ -98,7 +98,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -130,7 +130,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 3; // Admin user
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -161,7 +161,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -199,7 +199,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -237,7 +237,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -277,7 +277,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 3; // Regular member
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -311,7 +311,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 999; // Non-member
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -342,7 +342,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -370,7 +370,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "non-existent-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -392,7 +392,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -412,7 +412,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: "INVALID_ROLE",
       };
 
@@ -430,7 +430,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = {};
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -448,7 +448,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {};
+      mockReq.body = {};
 
       await GenerateInviteLinkController.generateInviteLink(
         mockReq as AuthRequest,
@@ -466,7 +466,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = undefined;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
