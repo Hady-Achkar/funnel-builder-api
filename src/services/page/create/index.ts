@@ -11,7 +11,7 @@ import {
   NotFoundError,
 } from "../../../errors";
 import { ZodError } from "zod";
-import { generateUniqueLinkingId } from "./utils/generate-linking-id";
+import { generateUniqueLinkingId } from "../../../utils/page-utils/linking-id";
 import { FunnelPageAllocations } from "../../../utils/allocations/funnel-page-allocations";
 
 export const createPage = async (

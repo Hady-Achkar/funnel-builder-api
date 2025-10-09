@@ -6,11 +6,15 @@ import {
   duplicatePageResponse,
 } from "../../../types/page/duplicate";
 import {
-  checkDuplicatePermissions,
-  generateDuplicateLinkingId,
-  updateCacheAfterDuplicate,
-} from "../../../helpers/page/duplicate";
-import { BadRequestError, UnauthorizedError } from "../../../errors";
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../../../errors";
+import { cacheService } from "../../cache/cache.service";
+import { generateUniqueLinkingId } from "../../../utils/page-utils/linking-id";
+import { FunnelPageAllocations } from "../../../utils/allocations/funnel-page-allocations";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 
 export const duplicatePage = async (
   userId: number,
@@ -20,31 +24,149 @@ export const duplicatePage = async (
     if (!userId) throw new UnauthorizedError("User ID is required");
 
     const validatedRequest = duplicatePageRequest.parse(requestBody);
-
-    const permissionResult = await checkDuplicatePermissions(
-      userId,
-      validatedRequest.pageId,
-      validatedRequest.targetFunnelId
-    );
-
-    const { sourcePage, targetFunnel, isSameFunnel } = permissionResult;
     const prisma = getPrisma();
 
-    const newLinkingId = await generateDuplicateLinkingId(
-      sourcePage.name,
-      sourcePage.linkingId,
-      targetFunnel.id,
-      isSameFunnel
-    );
+    // Get source page with workspace info
+    const sourcePage = await prisma.page.findUnique({
+      where: { id: validatedRequest.pageId },
+      select: {
+        id: true,
+        name: true,
+        content: true,
+        order: true,
+        type: true,
+        linkingId: true,
+        funnelId: true,
+        funnel: {
+          select: {
+            id: true,
+            workspaceId: true,
+            workspace: {
+              select: {
+                id: true,
+                ownerId: true,
+                planType: true,
+                addOns: {
+                  select: {
+                    type: true,
+                    quantity: true,
+                    status: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
+    if (!sourcePage) {
+      throw new NotFoundError("Page not found");
+    }
+
+    // Check VIEW permission on source page
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: sourcePage.funnel.workspaceId,
+      action: PermissionAction.VIEW_PAGE,
+    });
+
+    // Determine target funnel
+    const isSameFunnel =
+      !validatedRequest.targetFunnelId ||
+      validatedRequest.targetFunnelId === sourcePage.funnelId;
+
+    let targetFunnel;
+    let targetWorkspaceId: number;
+
+    if (isSameFunnel) {
+      targetFunnel = sourcePage.funnel;
+      targetWorkspaceId = sourcePage.funnel.workspaceId;
+    } else {
+      // Get target funnel with workspace info
+      const targetFunnelData = await prisma.funnel.findUnique({
+        where: { id: validatedRequest.targetFunnelId },
+        select: {
+          id: true,
+          workspaceId: true,
+          workspace: {
+            select: {
+              id: true,
+              ownerId: true,
+              planType: true,
+              addOns: {
+                select: {
+                  type: true,
+                  quantity: true,
+                  status: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!targetFunnelData) {
+        throw new NotFoundError("Target funnel not found");
+      }
+
+      targetFunnel = targetFunnelData;
+      targetWorkspaceId = targetFunnelData.workspaceId;
+    }
+
+    // Check CREATE_PAGE permission on target funnel
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: targetWorkspaceId,
+      action: PermissionAction.CREATE_PAGE,
+    });
+
+    // Check page allocation limits for target funnel
+    const currentPageCount = await prisma.page.count({
+      where: { funnelId: targetFunnel.id },
+    });
+
+    const canCreate = FunnelPageAllocations.canCreatePage(currentPageCount, {
+      workspacePlanType: targetFunnel.workspace.planType,
+      addOns: targetFunnel.workspace.addOns,
+    });
+
+    if (!canCreate) {
+      const summary = FunnelPageAllocations.getAllocationSummary(
+        currentPageCount,
+        {
+          workspacePlanType: targetFunnel.workspace.planType,
+          addOns: targetFunnel.workspace.addOns,
+        }
+      );
+
+      throw new BadRequestError(
+        `Target funnel has reached its page limit (${summary.totalAllocation} pages). ` +
+          `It has ${summary.baseAllocation} base pages` +
+          (summary.extraFromAddOns > 0
+            ? ` + ${summary.extraFromAddOns} from add-ons. `
+            : ". ") +
+          `Upgrade your plan or purchase page add-ons to create more pages.`
+      );
+    }
+
+    // Prepare new page name
     const newName = isSameFunnel
       ? `${sourcePage.name} (copy)`
       : sourcePage.name;
 
+    // Generate unique linking ID
+    const newLinkingId = await generateUniqueLinkingId(
+      newName,
+      targetFunnel.id
+    );
+
+    // Calculate order and handle reordering
     let newOrder: number;
     let reorderedPages: Array<{ id: number; order: number }> = [];
 
     if (isSameFunnel) {
+      // Insert after source page
       newOrder = sourcePage.order + 1;
 
       const pagesToReorder = await prisma.page.findMany({
@@ -61,6 +183,7 @@ export const duplicatePage = async (
         order: page.order + 1,
       }));
     } else {
+      // Add to end of target funnel
       const lastPage = await prisma.page.findFirst({
         where: { funnelId: targetFunnel.id },
         select: { order: true },
@@ -70,7 +193,9 @@ export const duplicatePage = async (
       newOrder = (lastPage?.order || 0) + 1;
     }
 
+    // Create duplicate page in transaction
     const newPage = await prisma.$transaction(async (tx) => {
+      // Reorder existing pages if needed
       if (isSameFunnel && reorderedPages.length > 0) {
         await Promise.all(
           reorderedPages.map((page) =>
@@ -82,6 +207,7 @@ export const duplicatePage = async (
         );
       }
 
+      // Create the duplicate page
       const created = await tx.page.create({
         data: {
           name: newName,
@@ -100,26 +226,24 @@ export const duplicatePage = async (
       return created;
     });
 
-    await updateCacheAfterDuplicate({
-      workspaceId: targetFunnel.workspaceId,
-      funnelId: targetFunnel.id,
-      newPage: {
-        id: newPage.id,
-        name: newPage.name,
-        content: newPage.content,
-        order: newPage.order,
-        type: newPage.type,
-        linkingId: newPage.linkingId,
-        seoTitle: newPage.seoTitle,
-        seoDescription: newPage.seoDescription,
-        seoKeywords: newPage.seoKeywords,
-        funnelId: newPage.funnelId,
-        visits: newPage.visits,
-        createdAt: newPage.createdAt,
-        updatedAt: newPage.updatedAt,
-      },
-      reorderedPages,
-    });
+    // Simplified cache invalidation - just delete the funnel full cache
+    try {
+      await cacheService.del(
+        `workspace:${sourcePage.funnel.workspaceId}:funnel:${sourcePage.funnelId}:full`
+      );
+
+      // If different funnel, also invalidate target funnel cache
+      if (!isSameFunnel) {
+        await cacheService.del(
+          `workspace:${targetWorkspaceId}:funnel:${targetFunnel.id}:full`
+        );
+      }
+    } catch (cacheError) {
+      console.warn(
+        "Cache invalidation failed but page was duplicated:",
+        cacheError
+      );
+    }
 
     const response: DuplicatePageResponse = {
       message: "Page duplicated successfully",

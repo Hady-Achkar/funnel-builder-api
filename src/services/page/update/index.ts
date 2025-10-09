@@ -7,12 +7,10 @@ import {
   UpdatePageRequest,
   UpdatePageResponse,
 } from "../../../types/page/update";
-import {
-  validatePageExists,
-  generateLinkingIdFromName,
-  checkLinkingIdUniqueness,
-} from "../../../helpers/page/update";
-import { checkFunnelEditPermissions } from "../../../helpers/page/create";
+import { BadRequestError } from "../../../errors";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { generateUniqueLinkingId } from "../../../utils/page-utils/linking-id";
 
 export const updatePage = async (
   params: UpdatePageParamsInput,
@@ -23,9 +21,30 @@ export const updatePage = async (
   const validatedData = updatePageRequest.parse(requestData);
 
   const prisma = getPrisma();
-  const existingPage = await validatePageExists(validatedParams.id);
 
-  await checkFunnelEditPermissions(userId, existingPage.funnelId);
+  // Get existing page with workspace info for permission check
+  const existingPage = await prisma.page.findUnique({
+    where: { id: validatedParams.id },
+    include: {
+      funnel: {
+        select: {
+          id: true,
+          workspaceId: true,
+        },
+      },
+    },
+  });
+
+  if (!existingPage) {
+    throw new BadRequestError("Page not found");
+  }
+
+  // Check permission using PermissionManager
+  await PermissionManager.requirePermission({
+    userId,
+    workspaceId: existingPage.funnel.workspaceId,
+    action: PermissionAction.EDIT_PAGE,
+  });
 
   const updateData: any = {};
   let newLinkingId: string | undefined;
@@ -33,21 +52,25 @@ export const updatePage = async (
   // Handle linkingId logic
   if (validatedData.linkingId !== undefined) {
     // Use provided linkingId directly (already validated by Zod)
-    await checkLinkingIdUniqueness(
-      validatedData.linkingId,
-      existingPage.funnelId,
-      existingPage.id
-    );
+    const conflictingPage = await prisma.page.findFirst({
+      where: {
+        linkingId: validatedData.linkingId,
+        funnelId: existingPage.funnelId,
+        id: { not: existingPage.id },
+      },
+    });
+
+    if (conflictingPage) {
+      throw new BadRequestError(
+        `A page with the linking ID "${validatedData.linkingId}" already exists in this funnel. Please choose a different name.`
+      );
+    }
+
     newLinkingId = validatedData.linkingId;
     updateData.linkingId = newLinkingId;
   } else if (validatedData.name !== undefined) {
     // Generate linkingId from name when name is updated but linkingId not provided
-    newLinkingId = generateLinkingIdFromName(validatedData.name);
-    await checkLinkingIdUniqueness(
-      newLinkingId,
-      existingPage.funnelId,
-      existingPage.id
-    );
+    newLinkingId = await generateUniqueLinkingId(validatedData.name, existingPage.funnelId, existingPage.id);
     updateData.linkingId = newLinkingId;
   }
 
@@ -100,29 +123,10 @@ export const updatePage = async (
     data: updateData,
   });
 
-  const pageCacheKey = `funnel:${existingPage.funnelId}:page:${existingPage.id}:full`;
-  const funnelCacheKey = `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:full`;
-
-  // Get existing funnel cache to update it
-  let funnelCache = await cacheService.get<any>(funnelCacheKey);
-  if (funnelCache && funnelCache.pages) {
-    // Update the specific page in the funnel cache
-    const pageIndex = funnelCache.pages.findIndex((p: any) => p.id === existingPage.id);
-    if (pageIndex !== -1) {
-      // Update the page data in funnel cache (without content to keep it lightweight)
-      funnelCache.pages[pageIndex] = {
-        ...updatedPage,
-        content: undefined, // Don't store content in funnel cache
-      };
-    }
-  }
-
-  const cacheUpdates = [
-    cacheService.set(pageCacheKey, updatedPage, { ttl: 0 }),
-    funnelCache ? cacheService.set(funnelCacheKey, funnelCache, { ttl: 0 }) : Promise.resolve(),
-  ];
-
-  await Promise.all(cacheUpdates);
+  // Simplified cache invalidation - just delete the funnel cache
+  await cacheService.del(
+    `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:full`
+  );
 
   return {
     message: "Page updated successfully",
