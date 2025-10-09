@@ -11,20 +11,25 @@ Refactor all 8 page operation functions to follow ARCHITECTURE.md standards:
 
 ## 📊 Overall Progress
 
-**Status:** ✅ Phases 2, 3, 5 & 7 COMPLETED - 5 of 8 functions done!
+**Status:** ✅ Phases 1, 2, 3, 5, 6 & 7 COMPLETED - 6 of 8 functions done!
 **Started:** 2025-10-08
 **Last Updated:** 2025-10-09
-**Completion:** 62.5% (5/8 functions completed)
+**Completion:** 75% (6/8 functions completed)
+
+### Statistics
+- **Total Tests Written:** 116/60+ (193% of target!)
+- **Helper Files Deleted:** 12/21 (57% reduction so far)
+- **Code Quality:** All tests passing ✅, TypeScript compilation clean ✅
 
 ### Functions Overview
-- [x] **1. CREATE** - Create new page in funnel (✅ COMPLETED)
-- [x] **2. GET** - Get single page by ID (✅ COMPLETED)
-- [x] **3. UPDATE** - Update page fields (✅ COMPLETED)
-- [ ] **4. DELETE** - Delete page and reorder
-- [x] **5. DUPLICATE** - Duplicate page within/across funnels (✅ COMPLETED)
-- [ ] **6. REORDER** - Reorder multiple pages
-- [x] **7. GET_PUBLIC_PAGE** - Public page access (✅ COMPLETED)
-- [ ] **8. CREATE_PAGE_VISIT** - Track page visits
+- [x] **1. CREATE** - Create new page in funnel (✅ COMPLETED - 18 tests)
+- [x] **2. GET** - Get single page by ID (✅ COMPLETED - 18 tests)
+- [x] **3. UPDATE** - Update page fields (✅ COMPLETED - 25 tests)
+- [ ] **4. DELETE** - Delete page and reorder (⏸️ NOT STARTED)
+- [x] **5. DUPLICATE** - Duplicate page within/across funnels (✅ COMPLETED - 11 tests)
+- [x] **6. REORDER** - Reorder multiple pages (✅ COMPLETED - 28 tests)
+- [x] **7. GET_PUBLIC_PAGE** - Public page access (✅ COMPLETED - 16 tests)
+- [ ] **8. CREATE_PAGE_VISIT** - Track page visits (⏸️ NOT STARTED)
 
 ---
 
@@ -375,26 +380,118 @@ if (!isSameFunnel) {
 
 ---
 
-## Phase 6: REORDER Function ⏸️ NOT STARTED
+## Phase 6: REORDER Function ✅ COMPLETED
 
-**Status:** Pending Phase 5 completion
+**Status:** DONE
+**Started:** 2025-10-09
+**Completed:** 2025-10-09
+**Files Modified:** 1/1 (Service only)
+**Tests Written:** 28/8+ (exceeded target by 250%!)
 
 ### Tasks
-- [ ] Replace permission helper with PermissionManager
-- [ ] Simplify cache invalidation
-- [ ] Update service and controller
-- [ ] Write 8+ tests
-- [ ] Delete helpers (3 files)
+- [x] Replace permission helper with PermissionManager
+- [x] Simplify cache invalidation (replaced complex cache update with simple del())
+- [x] Update service: `src/services/page/reorder/index.ts`
+- [x] Controller unchanged (no modifications needed)
+- [x] Create tests: `src/test/page/reorder-pages.test.ts`
+- [x] Delete helpers: `src/helpers/page/reorder/` (3 files removed)
 
-### Test Coverage Requirements (8+ tests)
-- [ ] Authentication validation
-- [ ] Permission validation (REORDER_PAGE)
-- [ ] Funnel not found
-- [ ] Duplicate order values
-- [ ] Non-sequential order values
-- [ ] Missing pages in order array
-- [ ] Cache invalidation check
-- [ ] Success with all pages reordered
+### Test Coverage Achieved (28 tests - ALL PASSING ✅)
+**Authentication & Authorization (6 tests):**
+- [x] Should require authentication
+- [x] Should reject if funnel not found
+- [x] Should reject if no pages found in funnel
+- [x] Allow workspace owner to reorder pages
+- [x] Allow member with REORDER_PAGE permission
+- [x] Reject user without REORDER_PAGE permission
+
+**Validation (6 tests):**
+- [x] Should reject if page ID not found in funnel
+- [x] Should reject if not all pages are included
+- [x] Should reject duplicate order values
+- [x] Should reject non-sequential order values
+- [x] Should reject orders not starting from 1
+- [x] Should accept valid reorder request
+
+**Database Transaction (2 tests):**
+- [x] Should update all page orders in a transaction
+- [x] Should call page.update for each page
+
+**Cache Invalidation (1 test):**
+- [x] Should invalidate workspace funnel cache after reorder
+
+**Input Validation (7 tests):**
+- [x] Validate funnelId is required
+- [x] Validate funnelId is a positive number
+- [x] Validate pageOrders array is required
+- [x] Validate pageOrders array is not empty
+- [x] Validate each page order has id and order
+- [x] Validate page ID is a positive number
+- [x] Validate order is a positive number
+
+**Controller Integration (3 tests):**
+- [x] Return 200 with success message
+- [x] Handle errors through next middleware
+- [x] Require authentication in controller
+
+**Complex Reordering Scenarios (3 tests):**
+- [x] Handle reverse order
+- [x] Handle partial reordering (swap middle elements)
+- [x] Handle single page funnel
+
+### Key Implementation Notes
+```typescript
+// Get funnel with workspace info and existing pages
+const funnel = await prisma.funnel.findFirst({
+  where: { id: funnelId },
+  select: {
+    id: true,
+    workspaceId: true,
+    pages: {
+      select: { id: true, order: true },
+      orderBy: { order: "asc" },
+    },
+  },
+});
+
+// Check permission using PermissionManager
+await PermissionManager.requirePermission({
+  userId,
+  workspaceId: funnel.workspaceId,
+  action: PermissionAction.REORDER_PAGE,
+});
+
+// Comprehensive validation
+// - All provided page IDs must exist in the funnel
+// - Must provide order for all pages (not partial)
+// - No duplicate order values
+// - Orders must be sequential starting from 1
+
+// Update page orders in a transaction
+await prisma.$transaction(
+  pageOrders.map(({ id, order }) =>
+    prisma.page.update({
+      where: { id },
+      data: { order },
+    })
+  )
+);
+
+// Simplified cache invalidation - just delete the funnel cache
+await cacheService.del(
+  `workspace:${workspaceId}:funnel:${funnelId}:full`
+);
+```
+
+### Files Modified
+1. **Service:** [src/services/page/reorder/index.ts](src/services/page/reorder/index.ts)
+2. **Controller:** [src/controllers/page/reorder/index.ts](src/controllers/page/reorder/index.ts) (unchanged)
+3. **Tests:** [src/test/page/reorder-pages.test.ts](src/test/page/reorder-pages.test.ts) (NEW - 28 tests)
+
+### Files Deleted
+- [src/helpers/page/reorder/permission.helper.ts](src/helpers/page/reorder/permission.helper.ts)
+- [src/helpers/page/reorder/cache.helper.ts](src/helpers/page/reorder/cache.helper.ts)
+- [src/helpers/page/reorder/index.ts](src/helpers/page/reorder/index.ts)
 
 ---
 
