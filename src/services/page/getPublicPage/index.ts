@@ -47,10 +47,11 @@ export const getPublicPage = async (
 
     const pageId = funnel.pages[0].id;
     const funnelId = funnel.id;
+    const workspaceId = funnel.workspaceId;
 
-    // Try to get page from cache first  
-    const pageCacheKey = `funnel:${funnelId}:page:${pageId}:full`;
-    let cachedPage = await cacheService.get(pageCacheKey);
+    // Try to get page from cache first
+    const pageCacheKey = `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`;
+    let cachedPage = await cacheService.get<any>(pageCacheKey);
 
     if (cachedPage && typeof cachedPage === 'object') {
       // Return cached data
@@ -82,22 +83,7 @@ export const getPublicPage = async (
 
     // Cache the page for future requests
     try {
-      const pageData = {
-        id: page.id,
-        name: page.name,
-        content: page.content,
-        order: page.order,
-        type: page.type,
-        linkingId: page.linkingId,
-        seoTitle: page.seoTitle,
-        seoDescription: page.seoDescription,
-        seoKeywords: page.seoKeywords,
-        funnelId: page.funnelId,
-        createdAt: page.createdAt,
-        updatedAt: page.updatedAt,
-      };
-
-      await cacheService.set(pageCacheKey, pageData, { ttl: 0 });
+      await cacheService.set(pageCacheKey, page, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Failed to cache page data:", cacheError);
     }

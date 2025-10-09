@@ -14,7 +14,7 @@ export type GetPageRequest = z.infer<typeof getPageRequest>;
 export const getPageResponse = z.object({
   id: z.number(),
   name: z.string(),
-  content: z.string(),
+  content: z.any(), // Can be string or parsed JSON (array/object)
   order: z.number(),
   type: z.enum(PageType),
   linkingId: z.string(),
