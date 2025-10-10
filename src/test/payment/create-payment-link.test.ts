@@ -550,7 +550,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/workspace.*not found|own|permission/i);
+      expect(error.message).toMatch(/affiliate link.*no longer valid|seller/i);
 
       // Cleanup
       await prisma.user.delete({ where: { id: otherSeller.id } });
@@ -634,7 +634,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/invalid.*token/i);
+      expect(error.message).toMatch(/affiliate link.*invalid|expired|new link/i);
     });
 
     it("should reject if affiliate token not found in database", async () => {
@@ -679,7 +679,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/invalid.*token/i);
+      expect(error.message).toMatch(/affiliate link.*no longer valid|seller/i);
     });
   });
 
@@ -719,7 +719,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/mamopay/i);
+      expect(error.message).toMatch(/payment link creation failed|try again|support/i);
     });
   });
 });

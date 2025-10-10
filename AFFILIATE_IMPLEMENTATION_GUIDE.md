@@ -860,13 +860,35 @@ For each function:
 - [ ] Implement password removal
 - [ ] Integrate domain deletion
 
-### Phase 4: Payment Link Updates 💳
+### Phase 4: Payment Link Updates ✅ COMPLETED
 
-- [ ] Write tests for workspace payment links
-- [ ] Update payment link creation service
-- [ ] Add workspace validation
-- [ ] Update commission calculation
-- [ ] Test payment link generation
+- [x] Write tests for generic payment link creation (10 integration tests)
+- [x] Update payment link types (remove old fields, add defaults)
+- [x] Refactor payment link service (pure business logic)
+- [x] Refactor payment link controller (ARCHITECTURE.md compliant)
+- [x] Add workspace validation (AGENCY workspaces only)
+- [x] Update commission structure (use commissionPercentage, NOT affiliateAmount)
+- [x] Add workspace data to custom_data for WORKSPACE_PURCHASE
+- [x] Test payment link generation (all tests passing)
+- [x] Support both PLAN_PURCHASE and WORKSPACE_PURCHASE payment types
+
+**Files Created/Updated:**
+
+- ✅ `/src/types/payment/create-payment-link/index.ts` (removed plan-specific fields, added defaults)
+- ✅ `/src/services/payment/create-payment-link/index.ts` (generic service, accepts processed data)
+- ✅ `/src/controllers/payment/create-payment-link/index.ts` (all validation and Prisma calls)
+- ✅ `/src/test/payment/create-payment-link.test.ts` (10 comprehensive integration tests)
+
+**Key Changes:**
+
+- **Removed Fields**: `maximumFunnelsAllowed`, `maximumSubdomainsAllowed`, `maximumCustomDomainsAllowed`, `maximumAdminsAllowed`
+- **Added Defaults**: `frequency: "monthly"`, `frequencyInterval: 1`, `freeTrialPeriodInDays: 0`
+- **Generic PaymentType**: Supports `PLAN_PURCHASE` and `WORKSPACE_PURCHASE`
+- **New Commission**: Uses `commissionPercentage` from JWT (replaced `affiliateAmount`)
+- **Workspace Validation**: Only AGENCY workspaces can be sold
+- **Custom_Data Structure**:
+  - `details` object: buyer info + payment type + workspace data (if applicable)
+  - `affiliateLink` object: includes `commissionPercentage` and `workspaceId` (if workspace purchase)
 
 ### Phase 5: Webhook Processing 🔔
 

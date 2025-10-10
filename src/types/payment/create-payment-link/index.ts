@@ -2,38 +2,40 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const createPaymentLinkRequest = z.object({
+  // Required fields
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Must be a valid email address"),
-  planType: z.enum($Enums.UserPlan, {
-    message: `Plan type must be one of: ${Object.values($Enums.UserPlan).join(
-      ", "
-    )}`,
-  }),
-  paymentType: z.enum($Enums.PaymentType).default("PLAN_PURCHASE"),
+
+  paymentType: z.nativeEnum($Enums.PaymentType),
+  planType: z.nativeEnum($Enums.UserPlan),
+
   planTitle: z.string().min(1, "Plan title is required"),
   planDescription: z.string().min(1, "Plan description is required"),
+
   amount: z.number().positive("Amount must be positive"),
-  frequency: z.enum(["monthly", "annually", "weekly"]),
-  frequencyInterval: z.number().min(1, "Frequency interval must be at least 1"),
+
+  // Fields with defaults
+  frequency: z.enum(["monthly", "annually", "weekly"]).default("monthly"),
+  frequencyInterval: z
+    .number()
+    .min(1, "Frequency interval must be at least 1")
+    .default(1),
   freeTrialPeriodInDays: z
     .number()
-    .min(0, "Free trial period cannot be negative"),
-  maximumFunnelsAllowed: z
-    .number()
-    .min(0, "Maximum funnels cannot be negative"),
-  maximumSubdomainsAllowed: z
-    .number()
-    .min(0, "Maximum subdomains cannot be negative"),
-  maximumCustomDomainsAllowed: z
-    .number()
-    .min(0, "Maximum custom domains cannot be negative"),
-  maximumAdminsAllowed: z.number().min(1, "Must allow at least 1 admin"),
-  returnUrl: z.string().min(1, "Return URL is required"),
-  failureReturnUrl: z.string().url("Must be a valid URL"),
-  termsAndConditionsUrl: z.string().url("Must be a valid URL"),
+    .min(0, "Free trial period cannot be negative")
+    .default(0),
+
+  returnUrl: z.string().url("Return URL must be a valid URL"),
+  failureReturnUrl: z.string().url("Failure return URL must be a valid URL"),
+  termsAndConditionsUrl: z
+    .string()
+    .url("Terms and conditions URL must be a valid URL"),
+
+  // Optional
   affiliateToken: z.string().optional(),
 });
+
 export type CreatePaymentLinkRequest = z.infer<typeof createPaymentLinkRequest>;
 
 export const createPaymentLinkResponse = z.object({
@@ -51,13 +53,7 @@ export const createPaymentLinkResponse = z.object({
     trialPeriodDays: z.number(),
     active: z.boolean(),
     createdDate: z.string(),
-    planDetails: z.object({
-      planType: z.enum($Enums.UserPlan),
-      maximumFunnelsAllowed: z.number(),
-      maximumSubdomainsAllowed: z.number(),
-      maximumCustomDomainsAllowed: z.number(),
-      maximumAdminsAllowed: z.number(),
-    }),
+    planType: z.nativeEnum($Enums.UserPlan),
   }),
 });
 
