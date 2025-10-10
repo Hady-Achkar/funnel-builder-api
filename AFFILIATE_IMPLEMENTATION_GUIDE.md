@@ -805,11 +805,40 @@ For each function:
 
 - [x] Update Prisma schema with new models
 - [x] Add WORKSPACE_PURCHASE to PaymentType enum
-- [x] Database reset and push completed
+- [x] Add workspaceId to AffiliateLink model (replaced funnelId)
+- [x] Add workspaceId to Payment model
+- [x] Create BalanceTransaction model
+- [x] Create WorkspaceTransfer model
+- [x] Database reset and push completed (production)
+- [x] Test database schema synced
 - [x] Generate TypeScript types
-- [ ] Update Zod schemas (Next step)
+- [x] Update Zod schemas for GenerateAffiliateLinkRequest
 
-### Phase 2: Balance Management 📝
+### Phase 1.5: Generate Affiliate Link ✅ COMPLETED
+
+- [x] Create GenerateAffiliateLinkRequest Zod schema
+- [x] Create GenerateAffiliateLinkResponse Zod schema
+- [x] Write 18 comprehensive integration tests for controller
+- [x] Implement AffiliateLinkService.generateLink()
+- [x] Implement AffiliateLinkController.generateLink()
+- [x] Configure Vitest to use test database (.env.test)
+- [x] Sync test database schema
+- [x] All tests passing with real test database
+- [x] Follow ARCHITECTURE.md patterns (Controller → Service → DB)
+- [x] User-friendly error messages implemented
+- [x] JWT token generation with all required fields
+- [x] planType defaults to BUSINESS with override support
+
+**Files Created/Updated:**
+
+- ✅ `/src/types/affiliate/generate-affiliate-link/index.ts`
+- ✅ `/src/services/affiliate/generate-affiliate-link/index.ts`
+- ✅ `/src/controllers/affiliate/generate-affiliate-link/index.ts`
+- ✅ `/src/test/affiliate/generate-affiliate-link.test.ts`
+- ✅ `vitest.config.ts`
+- ✅ `.env.test` (added FRONTEND_URL)
+
+### Phase 2: Balance Management 📝 NEXT
 
 - [ ] Create BalanceTransaction service
 - [ ] Write tests for balance transactions
