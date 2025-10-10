@@ -9,90 +9,100 @@ datasource db {
 }
 
 model User {
-  id                         Int               @id @default(autoincrement())
-  email                      String            @unique
-  username                   String            @unique
+  id                         Int                  @id @default(autoincrement())
+  email                      String               @unique
+  username                   String               @unique
   firstName                  String
   lastName                   String
   password                   String
-  verified                   Boolean           @default(false)
-  verificationToken          String?           @unique
+  verified                   Boolean              @default(false)
+  verificationToken          String?              @unique
   verificationTokenExpiresAt DateTime?
-  passwordResetToken         String?           @unique
+  passwordResetToken         String?              @unique
   passwordResetExpiresAt     DateTime?
-  isAdmin                    Boolean           @default(false)
+  isAdmin                    Boolean              @default(false)
   plan                       UserPlan
   referralLinkUsedId         Int?
-  balance                    Float             @default(0)
+  balance                    Float                @default(0)
   avatar                     String?
-  createdAt                  DateTime          @default(now())
-  updatedAt                  DateTime          @updatedAt
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
   trialStartDate             DateTime?
   trialEndDate               DateTime?
-  partnerLevel               Int               @default(1)
-  totalSales                 Int               @default(0)
-  commissionPercentage       Float             @default(5)
-  addOns                     AddOn[]           @relation("UserAddOns")
-  affiliateLinks             AffiliateLink[]   @relation("AffiliateOwner")
-  createdDomains             Domain[]          @relation("DomainCreator")
-  createdFunnels             Funnel[]          @relation("FunnelCreator")
+  partnerLevel               Int                  @default(1)
+  totalSales                 Int                  @default(0)
+  commissionPercentage       Float                @default(5)
+  addOns                     AddOn[]              @relation("UserAddOns")
+  affiliateLinks             AffiliateLink[]      @relation("AffiliateOwner")
+  balanceTransactions        BalanceTransaction[]
+  createdDomains             Domain[]             @relation("DomainCreator")
+  createdFunnels             Funnel[]             @relation("FunnelCreator")
   imageFolders               ImageFolder[]
-  payments                   Payment[]         @relation("UserPayments")
-  subscriptions              Subscription[]    @relation("UserSubscriptions")
+  payments                   Payment[]            @relation("UserPayments")
+  subscriptions              Subscription[]       @relation("UserSubscriptions")
   templates                  Template[]
-  referralLinkUsed           AffiliateLink?    @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
-  sentInvitations            WorkspaceMember[] @relation("InvitationSender")
+  workspaceTransfersFrom     WorkspaceTransfer[]  @relation("TransfersFrom")
+  workspaceTransfersTo       WorkspaceTransfer[]  @relation("TransfersTo")
+  referralLinkUsed           AffiliateLink?       @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
+  sentInvitations            WorkspaceMember[]    @relation("InvitationSender")
   workspaceMembers           WorkspaceMember[]
-  ownedWorkspaces            Workspace[]       @relation("WorkspaceOwner")
+  ownedWorkspaces            Workspace[]          @relation("WorkspaceOwner")
 
   @@map("users")
 }
 
 model AffiliateLink {
-  id              Int       @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
-  token           String    @unique
+  token           String     @unique
   itemType        UserPlan
   userId          Int
-  clickCount      Int       @default(0)
-  totalAmount     Float     @default(0)
-  settings        Json?     @default("{}")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  user            User      @relation("AffiliateOwner", fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId     Int
+  clickCount      Int        @default(0)
+  totalAmount     Float      @default(0)
+  settings        Json?      @default("{}")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  user            User       @relation("AffiliateOwner", fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   payments        Payment[]
-  subscribedUsers User[]    @relation("ReferralUsers")
+  subscribedUsers User[]     @relation("ReferralUsers")
 
   @@index([token])
   @@index([userId])
+  @@index([workspaceId])
   @@index([itemType])
   @@map("affiliate_links")
 }
 
 model Payment {
-  id                    Int            @id @default(autoincrement())
-  transactionId         String         @unique
+  id                    Int                @id @default(autoincrement())
+  transactionId         String             @unique
   amount                Float?
   currency              String
   status                String
   itemType              UserPlan
-  paymentType           PaymentType    @default(PLAN_PURCHASE)
+  paymentType           PaymentType        @default(PLAN_PURCHASE)
   addOnId               Int?
   addOnType             AddOnType?
   addOnQuantity         Int?
   buyerId               Int?
   affiliateLinkId       Int?
   level1AffiliateAmount Float?
-  affiliatePaid         Boolean        @default(false)
-  rawData               Json?          @default("{}")
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  addOn                 AddOn?         @relation(fields: [addOnId], references: [id])
-  affiliateLink         AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
-  buyer                 User?          @relation("UserPayments", fields: [buyerId], references: [id])
+  affiliatePaid         Boolean            @default(false)
+  workspaceId           Int?
+  rawData               Json?              @default("{}")
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  addOn                 AddOn?             @relation(fields: [addOnId], references: [id])
+  affiliateLink         AffiliateLink?     @relation(fields: [affiliateLinkId], references: [id])
+  buyer                 User?              @relation("UserPayments", fields: [buyerId], references: [id])
+  workspace             Workspace?         @relation(fields: [workspaceId], references: [id])
+  workspaceTransfer     WorkspaceTransfer?
 
   @@index([buyerId])
   @@index([affiliateLinkId])
+  @@index([workspaceId])
   @@index([status])
   @@index([transactionId])
   @@map("payments")
@@ -132,10 +142,13 @@ model Workspace {
   status            WorkspaceStatus             @default(ACTIVE)
   planType          UserPlan                    @default(FREE)
   addOns            AddOn[]                     @relation("WorkspaceAddOns")
+  affiliateLinks    AffiliateLink[]
   domains           Domain[]
   funnels           Funnel[]
   members           WorkspaceMember[]
+  payments          Payment[]
   rolePermTemplates WorkspaceRolePermTemplate[]
+  transfers         WorkspaceTransfer[]
   owner             User                        @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@map("workspaces")
@@ -543,6 +556,44 @@ model AddOn {
   @@map("addons")
 }
 
+model BalanceTransaction {
+  id              Int                    @id @default(autoincrement())
+  userId          Int
+  type            BalanceTransactionType
+  amount          Float
+  balanceBefore   Float
+  balanceAfter    Float
+  referenceType   String?
+  referenceId     Int?
+  notes           String?
+  createdAt       DateTime               @default(now())
+  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([referenceType, referenceId])
+  @@index([createdAt])
+  @@map("balance_transactions")
+}
+
+model WorkspaceTransfer {
+  id            Int       @id @default(autoincrement())
+  workspaceId   Int
+  fromUserId    Int
+  toUserId      Int
+  paymentId     Int       @unique
+  transferredAt DateTime  @default(now())
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  fromUser      User      @relation("TransfersFrom", fields: [fromUserId], references: [id])
+  toUser        User      @relation("TransfersTo", fields: [toUserId], references: [id])
+  payment       Payment   @relation(fields: [paymentId], references: [id])
+
+  @@index([workspaceId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([paymentId])
+  @@map("workspace_transfers")
+}
+
 enum UserPlan {
   BUSINESS
   AGENCY
@@ -566,6 +617,7 @@ enum PaymentType {
   PLAN_PURCHASE
   ADDON_PURCHASE
   ADDON_RENEWAL
+  WORKSPACE_PURCHASE
 }
 
 enum WorkspaceRole {
@@ -667,4 +719,11 @@ enum AddOnStatus {
   CANCELLED
   EXPIRED
   PENDING
+}
+
+enum BalanceTransactionType {
+  COMMISSION
+  WITHDRAWAL
+  ADJUSTMENT
+  REFUND
 }

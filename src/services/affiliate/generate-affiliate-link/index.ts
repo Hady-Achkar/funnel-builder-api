@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import { ZodError } from "zod";
 import {
-  GenerateAffiliateLinkRequest as GenerateAffiliateLinkRequestSchema,
+  GenerateAffiliateLinkRequest,
   GenerateAffiliateLinkResponse,
 } from "../../../types/affiliate/generate-affiliate-link";
 import { getPrisma } from "../../../lib/prisma";
@@ -10,89 +9,107 @@ import { BadRequestError } from "../../../errors";
 export class AffiliateLinkService {
   static async generateLink(
     userId: number,
-    requestData: unknown
+    data: GenerateAffiliateLinkRequest
   ): Promise<GenerateAffiliateLinkResponse> {
-    try {
-      const validatedData =
-        GenerateAffiliateLinkRequestSchema.parse(requestData);
-      const { name, funnelId, planType, affiliateAmount, settings } =
-        validatedData;
-      const user = await getPrisma().user.findUnique({
-        where: { id: userId },
-      });
-      if (!user) {
-        throw new BadRequestError("User not found");
-      }
+    const prisma = getPrisma();
 
-      const funnel = await getPrisma().funnel.findFirst({
-        where: {
-          id: funnelId,
-          createdBy: userId,
-        },
-      });
-      if (!funnel) {
-        throw new BadRequestError("Funnel not found or access denied");
-      }
+    // 1. GET USER COMMISSION PERCENTAGE
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        commissionPercentage: true,
+      },
+    });
 
-      const existingLink = await getPrisma().affiliateLink.findFirst({
-        where: {
-          userId: userId,
-          name: name,
-        },
-      });
-      if (existingLink) {
-        throw new BadRequestError(
-          "An affiliate link with this name already exists"
-        );
-      }
-
-      const affiliateLink = await getPrisma().affiliateLink.create({
-        data: {
-          name,
-          token: "",
-          itemType: planType,
-          userId,
-          settings: settings || {},
-        },
-      });
-
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new Error("JWT_SECRET is not configured");
-      }
-
-      const tokenPayload = {
-        userId,
-        funnelId,
-        name,
-        affiliateAmount,
-        settings,
-        affiliateLinkId: affiliateLink.id,
-      };
-
-      const token = jwt.sign(tokenPayload, jwtSecret);
-
-      const updatedAffiliateLink = await getPrisma().affiliateLink.update({
-        where: { id: affiliateLink.id },
-        data: { token },
-      });
-
-      const baseUrl = process.env.FRONTEND_URL;
-      const affiliateUrl = `${baseUrl}/affiliate?affiliate=${token}`;
-
-      const response: GenerateAffiliateLinkResponse = {
-        message: "Affiliate link generated successfully",
-        id: updatedAffiliateLink.id,
-        url: affiliateUrl,
-      };
-
-      return response;
-    } catch (error: unknown) {
-      if (error instanceof ZodError) {
-        const message = error.issues[0]?.message || "Invalid request data";
-        throw new BadRequestError(message);
-      }
-      throw error;
+    // User should always exist (authenticated by controller)
+    if (!user) {
+      throw new Error("User not found - this should not happen");
     }
+
+    // 2. VALIDATE WORKSPACE EXISTS AND USER OWNS IT
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        id: data.workspaceId,
+        ownerId: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    });
+
+    if (!workspace) {
+      throw new BadRequestError(
+        "Workspace not found or you don't have permission to create affiliate links for it"
+      );
+    }
+
+    // 3. CHECK FOR DUPLICATE LINK NAME
+    const existingLink = await prisma.affiliateLink.findFirst({
+      where: {
+        userId: userId,
+        name: data.name,
+      },
+    });
+
+    if (existingLink) {
+      throw new BadRequestError(
+        `You already have an affiliate link named "${data.name}". Please choose a different name`
+      );
+    }
+
+    // 4. VALIDATE JWT_SECRET
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+
+    // 5. CREATE AFFILIATE LINK (without token first)
+    const affiliateLink = await prisma.affiliateLink.create({
+      data: {
+        name: data.name,
+        token: "", // Will be updated after JWT generation
+        itemType: data.planType, // Uses default BUSINESS or provided value
+        userId,
+        workspaceId: data.workspaceId,
+        settings: data.settings,
+      },
+    });
+
+    // 6. GENERATE JWT TOKEN
+    const tokenPayload = {
+      userId,
+      workspaceId: data.workspaceId,
+      name: data.name,
+      planType: data.planType, // Include planType in token
+      commissionPercentage: user.commissionPercentage,
+      settings: data.settings,
+      affiliateLinkId: affiliateLink.id,
+    };
+
+    const token = jwt.sign(tokenPayload, jwtSecret);
+
+    // 7. UPDATE AFFILIATE LINK WITH TOKEN
+    await prisma.affiliateLink.update({
+      where: { id: affiliateLink.id },
+      data: { token },
+    });
+
+    // 8. GENERATE AFFILIATE URL
+    const baseUrl = process.env.FRONTEND_URL;
+    if (!baseUrl) {
+      throw new Error("FRONTEND_URL is not configured");
+    }
+
+    const affiliateUrl = `${baseUrl}/affiliate?affiliate=${token}`;
+
+    // 9. RETURN RESPONSE
+    return {
+      message: "Affiliate link created successfully",
+      id: affiliateLink.id,
+      url: affiliateUrl,
+      token,
+    };
   }
 }
