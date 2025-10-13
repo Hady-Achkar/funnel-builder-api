@@ -5,10 +5,23 @@ import {
   beforeAll,
   afterAll,
   beforeEach,
+  vi,
 } from "vitest";
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient } from "../../generated/prisma-client";
 import { CloneWorkspaceService } from "../../services/workspace/clone-workspace";
+
+// Mock Cloudflare API calls for workspace subdomains
+// Note: Workspace subdomains use WORKSPACE_ZONE_ID (for digitalsite.com)
+// The createARecord utility is mocked to avoid real Cloudflare API calls during tests
+vi.mock("../../services/domain/create-subdomain/utils/create-a-record", () => ({
+  createARecord: vi.fn().mockResolvedValue({
+    id: "mock-cloudflare-record-id",
+    type: "A",
+    name: "test",
+    content: "74.234.194.84",
+  }),
+}));
 
 /**
  * Integration tests for Clone Workspace Service
@@ -25,7 +38,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
   let sellerUserId: number;
   let buyerUserId: number;
   let sourceWorkspaceId: number;
-  let paymentId: number;
+  let testPaymentTransactionId: string;
   let funnelId1: number;
   let funnelId2: number;
   let pageId1: number;
@@ -227,7 +240,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         workspaceId: sourceWorkspaceId,
       },
     });
-    paymentId = payment.id;
+    testPaymentTransactionId = payment.transactionId;
   });
 
   afterAll(async () => {
@@ -295,10 +308,10 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         CloneWorkspaceService.cloneWorkspace({
           sourceWorkspaceId: sourceWorkspaceId,
           newOwnerId: buyerUserId,
-          paymentId: 999999, // Non-existent payment
+          paymentId: "999999", // Non-existent payment (string format)
           planType: "BUSINESS",
         })
-      ).rejects.toThrow(/payment.*not found/i);
+      ).rejects.toThrow(/couldn't find a payment/i);
     });
 
     it("should reject if payment already used for cloning", async () => {
@@ -306,7 +319,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: paymentId,
+        paymentId: testPaymentTransactionId,
         planType: "BUSINESS",
       });
 
@@ -315,7 +328,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         CloneWorkspaceService.cloneWorkspace({
           sourceWorkspaceId: sourceWorkspaceId,
           newOwnerId: buyerUserId,
-          paymentId: paymentId,
+          paymentId: testPaymentTransactionId,
           planType: "BUSINESS",
         })
       ).rejects.toThrow(/payment.*already.*used/i);
@@ -339,7 +352,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         CloneWorkspaceService.cloneWorkspace({
           sourceWorkspaceId: 999999, // Non-existent workspace
           newOwnerId: buyerUserId,
-          paymentId: newPayment.id,
+          paymentId: newPayment.transactionId,
           planType: "BUSINESS",
         })
       ).rejects.toThrow(/workspace.*not found/i);
@@ -366,7 +379,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         CloneWorkspaceService.cloneWorkspace({
           sourceWorkspaceId: sourceWorkspaceId,
           newOwnerId: 999999, // Non-existent user
-          paymentId: newPayment.id,
+          paymentId: newPayment.transactionId,
           planType: "BUSINESS",
         })
       ).rejects.toThrow(/owner.*not found/i);
@@ -407,11 +420,12 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: newPayment.id,
+        paymentId: newPayment.transactionId,
         planType: "BUSINESS",
       });
 
-      expect(result.clonedWorkspace.slug).toMatch(/test-workspace/);
+      // Slug should be based on buyer's lastName (User -> user)
+      expect(result.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
       expect(result.clonedWorkspace.slug).not.toBe(workspaceSlug);
 
       clonedWorkspaceId = result.clonedWorkspaceId;
@@ -441,7 +455,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: newPayment.id,
+        paymentId: newPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -487,7 +501,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result1 = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: payment1.id,
+        paymentId: payment1.transactionId,
         planType: "BUSINESS",
       });
 
@@ -507,12 +521,17 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result2 = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: payment2.id,
+        paymentId: payment2.transactionId,
         planType: "BUSINESS",
       });
 
+      // Both should be based on buyer's lastName (User -> user)
+      expect(result1.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
+      expect(result2.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
       expect(result1.clonedWorkspace.slug).not.toBe(result2.clonedWorkspace.slug);
-      expect(result2.clonedWorkspace.slug).toMatch(/-\d+$/); // Should end with -1 or -2
+
+      // Second clone should have incremental number (-2, -3, etc.)
+      expect(result2.clonedWorkspace.slug).toMatch(/-\d+$/); // Should end with -2, -3, etc.
 
       // Clean up
       await prisma.workspaceClone.deleteMany({
@@ -531,7 +550,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
   describe("Funnel Cloning Tests", () => {
     let clonedWorkspaceId: number;
-    let testPaymentId: number;
+    let testPayment: { id: number; transactionId: string };
 
     beforeEach(async () => {
       // Clean up before each test
@@ -555,7 +574,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           buyerId: buyerUserId,
         },
       });
-      testPaymentId = payment.id;
+      testPayment = payment;
     });
 
     afterEach(async () => {
@@ -566,8 +585,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         });
         await prisma.workspace.delete({ where: { id: clonedWorkspaceId } });
       }
-      if (testPaymentId) {
-        await prisma.payment.delete({ where: { id: testPaymentId } });
+      if (testPayment) {
+        await prisma.payment.delete({ where: { id: testPayment.id } });
       }
     });
 
@@ -575,7 +594,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -597,7 +616,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -624,7 +643,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -646,7 +665,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -667,7 +686,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS", // BUSINESS plan
       });
 
@@ -699,7 +718,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: agencyPayment.id,
+        paymentId: agencyPayment.transactionId,
         planType: "AGENCY", // AGENCY plan keeps password
       });
 
@@ -739,7 +758,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -767,7 +786,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -831,7 +850,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -859,7 +878,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -880,7 +899,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -907,7 +926,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
   describe("Role Template Tests", () => {
     let clonedWorkspaceId: number;
-    let testPaymentId: number;
+    let testPayment: { id: number; transactionId: string };
 
     beforeEach(async () => {
       // Clean up before each test
@@ -931,7 +950,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           buyerId: buyerUserId,
         },
       });
-      testPaymentId = payment.id;
+      testPayment = payment;
     });
 
     afterEach(async () => {
@@ -941,8 +960,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         });
         await prisma.workspace.delete({ where: { id: clonedWorkspaceId } });
       }
-      if (testPaymentId) {
-        await prisma.payment.delete({ where: { id: testPaymentId } });
+      if (testPayment) {
+        await prisma.payment.delete({ where: { id: testPayment.id } });
       }
     });
 
@@ -950,7 +969,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -972,7 +991,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
   describe("WorkspaceClone Record Tests", () => {
     let clonedWorkspaceId: number;
-    let testPaymentId: number;
+    let testPayment: { id: number; transactionId: string };
 
     beforeEach(async () => {
       await prisma.workspaceClone.deleteMany({
@@ -994,7 +1013,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           buyerId: buyerUserId,
         },
       });
-      testPaymentId = payment.id;
+      testPayment = payment;
     });
 
     afterEach(async () => {
@@ -1004,8 +1023,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         });
         await prisma.workspace.delete({ where: { id: clonedWorkspaceId } });
       }
-      if (testPaymentId) {
-        await prisma.payment.delete({ where: { id: testPaymentId } });
+      if (testPayment) {
+        await prisma.payment.delete({ where: { id: testPayment.id } });
       }
     });
 
@@ -1013,14 +1032,14 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
       clonedWorkspaceId = result.clonedWorkspaceId;
 
       const cloneRecord = await prisma.workspaceClone.findUnique({
-        where: { paymentId: testPaymentId },
+        where: { paymentId: testPayment.id },
       });
 
       expect(cloneRecord).toBeDefined();
@@ -1028,13 +1047,13 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(cloneRecord!.clonedWorkspaceId).toBe(result.clonedWorkspaceId);
       expect(cloneRecord!.sellerId).toBe(sellerUserId);
       expect(cloneRecord!.buyerId).toBe(buyerUserId);
-      expect(cloneRecord!.paymentId).toBe(testPaymentId);
+      expect(cloneRecord!.paymentId).toBe(testPayment.id);
     });
   });
 
   describe("Success Tests", () => {
     let clonedWorkspaceId: number;
-    let testPaymentId: number;
+    let testPayment: { id: number; transactionId: string };
 
     beforeEach(async () => {
       await prisma.workspaceClone.deleteMany({
@@ -1056,7 +1075,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           buyerId: buyerUserId,
         },
       });
-      testPaymentId = payment.id;
+      testPayment = payment;
     });
 
     afterEach(async () => {
@@ -1066,8 +1085,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         });
         await prisma.workspace.delete({ where: { id: clonedWorkspaceId } });
       }
-      if (testPaymentId) {
-        await prisma.payment.delete({ where: { id: testPaymentId } });
+      if (testPayment) {
+        await prisma.payment.delete({ where: { id: testPayment.id } });
       }
     });
 
@@ -1075,7 +1094,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -1101,7 +1120,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
         newOwnerId: buyerUserId,
-        paymentId: testPaymentId,
+        paymentId: testPayment.transactionId,
         planType: "BUSINESS",
       });
 
@@ -1115,6 +1134,94 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(result.clonedWorkspace).toHaveProperty("name");
       expect(result.clonedWorkspace).toHaveProperty("slug");
       expect(result.clonedWorkspace).toHaveProperty("planType");
+    });
+
+    it("should create workspace subdomain on digitalsite.com", async () => {
+      // Clone a workspace
+      const result = await CloneWorkspaceService.cloneWorkspace({
+        sourceWorkspaceId: sourceWorkspaceId,
+        newOwnerId: buyerUserId,
+        paymentId: testPayment.transactionId,
+        planType: "BUSINESS",
+      });
+
+      clonedWorkspaceId = result.clonedWorkspaceId;
+
+      // Verify workspace was created
+      const clonedWorkspace = await prisma.workspace.findUnique({
+        where: { id: result.clonedWorkspaceId },
+        include: { domains: true },
+      });
+
+      expect(clonedWorkspace).toBeTruthy();
+      expect(clonedWorkspace!.domains.length).toBeGreaterThan(0);
+
+      // Find workspace subdomain
+      const workspaceSubdomain = clonedWorkspace!.domains.find(
+        (d) =>
+          d.type === "SUBDOMAIN" &&
+          d.hostname.endsWith(".digitalsite.com")
+      );
+
+      expect(workspaceSubdomain).toBeTruthy();
+      expect(workspaceSubdomain!.hostname).toBe(
+        `${clonedWorkspace!.slug}.digitalsite.com`
+      );
+      expect(workspaceSubdomain!.status).toBe("ACTIVE");
+      expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
+      expect(workspaceSubdomain!.workspaceId).toBe(result.clonedWorkspaceId);
+      expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
+    });
+
+    it("should create subdomain based on buyer's lastName", async () => {
+      // Clone workspace
+      const result = await CloneWorkspaceService.cloneWorkspace({
+        sourceWorkspaceId: sourceWorkspaceId,
+        newOwnerId: buyerUserId,
+        paymentId: testPayment.transactionId,
+        planType: "BUSINESS",
+      });
+
+      clonedWorkspaceId = result.clonedWorkspaceId;
+
+      // Get buyer's lastName to verify slug naming
+      const buyer = await prisma.user.findUnique({
+        where: { id: buyerUserId },
+        select: { lastName: true },
+      });
+
+      // Verify workspace has subdomain with correct format
+      const clonedWorkspaceWithDomain = await prisma.workspace.findUnique({
+        where: { id: result.clonedWorkspaceId },
+        include: { domains: true },
+      });
+
+      expect(clonedWorkspaceWithDomain).toBeTruthy();
+
+      // Verify slug is based on lastName (User -> user)
+      expect(clonedWorkspaceWithDomain!.slug).toMatch(/^user(-\d+)?$/);
+
+      // Find the workspace subdomain
+      const workspaceSubdomain = clonedWorkspaceWithDomain!.domains.find(
+        (d) => d.type === "SUBDOMAIN"
+      );
+
+      expect(workspaceSubdomain).toBeTruthy();
+
+      // Subdomain should be based on buyer's lastName
+      const expectedPattern = new RegExp(`^user(-\\d+)?\\.digitalsite\\.com$`);
+      expect(workspaceSubdomain!.hostname).toMatch(expectedPattern);
+
+      // Should match: user.digitalsite.com or user-2.digitalsite.com, etc.
+      expect(workspaceSubdomain!.hostname).toBe(
+        `${clonedWorkspaceWithDomain!.slug}.digitalsite.com`
+      );
+
+      // Verify subdomain properties
+      expect(workspaceSubdomain!.status).toBe("ACTIVE");
+      expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
+      expect(workspaceSubdomain!.workspaceId).toBe(result.clonedWorkspaceId);
+      expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
   });
 });

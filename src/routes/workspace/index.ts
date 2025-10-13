@@ -14,6 +14,7 @@ import { LeaveWorkspaceController } from "../../controllers/workspace/leave";
 import { GetUserWorkspacesSummaryController } from "../../controllers/workspace/get-user-summary";
 import { GenerateInviteLinkController } from "../../controllers/workspace/generate-invite-link";
 import { JoinByLinkController } from "../../controllers/workspace/join-by-link";
+import { CloneWorkspaceController } from "../../controllers/workspace/clone-workspace";
 
 const router: Router = express.Router();
 
@@ -25,6 +26,9 @@ router.use(authenticateToken);
 
 // Create new workspace
 router.post("/", CreateWorkspaceController.create);
+
+// Clone workspace (for affiliate marketplace purchases)
+router.post("/clone", CloneWorkspaceController.cloneWorkspace);
 
 // Get all workspaces for user
 router.get("/", getAllWorkspacesController);

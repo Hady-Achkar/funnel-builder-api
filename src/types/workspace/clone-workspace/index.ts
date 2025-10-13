@@ -6,10 +6,20 @@ import { UserPlan } from "../../../generated/prisma-client";
  * Called from subscription webhook after successful workspace purchase
  */
 export const CloneWorkspaceRequest = z.object({
-  sourceWorkspaceId: z.number().int().positive(),
-  newOwnerId: z.number().int().positive(),
-  paymentId: z.number().int().positive().optional(),
-  planType: z.nativeEnum(UserPlan), // Plan type from buyer's subscription
+  sourceWorkspaceId: z
+    .number({ message: "Source workspace ID must be a valid number" })
+    .int({ message: "Source workspace ID must be a whole number" })
+    .positive({ message: "Source workspace ID must be greater than 0" }),
+  newOwnerId: z
+    .number({ message: "New owner ID must be a valid number" })
+    .int({ message: "New owner ID must be a whole number" })
+    .positive({ message: "New owner ID must be greater than 0" }),
+  paymentId: z
+    .string({ message: "Payment ID must be provided as a string" })
+    .min(1, { message: "Payment ID cannot be empty" }),
+  planType: z.nativeEnum(UserPlan, {
+    message: "Plan type must be either BUSINESS or AGENCY",
+  }),
 });
 
 export type CloneWorkspaceRequest = z.infer<typeof CloneWorkspaceRequest>;

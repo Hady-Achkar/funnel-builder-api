@@ -1,46 +1,45 @@
 import { getPrisma } from "../../../lib/prisma";
-import { BadRequestError } from "../../../errors/http-errors";
+import {
+  BadRequestError,
+  InternalServerError,
+  BadGatewayError,
+} from "../../../errors/http-errors";
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
 } from "../../../types/workspace/clone-workspace";
-import { $Enums, UserPlan } from "../../../generated/prisma-client";
+import {
+  $Enums,
+  UserPlan,
+  DomainType,
+  DomainStatus,
+  SslStatus,
+} from "../../../generated/prisma-client";
+import { createARecord } from "../../domain/create-subdomain/utils/create-a-record";
 
-/**
- * Service for cloning workspaces in the affiliate marketplace
- * Called from subscription webhook after successful workspace purchase
- */
 export class CloneWorkspaceService {
-  /**
-   * Clones a workspace with all its content for a new owner
-   *
-   * Includes: workspace properties, funnels, pages, themes, settings, role templates
-   * Excludes: domains, addons, members, affiliate links, domain connections
-   *
-   * @param data - Clone request containing source workspace, new owner, payment, and plan type
-   * @returns Response with cloned workspace details
-   */
   static async cloneWorkspace(
     data: CloneWorkspaceRequest
   ): Promise<CloneWorkspaceResponse> {
-    const prisma = getPrisma();
+    try {
+      const prisma = getPrisma();
 
-    // 1. VALIDATE PAYMENT EXISTS AND NOT ALREADY USED (Skip for testing if no paymentId)
-    if (data.paymentId) {
-      const payment = await prisma.payment.findUnique({
-        where: { id: data.paymentId },
-        include: { workspaceClone: true },
-      });
+    // 1. VALIDATE PAYMENT EXISTS AND NOT ALREADY USED
+    const payment = await prisma.payment.findFirst({
+      where: { transactionId: data.paymentId },
+      include: { workspaceClone: true },
+    });
 
-      if (!payment) {
-        throw new BadRequestError("Payment not found");
-      }
+    if (!payment) {
+      throw new BadRequestError(
+        "We couldn't find a payment with this transaction ID. Please verify your payment information"
+      );
+    }
 
-      if (payment.workspaceClone) {
-        throw new BadRequestError(
-          "This payment has already been used for workspace cloning"
-        );
-      }
+    if (payment.workspaceClone) {
+      throw new BadRequestError(
+        "This payment has already been used to clone a workspace and cannot be used again"
+      );
     }
 
     // 2. VALIDATE SOURCE WORKSPACE EXISTS
@@ -67,16 +66,26 @@ export class CloneWorkspaceService {
     // 3. VALIDATE NEW OWNER EXISTS
     const newOwner = await prisma.user.findUnique({
       where: { id: data.newOwnerId },
+      select: {
+        id: true,
+        lastName: true,
+        firstName: true,
+      },
     });
 
     if (!newOwner) {
       throw new BadRequestError("New owner not found");
     }
 
-    // 4. GENERATE UNIQUE SLUG
-    const baseSlug = sourceWorkspace.slug;
+    // 4. GENERATE UNIQUE SLUG BASED ON NEW OWNER'S LAST NAME
+    // Use lastName as base slug, fallback to firstName if no lastName
+    const baseSlug = (newOwner.lastName || newOwner.firstName || "workspace")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphens
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+
     let uniqueSlug = baseSlug;
-    let counter = 1;
+    let counter = 2; // Start from 2 for incremental numbers
 
     while (true) {
       const exists = await prisma.workspace.findUnique({
@@ -87,6 +96,7 @@ export class CloneWorkspaceService {
         break;
       }
 
+      // If slug exists, append -2, -3, -4, etc.
       uniqueSlug = `${baseSlug}-${counter}`;
       counter++;
 
@@ -166,7 +176,10 @@ export class CloneWorkspaceService {
         });
 
         // Update CUSTOM theme to link it to the funnel (GLOBAL themes don't have funnelId)
-        if (newThemeId && sourceFunnel.activeTheme?.type === $Enums.ThemeType.CUSTOM) {
+        if (
+          newThemeId &&
+          sourceFunnel.activeTheme?.type === $Enums.ThemeType.CUSTOM
+        ) {
           await tx.theme.update({
             where: { id: newThemeId },
             data: { funnelId: newFunnel.id },
@@ -182,13 +195,15 @@ export class CloneWorkspaceService {
             data: {
               funnelId: newFunnel.id,
               defaultSeoTitle: sourceFunnel.settings.defaultSeoTitle,
-              defaultSeoDescription: sourceFunnel.settings.defaultSeoDescription,
+              defaultSeoDescription:
+                sourceFunnel.settings.defaultSeoDescription,
               defaultSeoKeywords: sourceFunnel.settings.defaultSeoKeywords,
               favicon: sourceFunnel.settings.favicon,
               ogImage: sourceFunnel.settings.ogImage,
               googleAnalyticsId: null, // Clear tracking IDs
               facebookPixelId: null, // Clear pixel IDs
-              customTrackingScripts: sourceFunnel.settings.customTrackingScripts,
+              customTrackingScripts:
+                sourceFunnel.settings.customTrackingScripts,
               enableCookieConsent: sourceFunnel.settings.enableCookieConsent,
               cookieConsentText: sourceFunnel.settings.cookieConsentText,
               privacyPolicyUrl: sourceFunnel.settings.privacyPolicyUrl,
@@ -225,19 +240,16 @@ export class CloneWorkspaceService {
         }
       }
 
-      // Create WorkspaceClone tracking record (skip if no paymentId for testing)
-      let cloneRecord = null;
-      if (data.paymentId) {
-        cloneRecord = await tx.workspaceClone.create({
-          data: {
-            sourceWorkspaceId: data.sourceWorkspaceId,
-            clonedWorkspaceId: clonedWorkspace.id,
-            sellerId: sourceWorkspace.ownerId,
-            buyerId: data.newOwnerId,
-            paymentId: data.paymentId,
-          },
-        });
-      }
+      // Create WorkspaceClone tracking record
+      const cloneRecord = await tx.workspaceClone.create({
+        data: {
+          sourceWorkspaceId: data.sourceWorkspaceId,
+          clonedWorkspaceId: clonedWorkspace.id,
+          sellerId: sourceWorkspace.ownerId,
+          buyerId: data.newOwnerId,
+          paymentId: payment.id, // Use the database payment ID
+        },
+      });
 
       return {
         clonedWorkspace,
@@ -245,17 +257,93 @@ export class CloneWorkspaceService {
       };
     });
 
-    // 6. RETURN RESPONSE
-    return {
-      message: "Workspace cloned successfully",
-      clonedWorkspaceId: result.clonedWorkspace.id,
-      clonedWorkspace: {
-        id: result.clonedWorkspace.id,
-        name: result.clonedWorkspace.name,
-        slug: result.clonedWorkspace.slug,
-        planType: result.clonedWorkspace.planType,
-      },
-      cloneRecordId: result.cloneRecord !== null ? result.cloneRecord.id : 0,
-    };
+    // 6. CREATE WORKSPACE SUBDOMAIN ON DIGITALSITE.COM
+      const workspaceDomain = process.env.WORKSPACE_DOMAIN;
+      if (!workspaceDomain) {
+        throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
+      }
+
+      const workspaceHostname = `${uniqueSlug}.${workspaceDomain}`;
+
+      try {
+        // Get Cloudflare configuration for WORKSPACE domain (digitalsite.com)
+        const workspaceZoneId = process.env.WORKSPACE_ZONE_ID;
+        if (!workspaceZoneId) {
+          throw new InternalServerError("WORKSPACE_ZONE_ID is not configured");
+        }
+
+        const targetIp = "74.234.194.84";
+
+        // Create A record in Cloudflare for workspace subdomain
+        const aRecord = await createARecord(uniqueSlug, workspaceZoneId, targetIp);
+
+        // Create Domain record in database
+        await prisma.domain.create({
+          data: {
+            hostname: workspaceHostname,
+            type: DomainType.SUBDOMAIN,
+            status: DomainStatus.ACTIVE,
+            sslStatus: SslStatus.ACTIVE,
+            workspaceId: result.clonedWorkspace.id,
+            createdBy: data.newOwnerId,
+            cloudflareRecordId: aRecord.id,
+            cloudflareZoneId: workspaceZoneId,
+            lastVerifiedAt: new Date(),
+          },
+        });
+
+        console.log(
+          `✅ Cloned workspace subdomain created: ${workspaceHostname}`
+        );
+      } catch (error: any) {
+        const errMsg =
+          error.response?.data?.errors?.[0]?.message || error.message;
+        console.error(
+          `[Workspace Clone] Failed to create subdomain: ${errMsg}`,
+          {
+            stack: error.stack,
+          }
+        );
+
+        // Clean up: delete the cloned workspace since subdomain creation failed
+        await prisma.workspace.delete({
+          where: { id: result.clonedWorkspace.id },
+        });
+
+        throw new BadGatewayError(
+          "We couldn't set up your workspace address. Please try again or contact support if the issue persists."
+        );
+      }
+
+      // 7. RETURN RESPONSE
+      return {
+        message: "Workspace cloned successfully",
+        clonedWorkspaceId: result.clonedWorkspace.id,
+        clonedWorkspace: {
+          id: result.clonedWorkspace.id,
+          name: result.clonedWorkspace.name,
+          slug: result.clonedWorkspace.slug,
+          planType: result.clonedWorkspace.planType,
+        },
+        cloneRecordId: result.cloneRecord.id,
+      };
+    } catch (error: unknown) {
+      // Re-throw known errors as-is (already user-friendly)
+      if (
+        error instanceof BadRequestError ||
+        error instanceof InternalServerError ||
+        error instanceof BadGatewayError
+      ) {
+        throw error;
+      }
+
+      // Log unexpected errors
+      console.error("[Workspace Clone] Unexpected error:", error);
+
+      // Throw generic error for unexpected failures
+      throw new InternalServerError(
+        "An unexpected error occurred while cloning the workspace. Please try again."
+      );
+    }
   }
 }
