@@ -91,10 +91,19 @@ export class CreatePaymentLinkService {
         failure_return_url: data.failureReturnUrl,
         terms_and_conditions_url: data.termsAndConditionsUrl,
         custom_data: customData,
+        // Subscription structure for MamoPay recurring payments
+        subscription: {
+          frequency: data.frequency, // "annually", "monthly", "weekly"
+          frequency_interval: data.frequencyInterval, // 1, 2, 3, etc.
+        },
+        // Processing fee percentage
+        processing_fee_percentage: 2,
       };
 
       // 5. CALL MAMOPAY API
       const mamoPayApiUrl = `${process.env.MAMOPAY_API_URL}/manage_api/v1/links`;
+
+      console.log("[CreatePaymentLink] Sending to MamoPay:", JSON.stringify(mamoPayPayload, null, 2));
 
       const response = await fetch(mamoPayApiUrl, {
         method: "POST",
@@ -106,9 +115,13 @@ export class CreatePaymentLinkService {
       });
 
       if (!response.ok) {
-        await response.text();
+        const errorText = await response.text();
+        console.error("[CreatePaymentLink] MamoPay error response:", {
+          status: response.status,
+          body: errorText,
+        });
         throw new BadRequestError(
-          `Payment link creation failed. Please try again or contact support. Error: ${response.status}`
+          `Payment link creation failed. MamoPay error (${response.status}): ${errorText}`
         );
       }
 

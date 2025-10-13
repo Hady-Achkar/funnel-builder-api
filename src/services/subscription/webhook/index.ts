@@ -83,26 +83,67 @@ export class PaymentWebhookService {
         throw zodError;
       }
 
-      // 6. Log webhook details for debugging
-      console.log("[Webhook] Valid webhook received:", {
-        transactionId: validatedData.id,
-        amount: validatedData.amount,
-        currency: validatedData.amount_currency,
-        paymentType: validatedData.custom_data.details.paymentType,
-        email: validatedData.custom_data.details.email,
-        hasAffiliateLink: !!validatedData.custom_data.affiliateLink,
-        affiliateLinkId: validatedData.custom_data.affiliateLink?.id,
-      });
+      // 6. Route to appropriate processor based on paymentType and affiliateLink
+      const paymentType = validatedData.custom_data.details.paymentType;
+      const hasAffiliateLink = !!validatedData.custom_data.affiliateLink;
 
-      // TODO: Future processing based on paymentType and affiliateLink
-      // - If paymentType === "WORKSPACE_PURCHASE" && affiliateLink exists → Clone workspace
-      // - If paymentType === "PLAN_PURCHASE" → Create/update subscription
-      // - If paymentType === "ADD_ONS" → Process add-on purchase
+      if (paymentType === "PLAN_PURCHASE" && !hasAffiliateLink) {
+        // Import processor dynamically to avoid circular dependencies
+        const { PlanPurchaseProcessor } = await import(
+          "./processors/plan-purchase"
+        );
+        const result = await PlanPurchaseProcessor.process(validatedData);
 
-      // For now, just return success
+        return {
+          received: true,
+          message: result.message,
+          data: {
+            userId: result.userId,
+            paymentId: result.paymentId,
+            subscriptionId: result.subscriptionId,
+          },
+        };
+      }
+
+      if (paymentType === "PLAN_PURCHASE" && hasAffiliateLink) {
+        // TODO: Implement PLAN_PURCHASE with affiliate link processor
+        console.log(
+          "[Webhook] PLAN_PURCHASE with affiliate link processing not yet implemented"
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason:
+            "PLAN_PURCHASE with affiliate link processing not yet implemented",
+        };
+      }
+
+      if (paymentType === "WORKSPACE_PURCHASE") {
+        // TODO: Implement workspace purchase processor
+        console.log(
+          "[Webhook] WORKSPACE_PURCHASE processing not yet implemented"
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason: "WORKSPACE_PURCHASE processing not yet implemented",
+        };
+      }
+
+      if (paymentType === "ADD_ONS") {
+        // TODO: Implement add-ons processor
+        console.log("[Webhook] ADD_ONS processing not yet implemented");
+        return {
+          received: true,
+          ignored: true,
+          reason: "ADD_ONS processing not yet implemented",
+        };
+      }
+
       return {
         received: true,
-        message: "Webhook received and validated successfully",
+        ignored: true,
+        reason: `Unknown payment type: ${paymentType}`,
       };
     } catch (error) {
       console.error("[Webhook] Unexpected error:", error);
