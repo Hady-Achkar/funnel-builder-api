@@ -7,9 +7,15 @@ import { UserPlan, AddOnStatus } from "../../generated/prisma-client";
 // Mock the prisma client
 vi.mock("../../lib/prisma");
 
-// Mock the domain creation helper
-vi.mock("../../helpers/domain/create-subdomain", () => ({
-  createARecord: vi.fn().mockResolvedValue(undefined),
+// Mock Cloudflare API calls for workspace subdomains
+// Note: Workspace subdomains use WORKSPACE_ZONE_ID (for digitalsite.com)
+vi.mock("../../services/domain/create-subdomain/utils/create-a-record", () => ({
+  createARecord: vi.fn().mockResolvedValue({
+    id: "mock-cloudflare-record-id",
+    type: "A",
+    name: "test",
+    content: "74.234.194.84",
+  }),
 }));
 
 describe("Workspace Creation Tests", () => {
@@ -32,6 +38,13 @@ describe("Workspace Creation Tests", () => {
       },
       domain: {
         findUnique: vi.fn(),
+        create: vi.fn().mockResolvedValue({
+          id: 1,
+          hostname: "test.digitalsite.com",
+          type: "SUBDOMAIN",
+          status: "ACTIVE",
+          sslStatus: "ACTIVE",
+        }),
       },
       user: {
         findUnique: vi.fn(),
@@ -746,6 +759,166 @@ describe("Workspace Creation Tests", () => {
       await CreateWorkspaceService.create(userId, workspaceData);
 
       expect(createdWorkspaceStatus).toBe("DRAFT");
+    });
+  });
+
+  describe("Workspace Subdomain Creation", () => {
+    it("should create workspace subdomain on digitalsite.com", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "My Workspace",
+        slug: "my-workspace",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+              planType: UserPlan.BUSINESS,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      // Verify domain.create was called with correct data
+      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          hostname: "my-workspace.digitalsite.com",
+          type: "SUBDOMAIN",
+          status: "ACTIVE",
+          sslStatus: "ACTIVE",
+          workspaceId: 1,
+          createdBy: userId,
+          cloudflareRecordId: "mock-cloudflare-record-id",
+          cloudflareZoneId: "test-zone-id",
+        }),
+      });
+    });
+
+    it("should use WORKSPACE_ZONE_ID for workspace subdomains", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Test Workspace",
+        slug: "test-workspace",
+      };
+
+      // Set specific zone ID for this test
+      process.env.WORKSPACE_ZONE_ID = "workspace-specific-zone-id";
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.BUSINESS,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+              planType: UserPlan.BUSINESS,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      // Verify the correct zone ID was used
+      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          cloudflareZoneId: "workspace-specific-zone-id",
+        }),
+      });
+    });
+
+    it("should create subdomain with workspace slug in hostname", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Premium Workspace",
+        slug: "premium-workspace-123",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.AGENCY,
+      });
+
+      mockPrisma.addOn.findMany.mockResolvedValue([]);
+      mockPrisma.workspace.count.mockResolvedValue(0);
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
+      mockPrisma.workspace.findFirst.mockResolvedValue(null);
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const txMock = {
+          workspace: {
+            create: vi.fn().mockResolvedValue({
+              id: 5,
+              name: workspaceData.name,
+              slug: workspaceData.slug,
+              ownerId: userId,
+              planType: UserPlan.AGENCY,
+            }),
+          },
+          workspaceMember: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+          workspaceRolePermTemplate: {
+            create: vi.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateWorkspaceService.create(userId, workspaceData);
+
+      // Verify hostname format
+      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          hostname: "premium-workspace-123.digitalsite.com",
+          workspaceId: 5,
+        }),
+      });
     });
   });
 });

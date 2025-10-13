@@ -3,18 +3,23 @@ import { CreateWorkspaceRequest } from "../../../types/workspace/create";
 import {
   BadRequestError,
   InternalServerError,
+  BadGatewayError,
 } from "../../../errors/http-errors";
 import {
   WorkspaceRole,
   WorkspacePermission,
   WorkspaceStatus,
   UserPlan,
+  DomainType,
+  DomainStatus,
+  SslStatus,
 } from "../../../generated/prisma-client";
 import { rolePermissionPresets } from "../../../types/workspace/update";
 import { cacheService } from "../../cache/cache.service";
 import { determineWorkspacePlanType } from "./utils/workspace-plan";
 import { isSlugReserved } from "./utils/reserved-slugs";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
+import { createARecord } from "../../domain/create-subdomain/utils/create-a-record";
 export class CreateWorkspaceService {
   static async create(
     userId: number,
@@ -204,7 +209,65 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 11. INVALIDATE USER'S WORKSPACES CACHE
+      // 11. CREATE WORKSPACE SUBDOMAIN ON DIGITALSITE.COM
+      // Note: workspaceDomain is already defined at line 99
+      if (!workspaceDomain) {
+        throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
+      }
+
+      const workspaceHostname = `${result.slug}.${workspaceDomain}`;
+
+      try {
+        // Get Cloudflare configuration for WORKSPACE domain (digitalsite.com)
+        const workspaceZoneId = process.env.WORKSPACE_ZONE_ID;
+        if (!workspaceZoneId) {
+          throw new InternalServerError("WORKSPACE_ZONE_ID is not configured");
+        }
+
+        const targetIp = "74.234.194.84";
+
+        // Create A record in Cloudflare for workspace subdomain
+        const aRecord = await createARecord(result.slug, workspaceZoneId, targetIp);
+
+        // Create Domain record in database
+        await prisma.domain.create({
+          data: {
+            hostname: workspaceHostname,
+            type: DomainType.SUBDOMAIN,
+            status: DomainStatus.ACTIVE,
+            sslStatus: SslStatus.ACTIVE,
+            workspaceId: result.id,
+            createdBy: userId,
+            cloudflareRecordId: aRecord.id,
+            cloudflareZoneId: workspaceZoneId,
+            lastVerifiedAt: new Date(),
+          },
+        });
+
+        console.log(
+          `✅ Workspace subdomain created: ${workspaceHostname}`
+        );
+      } catch (error: any) {
+        const errMsg =
+          error.response?.data?.errors?.[0]?.message || error.message;
+        console.error(
+          `[Workspace Create] Failed to create subdomain: ${errMsg}`,
+          {
+            stack: error.stack,
+          }
+        );
+
+        // Clean up: delete the workspace since subdomain creation failed
+        await prisma.workspace.delete({
+          where: { id: result.id },
+        });
+
+        throw new BadGatewayError(
+          "We couldn't set up your workspace address. Please try again or contact support if the issue persists."
+        );
+      }
+
+      // 12. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {
