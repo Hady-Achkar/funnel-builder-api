@@ -14,6 +14,7 @@ import { LeaveWorkspaceController } from "../../controllers/workspace/leave";
 import { GetUserWorkspacesSummaryController } from "../../controllers/workspace/get-user-summary";
 import { GenerateInviteLinkController } from "../../controllers/workspace/generate-invite-link";
 import { JoinByLinkController } from "../../controllers/workspace/join-by-link";
+import { CloneWorkspaceController } from "../../controllers/workspace/clone-workspace";
 
 const router: Router = express.Router();
 
@@ -71,5 +72,9 @@ router.post("/:slug/leave", LeaveWorkspaceController.leave);
 
 // Delete workspace
 router.delete("/:slug", DeleteWorkspaceController.deleteBySlug);
+
+// ⚠️ TEMPORARY TEST ROUTE - Remove before production
+// Clone workspace (normally called from webhook, this is for testing only)
+router.post("/test-clone", CloneWorkspaceController.cloneWorkspace);
 
 export default router;

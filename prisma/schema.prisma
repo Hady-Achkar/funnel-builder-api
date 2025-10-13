@@ -41,8 +41,8 @@ model User {
   payments                   Payment[]            @relation("UserPayments")
   subscriptions              Subscription[]       @relation("UserSubscriptions")
   templates                  Template[]
-  workspaceTransfersFrom     WorkspaceTransfer[]  @relation("TransfersFrom")
-  workspaceTransfersTo       WorkspaceTransfer[]  @relation("TransfersTo")
+  workspaceSales             WorkspaceClone[]     @relation("WorkspaceSales")
+  workspacePurchases         WorkspaceClone[]     @relation("WorkspacePurchases")
   referralLinkUsed           AffiliateLink?       @relation("ReferralUsers", fields: [referralLinkUsedId], references: [id])
   sentInvitations            WorkspaceMember[]    @relation("InvitationSender")
   workspaceMembers           WorkspaceMember[]
@@ -98,7 +98,7 @@ model Payment {
   affiliateLink         AffiliateLink?     @relation(fields: [affiliateLinkId], references: [id])
   buyer                 User?              @relation("UserPayments", fields: [buyerId], references: [id])
   workspace             Workspace?         @relation(fields: [workspaceId], references: [id])
-  workspaceTransfer     WorkspaceTransfer?
+  workspaceClone        WorkspaceClone?
 
   @@index([buyerId])
   @@index([affiliateLinkId])
@@ -148,7 +148,8 @@ model Workspace {
   members           WorkspaceMember[]
   payments          Payment[]
   rolePermTemplates WorkspaceRolePermTemplate[]
-  transfers         WorkspaceTransfer[]
+  sourceClones      WorkspaceClone[]            @relation("SourceWorkspace")
+  clonedFrom        WorkspaceClone?             @relation("ClonedWorkspace")
   owner             User                        @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@map("workspaces")
@@ -575,23 +576,26 @@ model BalanceTransaction {
   @@map("balance_transactions")
 }
 
-model WorkspaceTransfer {
-  id            Int       @id @default(autoincrement())
-  workspaceId   Int
-  fromUserId    Int
-  toUserId      Int
-  paymentId     Int       @unique
-  transferredAt DateTime  @default(now())
-  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  fromUser      User      @relation("TransfersFrom", fields: [fromUserId], references: [id])
-  toUser        User      @relation("TransfersTo", fields: [toUserId], references: [id])
-  payment       Payment   @relation(fields: [paymentId], references: [id])
+model WorkspaceClone {
+  id                Int       @id @default(autoincrement())
+  sourceWorkspaceId Int
+  clonedWorkspaceId Int       @unique
+  sellerId          Int
+  buyerId           Int
+  paymentId         Int       @unique
+  clonedAt          DateTime  @default(now())
+  sourceWorkspace   Workspace @relation("SourceWorkspace", fields: [sourceWorkspaceId], references: [id])
+  clonedWorkspace   Workspace @relation("ClonedWorkspace", fields: [clonedWorkspaceId], references: [id])
+  seller            User      @relation("WorkspaceSales", fields: [sellerId], references: [id])
+  buyer             User      @relation("WorkspacePurchases", fields: [buyerId], references: [id])
+  payment           Payment   @relation(fields: [paymentId], references: [id])
 
-  @@index([workspaceId])
-  @@index([fromUserId])
-  @@index([toUserId])
+  @@index([sourceWorkspaceId])
+  @@index([clonedWorkspaceId])
+  @@index([sellerId])
+  @@index([buyerId])
   @@index([paymentId])
-  @@map("workspace_transfers")
+  @@map("workspace_clones")
 }
 
 enum UserPlan {
