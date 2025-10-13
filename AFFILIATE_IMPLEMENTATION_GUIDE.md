@@ -19,32 +19,33 @@
 
 The affiliate marketplace allows users to sell their workspaces to customers through payment links. When a customer purchases:
 
-1. They receive ownership of the workspace
-2. The seller becomes an admin member
+1. They receive a complete cloned copy of the workspace
+2. The seller retains their original workspace unchanged
 3. The seller earns commission based on their percentage
-4. Page visits are reset and protections removed
-5. Domains are deleted from the workspace
+4. The cloned workspace has a unique slug (auto-generated)
+5. All funnels and pages are duplicated to the new workspace
 
 ### Technical Scope
 
-- **NO** funnel selling (workspace-based only)
-- **NO** workspace cloning (direct transfer)
+- **YES** workspace cloning (buyer gets independent copy)
+- **NO** ownership transfer (seller keeps original)
 - **NO** withdrawal system (Phase 1)
-- **Focus**: Affiliate, Payment Links, Payments, Subscriptions
+- **Focus**: Affiliate, Payment Links, Workspace Cloning, Subscriptions
 
 ### Key Workflow
 
 ```mermaid
 graph TD
-    A[Seller Creates Payment Link] --> B[Link Contains Workspace ID]
+    A[Seller Creates Affiliate Link] --> B[Link Contains Workspace ID]
     B --> C[Customer Makes Payment]
     C --> D[Webhook Received]
     D --> E[Create Customer Account]
-    E --> F[Transfer Workspace Ownership]
-    F --> G[Add Seller as Admin]
-    G --> H[Process Commission]
-    H --> I[Update Seller Balance]
-    I --> J[Send Notifications]
+    E --> F[Clone Workspace for Buyer]
+    F --> G[Generate Unique Slug]
+    G --> H[Duplicate All Funnels]
+    H --> I[Process Commission]
+    I --> J[Update Seller Balance]
+    J --> K[Send Notifications]
 ```
 
 ---
@@ -56,14 +57,14 @@ graph TD
 - Affiliate links track referrals for plan purchases
 - Payments store commission amounts but don't process them
 - Workspaces have single ownership model
-- No workspace transfer mechanism exists
+- No workspace cloning mechanism exists
 
 ### Target State
 
 - Affiliate links will include workspace selling capability
 - Commission automatically credited to seller balance
-- Workspace ownership transferable with role preservation
-- Complete audit trail of all transactions
+- Workspace cloning creates independent copies for buyers
+- Complete audit trail of all cloning transactions
 
 ### Data Flow
 
@@ -72,7 +73,10 @@ Payment Link Generation:
 User -> API -> Validate Workspace -> Generate JWT -> Return Link
 
 Payment Processing:
-Customer -> MamoPay -> Webhook -> Our API -> Process Transfer -> Update Balance
+Customer -> MamoPay -> Webhook -> Our API -> Clone Workspace -> Update Balance
+
+Workspace Cloning:
+Original Workspace -> Clone Service -> New Workspace (with unique slug) -> Duplicate Funnels -> Copy Pages
 
 Commission Flow:
 Payment Created -> Calculate Commission -> Update Balance -> Log Transaction
@@ -134,26 +138,30 @@ enum BalanceTransactionType {
 }
 ```
 
-#### 4. Add WorkspaceTransfer Model
+#### 4. Add WorkspaceClone Model
 
 ```prisma
-model WorkspaceTransfer {
-  id              Int      @id @default(autoincrement())
-  workspaceId     Int
-  fromUserId      Int
-  toUserId        Int
-  paymentId       Int      @unique
-  transferredAt   DateTime @default(now())
+model WorkspaceClone {
+  id                Int       @id @default(autoincrement())
+  sourceWorkspaceId Int       // Original workspace being cloned
+  clonedWorkspaceId Int       @unique // New workspace created for buyer
+  sellerId          Int       // Original owner (seller)
+  buyerId           Int       // New owner (buyer)
+  paymentId         Int       @unique
+  clonedAt          DateTime  @default(now())
 
   // Relations
-  workspace       Workspace @relation(fields: [workspaceId], references: [id])
-  fromUser        User      @relation("TransfersFrom", fields: [fromUserId], references: [id])
-  toUser          User      @relation("TransfersTo", fields: [toUserId], references: [id])
-  payment         Payment   @relation(fields: [paymentId], references: [id])
+  sourceWorkspace   Workspace @relation("SourceWorkspaces", fields: [sourceWorkspaceId], references: [id])
+  clonedWorkspace   Workspace @relation("ClonedWorkspaces", fields: [clonedWorkspaceId], references: [id])
+  seller            User      @relation("SellerClones", fields: [sellerId], references: [id])
+  buyer             User      @relation("BuyerClones", fields: [buyerId], references: [id])
+  payment           Payment   @relation(fields: [paymentId], references: [id])
 
-  @@index([workspaceId])
-  @@index([fromUserId])
-  @@index([toUserId])
+  @@index([sourceWorkspaceId])
+  @@index([clonedWorkspaceId])
+  @@index([sellerId])
+  @@index([buyerId])
+  @@index([paymentId])
 }
 ```
 
@@ -163,8 +171,8 @@ model WorkspaceTransfer {
 model User {
   // ... existing fields ...
   balanceTransactions   BalanceTransaction[]
-  workspaceTransfersFrom WorkspaceTransfer[] @relation("TransfersFrom")
-  workspaceTransfersTo   WorkspaceTransfer[] @relation("TransfersTo")
+  sellerClones          WorkspaceClone[] @relation("SellerClones")
+  buyerClones           WorkspaceClone[] @relation("BuyerClones")
 }
 ```
 
@@ -174,14 +182,15 @@ model User {
 model Workspace {
   // ... existing fields ...
   payments              Payment[]
-  transfers             WorkspaceTransfer[]
+  sourcedClones         WorkspaceClone[] @relation("SourceWorkspaces")
+  createdFromClone      WorkspaceClone?  @relation("ClonedWorkspaces")
 }
 ```
 
 ### Migration Command
 
 ```bash
-npx prisma migrate dev --name add-affiliate-workspace-marketplace
+npx prisma migrate dev --name add-affiliate-workspace-cloning
 ```
 
 ---
@@ -202,12 +211,13 @@ npx prisma migrate dev --name add-affiliate-workspace-marketplace
 - [ ] Add balance update functions
 - [ ] Build transaction logging
 
-### Phase 3: Workspace Transfer (Day 5-6)
+### Phase 3: Workspace Cloning (Day 5-6)
 
-- [ ] Create transfer ownership service
-- [ ] Implement page visit reset
-- [ ] Add password protection removal
-- [ ] Integrate domain deletion
+- [ ] Create workspace cloning service
+- [ ] Implement unique slug generation
+- [ ] Clone all funnels with pages
+- [ ] Clone role permission templates
+- [ ] Create WorkspaceClone tracking record
 
 ### Phase 4: Payment Link Updates (Day 7-8)
 
@@ -219,7 +229,7 @@ npx prisma migrate dev --name add-affiliate-workspace-marketplace
 ### Phase 5: Webhook Processing (Day 9-10)
 
 - [ ] Update subscription webhook
-- [ ] Add workspace transfer logic
+- [ ] Add workspace cloning logic
 - [ ] Process commissions
 - [ ] Send notifications
 
@@ -311,76 +321,121 @@ describe("processUnpaidCommissions", () => {
 
 ---
 
-### 3. Workspace Transfer Service
+### 3. Workspace Clone Service
 
-#### File: `/src/services/workspace/transfer-ownership/index.ts`
+#### File: `/src/services/workspace/clone-workspace/index.ts`
 
 ```typescript
-interface TransferWorkspaceParams {
-  workspaceId: number;
-  fromUserId: number;
-  toUserId: number;
+interface CloneWorkspaceParams {
+  sourceWorkspaceId: number;
+  newOwnerId: number;
   paymentId: number;
 }
 
-async function transferWorkspaceOwnership(
-  params: TransferWorkspaceParams
-): Promise<WorkspaceTransfer> {
-  // 1. Validate workspace exists and is owned by fromUser
-  // 2. Begin transaction
-  // 3. Update workspace owner to toUser
-  // 4. Add fromUser as ADMIN member
-  // 5. Reset all page visits to 0
-  // 6. Remove password protection from funnels
-  // 7. Delete all domains (using existing service)
-  // 8. Create transfer record
-  // 9. Commit transaction
-  // 10. Return transfer record
+interface CloneWorkspaceResponse {
+  clonedWorkspaceId: number;
+  clonedWorkspaceName: string;
+  clonedWorkspaceSlug: string;
+  funnelsCloned: number;
+  message: string;
+}
+
+export class CloneWorkspaceService {
+  static async cloneWorkspace(
+    params: CloneWorkspaceParams
+  ): Promise<CloneWorkspaceResponse> {
+    // 1. Fetch source workspace with funnels and settings
+    // 2. Get buyer's plan type from user record
+    // 3. Generate unique slug for new workspace
+    // 4. Begin transaction
+    // 5. Create new workspace with buyer's plan
+    // 6. Create owner membership for buyer
+    // 7. Clone rolePermTemplates
+    // 8. Clone all funnels with pages
+    // 9. Create WorkspaceClone record
+    // 10. Commit transaction
+    // 11. Return clone details
+  }
 }
 ```
 
 #### Sub-functions:
 
-##### Reset Page Visits
+##### Generate Unique Workspace Slug
 
 ```typescript
-async function resetPageVisits(workspaceId: number): Promise<void> {
-  // Update all pages in all funnels of workspace
-  // Set visitCount = 0
+async function generateUniqueWorkspaceSlug(
+  prisma: PrismaClient,
+  baseName: string
+): Promise<string> {
+  // Convert name to slug format
+  // Check if slug exists
+  // If exists, append -1, -2, etc. until unique
+  // Return unique slug
 }
 ```
 
-##### Remove Password Protection
+##### Clone Funnel With Pages
 
 ```typescript
-async function removePasswordProtection(workspaceId: number): Promise<void> {
-  // Find all funnel settings for workspace funnels
-  // Set isPasswordProtected = false
-  // Clear password field
+async function cloneFunnelForWorkspace(
+  tx: Prisma.TransactionClient,
+  sourceFunnel: Funnel,
+  targetWorkspaceId: number,
+  newOwnerId: number
+): Promise<Funnel> {
+  // 1. Clone theme (if custom)
+  // 2. Generate unique funnel slug
+  // 3. Create funnel copy
+  // 4. Clone funnel settings (exclude tracking IDs)
+  // 5. Clone all pages with content
+  // 6. Regenerate linking IDs
+  // 7. Return cloned funnel
 }
 ```
 
-##### Delete Workspace Domains
+##### What Gets Cloned vs What Doesn't
 
 ```typescript
-async function deleteWorkspaceDomains(workspaceId: number): Promise<void> {
-  // Get all domains for workspace
-  // Call existing delete domain service for each
-}
+// ✅ CLONED:
+// - Workspace: name, image, settings, description
+// - All funnels with pages and content
+// - Role permission templates
+// - Theme configurations
+
+// ✅ SET TO NEW VALUES:
+// - slug (unique, auto-incremented)
+// - ownerId (buyer)
+// - planType (buyer's subscription)
+// - status (ACTIVE)
+// - Page visits (reset to 0)
+// - Password protection (removed)
+
+// ❌ NOT CLONED:
+// - Add-ons
+// - Affiliate links
+// - Domains
+// - Other members (only buyer as owner)
+// - Payments history
+// - Tracking IDs (GA, FB Pixel)
 ```
 
-#### Tests: `/src/services/workspace/transfer-ownership/index.test.ts`
+#### Tests: `/src/services/workspace/clone-workspace/index.test.ts`
 
 ```typescript
-describe("transferWorkspaceOwnership", () => {
-  it("should transfer ownership to new user");
-  it("should keep seller as admin member");
-  it("should reset all page visits to 0");
-  it("should remove password protection from all funnels");
-  it("should delete all domains");
-  it("should create transfer record");
+describe("CloneWorkspaceService", () => {
+  it("should create new workspace with same name");
+  it("should generate unique slug with incremental number");
+  it("should set planType to buyer's subscription plan");
+  it("should set status to ACTIVE");
+  it("should clone all funnels from source");
+  it("should NOT add seller as member");
+  it("should NOT copy domains");
+  it("should NOT copy add-ons");
+  it("should reset page visits to 0");
+  it("should remove password protection");
+  it("should create WorkspaceClone record");
   it("should rollback on error");
-  it("should prevent duplicate transfers");
 });
 ```
 
@@ -524,26 +579,26 @@ async function createSubscriptionFromWebhook(webhookData: any): Promise<void> {
   if (details.paymentType === "WORKSPACE_PURCHASE" && workspace) {
     // NEW FLOW: Workspace Purchase
 
-    // 1. Create user account (BUSINESS plan)
+    // 1. Create user account with plan from affiliate link
     const user = await createUser({
       ...details,
-      plan: "BUSINESS", // Always BUSINESS for workspace buyers
+      plan: affiliateLink.planType, // Use plan from affiliate link (BUSINESS/AGENCY/FREE)
     });
 
-    // 2. Transfer workspace ownership
-    await transferWorkspaceOwnership({
-      workspaceId: workspace.id,
-      fromUserId: workspace.sellerId,
-      toUserId: user.id,
+    // 2. Clone workspace for buyer (NOT transfer)
+    const cloneResult = await CloneWorkspaceService.cloneWorkspace({
+      sourceWorkspaceId: workspace.id,
+      newOwnerId: user.id,
       paymentId: payment.id,
     });
 
     // 3. Process affiliate commission
     if (affiliateLink) {
+      const commissionAmount = payment.amount * (affiliateLink.commissionPercentage / 100);
       await processAffiliateCommission({
         paymentId: payment.id,
         affiliateUserId: affiliateLink.userId,
-        amount: affiliateLink.affiliateAmount,
+        amount: commissionAmount,
       });
     }
 
@@ -551,7 +606,8 @@ async function createSubscriptionFromWebhook(webhookData: any): Promise<void> {
     await sendWorkspacePurchaseEmails({
       buyer: user,
       seller: workspace.sellerId,
-      workspace: workspace,
+      originalWorkspace: workspace,
+      clonedWorkspace: cloneResult,
     });
   } else {
     // EXISTING FLOW: Plan Purchase
@@ -564,10 +620,12 @@ async function createSubscriptionFromWebhook(webhookData: any): Promise<void> {
 
 ```typescript
 describe("createSubscriptionFromWebhook - Workspace Purchase", () => {
-  it("should create BUSINESS account for buyer");
-  it("should transfer workspace ownership");
-  it("should process affiliate commission");
-  it("should send notification emails");
+  it("should create user account with plan from affiliate link");
+  it("should clone workspace for buyer");
+  it("should generate unique slug for cloned workspace");
+  it("should NOT transfer ownership of original workspace");
+  it("should process affiliate commission based on percentage");
+  it("should send notification emails with clone details");
   it("should handle webhook retry (idempotency)");
   it("should rollback on failure");
 });
@@ -607,7 +665,7 @@ async function getAffiliateSalesHistory(userId: number): Promise<{
     paidAt: Date;
   }>;
 }> {
-  // Get all workspace transfers where fromUserId = userId
+  // Get all workspace clones where sellerId = userId
   // Include payment and buyer details
 }
 ```
@@ -762,7 +820,7 @@ For each function:
       index.test.ts      # Tests
       fixtures.ts        # Test data
   /workspace/
-    /transfer-ownership/
+    /clone-workspace/
       index.ts           # Implementation
       index.test.ts      # Tests
       /utils/
@@ -774,26 +832,32 @@ For each function:
 
 #### Commission Processing
 
-- [ ] Commission calculation accuracy
+- [ ] Commission calculation accuracy (percentage-based)
 - [ ] Balance updates
 - [ ] Transaction logging
 - [ ] Concurrent processing
 - [ ] Idempotency
 
-#### Workspace Transfer
+#### Workspace Cloning
 
-- [ ] Ownership change
-- [ ] Member role preservation
-- [ ] Page visit reset
-- [ ] Password removal
-- [ ] Domain deletion
-- [ ] Rollback on error
+- [ ] Complete workspace duplication
+- [ ] Unique slug generation (auto-increment)
+- [ ] All funnels and pages copied
+- [ ] Role templates preserved
+- [ ] Settings copied correctly
+- [ ] Domains NOT copied
+- [ ] Addons NOT copied
+- [ ] Other members NOT copied
+- [ ] Original workspace unchanged
+- [ ] Buyer gets independent copy
+- [ ] Transaction rollback on error
 
 #### Payment Flow
 
 - [ ] Payment link generation
 - [ ] Webhook processing
-- [ ] User creation
+- [ ] User creation with correct plan
+- [ ] Workspace cloning trigger
 - [ ] Email notifications
 - [ ] Error handling
 
@@ -808,7 +872,7 @@ For each function:
 - [x] Add workspaceId to AffiliateLink model (replaced funnelId)
 - [x] Add workspaceId to Payment model
 - [x] Create BalanceTransaction model
-- [x] Create WorkspaceTransfer model
+- [x] Create WorkspaceClone model (replaced WorkspaceTransfer)
 - [x] Database reset and push completed (production)
 - [x] Test database schema synced
 - [x] Generate TypeScript types
@@ -847,18 +911,18 @@ For each function:
 - [ ] Write tests for commission processing
 - [ ] Implement commission processing logic
 
-### Phase 3: Workspace Transfer 🔄
+### Phase 3: Workspace Cloning 🔄
 
-- [ ] Create transfer service structure
-- [ ] Write tests for workspace transfer
-- [ ] Implement transferWorkspaceOwnership
-- [ ] Create resetPageVisits utility
-- [ ] Write tests for page visit reset
-- [ ] Implement page visit reset
-- [ ] Create removePasswordProtection utility
-- [ ] Write tests for password removal
-- [ ] Implement password removal
-- [ ] Integrate domain deletion
+- [ ] Create CloneWorkspaceService structure
+- [ ] Write tests for workspace cloning
+- [ ] Implement cloneWorkspace function
+- [ ] Create unique slug generation utility
+- [ ] Write tests for funnel duplication
+- [ ] Implement funnel and page copying
+- [ ] Write tests for selective copying (exclude domains, addons, members)
+- [ ] Implement role templates copying
+- [ ] Implement settings copying
+- [ ] Create WorkspaceClone record tracking
 
 ### Phase 4: Payment Link Updates ✅ COMPLETED
 
@@ -895,7 +959,7 @@ For each function:
 - [ ] Write tests for workspace purchase webhook
 - [ ] Update webhook handler for WORKSPACE_PURCHASE
 - [ ] Implement user creation for buyers
-- [ ] Integrate workspace transfer
+- [ ] Integrate workspace cloning
 - [ ] Process commissions
 - [ ] Send notifications
 
@@ -947,7 +1011,7 @@ PROCESS_COMMISSIONS_BATCH_SIZE=100  # Batch size for processing
 POST   /api/affiliate/process-commissions  # Process unpaid commissions
 GET    /api/affiliate/balance              # Get affiliate balance
 GET    /api/affiliate/sales-history        # Get sales history
-POST   /api/workspace/:id/transfer         # Manual workspace transfer (admin)
+POST   /api/workspace/:id/clone            # Manual workspace clone (admin)
 ```
 
 ### Updated Endpoints
@@ -989,7 +1053,7 @@ POST   /api/subscription/create            # Handles workspace purchases
 
 ## Security Considerations
 
-1. **Workspace Validation**: Always verify ownership before transfer
+1. **Workspace Validation**: Always verify workspace is AGENCY type before cloning
 2. **Commission Calculation**: Use database transactions to prevent double-processing
 3. **Webhook Security**: Validate webhook signatures if available
 4. **Balance Updates**: Use atomic operations to prevent race conditions
@@ -1040,12 +1104,14 @@ POST   /api/subscription/create            # Handles workspace purchases
 3. Check for processing errors in logs
 4. Run manual commission processing
 
-#### Workspace Transfer Failed
+#### Workspace Clone Failed
 
-1. Check WorkspaceTransfer records
-2. Verify ownership before transfer
-3. Check for constraint violations
-4. Review transaction logs
+1. Check WorkspaceClone records
+2. Verify source workspace exists and is AGENCY type
+3. Check for unique slug conflicts
+4. Review transaction logs for rollback issues
+5. Ensure all related entities (funnels, pages) copied
+6. Verify buyer account created successfully
 
 #### Payment Link Invalid
 
@@ -1067,9 +1133,10 @@ SELECT * FROM BalanceTransaction
 WHERE userId = ?
 ORDER BY createdAt DESC;
 
--- Verify workspace transfers
-SELECT * FROM WorkspaceTransfer
-WHERE workspaceId = ?;
+-- Verify workspace clones
+SELECT * FROM WorkspaceClone
+WHERE sourceWorkspaceId = ?
+OR clonedWorkspaceId = ?;
 ```
 
 ---
