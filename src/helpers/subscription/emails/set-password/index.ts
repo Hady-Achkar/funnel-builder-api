@@ -1,4 +1,9 @@
 import sgMail from "@sendgrid/mail";
+import {
+  getSetPasswordEmailHtml,
+  getSetPasswordEmailText,
+  SetPasswordTemplateData,
+} from "../../../../constants/emails/subscription/set-password";
 
 let initialized = false;
 
@@ -16,6 +21,7 @@ function initialize() {
 /**
  * Sends password setup email to new subscription users
  * This is sent after account creation via webhook to allow user to set their password
+ * Uses HTML template from constants instead of SendGrid dynamic templates
  * @param to - User's email address
  * @param firstName - User's first name for personalization
  * @param passwordResetToken - Token for setting password
@@ -30,18 +36,21 @@ export async function sendSetPasswordEmail(
 
     const setPasswordLink = `${process.env.FRONTEND_URL}/reset-password?token=${passwordResetToken}`;
 
+    const templateData: SetPasswordTemplateData = {
+      firstName,
+      email: to,
+      setPasswordLink,
+    };
+
     const msg = {
       to,
       from: {
         email: process.env.SENDGRID_FROM_EMAIL,
         name: "Digitalsite",
       },
-      templateId: "d-YOUR_SENDGRID_TEMPLATE_ID", // TODO: Replace with actual SendGrid template ID
-      dynamicTemplateData: {
-        firstName,
-        email: to,
-        link: setPasswordLink,
-      },
+      subject: "Set Your Password - Digitalsite",
+      html: getSetPasswordEmailHtml(templateData),
+      text: getSetPasswordEmailText(templateData),
     };
 
     await sgMail.send(msg);
