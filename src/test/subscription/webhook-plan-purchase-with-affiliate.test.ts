@@ -62,6 +62,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         partnerLevel: 1,
         totalSales: 0,
         balance: 0,
+        pendingBalance: 0, // NEW: Initialize pending balance
         commissionPercentage: 5,
       },
     });
@@ -224,8 +225,20 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
     await prismaClient.$disconnect();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Reset affiliate owner balance for each test
+    await prisma.user.update({
+      where: { id: affiliateOwnerId },
+      data: {
+        balance: 0,
+        pendingBalance: 0,
+        totalSales: 0,
+        partnerLevel: 1,
+        commissionPercentage: 5,
+      },
+    });
   });
 
   /**
@@ -321,14 +334,15 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       expect(subscription).toBeDefined();
       expect(subscription?.status).toBe("ACTIVE");
 
-      // Verify affiliate owner balance updated
+      // Verify affiliate owner balance updated (NEW: held in pendingBalance, not available balance)
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // NEW: Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // NEW: Available balance unchanged
       expect(affiliateOwner?.totalSales).toBe(1);
 
-      // Verify BalanceTransaction created
+      // Verify BalanceTransaction created (NEW: type is COMMISSION_HOLD)
       const transaction = await prisma.balanceTransaction.findFirst({
         where: {
           userId: affiliateOwnerId,
@@ -336,10 +350,11 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         },
       });
       expect(transaction).toBeDefined();
-      expect(transaction?.type).toBe("COMMISSION");
+      expect(transaction?.type).toBe("COMMISSION_HOLD"); // NEW: Commission held, not immediately available
       expect(transaction?.amount).toBe(50);
-      expect(transaction?.balanceBefore).toBe(0);
-      expect(transaction?.balanceAfter).toBe(50);
+      expect(transaction?.balanceBefore).toBe(0); // Available balance unchanged
+      expect(transaction?.balanceAfter).toBe(0); // Available balance unchanged
+      expect(transaction?.releasedAt).toBeDefined(); // NEW: Has release date (30 days from now)
 
       // Verify emails sent
       expect(sendVerificationEmailSpy).toHaveBeenCalledTimes(1);
@@ -395,7 +410,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(75);
+      expect(affiliateOwner?.pendingBalance).toBe(75); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
     });
 
     it("should upgrade to Level 3 after 50th sale with 15% commission", async () => {
@@ -450,7 +466,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(100);
+      expect(affiliateOwner?.pendingBalance).toBe(100); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
     });
   });
 
@@ -481,6 +498,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         where: { id: affiliateOwnerId },
       });
       expect(affiliateOwner?.balance).toBe(0);
+      expect(affiliateOwner?.pendingBalance).toBe(0); // No commission
       expect(affiliateOwner?.totalSales).toBe(0);
 
       // Verify NO congratulations email sent
@@ -509,6 +527,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         where: { id: affiliateOwnerId },
       });
       expect(affiliateOwner?.balance).toBe(0);
+      expect(affiliateOwner?.pendingBalance).toBe(0); // No commission
     });
 
     it("should NOT pay commission for FREE invites BUSINESS", async () => {
@@ -533,6 +552,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         where: { id: affiliateOwnerId },
       });
       expect(affiliateOwner?.balance).toBe(0);
+      expect(affiliateOwner?.pendingBalance).toBe(0); // No commission
     });
 
     it("should NOT pay commission for AGENCY invites FREE", async () => {
@@ -556,6 +576,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         where: { id: affiliateOwnerId },
       });
       expect(affiliateOwner?.balance).toBe(0);
+      expect(affiliateOwner?.pendingBalance).toBe(0); // No commission
     });
   });
 
@@ -591,7 +612,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50); // Not $100
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged // Not $100
     });
 
     it("should handle verification email failure gracefully", async () => {
@@ -618,7 +640,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
     });
 
     it("should handle set password email failure gracefully", async () => {
@@ -638,7 +661,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
     });
 
     it("should handle congratulations email failure gracefully", async () => {
@@ -658,7 +682,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
 
       // Payment should be marked as paid
       const payment = await prisma.payment.findUnique({
@@ -701,7 +726,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
     });
   });
 
@@ -811,7 +837,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
       expect(affiliateOwner?.totalSales).toBe(1);
 
       // Check if workspace cloning succeeded or failed
@@ -940,7 +967,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
       });
-      expect(affiliateOwner?.balance).toBe(50);
+      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
+      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
       expect(affiliateOwner?.totalSales).toBe(1);
 
       // Verify NO workspace cloned (cloning failed silently)

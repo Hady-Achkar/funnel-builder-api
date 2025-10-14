@@ -180,6 +180,7 @@ export class PlanPurchaseWithAffiliateProcessor {
           partnerLevel: true,
           totalSales: true,
           balance: true,
+          pendingBalance: true, // NEW: Include pending balance
           commissionPercentage: true,
         },
       });
@@ -203,7 +204,11 @@ export class PlanPurchaseWithAffiliateProcessor {
         commissionAmount,
       });
 
-      // 8. Create Payment record
+      // 8. Create Payment record with commission hold
+      const commissionHeldUntil = new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000
+      ); // 30 days from now
+
       const payment = await prisma.payment.create({
         data: {
           transactionId,
@@ -214,8 +219,13 @@ export class PlanPurchaseWithAffiliateProcessor {
           paymentType: "PLAN_PURCHASE",
           buyerId: user.id,
           affiliateLinkId: affiliateLink.id,
-          level1AffiliateAmount: commissionAmount,
-          affiliatePaid: false, // Will be true after commission processing
+          level1AffiliateAmount: commissionAmount, // Keep for backward compatibility
+          affiliatePaid: false, // Keep for backward compatibility
+          commissionAmount, // NEW: Commission amount
+          commissionStatus:
+            commissionAmount > 0 ? "PENDING" : null, // NEW: On hold if commission exists
+          commissionHeldUntil:
+            commissionAmount > 0 ? commissionHeldUntil : null, // NEW: Release date
           rawData: webhookData as any,
         },
       });
@@ -437,12 +447,13 @@ export class PlanPurchaseWithAffiliateProcessor {
   }
 
   /**
-   * Process commission payment to affiliate owner
-   * - Updates balance
+   * Process commission payment to affiliate owner (30-day hold)
+   * - Adds commission to pendingBalance (NOT available balance)
    * - Increments totalSales
-   * - Creates BalanceTransaction
+   * - Creates BalanceTransaction (COMMISSION_HOLD)
+   * - Sets release date to 30 days from now
    * - Updates partner level if thresholds reached
-   * - Marks payment as paid
+   * - Marks payment as paid (backward compatibility)
    * - Updates affiliate link stats
    * - Sends congratulations email
    */
@@ -455,6 +466,7 @@ export class PlanPurchaseWithAffiliateProcessor {
       partnerLevel: number;
       totalSales: number;
       balance: number;
+      pendingBalance: number; // NEW: Include pending balance
       commissionPercentage: number;
     },
     commissionAmount: number,
@@ -467,40 +479,44 @@ export class PlanPurchaseWithAffiliateProcessor {
       affiliateOwnerId: affiliateOwner.id,
       commissionAmount,
       currentBalance: affiliateOwner.balance,
+      currentPendingBalance: affiliateOwner.pendingBalance,
       currentTotalSales: affiliateOwner.totalSales,
     });
 
-    // 1. Update affiliate owner balance and totalSales (atomic)
+    // 1. Update affiliate owner pendingBalance (NOT available balance) and totalSales (atomic)
     const updatedUser = await prisma.user.update({
       where: { id: affiliateOwner.id },
       data: {
-        balance: { increment: commissionAmount },
+        pendingBalance: { increment: commissionAmount }, // NEW: Hold in pending, not available
         totalSales: { increment: 1 },
       },
     });
 
-    console.log("[PlanPurchaseAffiliate] Affiliate balance updated:", {
-      newBalance: updatedUser.balance,
+    console.log("[PlanPurchaseAffiliate] Affiliate pending balance updated:", {
+      newPendingBalance: updatedUser.pendingBalance,
+      availableBalance: updatedUser.balance, // Unchanged
       newTotalSales: updatedUser.totalSales,
     });
 
-    // 2. Create BalanceTransaction for audit trail
+    // 2. Create BalanceTransaction for audit trail (COMMISSION_HOLD)
     await prisma.balanceTransaction.create({
       data: {
         userId: affiliateOwner.id,
-        type: "COMMISSION",
+        type: "COMMISSION_HOLD", // NEW: Indicates held commission
         amount: commissionAmount,
-        balanceBefore: affiliateOwner.balance,
-        balanceAfter: updatedUser.balance,
+        balanceBefore: affiliateOwner.balance, // Available balance unchanged
+        balanceAfter: affiliateOwner.balance, // Available balance unchanged
         referenceType: "Payment",
         referenceId: paymentId,
-        notes: `Commission for ${buyerPlanType} plan referral from ${buyerEmail}`,
+        releasedAt: null, // NULL until actually released (not the scheduled date)
+        notes: `Commission held for 30 days - ${buyerPlanType} plan referral from ${buyerEmail}`,
       },
     });
 
     console.log(
-      "[PlanPurchaseAffiliate] BalanceTransaction created for payment:",
-      paymentId
+      "[PlanPurchaseAffiliate] BalanceTransaction (COMMISSION_HOLD) created for payment:",
+      paymentId,
+      "- Will be released in 30 days if not refunded"
     );
 
     // 3. Check and update partner level if thresholds reached

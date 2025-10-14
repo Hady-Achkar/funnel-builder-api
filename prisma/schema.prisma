@@ -24,6 +24,7 @@ model User {
   plan                       UserPlan
   referralLinkUsedId         Int?
   balance                    Float                @default(0)
+  pendingBalance             Float                @default(0)
   avatar                     String?
   createdAt                  DateTime             @default(now())
   updatedAt                  DateTime             @updatedAt
@@ -81,7 +82,7 @@ model Payment {
   amount                Float?
   currency              String
   status                String
-  itemType              UserPlan
+  itemType              UserPlan?
   paymentType           PaymentType        @default(PLAN_PURCHASE)
   addOnId               Int?
   addOnType             AddOnType?
@@ -90,13 +91,17 @@ model Payment {
   affiliateLinkId       Int?
   level1AffiliateAmount Float?
   affiliatePaid         Boolean            @default(false)
+  commissionAmount      Float?
+  commissionStatus      CommissionStatus?
+  commissionHeldUntil   DateTime?
+  commissionReleasedAt  DateTime?
   workspaceId           Int?
   rawData               Json?              @default("{}")
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   addOn                 AddOn?             @relation(fields: [addOnId], references: [id])
   affiliateLink         AffiliateLink?     @relation(fields: [affiliateLinkId], references: [id])
-  buyer                 User?              @relation("UserPayments", fields: [buyerId], references: [id])
+  buyer                 User?              @relation("UserPayments", fields: [buyerId], references: [id], onDelete: SetNull)
   workspace             Workspace?         @relation(fields: [workspaceId], references: [id])
   workspaceClone        WorkspaceClone?
 
@@ -105,6 +110,7 @@ model Payment {
   @@index([workspaceId])
   @@index([status])
   @@index([transactionId])
+  @@index([commissionStatus])
   @@map("payments")
 }
 
@@ -114,14 +120,14 @@ model Subscription {
   startsAt         DateTime
   endsAt           DateTime
   status           SubscriptionStatus @default(ACTIVE)
-  userId           Int
+  userId           Int?
   intervalUnit     IntervalUnit
   intervalCount    Int                @default(1)
   rawData          Json?              @default("{}")
   subscriptionType UserPlan
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  user             User               @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  user             User?              @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([status])
@@ -567,6 +573,7 @@ model BalanceTransaction {
   referenceType   String?
   referenceId     Int?
   notes           String?
+  releasedAt      DateTime?
   createdAt       DateTime               @default(now())
   user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -580,14 +587,14 @@ model WorkspaceClone {
   id                Int       @id @default(autoincrement())
   sourceWorkspaceId Int
   clonedWorkspaceId Int       @unique
-  sellerId          Int
-  buyerId           Int
+  sellerId          Int?
+  buyerId           Int?
   paymentId         Int       @unique
   clonedAt          DateTime  @default(now())
   sourceWorkspace   Workspace @relation("SourceWorkspace", fields: [sourceWorkspaceId], references: [id])
   clonedWorkspace   Workspace @relation("ClonedWorkspace", fields: [clonedWorkspaceId], references: [id])
-  seller            User      @relation("WorkspaceSales", fields: [sellerId], references: [id])
-  buyer             User      @relation("WorkspacePurchases", fields: [buyerId], references: [id])
+  seller            User?     @relation("WorkspaceSales", fields: [sellerId], references: [id], onDelete: SetNull)
+  buyer             User?     @relation("WorkspacePurchases", fields: [buyerId], references: [id], onDelete: SetNull)
   payment           Payment   @relation(fields: [paymentId], references: [id])
 
   @@index([sourceWorkspaceId])
@@ -730,4 +737,13 @@ enum BalanceTransactionType {
   WITHDRAWAL
   ADJUSTMENT
   REFUND
+  COMMISSION_HOLD
+  COMMISSION_RELEASE
+  COMMISSION_REVERSED
+}
+
+enum CommissionStatus {
+  PENDING
+  RELEASED
+  REVERSED
 }
