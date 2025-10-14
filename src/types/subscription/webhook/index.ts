@@ -66,10 +66,16 @@ export const PaymentWebhookRequest = z.object({
   refund_amount: z.number().optional(),
   refund_status: z.string().optional(),
 
-  // Custom data with details and optional affiliate link
+  // Custom data with details, optional affiliate link, and optional workspace
   custom_data: z.object({
     details: WebhookPaymentDetails,
     affiliateLink: WebhookAffiliateLink.optional(),
+    workspace: z.object({
+      id: z.number(),
+      name: z.string(),
+      slug: z.string(),
+      sellerId: z.number(),
+    }).optional(),
   }),
 
   // Additional fields

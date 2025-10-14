@@ -1,0 +1,58 @@
+{
+  "status": "captured",
+  "id": "PAY-TEST-WORKSPACE-CLONE",
+  "amount": 304.98,
+  "amount_currency": "USD",
+  "refund_amount": 0.0,
+  "refund_status": "No refund",
+  "custom_data": {
+    "details": {
+      "email": "test-workspace-clone@example.com",
+      "lastName": "Test",
+      "planType": "BUSINESS",
+      "firstName": "Workspace",
+      "frequency": "annually",
+      "trialDays": 0,
+      "paymentType": "PLAN_PURCHASE",
+      "trialEndDate": "2025-10-14T09:01:21.887Z",
+      "frequencyInterval": 1
+    },
+    "affiliateLink": {
+      "id": 1,
+      "token": "YOUR_JWT_TOKEN_HERE",
+      "userId": 2,
+      "itemType": "BUSINESS",
+      "commissionPercentage": 5
+    }
+  },
+  "created_date": "2025-10-14-13-02-03",
+  "subscription_id": "MPB-SUB-TEST",
+  "settlement_amount": "1,054.47",
+  "settlement_currency": "AED",
+  "settlement_date": "2025-10-21",
+  "customer_details": {
+    "name": "Workspace Test",
+    "email": "test-workspace-clone@example.com",
+    "phone_number": "-",
+    "comment": "-"
+  },
+  "payment_method": {
+    "card_id": "CARD-TEST",
+    "type": "CREDIT VISA",
+    "card_holder_name": "card holder",
+    "card_last4": "4242",
+    "card_expiry_month": "1",
+    "card_expiry_year": "2028",
+    "origin": "International card"
+  },
+  "settlement_fee": "AED 52.97",
+  "settlement_vat": "AED 2.65",
+  "payment_link_id": "MB-LINK-TEST",
+  "payment_link_url": "https://sandbox.dev.business.mamopay.com/pay/test",
+  "external_id": null,
+  "billing_descriptor": "Mamo*DIGITALSITE  FZCO Dubai",
+  "error_code": null,
+  "error_message": null,
+  "next_payment_date": "14/10/2026",
+  "event_type": "charge.succeeded"
+}

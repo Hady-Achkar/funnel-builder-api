@@ -5,6 +5,8 @@ import {
   WebhookResponse,
   WebhookEventType,
 } from "../../../types/subscription/webhook";
+import { PlanPurchaseProcessor } from "./processors/plan-purchase";
+import { PlanPurchaseWithAffiliateProcessor } from "./processors/plan-purchase-with-affiliate";
 
 export class PaymentWebhookService {
   static async processWebhook(data: unknown): Promise<WebhookResponse> {
@@ -88,10 +90,6 @@ export class PaymentWebhookService {
       const hasAffiliateLink = !!validatedData.custom_data.affiliateLink;
 
       if (paymentType === "PLAN_PURCHASE" && !hasAffiliateLink) {
-        // Import processor dynamically to avoid circular dependencies
-        const { PlanPurchaseProcessor } = await import(
-          "./processors/plan-purchase"
-        );
         const result = await PlanPurchaseProcessor.process(validatedData);
 
         return {
@@ -106,15 +104,18 @@ export class PaymentWebhookService {
       }
 
       if (paymentType === "PLAN_PURCHASE" && hasAffiliateLink) {
-        // TODO: Implement PLAN_PURCHASE with affiliate link processor
-        console.log(
-          "[Webhook] PLAN_PURCHASE with affiliate link processing not yet implemented"
+        const result = await PlanPurchaseWithAffiliateProcessor.process(
+          validatedData
         );
+
         return {
           received: true,
-          ignored: true,
-          reason:
-            "PLAN_PURCHASE with affiliate link processing not yet implemented",
+          message: result.message,
+          data: {
+            userId: result.userId,
+            paymentId: result.paymentId,
+            subscriptionId: result.subscriptionId,
+          },
         };
       }
 
