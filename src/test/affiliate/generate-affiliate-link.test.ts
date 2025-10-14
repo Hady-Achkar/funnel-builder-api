@@ -25,6 +25,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
   const prisma = getPrisma();
   let testUserId: number;
   let testWorkspaceId: number;
+  let testWorkspaceSlug: string;
   const testUserEmail = `test-affiliate-${Date.now()}@example.com`;
   const testUsername = `testaffiliate${Date.now()}`;
 
@@ -79,6 +80,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       },
     });
     testWorkspaceId = testWorkspace.id;
+    testWorkspaceSlug = testWorkspace.slug;
   });
 
   afterAll(async () => {
@@ -110,7 +112,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "My Premium Workspace Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           settings: { tracking: "enabled", source: "email" },
         },
         testUserId
@@ -161,6 +163,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       ) as any;
       expect(decoded.userId).toBe(testUserId);
       expect(decoded.workspaceId).toBe(testWorkspaceId);
+      expect(decoded.workspaceSlug).toBe(testWorkspaceSlug);
       expect(decoded.name).toBe("My Premium Workspace Link");
       expect(decoded.commissionPercentage).toBe(20); // From user
       expect(decoded.settings).toEqual({
@@ -184,7 +187,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "High Commission Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -218,7 +221,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Default Plan Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           // planType not provided
         },
         testUserId
@@ -255,7 +258,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Free Plan Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           planType: "FREE", // Explicitly set to FREE
         },
         testUserId
@@ -292,7 +295,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Agency Plan Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           planType: "AGENCY", // Explicitly set to AGENCY
         },
         testUserId
@@ -329,7 +332,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Link Without Settings",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           // settings not provided
         },
         testUserId
@@ -357,7 +360,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req1 = mockRequest(
         {
           name: "Link One",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -372,7 +375,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req2 = mockRequest(
         {
           name: "Link Two",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -401,7 +404,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Test Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         nonExistentUserId
       );
@@ -424,11 +427,11 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
 
     it("should return user-friendly error when workspace not found", async () => {
       // Arrange
-      const nonExistentWorkspaceId = 999999;
+      const nonExistentWorkspaceSlug = "non-existent-workspace-999999";
       const req = mockRequest(
         {
           name: "Test Link",
-          workspaceId: nonExistentWorkspaceId,
+          workspaceSlug: nonExistentWorkspaceSlug,
         },
         testUserId
       );
@@ -477,7 +480,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Unauthorized Link",
-          workspaceId: otherWorkspace.id,
+          workspaceSlug: otherWorkspace.slug,
         },
         testUserId
       );
@@ -509,7 +512,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req1 = mockRequest(
         {
           name: linkName,
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -524,7 +527,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req2 = mockRequest(
         {
           name: linkName,
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -548,7 +551,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       // Arrange
       const req = mockRequest(
         {
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           // name is missing
         },
         testUserId
@@ -571,12 +574,12 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       );
     });
 
-    it("should return user-friendly error for missing workspaceId", async () => {
+    it("should return user-friendly error for missing workspaceSlug", async () => {
       // Arrange
       const req = mockRequest(
         {
           name: "Test Link",
-          // workspaceId is missing
+          // workspaceSlug is missing
         },
         testUserId
       );
@@ -593,15 +596,15 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/workspace|expected number/i);
+      expect(error.message).toMatch(/expected string|workspace|provide a workspace slug/i);
     });
 
-    it("should return user-friendly error for invalid workspaceId", async () => {
+    it("should return user-friendly error for invalid workspaceSlug format", async () => {
       // Arrange
       const req = mockRequest(
         {
           name: "Test Link",
-          workspaceId: -1,
+          workspaceSlug: "Invalid Slug With Spaces!",
         },
         testUserId
       );
@@ -618,7 +621,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       // Assert
       expect(next).toHaveBeenCalled();
       const error = next.mock.calls[0][0];
-      expect(error.message).toMatch(/select a valid workspace|positive/i);
+      expect(error.message).toMatch(/slug must contain only lowercase/i);
     });
   });
 
@@ -628,7 +631,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Complete Token Test",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           settings: { custom: "value" },
         },
         testUserId
@@ -672,7 +675,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Token Structure Test",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );
@@ -710,7 +713,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Database Test Link",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
           settings: { test: "data" },
         },
         testUserId
@@ -757,7 +760,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       const req = mockRequest(
         {
           name: "Unique Token Test",
-          workspaceId: testWorkspaceId,
+          workspaceSlug: testWorkspaceSlug,
         },
         testUserId
       );

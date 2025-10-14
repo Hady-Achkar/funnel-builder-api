@@ -7,10 +7,15 @@ export const GenerateAffiliateLinkRequest = z.object({
     .min(1, "Please provide a name for your affiliate link")
     .max(100, "Link name is too long. Please use 100 characters or less")
     .trim(),
-  workspaceId: z
-    .number()
-    .int("Please select a valid workspace")
-    .positive("Please select a valid workspace"),
+  workspaceSlug: z
+    .string()
+    .min(1, "Please provide a workspace slug")
+    .max(100, "Workspace slug is too long")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Workspace slug must contain only lowercase letters, numbers, and hyphens"
+    )
+    .trim(),
   planType: z
     .nativeEnum(UserPlan)
     .optional()

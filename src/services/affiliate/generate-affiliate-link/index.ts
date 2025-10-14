@@ -29,7 +29,7 @@ export class AffiliateLinkService {
     // 2. VALIDATE WORKSPACE EXISTS AND USER OWNS IT
     const workspace = await prisma.workspace.findFirst({
       where: {
-        id: data.workspaceId,
+        slug: data.workspaceSlug,
         ownerId: userId,
       },
       select: {
@@ -72,7 +72,7 @@ export class AffiliateLinkService {
         token: "", // Will be updated after JWT generation
         itemType: data.planType, // Uses default BUSINESS or provided value
         userId,
-        workspaceId: data.workspaceId,
+        workspaceId: workspace.id, // Use the resolved workspace ID
         settings: data.settings,
       },
     });
@@ -80,9 +80,10 @@ export class AffiliateLinkService {
     // 6. GENERATE JWT TOKEN
     const tokenPayload = {
       userId,
-      workspaceId: data.workspaceId,
+      workspaceId: workspace.id,
+      workspaceSlug: workspace.slug,
       name: data.name,
-      planType: data.planType, // Include planType in token
+      planType: data.planType,
       commissionPercentage: user.commissionPercentage,
       settings: data.settings,
       affiliateLinkId: affiliateLink.id,
