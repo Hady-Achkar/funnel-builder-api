@@ -5,7 +5,7 @@ import { FrequencyConverter } from "../../../../utils/subscription-utils/frequen
 import { TrialPeriodCalculator } from "../../../../utils/common-functions/trial-period";
 import { sendSetPasswordEmail } from "../../../../helpers/subscription/emails/set-password";
 import crypto from "crypto";
-import { UserPlan } from "../../../../generated/prisma-client";
+import { UserPlan, RegistrationSource } from "../../../../generated/prisma-client";
 
 interface PlanPurchaseResult {
   success: boolean;
@@ -110,16 +110,19 @@ export class PlanPurchaseProcessor {
         const tempPassword = crypto.randomBytes(16).toString("hex");
 
         // Register user
-        const registerResult = await RegisterService.register({
-          email: email.toLowerCase(),
-          username,
-          firstName,
-          lastName,
-          password: tempPassword,
-          isAdmin: false,
-          plan: userPlan,
-          trialPeriod,
-        });
+        const registerResult = await RegisterService.register(
+          {
+            email: email.toLowerCase(),
+            username,
+            firstName,
+            lastName,
+            password: tempPassword,
+            isAdmin: false,
+            plan: userPlan,
+            trialPeriod,
+          },
+          RegistrationSource.DIRECT
+        );
 
         // Get the created user
         user = await prisma.user.findUnique({

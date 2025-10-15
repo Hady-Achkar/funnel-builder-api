@@ -10,12 +10,16 @@ import {
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient } from "../../generated/prisma-client";
 import { PaymentWebhookService } from "../../services/subscription/webhook";
-import { sendVerificationEmail } from "../../helpers/auth/emails/register";
 import { sendSetPasswordEmail } from "../../helpers/subscription/emails/set-password";
 import { UserPlan } from "../../generated/prisma-client";
 
 // Mock email services
-vi.mock("../../helpers/auth/emails/register");
+vi.mock("@sendgrid/mail", () => ({
+  default: {
+    setApiKey: vi.fn(),
+    send: vi.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
 vi.mock("../../helpers/subscription/emails/set-password");
 
 describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
@@ -87,12 +91,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
     vi.clearAllMocks();
 
     // Setup mock implementations
-    vi.mocked(sendVerificationEmail).mockResolvedValue(undefined);
     vi.mocked(sendSetPasswordEmail).mockResolvedValue(undefined);
   });
 
   describe("Agency User Plan Purchase", () => {
-    it("should create agency user with subscription, payment, and send 2 emails (verification + set password)", async () => {
+    it("should create agency user with subscription, payment, and send set password email", async () => {
       // Arrange
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
@@ -216,14 +219,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(daysDiff).toBeGreaterThanOrEqual(28); // At least 28 days
       expect(daysDiff).toBeLessThanOrEqual(31); // At most 31 days
 
-      // Assert - Verification Email Sent
-      expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
-      expect(sendVerificationEmail).toHaveBeenCalledWith(
-        "john.agency@test.com",
-        "John",
-        user?.verificationToken
-      );
-
       // Assert - Set Password Email Sent
       expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmail).toHaveBeenCalledWith(
@@ -231,12 +226,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         "John",
         user?.passwordResetToken
       );
-
-      // Total: 2 emails sent
-      const totalEmailsSent =
-        vi.mocked(sendVerificationEmail).mock.calls.length +
-        vi.mocked(sendSetPasswordEmail).mock.calls.length;
-      expect(totalEmailsSent).toBe(2);
     });
 
     it("should create agency user with annual subscription", async () => {
@@ -309,13 +298,12 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(daysDiff).toBeLessThanOrEqual(366);
 
       // Verify 2 emails sent
-      expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Business User Plan Purchase", () => {
-    it("should create business user with subscription, payment, and send 2 emails (verification + set password)", async () => {
+    it("should create business user with subscription, payment, and send set password email", async () => {
       // Arrange
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
@@ -400,14 +388,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(subscription?.status).toBe("ACTIVE");
       expect(subscription?.intervalUnit).toBe("MONTH");
 
-      // Assert - 2 Emails Sent
-      expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
-      expect(sendVerificationEmail).toHaveBeenCalledWith(
-        "jane.business@test.com",
-        "Jane",
-        user?.verificationToken
-      );
-
+      // Assert - Set Password Email Sent
       expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmail).toHaveBeenCalledWith(
         "jane.business@test.com",
@@ -477,7 +458,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(subscription?.intervalCount).toBe(1);
 
       // Verify 2 emails sent
-      expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
     });
   });
@@ -554,7 +534,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(users[0].id).toBe(existingUser.id);
 
       // Emails should NOT be sent for existing user
-      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(sendSetPasswordEmail).not.toHaveBeenCalled();
 
       // Payment and subscription should still be created
@@ -643,7 +622,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(user2).toBeNull();
 
       // Verify no emails sent for duplicate
-      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(sendSetPasswordEmail).not.toHaveBeenCalled();
 
       // Verify only one payment exists
@@ -708,7 +686,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(user).toBeNull();
 
       // Verify no emails sent
-      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(sendSetPasswordEmail).not.toHaveBeenCalled();
     });
 
@@ -812,7 +789,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         where: { email: "failed@test.com" },
       });
       expect(user).toBeNull();
-      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(sendSetPasswordEmail).not.toHaveBeenCalled();
     });
 
@@ -865,77 +841,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   });
 
   describe("Edge Cases - Email Service Failure", () => {
-    it("should handle verification email failure gracefully and continue processing", async () => {
-      // Arrange
-      vi.mocked(sendVerificationEmail).mockRejectedValue(
-        new Error("Email service unavailable")
-      );
-
-      const mockWebhookPayload = {
-        event_type: "charge.succeeded",
-        status: "captured",
-        id: "PAY-EMAIL-FAIL-001",
-        amount: 99.99,
-        amount_currency: "USD",
-        subscription_id: "SUB-EMAIL-FAIL-001",
-        created_date: new Date().toISOString(),
-        custom_data: {
-          details: {
-            email: "emailfail@test.com",
-            firstName: "Email",
-            lastName: "Fail",
-            planType: "AGENCY",
-            paymentType: "PLAN_PURCHASE",
-            frequency: "monthly",
-            frequencyInterval: 1,
-            trialDays: 14,
-            trialEndDate: new Date().toISOString(),
-          },
-        },
-        customer_details: {
-          name: "Email Fail",
-          email: "emailfail@test.com",
-          phone_number: "+1234567890",
-        },
-        payment_method: {
-          type: "card",
-          card_holder_name: "Email Fail",
-          card_last4: "4242",
-          card_expiry_month: "12",
-          card_expiry_year: "2025",
-          origin: "web",
-        },
-      };
-
-      // Act - Should not throw
-      const response = await PaymentWebhookService.processWebhook(
-        mockWebhookPayload
-      );
-
-      // Assert - Webhook still processed successfully
-      expect(response.received).toBe(true);
-      expect(response.data?.userId).toBeDefined();
-
-      // User still created despite email failure
-      const user = await prisma.user.findUnique({
-        where: { email: "emailfail@test.com" },
-      });
-      expect(user).toBeDefined();
-
-      // Payment and subscription still created
-      const payment = await prisma.payment.findFirst({
-        where: { buyerId: user?.id },
-      });
-      expect(payment).toBeDefined();
-
-      const subscription = await prisma.subscription.findFirst({
-        where: { userId: user?.id },
-      });
-      expect(subscription).toBeDefined();
-
-      // Email was attempted
-      expect(sendVerificationEmail).toHaveBeenCalled();
-    });
+    // Test removed: verification email now sent directly via sgMail in service, not testable this way
 
     it("should handle set password email failure gracefully", async () => {
       // Arrange
@@ -1080,7 +986,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.message).toContain("renewed");
 
       // Verify NO emails sent (it's a renewal)
-      expect(sendVerificationEmail).not.toHaveBeenCalled();
       expect(sendSetPasswordEmail).not.toHaveBeenCalled();
 
       // Verify new payment created

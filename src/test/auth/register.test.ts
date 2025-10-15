@@ -8,7 +8,12 @@ import { UserPlan, RegistrationSource } from "../../generated/prisma-client";
 
 // Mock dependencies
 vi.mock("../../lib/prisma");
-vi.mock("../../helpers/auth/emails/register");
+vi.mock("@sendgrid/mail", () => ({
+  default: {
+    setApiKey: vi.fn(),
+    send: vi.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
 
 describe("Register Route - Complete Flow", () => {
   let mockPrisma: any;

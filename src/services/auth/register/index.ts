@@ -12,7 +12,11 @@ import {
   getVerificationTokenExpiry,
 } from "./utils/generate-verification-token";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
-import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
+import {
+  getVerificationEmail,
+  VerificationEmailData,
+} from "../../../constants/emails/auth/verification";
+import sgMail from "@sendgrid/mail";
 import { cacheService } from "../../cache/cache.service";
 import { RegistrationSource, UserPlan } from "../../../generated/prisma-client";
 
@@ -66,13 +70,40 @@ export class RegisterService {
 
       // Send verification email (non-blocking, don't fail registration if email fails)
       try {
-        await sendVerificationEmail(
-          user.email,
-          user.firstName,
-          verificationToken
-        );
-      } catch (error) {
+        const apiKey = process.env.SENDGRID_API_KEY;
+        if (!apiKey) {
+          throw new Error("SENDGRID_API_KEY is not configured");
+        }
+        sgMail.setApiKey(apiKey);
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+        const emailData: VerificationEmailData = {
+          firstName: user.firstName,
+          verificationUrl,
+        };
+
+        const html = getVerificationEmail(emailData);
+
+        const msg = {
+          to: user.email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL,
+            name: "Digitalsite",
+          },
+          subject: "Verify Your Email Address | تأكيد بريدك الإلكتروني",
+          html,
+        };
+
+        await sgMail.send(msg);
+      } catch (error: any) {
         console.error("Failed to send verification email:", error);
+        if (error.response && error.response.body) {
+          console.error(
+            "SendGrid error details:",
+            JSON.stringify(error.response.body, null, 2)
+          );
+        }
         // Continue with registration even if email fails
       }
 

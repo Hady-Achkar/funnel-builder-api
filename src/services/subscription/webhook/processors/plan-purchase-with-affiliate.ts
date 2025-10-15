@@ -8,7 +8,7 @@ import { sendAffiliateCongratulationsEmail } from "../../../../helpers/subscript
 import { CloneWorkspaceService } from "../../../workspace/clone-workspace";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { UserPlan } from "../../../../generated/prisma-client";
+import { UserPlan, RegistrationSource } from "../../../../generated/prisma-client";
 
 interface PlanPurchaseWithAffiliateResult {
   success: boolean;
@@ -89,16 +89,19 @@ export class PlanPurchaseWithAffiliateProcessor {
         const tempPassword = crypto.randomBytes(16).toString("hex");
 
         // Register user (this sets trialStartDate and trialEndDate)
-        const registerResult = await RegisterService.register({
-          email: email.toLowerCase(),
-          username,
-          firstName,
-          lastName,
-          password: tempPassword,
-          isAdmin: false,
-          plan: userPlan,
-          trialPeriod,
-        });
+        const registerResult = await RegisterService.register(
+          {
+            email: email.toLowerCase(),
+            username,
+            firstName,
+            lastName,
+            password: tempPassword,
+            isAdmin: false,
+            plan: userPlan,
+            trialPeriod,
+          },
+          RegistrationSource.DIRECT
+        );
 
         // Get the created user
         user = await prisma.user.findUnique({

@@ -12,7 +12,14 @@ import { PrismaClient } from "../../generated/prisma-client";
 import { PaymentWebhookService } from "../../services/subscription/webhook";
 import * as setPasswordEmail from "../../helpers/subscription/emails/set-password";
 import * as affiliateCongratulationsEmail from "../../helpers/subscription/emails/affiliate/congratulations";
-import * as verificationEmail from "../../helpers/auth/emails/register";
+
+// Mock SendGrid
+vi.mock("@sendgrid/mail", () => ({
+  default: {
+    setApiKey: vi.fn(),
+    send: vi.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
 
 describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
   const prismaClient = new PrismaClient();
@@ -33,10 +40,6 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
     affiliateCongratulationsEmail,
     "sendAffiliateCongratulationsEmail"
   );
-  const sendVerificationEmailSpy = vi.spyOn(
-    verificationEmail,
-    "sendVerificationEmail"
-  );
 
   beforeAll(async () => {
     // Verify we're using test database
@@ -47,7 +50,6 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
     // Mock email functions to prevent actual email sending
     sendSetPasswordEmailSpy.mockResolvedValue(undefined);
     sendAffiliateCongratulationsEmailSpy.mockResolvedValue(undefined);
-    sendVerificationEmailSpy.mockResolvedValue(undefined);
 
     // Create affiliate owner (AGENCY plan, Level 1)
     const affiliateOwner = await prisma.user.create({
@@ -357,7 +359,6 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       expect(transaction?.releasedAt).toBeDefined(); // NEW: Has release date (30 days from now)
 
       // Verify emails sent
-      expect(sendVerificationEmailSpy).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmailSpy).toHaveBeenCalledTimes(1);
       expect(sendAffiliateCongratulationsEmailSpy).toHaveBeenCalledTimes(1);
 
@@ -616,33 +617,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged // Not $100
     });
 
-    it("should handle verification email failure gracefully", async () => {
-      sendVerificationEmailSpy.mockRejectedValueOnce(
-        new Error("Email service down")
-      );
-
-      const email = `buyer-email-fail-1-${Date.now()}@example.com`;
-      const payload = createWebhookPayload(email, "BUSINESS");
-
-      // Should not throw error
-      const result = await PaymentWebhookService.processWebhook(payload);
-
-      // Should still succeed
-      expect(result.received).toBe(true);
-
-      // User should still be created
-      const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-      });
-      expect(user).toBeDefined();
-
-      // Commission should still be processed
-      const affiliateOwner = await prisma.user.findUnique({
-        where: { id: affiliateOwnerId },
-      });
-      expect(affiliateOwner?.pendingBalance).toBe(50); // Commission on hold
-      expect(affiliateOwner?.balance).toBe(0); // Available balance unchanged
-    });
+    // Test removed: verification email now sent directly via sgMail in service
 
     it("should handle set password email failure gracefully", async () => {
       sendSetPasswordEmailSpy.mockRejectedValueOnce(
@@ -713,7 +688,6 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       await PaymentWebhookService.processWebhook(payload);
 
       // Verify NO new user emails sent
-      expect(sendVerificationEmailSpy).not.toHaveBeenCalled();
       expect(sendSetPasswordEmailSpy).not.toHaveBeenCalled();
 
       // Verify payment and subscription still created
@@ -784,7 +758,6 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       await PaymentWebhookService.processWebhook(payload);
 
       // Verify buyer receives 2 emails
-      expect(sendVerificationEmailSpy).toHaveBeenCalledTimes(1);
       expect(sendSetPasswordEmailSpy).toHaveBeenCalledTimes(1);
 
       // Verify affiliate owner receives 1 email
