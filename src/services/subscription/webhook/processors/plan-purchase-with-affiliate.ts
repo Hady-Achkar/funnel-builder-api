@@ -1,14 +1,14 @@
 import { getPrisma } from "../../../../lib/prisma";
 import { PaymentWebhookRequest } from "../../../../types/subscription/webhook";
-import { RegisterService } from "../../../auth/register";
 import { FrequencyConverter } from "../../../../utils/subscription-utils/frequency-converter";
-import { TrialPeriodCalculator } from "../../../../utils/common-functions/trial-period";
-import { sendSetPasswordEmail } from "../../../../helpers/subscription/emails/set-password";
+import {
+  TrialPeriodCalculator,
+  calculateTrialDates,
+} from "../../../../utils/common-functions/trial-period";
 import { sendAffiliateCongratulationsEmail } from "../../../../helpers/subscription/emails/affiliate/congratulations";
 import { CloneWorkspaceService } from "../../../workspace/clone-workspace";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { UserPlan, RegistrationSource } from "../../../../generated/prisma-client";
+import { UserPlan } from "../../../../generated/prisma-client";
 
 interface PlanPurchaseWithAffiliateResult {
   success: boolean;
@@ -59,120 +59,105 @@ export class PlanPurchaseWithAffiliateProcessor {
         affiliateOwnerId: affiliateLink.userId,
       });
 
-      // 1. Check if user already exists
-      let user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-      });
+      // 1. Find user by userId (if provided) OR email
+      const userIdFromCustomData = custom_data.userId;
+      let user = null;
 
-      let isNewUser = false;
+      // Try to find by userId first (from logged-in user creating payment link)
+      if (userIdFromCustomData) {
+        console.log(
+          "[PlanPurchaseAffiliate] Looking up user by userId:",
+          userIdFromCustomData
+        );
+        user = await prisma.user.findUnique({
+          where: { id: userIdFromCustomData },
+        });
 
+        // Security check: verify email matches
+        if (user && user.email.toLowerCase() !== email.toLowerCase()) {
+          console.error(
+            "[PlanPurchaseAffiliate] Email mismatch security check failed:",
+            {
+              userIdFromData: userIdFromCustomData,
+              emailFromUser: user.email,
+              emailFromTransaction: email,
+            }
+          );
+          throw new Error("Security validation failed: email mismatch");
+        }
+      }
+
+      // Fallback to email lookup if userId not provided or user not found
       if (!user) {
-        // 2. Create new user using RegisterService
-        console.log("[PlanPurchaseAffiliate] Creating new user:", email);
-
-        // Extract username from email (part before @)
-        const username = email
-          .split("@")[0]
-          .toLowerCase()
-          .replace(/[^a-z0-9_]/g, "_");
-
-        // Convert frequency to trial period format
-        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
-          frequency,
-          frequencyInterval || 1
-        );
-
-        // Map planType to UserPlan enum
-        const userPlan = this.mapPlanType(planType);
-
-        // Generate a temporary password for registration (user will set their own via reset token)
-        const tempPassword = crypto.randomBytes(16).toString("hex");
-
-        // Register user (this sets trialStartDate and trialEndDate)
-        const registerResult = await RegisterService.register(
-          {
-            email: email.toLowerCase(),
-            username,
-            firstName,
-            lastName,
-            password: tempPassword,
-            isAdmin: false,
-            plan: userPlan,
-            trialPeriod,
-          },
-          RegistrationSource.DIRECT
-        );
-
-        // Get the created user
+        console.log("[PlanPurchaseAffiliate] Looking up user by email:", email);
         user = await prisma.user.findUnique({
           where: { email: email.toLowerCase() },
         });
+      }
 
-        if (!user) {
-          throw new Error(
-            "User creation failed - user not found after registration"
-          );
-        }
-
-        // 3. Link user to affiliate link
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            referralLinkUsedId: affiliateLink.id,
-          },
-        });
-
-        console.log(
-          "[PlanPurchaseAffiliate] User created and linked to affiliate:",
-          user.id
+      // REJECT if user doesn't exist - user must be signed up first
+      if (!user) {
+        console.error(
+          "[PlanPurchaseAffiliate] User not found. User must be registered before subscribing:",
+          email
         );
+        throw new Error(
+          "User not found. Please sign up first before making a payment."
+        );
+      }
 
-        isNewUser = true;
+      // REJECT if user is not verified
+      if (!user.verified) {
+        console.error(
+          "[PlanPurchaseAffiliate] User not verified. User must verify email before subscribing:",
+          email
+        );
+        throw new Error(
+          "User email not verified. Please verify your email before making a payment."
+        );
+      }
+
+      console.log("[PlanPurchaseAffiliate] User found and verified:", user.id);
+
+      // 2. Update existing user's plan
+      const userPlan = this.mapPlanType(planType);
+
+      // Calculate trial period - ALWAYS override existing trial dates
+      const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+        frequency,
+        frequencyInterval || 1
+      );
+      const trialDates = calculateTrialDates(trialPeriod);
+
+      // Prepare update data - ALWAYS set trial dates
+      const updateData: any = {
+        plan: userPlan,
+        trialStartDate: trialDates.trialStartDate,
+        trialEndDate: trialDates.trialEndDate,
+      };
+
+      // Only set referralLinkUsedId if not already set (preserve original referral)
+      if (!user.referralLinkUsedId) {
+        updateData.referralLinkUsedId = affiliateLink.id;
+        console.log("[PlanPurchaseAffiliate] Setting referral link for user");
       } else {
-        console.log("[PlanPurchaseAffiliate] User already exists:", user.id);
-      }
-
-      // 4. Generate password reset token for new users
-      if (isNewUser) {
-        const passwordResetToken = crypto.randomBytes(32).toString("hex");
-        const passwordResetExpiresAt = new Date(
-          Date.now() + 24 * 60 * 60 * 1000
-        ); // 24 hours
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            passwordResetToken,
-            passwordResetExpiresAt,
-          },
-        });
-
         console.log(
-          "[PlanPurchaseAffiliate] Password reset token generated for user:",
-          user.id
+          "[PlanPurchaseAffiliate] User already has referral link, preserving original"
         );
-
-        // 5. Send password setup email
-        try {
-          await sendSetPasswordEmail(
-            user.email,
-            user.firstName,
-            passwordResetToken
-          );
-          console.log(
-            "[PlanPurchaseAffiliate] Password setup email sent to:",
-            user.email
-          );
-        } catch (emailError) {
-          console.error(
-            "[PlanPurchaseAffiliate] Failed to send password setup email:",
-            emailError
-          );
-          // Continue processing even if email fails
-        }
       }
 
-      // 6. Get affiliate owner for commission calculation
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: updateData,
+      });
+
+      console.log("[PlanPurchaseAffiliate] Updated user plan:", {
+        userId: user.id,
+        newPlan: userPlan,
+        referralLinkSet: !!updateData.referralLinkUsedId,
+      });
+
+      // 3. Get affiliate owner for commission calculation
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateLink.userId },
         select: {
@@ -225,8 +210,7 @@ export class PlanPurchaseWithAffiliateProcessor {
           level1AffiliateAmount: commissionAmount, // Keep for backward compatibility
           affiliatePaid: false, // Keep for backward compatibility
           commissionAmount, // NEW: Commission amount
-          commissionStatus:
-            commissionAmount > 0 ? "PENDING" : null, // NEW: On hold if commission exists
+          commissionStatus: commissionAmount > 0 ? "PENDING" : null, // NEW: On hold if commission exists
           commissionHeldUntil:
             commissionAmount > 0 ? commissionHeldUntil : null, // NEW: Release date
           rawData: webhookData as any,
@@ -243,11 +227,7 @@ export class PlanPurchaseWithAffiliateProcessor {
       const intervalUnit = FrequencyConverter.convertToIntervalUnit(frequency);
       const intervalCount = frequencyInterval || 1;
 
-      // Calculate end date based on frequency
-      const trialPeriod = FrequencyConverter.convertToTrialPeriod(
-        frequency,
-        intervalCount
-      );
+      // Calculate end date based on frequency (reuse trialDates from above)
       const endsAt = TrialPeriodCalculator.calculateEndDate(
         startsAt,
         trialPeriod
@@ -399,9 +379,8 @@ export class PlanPurchaseWithAffiliateProcessor {
 
       return {
         success: true,
-        message: isNewUser
-          ? "New user created with affiliate link, payment recorded, and subscription activated"
-          : "Payment recorded and subscription activated for existing user with affiliate tracking",
+        message:
+          "Payment recorded and subscription activated for existing user with affiliate tracking",
         userId: user.id,
         paymentId: payment.id,
         subscriptionId: subscription.id,

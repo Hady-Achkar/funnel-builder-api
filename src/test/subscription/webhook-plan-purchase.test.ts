@@ -96,7 +96,19 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
   describe("Agency User Plan Purchase", () => {
     it("should create agency user with subscription, payment, and send set password email", async () => {
-      // Arrange
+      // Arrange - Create verified user first
+      const user = await prisma.user.create({
+        data: {
+          email: "john.agency@test.com",
+          username: "johnagency",
+          firstName: "John",
+          lastName: "Agency",
+          password: "hashed_password",
+          verified: true, // Must be verified
+          plan: UserPlan.FREE, // Will be upgraded to AGENCY
+        },
+      });
+
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
         status: "captured",
@@ -147,29 +159,25 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.data?.paymentId).toBeDefined();
       expect(response.data?.subscriptionId).toBeDefined();
 
-      // Assert - User Created with correct data
-      const user = await prisma.user.findUnique({
+      // Assert - User Updated with correct data
+      const updatedUser = await prisma.user.findUnique({
         where: { email: "john.agency@test.com" },
       });
 
-      expect(user).toBeDefined();
-      expect(user?.firstName).toBe("John");
-      expect(user?.lastName).toBe("Agency");
-      expect(user?.email).toBe("john.agency@test.com");
-      expect(user?.plan).toBe(UserPlan.AGENCY);
-      expect(user?.verified).toBe(false); // Not verified yet
-      expect(user?.verificationToken).toBeDefined(); // Token generated
-      expect(user?.verificationTokenExpiresAt).toBeDefined();
-      expect(user?.passwordResetToken).toBeDefined(); // Set password token generated
-      expect(user?.passwordResetExpiresAt).toBeDefined();
-      expect(user?.isAdmin).toBe(false);
-      expect(user?.trialStartDate).toBeDefined();
-      expect(user?.trialEndDate).toBeDefined();
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser?.firstName).toBe("John");
+      expect(updatedUser?.lastName).toBe("Agency");
+      expect(updatedUser?.email).toBe("john.agency@test.com");
+      expect(updatedUser?.plan).toBe(UserPlan.AGENCY);
+      expect(updatedUser?.verified).toBe(true); // Still verified
+      expect(updatedUser?.isAdmin).toBe(false);
+      expect(updatedUser?.trialStartDate).toBeDefined();
+      expect(updatedUser?.trialEndDate).toBeDefined();
 
       // Assert - Payment Created with correct fields
       const payment = await prisma.payment.findFirst({
         where: {
-          buyerId: user?.id,
+          buyerId: updatedUser?.id,
           transactionId: "PAY-AGENCY-TEST-001",
         },
       });
@@ -181,7 +189,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(payment?.status).toBe("captured");
       expect(payment?.itemType).toBe(UserPlan.AGENCY);
       expect(payment?.paymentType).toBe("PLAN_PURCHASE");
-      expect(payment?.buyerId).toBe(user?.id);
+      expect(payment?.buyerId).toBe(updatedUser?.id);
       expect(payment?.affiliateLinkId).toBeNull(); // No affiliate
       expect(payment?.workspaceId).toBeNull(); // No workspace for plan purchase
       expect(payment?.addOnId).toBeNull(); // No add-on
@@ -194,7 +202,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       // Assert - Subscription Created with correct fields
       const subscription = await prisma.subscription.findFirst({
         where: {
-          userId: user?.id,
+          userId: updatedUser?.id,
           subscriptionId: "SUB-AGENCY-001",
         },
       });
@@ -218,18 +226,22 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       );
       expect(daysDiff).toBeGreaterThanOrEqual(28); // At least 28 days
       expect(daysDiff).toBeLessThanOrEqual(31); // At most 31 days
-
-      // Assert - Set Password Email Sent
-      expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
-      expect(sendSetPasswordEmail).toHaveBeenCalledWith(
-        "john.agency@test.com",
-        "John",
-        user?.passwordResetToken
-      );
     });
 
     it("should create agency user with annual subscription", async () => {
-      // Arrange
+      // Arrange - Create verified user first
+      const user = await prisma.user.create({
+        data: {
+          email: "annual.agency@test.com",
+          username: "annualagency",
+          firstName: "Annual",
+          lastName: "Agency",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
         status: "captured",
@@ -276,13 +288,13 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       // Assert
       expect(response.received).toBe(true);
 
-      const user = await prisma.user.findUnique({
+      const updatedUser = await prisma.user.findUnique({
         where: { email: "annual.agency@test.com" },
       });
-      expect(user?.plan).toBe(UserPlan.AGENCY);
+      expect(updatedUser?.plan).toBe(UserPlan.AGENCY);
 
       const subscription = await prisma.subscription.findFirst({
-        where: { userId: user?.id },
+        where: { userId: updatedUser?.id },
       });
 
       expect(subscription?.intervalUnit).toBe("YEAR");
@@ -296,15 +308,24 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       );
       expect(daysDiff).toBeGreaterThanOrEqual(365);
       expect(daysDiff).toBeLessThanOrEqual(366);
-
-      // Verify 2 emails sent
-      expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Business User Plan Purchase", () => {
     it("should create business user with subscription, payment, and send set password email", async () => {
-      // Arrange
+      // Arrange - Create verified user first
+      const user = await prisma.user.create({
+        data: {
+          email: "jane.business@test.com",
+          username: "janebusiness",
+          firstName: "Jane",
+          lastName: "Business",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
         status: "captured",
@@ -355,22 +376,20 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.data?.paymentId).toBeDefined();
       expect(response.data?.subscriptionId).toBeDefined();
 
-      // Assert - User Created
-      const user = await prisma.user.findUnique({
+      // Assert - User Updated
+      const updatedUser = await prisma.user.findUnique({
         where: { email: "jane.business@test.com" },
       });
 
-      expect(user).toBeDefined();
-      expect(user?.firstName).toBe("Jane");
-      expect(user?.lastName).toBe("Business");
-      expect(user?.plan).toBe(UserPlan.BUSINESS);
-      expect(user?.verified).toBe(false);
-      expect(user?.verificationToken).toBeDefined();
-      expect(user?.passwordResetToken).toBeDefined();
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser?.firstName).toBe("Jane");
+      expect(updatedUser?.lastName).toBe("Business");
+      expect(updatedUser?.plan).toBe(UserPlan.BUSINESS);
+      expect(updatedUser?.verified).toBe(true);
 
       // Assert - Payment Created
       const payment = await prisma.payment.findFirst({
-        where: { buyerId: user?.id },
+        where: { buyerId: updatedUser?.id },
       });
 
       expect(payment?.amount).toBe(199.99);
@@ -381,24 +400,28 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       // Assert - Subscription Created
       const subscription = await prisma.subscription.findFirst({
-        where: { userId: user?.id },
+        where: { userId: updatedUser?.id },
       });
 
       expect(subscription?.subscriptionType).toBe(UserPlan.BUSINESS);
       expect(subscription?.status).toBe("ACTIVE");
       expect(subscription?.intervalUnit).toBe("MONTH");
-
-      // Assert - Set Password Email Sent
-      expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
-      expect(sendSetPasswordEmail).toHaveBeenCalledWith(
-        "jane.business@test.com",
-        "Jane",
-        user?.passwordResetToken
-      );
     });
 
     it("should create business user with annual subscription", async () => {
-      // Arrange
+      // Arrange - Create verified user first
+      const user = await prisma.user.create({
+        data: {
+          email: "annual.business@test.com",
+          username: "annualbusiness",
+          firstName: "Annual",
+          lastName: "Business",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
       const mockWebhookPayload = {
         event_type: "charge.succeeded",
         status: "captured",
@@ -445,20 +468,17 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       // Assert
       expect(response.received).toBe(true);
 
-      const user = await prisma.user.findUnique({
+      const updatedUser = await prisma.user.findUnique({
         where: { email: "annual.business@test.com" },
       });
-      expect(user?.plan).toBe(UserPlan.BUSINESS);
+      expect(updatedUser?.plan).toBe(UserPlan.BUSINESS);
 
       const subscription = await prisma.subscription.findFirst({
-        where: { userId: user?.id },
+        where: { userId: updatedUser?.id },
       });
 
       expect(subscription?.intervalUnit).toBe("YEAR");
       expect(subscription?.intervalCount).toBe(1);
-
-      // Verify 2 emails sent
-      expect(sendSetPasswordEmail).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -551,7 +571,20 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
     });
 
     it("should not process duplicate payment (same transaction ID)", async () => {
-      // Arrange - First payment
+      // Arrange - Create verified user first
+      const user = await prisma.user.create({
+        data: {
+          email: "unique1@test.com",
+          username: "unique1",
+          firstName: "First",
+          lastName: "User",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
+      // First payment
       const firstWebhook = {
         event_type: "charge.succeeded",
         status: "captured",
@@ -620,9 +653,6 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         where: { email: "unique2@test.com" },
       });
       expect(user2).toBeNull();
-
-      // Verify no emails sent for duplicate
-      expect(sendSetPasswordEmail).not.toHaveBeenCalled();
 
       // Verify only one payment exists
       const payments = await prisma.payment.findMany({
@@ -841,10 +871,20 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   });
 
   describe("Edge Cases - Email Service Failure", () => {
-    // Test removed: verification email now sent directly via sgMail in service, not testable this way
-
     it("should handle set password email failure gracefully", async () => {
-      // Arrange
+      // Arrange - Create verified user first (no email should be sent now)
+      const user = await prisma.user.create({
+        data: {
+          email: "pwdfail@test.com",
+          username: "pwdfail",
+          firstName: "Password",
+          lastName: "Fail",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
       vi.mocked(sendSetPasswordEmail).mockRejectedValue(
         new Error("Email service unavailable")
       );
@@ -893,14 +933,14 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       // Assert - Still processes successfully
       expect(response.received).toBe(true);
 
-      const user = await prisma.user.findUnique({
+      const updatedUser = await prisma.user.findUnique({
         where: { email: "pwdfail@test.com" },
       });
-      expect(user).toBeDefined();
-      expect(user?.passwordResetToken).toBeDefined(); // Token still generated
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser?.plan).toBe(UserPlan.BUSINESS);
 
-      // Verify email was attempted
-      expect(sendSetPasswordEmail).toHaveBeenCalled();
+      // No email should be sent since user already exists and is verified
+      expect(sendSetPasswordEmail).not.toHaveBeenCalled();
     });
   });
 
@@ -1008,6 +1048,364 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         where: { userId: existingUser.id },
       });
       expect(subscriptions).toHaveLength(1);
+    });
+  });
+
+  describe("Existing User Scenarios", () => {
+    it("should link subscription to existing verified user and update plan", async () => {
+      // Arrange - Create existing verified user
+      const existingEmail = `existing-${Date.now()}@example.com`;
+      const existingUser = await prisma.user.create({
+        data: {
+          email: existingEmail,
+          username: `existing${Date.now()}`,
+          firstName: "Existing",
+          lastName: "User",
+          password: "hashed-password",
+          plan: UserPlan.FREE,
+          verified: true,
+        },
+      });
+
+      const mockWebhookPayload = {
+        id: `txn_existing_user_${Date.now()}`,
+        event_type: "charge.succeeded",
+        status: "captured",
+        amount: 199.0,
+        amount_currency: "USD",
+        subscription_id: `sub_existing_${Date.now()}`,
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: existingEmail,
+            firstName: "Existing",
+            lastName: "User",
+            planType: "AGENCY",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "annually",
+            frequencyInterval: 1,
+            trialDays: 0,
+          },
+          userId: existingUser.id, // Include userId from logged-in user
+        },
+        customer_details: {
+          name: "Existing User",
+          email: existingEmail,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "Existing User",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act
+      const result = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert
+      expect(result.received).toBe(true);
+      // Note: result.message comes from processor and may vary
+
+      // Verify user was updated, not created new
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: existingUser.id },
+      });
+      expect(updatedUser?.plan).toBe(UserPlan.AGENCY);
+      expect(updatedUser?.verified).toBe(true);
+
+      // Verify subscription was created for existing user
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: existingUser.id },
+      });
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriptionType).toBe(UserPlan.AGENCY);
+
+      // Verify payment was created
+      const payment = await prisma.payment.findFirst({
+        where: { buyerId: existingUser.id },
+      });
+      expect(payment).toBeDefined();
+
+      // Verify only one user exists with this email
+      const users = await prisma.user.findMany({
+        where: { email: existingEmail },
+      });
+      expect(users).toHaveLength(1);
+    });
+
+    it("should verify unverified user when they make payment", async () => {
+      // Arrange - Create unverified user
+      const unverifiedEmail = `unverified-${Date.now()}@example.com`;
+      const unverifiedUser = await prisma.user.create({
+        data: {
+          email: unverifiedEmail,
+          username: `unverified${Date.now()}`,
+          firstName: "Unverified",
+          lastName: "User",
+          password: "hashed-password",
+          plan: UserPlan.FREE,
+          verified: false, // NOT verified
+        },
+      });
+
+      const mockWebhookPayload = {
+        id: `txn_unverified_${Date.now()}`,
+        event_type: "charge.succeeded",
+        status: "captured",
+        amount: 99.0,
+        amount_currency: "USD",
+        subscription_id: `sub_unverified_${Date.now()}`,
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: unverifiedEmail,
+            firstName: "Unverified",
+            lastName: "User",
+            planType: "BUSINESS",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 14,
+          },
+          userId: unverifiedUser.id,
+        },
+        customer_details: {
+          name: "Unverified User",
+          email: unverifiedEmail,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "Unverified User",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act & Assert - Should reject unverified user
+      await expect(
+        PaymentWebhookService.processWebhook(mockWebhookPayload)
+      ).rejects.toThrow("User email not verified");
+
+      // Verify user was NOT upgraded or verified
+      const stillUnverifiedUser = await prisma.user.findUnique({
+        where: { id: unverifiedUser.id },
+      });
+      expect(stillUnverifiedUser?.verified).toBe(false);
+      expect(stillUnverifiedUser?.plan).toBe(UserPlan.FREE);
+
+      // Verify no payment or subscription was created
+      const payment = await prisma.payment.findFirst({
+        where: { buyerId: unverifiedUser.id },
+      });
+      expect(payment).toBeNull();
+
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: unverifiedUser.id },
+      });
+      expect(subscription).toBeNull();
+    });
+
+    it("should use userId for lookup when provided and validate email match", async () => {
+      // Arrange
+      const userEmail = `user-lookup-${Date.now()}@example.com`;
+      const user = await prisma.user.create({
+        data: {
+          email: userEmail,
+          username: `userlookup${Date.now()}`,
+          firstName: "User",
+          lastName: "Lookup",
+          password: "hashed-password",
+          plan: UserPlan.FREE,
+          verified: true,
+        },
+      });
+
+      const mockWebhookPayload = {
+        id: `txn_lookup_${Date.now()}`,
+        event_type: "charge.succeeded",
+        status: "captured",
+        amount: 99.0,
+        amount_currency: "USD",
+        subscription_id: `sub_lookup_${Date.now()}`,
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: userEmail,
+            firstName: "User",
+            lastName: "Lookup",
+            planType: "BUSINESS",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 0,
+          },
+          userId: user.id, // Provide userId
+        },
+        customer_details: {
+          name: "User Lookup",
+          email: userEmail,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "User Lookup",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act
+      const result = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert - Should succeed
+      expect(result.received).toBe(true);
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: user.id },
+      });
+      expect(subscription).toBeDefined();
+    });
+
+    it("should reject payment if userId and email don't match (security check)", async () => {
+      // Arrange
+      const user1 = await prisma.user.create({
+        data: {
+          email: `user1-${Date.now()}@example.com`,
+          username: `user1${Date.now()}`,
+          firstName: "User",
+          lastName: "One",
+          password: "hashed-password",
+          plan: UserPlan.FREE,
+          verified: true,
+        },
+      });
+
+      const user2Email = `user2-${Date.now()}@example.com`;
+
+      const mockWebhookPayload = {
+        id: `txn_mismatch_${Date.now()}`,
+        event_type: "charge.succeeded",
+        status: "captured",
+        amount: 99.0,
+        amount_currency: "USD",
+        subscription_id: `sub_mismatch_${Date.now()}`,
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: user2Email, // Different email
+            firstName: "User",
+            lastName: "Two",
+            planType: "BUSINESS",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 0,
+          },
+          userId: user1.id, // But user1's ID
+        },
+        customer_details: {
+          name: "User Two",
+          email: user2Email,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "User Two",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act & Assert - Should throw security error
+      await expect(
+        PaymentWebhookService.processWebhook(mockWebhookPayload)
+      ).rejects.toThrow("Security validation failed");
+    });
+
+    it("should fallback to email lookup if userId not provided", async () => {
+      // Arrange
+      const existingEmail = `fallback-${Date.now()}@example.com`;
+      const existingUser = await prisma.user.create({
+        data: {
+          email: existingEmail,
+          username: `fallback${Date.now()}`,
+          firstName: "Fallback",
+          lastName: "User",
+          password: "hashed-password",
+          plan: UserPlan.FREE,
+          verified: true,
+        },
+      });
+
+      const mockWebhookPayload = {
+        id: `txn_fallback_${Date.now()}`,
+        event_type: "charge.succeeded",
+        status: "captured",
+        amount: 199.0,
+        amount_currency: "USD",
+        subscription_id: `sub_fallback_${Date.now()}`,
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: existingEmail,
+            firstName: "Fallback",
+            lastName: "User",
+            planType: "AGENCY",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "annually",
+            frequencyInterval: 1,
+            trialDays: 0,
+          },
+          // No userId provided - should use email
+        },
+        customer_details: {
+          name: "Fallback User",
+          email: existingEmail,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "Fallback User",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act
+      const result = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert
+      expect(result.received).toBe(true);
+
+      // Verify subscription linked to existing user
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: existingUser.id },
+      });
+      expect(subscription).toBeDefined();
+
+      // Verify no duplicate user created
+      const users = await prisma.user.findMany({
+        where: { email: existingEmail },
+      });
+      expect(users).toHaveLength(1);
     });
   });
 });

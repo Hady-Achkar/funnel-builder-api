@@ -21,9 +21,17 @@ interface WorkspaceData {
   slug: string;
 }
 
+// Type for user data from authenticated token
+interface UserData {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 export class CreatePaymentLinkService {
   static async createPaymentLink(
     data: CreatePaymentLinkRequest,
+    userData: UserData,
     affiliateData: AffiliateData | null,
     workspaceData: WorkspaceData | null
   ): Promise<CreatePaymentLinkResponse> {
@@ -44,9 +52,9 @@ export class CreatePaymentLinkService {
       const customData: any = {
         // Object 1: All buyer and payment details
         details: {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
           planType: data.planType,
           paymentType: data.paymentType,
           frequency: data.frequency,
@@ -103,7 +111,10 @@ export class CreatePaymentLinkService {
       // 5. CALL MAMOPAY API
       const mamoPayApiUrl = `${process.env.MAMOPAY_API_URL}/manage_api/v1/links`;
 
-      console.log("[CreatePaymentLink] Sending to MamoPay:", JSON.stringify(mamoPayPayload, null, 2));
+      console.log(
+        "[CreatePaymentLink] Sending to MamoPay:",
+        JSON.stringify(mamoPayPayload, null, 2)
+      );
 
       const response = await fetch(mamoPayApiUrl, {
         method: "POST",

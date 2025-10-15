@@ -2,11 +2,7 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const createPaymentLinkRequest = z.object({
-  // Required fields
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Must be a valid email address"),
-
+  // Required fields - user details now come from auth token
   paymentType: z.nativeEnum($Enums.PaymentType),
   planType: z.nativeEnum($Enums.UserPlan),
 

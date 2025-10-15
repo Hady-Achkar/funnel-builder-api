@@ -20,6 +20,30 @@ export class CreatePaymentLinkController {
       const prisma = getPrisma();
       const userId = req.userId!; // Guaranteed by authenticateToken middleware
 
+      // 2. FETCH USER DATA from authenticated token
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          email: true,
+          firstName: true,
+          lastName: true,
+          verified: true,
+        },
+      });
+
+      if (!user) {
+        return next(new BadRequestError("User not found. Please login again."));
+      }
+
+      // 2a. REJECT if user is not verified
+      if (!user.verified) {
+        return next(
+          new BadRequestError(
+            "Please verify your email address before creating a payment link. Check your inbox for the verification email."
+          )
+        );
+      }
+
       // 3. PROCESS AFFILIATE TOKEN (if provided)
       let affiliateData = null;
       let workspaceData = null;
@@ -122,6 +146,11 @@ export class CreatePaymentLinkController {
       // 4. CALL SERVICE with processed data
       const result = await CreatePaymentLinkService.createPaymentLink(
         validatedData,
+        {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
         affiliateData,
         workspaceData
       );

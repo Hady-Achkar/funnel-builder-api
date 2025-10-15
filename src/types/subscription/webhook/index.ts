@@ -69,13 +69,16 @@ export const PaymentWebhookRequest = z.object({
   // Custom data with details, optional affiliate link, and optional workspace
   custom_data: z.object({
     details: WebhookPaymentDetails,
+    userId: z.number().optional(), // User ID from logged-in user creating payment link
     affiliateLink: WebhookAffiliateLink.optional(),
-    workspace: z.object({
-      id: z.number(),
-      name: z.string(),
-      slug: z.string(),
-      sellerId: z.number(),
-    }).optional(),
+    workspace: z
+      .object({
+        id: z.number(),
+        name: z.string(),
+        slug: z.string(),
+        sellerId: z.number(),
+      })
+      .optional(),
   }),
 
   // Additional fields

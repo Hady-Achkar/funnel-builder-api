@@ -44,11 +44,18 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
   let businessAffiliateToken: string;
 
   // Mock Express request and response
-  const mockRequest = (body: any, userId?: number): Partial<Request> =>
-    ({
+  const mockRequest = (body: any, userId?: number): Partial<Request> => {
+    const req: any = {
       body,
-      userId,
-    } as any);
+    };
+
+    // Set userId if provided (simulates authenticateToken middleware)
+    if (userId !== undefined) {
+      req.userId = userId;
+    }
+
+    return req;
+  };
 
   const mockResponse = (): Partial<Response> => {
     const res: Partial<Response> = {};
@@ -203,9 +210,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const buyerEmail = `buyer-plan-${Date.now()}@example.com`;
         const req = mockRequest(
           {
-            firstName: "John",
-            lastName: "Doe",
-            email: buyerEmail,
+            // User details now come from auth token, not request body
             paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Business Plan - Monthly",
@@ -223,23 +228,20 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const res = mockResponse();
 
         // Mock MamoPay API response
-        global.fetch = vi.fn().mockResolvedValue(
-          {
-            ok: true,
-            json: async () => ({
-              id: "mamopay_link_123",
-              link_url: "https://mamopay.com/pay/abc123",
-              payment_url: "https://mamopay.com/checkout/abc123",
-              title: "Business Plan - Monthly",
-              description: "Full access to business features",
-              amount: 99.99,
-              amount_currency: "USD",
-              active: true,
-              created_date: new Date().toISOString(),
-            }),
-          },
-          testSellerId
-        );
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_link_123",
+            link_url: "https://mamopay.com/pay/abc123",
+            payment_url: "https://mamopay.com/checkout/abc123",
+            title: "Business Plan - Monthly",
+            description: "Full access to business features",
+            amount: 99.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
 
         // Act
         await CreatePaymentLinkController.createPaymentLink(
@@ -254,35 +256,32 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         const responseData = (res.json as any).mock.calls[0][0];
         expect(responseData.message).toBe("Payment link created successfully");
-        expect(responseData.paymentLink).toMatchObject(
-          {
-            url: "https://mamopay.com/pay/abc123",
-            amount: 99.99,
-            frequency: "monthly",
-            frequencyInterval: 1,
-            trialPeriodDays: 14,
-            planType: "BUSINESS",
-          },
-          testSellerId
-        );
+        expect(responseData.paymentLink).toMatchObject({
+          url: "https://mamopay.com/pay/abc123",
+          amount: 99.99,
+          frequency: "monthly",
+          frequencyInterval: 1,
+          trialPeriodDays: 14,
+          planType: "BUSINESS",
+        });
 
         // Verify MamoPay was called with correct custom_data structure
         const mamoPayCall = (global.fetch as any).mock.calls[0];
         const payload = JSON.parse(mamoPayCall[1].body);
 
-        expect(payload.custom_data.details).toMatchObject(
-          {
-            firstName: "John",
-            lastName: "Doe",
-            email: buyerEmail,
-            planType: "BUSINESS",
-            paymentType: "PLAN_PURCHASE",
-            frequency: "monthly",
-            frequencyInterval: 1,
-            trialDays: 14,
-          },
-          testSellerId
-        );
+        expect(payload.custom_data.details).toMatchObject({
+          firstName: "Test", // From authenticated user
+          lastName: "Seller", // From authenticated user
+          // email will be seller's email from auth token
+          planType: "BUSINESS",
+          paymentType: "PLAN_PURCHASE",
+          frequency: "monthly",
+          frequencyInterval: 1,
+          trialDays: 14,
+        });
+
+        // Verify email comes from authenticated user
+        expect(payload.custom_data.details.email).toContain("seller-");
 
         // Should NOT have affiliate data
         expect(payload.custom_data.affiliateLink).toBeUndefined();
@@ -298,9 +297,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         // Arrange
         const req = mockRequest(
           {
-            firstName: "Jane",
-            lastName: "Smith",
-            email: `buyer-defaults-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "PLAN_PURCHASE",
             planType: "AGENCY",
             planTitle: "Agency Plan",
@@ -315,23 +312,20 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         );
         const res = mockResponse();
 
-        global.fetch = vi.fn().mockResolvedValue(
-          {
-            ok: true,
-            json: async () => ({
-              id: "mamopay_defaults",
-              link_url: "https://mamopay.com/pay/defaults",
-              payment_url: "https://mamopay.com/checkout/defaults",
-              title: "Agency Plan",
-              description: "Premium features",
-              amount: 199.99,
-              amount_currency: "USD",
-              active: true,
-              created_date: new Date().toISOString(),
-            }),
-          },
-          testSellerId
-        );
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_defaults",
+            link_url: "https://mamopay.com/pay/defaults",
+            payment_url: "https://mamopay.com/checkout/defaults",
+            title: "Agency Plan",
+            description: "Premium features",
+            amount: 199.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
 
         // Act
         await CreatePaymentLinkController.createPaymentLink(
@@ -342,24 +336,18 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         // Assert
         const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
-        expect(payload.custom_data.details).toMatchObject(
-          {
-            frequency: "monthly", // Default
-            frequencyInterval: 1, // Default
-            trialDays: 0, // Default
-          },
-          testSellerId
-        );
+        expect(payload.custom_data.details).toMatchObject({
+          frequency: "monthly", // Default
+          frequencyInterval: 1, // Default
+          trialDays: 0, // Default
+        });
 
         const responseData = (res.json as any).mock.calls[0][0];
-        expect(responseData.paymentLink).toMatchObject(
-          {
-            frequency: "monthly",
-            frequencyInterval: 1,
-            trialPeriodDays: 0,
-          },
-          testSellerId
-        );
+        expect(responseData.paymentLink).toMatchObject({
+          frequency: "monthly",
+          frequencyInterval: 1,
+          trialPeriodDays: 0,
+        });
       });
     },
     testSellerId
@@ -372,9 +360,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         // Arrange
         const req = mockRequest(
           {
-            firstName: "Bob",
-            lastName: "Johnson",
-            email: `buyer-affiliate-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Business Plan",
@@ -389,23 +375,20 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         );
         const res = mockResponse();
 
-        global.fetch = vi.fn().mockResolvedValue(
-          {
-            ok: true,
-            json: async () => ({
-              id: "mamopay_affiliate",
-              link_url: "https://mamopay.com/pay/affiliate",
-              payment_url: "https://mamopay.com/checkout/affiliate",
-              title: "Business Plan",
-              description: "Via affiliate",
-              amount: 149.99,
-              amount_currency: "USD",
-              active: true,
-              created_date: new Date().toISOString(),
-            }),
-          },
-          testSellerId
-        );
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_affiliate",
+            link_url: "https://mamopay.com/pay/affiliate",
+            payment_url: "https://mamopay.com/checkout/affiliate",
+            title: "Business Plan",
+            description: "Via affiliate",
+            amount: 149.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
 
         // Act
         await CreatePaymentLinkController.createPaymentLink(
@@ -418,16 +401,13 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
 
         // Verify affiliate data structure
-        expect(payload.custom_data.affiliateLink).toMatchObject(
-          {
-            id: testAffiliateLinkId,
-            token: testAffiliateToken,
-            itemType: "AGENCY",
-            userId: testSellerId,
-            commissionPercentage: 15, // From JWT
-          },
-          testSellerId
-        );
+        expect(payload.custom_data.affiliateLink).toMatchObject({
+          id: testAffiliateLinkId,
+          token: testAffiliateToken,
+          itemType: "AGENCY",
+          userId: testSellerId,
+          commissionPercentage: 15, // From JWT
+        });
 
         // Verify OLD field is NOT present
         expect(
@@ -453,9 +433,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         // Arrange
         const req = mockRequest(
           {
-            firstName: "Emma",
-            lastName: "Brown",
-            email: `buyer-workspace-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "WORKSPACE_PURCHASE",
             planType: "AGENCY",
             planTitle: "Agency Workspace",
@@ -470,23 +448,20 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         );
         const res = mockResponse();
 
-        global.fetch = vi.fn().mockResolvedValue(
-          {
-            ok: true,
-            json: async () => ({
-              id: "mamopay_workspace",
-              link_url: "https://mamopay.com/pay/workspace",
-              payment_url: "https://mamopay.com/checkout/workspace",
-              title: "Agency Workspace",
-              description: "Complete workspace purchase",
-              amount: 299.99,
-              amount_currency: "USD",
-              active: true,
-              created_date: new Date().toISOString(),
-            }),
-          },
-          testSellerId
-        );
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_workspace",
+            link_url: "https://mamopay.com/pay/workspace",
+            payment_url: "https://mamopay.com/checkout/workspace",
+            title: "Agency Workspace",
+            description: "Complete workspace purchase",
+            amount: 299.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
 
         // Act
         await CreatePaymentLinkController.createPaymentLink(
@@ -501,35 +476,27 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
 
         // Verify workspace data in details
-        expect(payload.custom_data.details).toMatchObject(
-          {
-            firstName: "Emma",
-            lastName: "Brown",
-            paymentType: "WORKSPACE_PURCHASE",
-            planType: "AGENCY",
-            workspaceId: testAgencyWorkspaceId,
-            workspaceName: "Premium Agency Workspace",
-          },
-          testSellerId
-        );
+        expect(payload.custom_data.details).toMatchObject({
+          firstName: "Test", // From authenticated user
+          lastName: "Seller", // From authenticated user
+          paymentType: "WORKSPACE_PURCHASE",
+          planType: "AGENCY",
+          workspaceId: testAgencyWorkspaceId,
+          workspaceName: "Premium Agency Workspace",
+        });
 
         // Verify workspace in affiliate data
-        expect(payload.custom_data.affiliateLink).toMatchObject(
-          {
-            workspaceId: testAgencyWorkspaceId,
-            commissionPercentage: 15,
-          },
-          testSellerId
-        );
+        expect(payload.custom_data.affiliateLink).toMatchObject({
+          workspaceId: testAgencyWorkspaceId,
+          commissionPercentage: 15,
+        });
       });
 
       it("should only allow AGENCY workspaces for WORKSPACE_PURCHASE", async () => {
         // Arrange - Try to use BUSINESS workspace token
         const req = mockRequest(
           {
-            firstName: "Test",
-            lastName: "User",
-            email: `buyer-business-reject-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "WORKSPACE_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Business Workspace",
@@ -561,21 +528,18 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
       it("should validate workspace ownership", async () => {
         // Arrange - Create another seller
-        const otherSeller = await prisma.user.create(
-          {
-            data: {
-              email: `other-seller-${Date.now()}@example.com`,
-              username: `otherseller${Date.now()}`,
-              firstName: "Other",
-              lastName: "Seller",
-              password: "hashed-password",
-              plan: "BUSINESS",
-              verified: true,
-              commissionPercentage: 10,
-            },
+        const otherSeller = await prisma.user.create({
+          data: {
+            email: `other-seller-${Date.now()}@example.com`,
+            username: `otherseller${Date.now()}`,
+            firstName: "Other",
+            lastName: "Seller",
+            password: "hashed-password",
+            plan: "BUSINESS",
+            verified: true,
+            commissionPercentage: 10,
           },
-          testSellerId
-        );
+        });
 
         // Create fake token claiming ownership of testAgencyWorkspace
         const fakeToken = jwt.sign(
@@ -593,9 +557,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         const req = mockRequest(
           {
-            firstName: "Test",
-            lastName: "User",
-            email: `buyer-fake-owner-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "WORKSPACE_PURCHASE",
             planType: "AGENCY",
             planTitle: "Fake Ownership",
@@ -626,10 +588,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         );
 
         // Cleanup
-        await prisma.user.delete(
-          { where: { id: otherSeller.id } },
-          testSellerId
-        );
+        await prisma.user.delete({ where: { id: otherSeller.id } });
       });
     },
     testSellerId
@@ -655,9 +614,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         const req = mockRequest(
           {
-            firstName: "Existing",
-            lastName: "User",
-            email: existingEmail, // Already exists - should be allowed!
+            // User details now come from auth token (existingUser)
             paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Test",
@@ -707,9 +664,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         // Arrange
         const req = mockRequest(
           {
-            firstName: "Test",
-            lastName: "User",
-            email: `buyer-bad-token-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Test",
@@ -757,9 +712,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         const req = mockRequest(
           {
-            firstName: "Test",
-            lastName: "User",
-            email: `buyer-orphan-${Date.now()}@example.com`,
+            // User details now come from auth token
             paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Test",
@@ -798,9 +751,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       // Arrange
       const req = mockRequest(
         {
-          firstName: "Test",
-          lastName: "User",
-          email: `buyer-mamopay-error-${Date.now()}@example.com`,
+          // User details now come from auth token
           paymentType: "PLAN_PURCHASE",
           planType: "BUSINESS",
           planTitle: "Test",
@@ -816,14 +767,11 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       const next = vi.fn();
 
       // Mock MamoPay API failure
-      global.fetch = vi.fn().mockResolvedValue(
-        {
-          ok: false,
-          status: 500,
-          text: async () => "MamoPay internal error",
-        },
-        testSellerId
-      );
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => "MamoPay internal error",
+      });
 
       // Act
       await CreatePaymentLinkController.createPaymentLink(
