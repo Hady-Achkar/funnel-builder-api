@@ -3,6 +3,7 @@ import { CreateWorkspaceService } from "../../services/workspace/create";
 import { getPrisma } from "../../lib/prisma";
 import { BadRequestError } from "../../errors/http-errors";
 import { UserPlan, AddOnStatus } from "../../generated/prisma-client";
+import * as createARecordModule from "../../services/domain/create-subdomain/utils/create-a-record";
 
 // Mock the prisma client
 vi.mock("../../lib/prisma");
@@ -804,19 +805,15 @@ describe("Workspace Creation Tests", () => {
 
       await CreateWorkspaceService.create(userId, workspaceData);
 
-      // Verify domain.create was called with correct data
-      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          hostname: "my-workspace.digitalsite.com",
-          type: "SUBDOMAIN",
-          status: "ACTIVE",
-          sslStatus: "ACTIVE",
-          workspaceId: 1,
-          createdBy: userId,
-          cloudflareRecordId: "mock-cloudflare-record-id",
-          cloudflareZoneId: "test-zone-id",
-        }),
-      });
+      // Verify domain.create was NOT called (subdomain DNS is created but not stored in database)
+      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
+
+      // Verify createARecord was called to create DNS record
+      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
+        "my-workspace",
+        "test-zone-id",
+        "74.234.194.84"
+      );
     });
 
     it("should use WORKSPACE_ZONE_ID for workspace subdomains", async () => {
@@ -863,12 +860,15 @@ describe("Workspace Creation Tests", () => {
 
       await CreateWorkspaceService.create(userId, workspaceData);
 
-      // Verify the correct zone ID was used
-      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          cloudflareZoneId: "workspace-specific-zone-id",
-        }),
-      });
+      // Verify the correct zone ID was used in DNS creation
+      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
+        "test-workspace",
+        "workspace-specific-zone-id",
+        "74.234.194.84"
+      );
+
+      // Verify domain.create was NOT called
+      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
     });
 
     it("should create subdomain with workspace slug in hostname", async () => {
@@ -912,13 +912,15 @@ describe("Workspace Creation Tests", () => {
 
       await CreateWorkspaceService.create(userId, workspaceData);
 
-      // Verify hostname format
-      expect(mockPrisma.domain.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          hostname: "premium-workspace-123.digitalsite.com",
-          workspaceId: 5,
-        }),
-      });
+      // Verify DNS record was created with correct slug
+      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
+        "premium-workspace-123",
+        "test-zone-id",
+        "74.234.194.84"
+      );
+
+      // Verify domain.create was NOT called
+      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
     });
   });
 });

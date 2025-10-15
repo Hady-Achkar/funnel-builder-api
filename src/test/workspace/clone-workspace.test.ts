@@ -1223,5 +1223,65 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(workspaceSubdomain!.workspaceId).toBe(result.clonedWorkspaceId);
       expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
+
+    it("should create workspace member for new owner with OWNER role", async () => {
+      // Create a new payment for this test
+      const newPayment = await prisma.payment.create({
+        data: {
+          transactionId: `TEST-MEMBER-${Date.now()}`,
+          amount: 99.99,
+          currency: "USD",
+          status: "captured",
+          itemType: "BUSINESS",
+          paymentType: "WORKSPACE_PURCHASE",
+          buyerId: buyerUserId,
+        },
+      });
+
+      const result = await CloneWorkspaceService.cloneWorkspace({
+        sourceWorkspaceId: sourceWorkspaceId,
+        newOwnerId: buyerUserId,
+        paymentId: newPayment.transactionId,
+        planType: "BUSINESS",
+      });
+
+      // Verify workspace member was created for the new owner
+      const workspaceMember = await prisma.workspaceMember.findFirst({
+        where: {
+          workspaceId: result.clonedWorkspaceId,
+          userId: buyerUserId,
+        },
+      });
+
+      expect(workspaceMember).toBeDefined();
+      expect(workspaceMember!.role).toBe("OWNER");
+      expect(workspaceMember!.status).toBe("ACTIVE");
+
+      // Verify owner has all permissions
+      expect(workspaceMember!.permissions).toContain("MANAGE_WORKSPACE");
+      expect(workspaceMember!.permissions).toContain("MANAGE_MEMBERS");
+      expect(workspaceMember!.permissions).toContain("CREATE_FUNNELS");
+      expect(workspaceMember!.permissions).toContain("EDIT_FUNNELS");
+      expect(workspaceMember!.permissions).toContain("EDIT_PAGES");
+      expect(workspaceMember!.permissions).toContain("DELETE_FUNNELS");
+      expect(workspaceMember!.permissions).toContain("VIEW_ANALYTICS");
+      expect(workspaceMember!.permissions).toContain("MANAGE_DOMAINS");
+      expect(workspaceMember!.permissions).toContain("CREATE_DOMAINS");
+      expect(workspaceMember!.permissions).toContain("DELETE_DOMAINS");
+      expect(workspaceMember!.permissions).toContain("CONNECT_DOMAINS");
+
+      // Clean up
+      await prisma.workspaceMember.deleteMany({
+        where: { workspaceId: result.clonedWorkspaceId },
+      });
+      await prisma.workspaceClone.deleteMany({
+        where: { clonedWorkspaceId: result.clonedWorkspaceId },
+      });
+      await prisma.workspace.delete({ where: { id: result.clonedWorkspaceId } });
+      await prisma.payment.delete({ where: { id: newPayment.id } });
+
+      // Prevent afterEach from trying to delete again
+      clonedWorkspaceId = 0;
+    });
   });
 });

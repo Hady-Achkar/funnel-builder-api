@@ -10,9 +10,6 @@ import {
   WorkspacePermission,
   WorkspaceStatus,
   UserPlan,
-  DomainType,
-  DomainStatus,
-  SslStatus,
 } from "../../../generated/prisma-client";
 import { rolePermissionPresets } from "../../../types/workspace/update";
 import { cacheService } from "../../cache/cache.service";
@@ -209,8 +206,7 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 11. CREATE WORKSPACE SUBDOMAIN ON DIGITALSITE.COM
-      // Note: workspaceDomain is already defined at line 99
+      // 11. CREATE WORKSPACE SUBDOMAIN DNS RECORD ON DIGITALSITE.COM
       if (!workspaceDomain) {
         throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
       }
@@ -227,37 +223,23 @@ export class CreateWorkspaceService {
         const targetIp = "74.234.194.84";
 
         // Create A record in Cloudflare for workspace subdomain
-        const aRecord = await createARecord(result.slug, workspaceZoneId, targetIp);
-
-        // Create Domain record in database
-        await prisma.domain.create({
-          data: {
-            hostname: workspaceHostname,
-            type: DomainType.SUBDOMAIN,
-            status: DomainStatus.ACTIVE,
-            sslStatus: SslStatus.ACTIVE,
-            workspaceId: result.id,
-            createdBy: userId,
-            cloudflareRecordId: aRecord.id,
-            cloudflareZoneId: workspaceZoneId,
-            lastVerifiedAt: new Date(),
-          },
-        });
+        // This allows the workspace to be accessible at slug.digitalsite.com
+        await createARecord(result.slug, workspaceZoneId, targetIp);
 
         console.log(
-          `✅ Workspace subdomain created: ${workspaceHostname}`
+          `✅ Workspace DNS record created: ${workspaceHostname} (not stored in domains table)`
         );
       } catch (error: any) {
         const errMsg =
           error.response?.data?.errors?.[0]?.message || error.message;
         console.error(
-          `[Workspace Create] Failed to create subdomain: ${errMsg}`,
+          `[Workspace Create] Failed to create DNS record: ${errMsg}`,
           {
             stack: error.stack,
           }
         );
 
-        // Clean up: delete the workspace since subdomain creation failed
+        // Clean up: delete the workspace since DNS creation failed
         await prisma.workspace.delete({
           where: { id: result.id },
         });
