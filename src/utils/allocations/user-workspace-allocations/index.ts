@@ -7,6 +7,8 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base workspace allocations per plan
 const BASE_WORKSPACE_ALLOCATIONS: Record<UserPlan, number> = {
+  [UserPlan.NO_PLAN]: 0, // No plan: 0 workspaces
+  [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 workspaces (member of other workspaces)
   [UserPlan.FREE]: 1, // Free plan: 1 workspace
   [UserPlan.BUSINESS]: 1, // Business plan: 1 workspaces
   [UserPlan.AGENCY]: 10000, // Agency plan: 10000 workspaces

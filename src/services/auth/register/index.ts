@@ -5,7 +5,6 @@ import {
   RegisterUserResponse,
   RegisterWorkspaceResponse,
 } from "../../../types/auth/register";
-import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
 import { TrialPeriodCalculator } from "../../../utils/common-functions/trial-period";
 import bcrypt from "bcryptjs";
 import {
@@ -15,17 +14,37 @@ import {
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
 import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
 import { cacheService } from "../../cache/cache.service";
+import { RegistrationSource, UserPlan } from "../../../generated/prisma-client";
 
 export class RegisterService {
-  static async register(data: RegisterRequest): Promise<RegisterResponse> {
+  static async register(
+    data: RegisterRequest,
+    registrationSource: RegistrationSource
+  ): Promise<RegisterResponse> {
     try {
       const prisma = getPrisma();
 
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const { trialStartDate, trialEndDate } =
-        TrialPeriodCalculator.getTrialDates(data.trialPeriod);
       const verificationToken = generateVerificationToken(data);
       const verificationTokenExpiresAt = getVerificationTokenExpiry();
+
+      // Determine user plan based on registration source
+      let userPlan = data.plan || UserPlan.NO_PLAN;
+      if (registrationSource === RegistrationSource.WORKSPACE_INVITE) {
+        userPlan = UserPlan.WORKSPACE_MEMBER;
+      }
+
+      // Set trial dates for all plans except WORKSPACE_MEMBER (default: 1 year)
+      let trialStartDate: Date | undefined;
+      let trialEndDate: Date | undefined;
+      if (userPlan !== UserPlan.WORKSPACE_MEMBER) {
+        const trialDates = TrialPeriodCalculator.getTrialDates(
+          data.trialPeriod
+        );
+        trialStartDate = trialDates.trialStartDate;
+        trialEndDate = trialDates.trialEndDate;
+      }
+
       const user = await prisma.user.create({
         data: {
           email: data.email,
@@ -37,7 +56,9 @@ export class RegisterService {
           verificationToken,
           verificationTokenExpiresAt,
           isAdmin: data.isAdmin,
-          plan: data.plan,
+          plan: userPlan,
+          registrationSource,
+          // Note: referralLinkUsedId will be set after payment is completed
           trialStartDate,
           trialEndDate,
         },
@@ -77,26 +98,18 @@ export class RegisterService {
           });
 
           if (workspace) {
-            // Find pending membership
-            const pendingMember = await prisma.workspaceMember.findFirst({
-              where: {
-                email: user.email,
-                workspaceId: workspace.id,
-                status: "PENDING",
-              },
-            });
+            const isDirectLink = tokenPayload.type === "workspace_direct_link";
 
-            if (pendingMember) {
-              // Update membership to active and connect user
-              const updateData =
-                WorkspaceInvitationProcessor.prepareMembershipUpdate();
-              const updatedMember = await prisma.workspaceMember.update({
-                where: { id: pendingMember.id },
+            if (isDirectLink) {
+              // For direct links, create a new workspace member
+              const newMember = await prisma.workspaceMember.create({
                 data: {
-                  ...updateData,
-                  user: {
-                    connect: { id: user.id },
-                  },
+                  userId: user.id,
+                  workspaceId: workspace.id,
+                  role: tokenPayload.role || "EDITOR",
+                  permissions: [],
+                  status: "ACTIVE",
+                  joinedAt: new Date(),
                 },
               });
 
@@ -105,12 +118,48 @@ export class RegisterService {
                 WorkspaceInvitationProcessor.formatWorkspaceResponse(
                   workspace,
                   {
-                    role: updatedMember.role,
-                    permissions: updatedMember.permissions,
+                    role: newMember.role,
+                    permissions: newMember.permissions,
                   }
                 );
+            } else {
+              // For email invitations, find and update pending membership
+              const pendingMember = await prisma.workspaceMember.findFirst({
+                where: {
+                  email: user.email,
+                  workspaceId: workspace.id,
+                  status: "PENDING",
+                },
+              });
 
-              // Invalidate workspace cache
+              if (pendingMember) {
+                // Update membership to active and connect user
+                const updateData =
+                  WorkspaceInvitationProcessor.prepareMembershipUpdate();
+                const updatedMember = await prisma.workspaceMember.update({
+                  where: { id: pendingMember.id },
+                  data: {
+                    ...updateData,
+                    user: {
+                      connect: { id: user.id },
+                    },
+                  },
+                });
+
+                // Format response
+                workspaceData =
+                  WorkspaceInvitationProcessor.formatWorkspaceResponse(
+                    workspace,
+                    {
+                      role: updatedMember.role,
+                      permissions: updatedMember.permissions,
+                    }
+                  );
+              }
+            }
+
+            // Invalidate workspace cache
+            if (workspaceData) {
               try {
                 await cacheService.del(`slug:${workspace.slug}`, {
                   prefix: "workspace",

@@ -21,7 +21,8 @@ model User {
   passwordResetToken         String?              @unique
   passwordResetExpiresAt     DateTime?
   isAdmin                    Boolean              @default(false)
-  plan                       UserPlan
+  plan                       UserPlan             @default(NO_PLAN)
+  registrationSource         RegistrationSource?  @default(DIRECT)
   referralLinkUsedId         Int?
   balance                    Float                @default(0)
   pendingBalance             Float                @default(0)
@@ -606,6 +607,8 @@ model WorkspaceClone {
 }
 
 enum UserPlan {
+  NO_PLAN
+  WORKSPACE_MEMBER
   BUSINESS
   AGENCY
   FREE
@@ -746,4 +749,10 @@ enum CommissionStatus {
   PENDING
   RELEASED
   REVERSED
+}
+
+enum RegistrationSource {
+  DIRECT
+  WORKSPACE_INVITE
+  AFFILIATE
 }

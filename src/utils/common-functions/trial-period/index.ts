@@ -10,9 +10,9 @@ export interface TrialPeriodResult {
 
 export class TrialPeriodCalculator {
   /**
-   * Default trial period is 6 years
+   * Default trial period is 1 year
    */
-  private static readonly DEFAULT_TRIAL_PERIOD = '6y';
+  private static readonly DEFAULT_TRIAL_PERIOD = '1y';
 
   /**
    * Parse period string like "1y", "2m", "3w", "30d"
@@ -66,7 +66,7 @@ export class TrialPeriodCalculator {
 
   /**
    * Get trial period dates for registration
-   * @param trialPeriod Optional period string (e.g., "1y", "2m", "3w"). Defaults to 6 years.
+   * @param trialPeriod Optional period string (e.g., "1y", "2m", "3w"). Defaults to 1 year.
    */
   static getTrialDates(trialPeriod?: string | null): TrialPeriodResult {
     const trialStartDate = new Date(); // Current date/time

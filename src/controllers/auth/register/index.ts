@@ -8,6 +8,8 @@ import {
 } from "./utils/validate-invitation";
 import { BadRequestError, ConflictError } from "../../../errors";
 import { getPrisma } from "../../../lib/prisma";
+import { RegistrationSource } from "../../../generated/prisma-client";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
 
 export class RegisterController {
   static async register(
@@ -20,6 +22,29 @@ export class RegisterController {
 
       const prisma = getPrisma();
 
+      // Determine registration source and validate tokens
+      let registrationSource: RegistrationSource = RegistrationSource.DIRECT;
+
+      // Validate affiliate token if provided (but don't link it yet - that happens after payment)
+      if (validatedData.affiliateToken) {
+        const affiliateLink = await prisma.affiliateLink.findUnique({
+          where: { token: validatedData.affiliateToken },
+          select: { id: true, token: true },
+        });
+
+        if (!affiliateLink) {
+          return next(
+            new BadRequestError(
+              "The affiliate link you used is invalid or no longer active. Please check the link and try again."
+            )
+          );
+        }
+
+        // Only set registration source, don't link affiliate yet (happens after payment)
+        registrationSource = RegistrationSource.AFFILIATE;
+      }
+
+      // Validate workspace invitation token if provided
       if (validatedData.workspaceInvitationToken) {
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) {
@@ -42,34 +67,105 @@ export class RegisterController {
           );
         }
 
-        if (!validateTokenEmail(decodedToken.email, validatedData.email)) {
-          return next(
-            new BadRequestError(
-              'This invitation was sent to a different email address. Please register with the email address that received the invitation.'
-            )
-          );
+        // Check invitation type
+        const isDirectLink = decodedToken.type === "workspace_direct_link";
+
+        // For email invitations, validate email match
+        if (!isDirectLink && decodedToken.email) {
+          if (!validateTokenEmail(decodedToken.email, validatedData.email)) {
+            return next(
+              new BadRequestError(
+                'This invitation was sent to a different email address. Please register with the email address that received the invitation.'
+              )
+            );
+          }
+
+          // For email invitations, check for pending member
+          const pendingMember = await prisma.workspaceMember.findFirst({
+            where: {
+              email: validatedData.email,
+              workspaceId: decodedToken.workspaceId,
+              status: "PENDING",
+            },
+            select: {
+              email: true,
+              workspaceId: true,
+              status: true,
+            },
+          });
+
+          if (!pendingMember) {
+            return next(
+              new BadRequestError(
+                "This invitation has already been used or is no longer valid. Please contact your workspace administrator for a new invitation."
+              )
+            );
+          }
         }
 
-        const pendingMember = await prisma.workspaceMember.findFirst({
-          where: {
-            email: validatedData.email,
-            workspaceId: decodedToken.workspaceId,
-            status: "PENDING",
-          },
+        // Verify the workspace exists and check member limits (applies to both direct links and email invitations)
+        const workspace = await prisma.workspace.findUnique({
+          where: { id: decodedToken.workspaceId },
           select: {
-            email: true,
-            workspaceId: true,
-            status: true,
+            id: true,
+            planType: true,
+            _count: {
+              select: {
+                members: {
+                  where: {
+                    status: "ACTIVE"
+                  }
+                }
+              }
+            }
           },
         });
 
-        if (!pendingMember) {
+        if (!workspace) {
           return next(
             new BadRequestError(
-              "This invitation has already been used or is no longer valid. Please contact your workspace administrator for a new invitation."
+              "The workspace associated with this invitation no longer exists."
             )
           );
         }
+
+        // Check if workspace has reached member limit
+        // For direct links, we need to check the limit before accepting
+        // For email invitations, the pending member was already counted when invited
+        if (isDirectLink) {
+          // Get workspace add-ons to check total allocation
+          const addOns = await prisma.addOn.findMany({
+            where: {
+              workspaceId: workspace.id,
+              status: "ACTIVE",
+            },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          });
+
+          const currentMemberCount = workspace._count.members;
+          const canAddMember = WorkspaceMemberAllocations.canAddMember(
+            currentMemberCount,
+            {
+              workspacePlanType: workspace.planType,
+              addOns,
+            }
+          );
+
+          if (!canAddMember) {
+            return next(
+              new BadRequestError(
+                "This workspace has reached its maximum member limit. Please contact the workspace owner to upgrade or purchase additional member slots."
+              )
+            );
+          }
+        }
+
+        // Workspace invitation takes precedence over affiliate
+        registrationSource = RegistrationSource.WORKSPACE_INVITE;
       }
 
       const existingUserByEmail = await prisma.user.findUnique({
@@ -98,7 +194,10 @@ export class RegisterController {
         );
       }
 
-      const result = await RegisterService.register(validatedData);
+      const result = await RegisterService.register(
+        validatedData,
+        registrationSource
+      );
 
       res.status(201).json(result);
     } catch (error) {

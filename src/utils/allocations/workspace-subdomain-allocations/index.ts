@@ -7,6 +7,8 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base subdomain allocations per workspace plan type
 const BASE_SUBDOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
+  [UserPlan.NO_PLAN]: 0, // No plan: 0 subdomains
+  [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 subdomains (not applicable)
   [UserPlan.FREE]: 1, // Free workspace: 1 subdomain
   [UserPlan.BUSINESS]: 1, // Business workspace: 1 subdomain
   [UserPlan.AGENCY]: 1, // Agency workspace: 1 subdomain

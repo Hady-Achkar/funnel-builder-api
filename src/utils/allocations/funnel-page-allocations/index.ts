@@ -7,6 +7,8 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base page allocations per funnel (same for all workspace plan types)
 const BASE_PAGE_ALLOCATIONS: Record<UserPlan, number> = {
+  [UserPlan.NO_PLAN]: 0, // No plan: 0 pages
+  [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 pages (not applicable)
   [UserPlan.FREE]: 35, // Free workspace: 35 pages per funnel
   [UserPlan.BUSINESS]: 35, // Business workspace: 35 pages per funnel
   [UserPlan.AGENCY]: 35, // Agency workspace: 35 pages per funnel

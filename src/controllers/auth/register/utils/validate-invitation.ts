@@ -2,9 +2,13 @@ import jwt from "jsonwebtoken";
 
 export interface DecodedInvitationToken {
   workspaceId: number;
-  email: string;
+  email?: string; // Optional for direct links
   role: string;
-  permissions: string[];
+  permissions?: string[];
+  type?: string; // "workspace_direct_link" or undefined for email invitations
+  workspaceSlug?: string;
+  linkId?: string;
+  createdBy?: number;
 }
 
 /**
@@ -16,7 +20,14 @@ export function decodeInvitationToken(token: string, jwtSecret: string): Decoded
     const decoded = jwt.verify(token, jwtSecret) as DecodedInvitationToken;
 
     // Validate required fields exist
-    if (!decoded.workspaceId || !decoded.email || !decoded.role) {
+    // workspaceId and role are required for all invitation types
+    if (!decoded.workspaceId || !decoded.role) {
+      return null;
+    }
+
+    // For email invitations, email is required
+    // For direct links (type === "workspace_direct_link"), email is optional
+    if (!decoded.type && !decoded.email) {
       return null;
     }
 

@@ -51,8 +51,11 @@ export const registerRequestSchema = z.object({
     .default(false),
   plan: z
     .nativeEnum(UserPlan)
-    .default(UserPlan.FREE)
-    .describe("Plan must be FREE, BUSINESS or AGENCY"),
+    .default(UserPlan.NO_PLAN)
+    .optional()
+    .describe(
+      "Plan must be NO_PLAN, WORKSPACE_MEMBER, FREE, BUSINESS or AGENCY"
+    ),
   trialPeriod: z
     .string()
     .regex(/^\d+[ymwd]$/i, {
@@ -61,12 +64,17 @@ export const registerRequestSchema = z.object({
     })
     .optional()
     .describe(
-      "Optional trial period. Format: 1y, 2m, 3w, 30d. Defaults to 6y if not provided"
+      "Optional trial period. Format: 1y, 2m, 3w, 30d. Defaults to 1 year. Not applied to WORKSPACE_MEMBER plan."
     ),
   workspaceInvitationToken: z
-    .string({message: "Workspace invitation token must be a string"})
+    .string({ message: "Workspace invitation token must be a string" })
     .min(1, "Workspace invitation token cannot be empty")
     .optional(),
+  affiliateToken: z
+    .string({ message: "Affiliate token must be a string" })
+    .min(1, "Affiliate token cannot be empty")
+    .optional()
+    .describe("Optional affiliate referral token"),
 });
 
 // User response schema using Prisma types inside Zod

@@ -7,6 +7,8 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base funnel allocations per workspace plan type
 const BASE_FUNNEL_ALLOCATIONS: Record<UserPlan, number> = {
+  [UserPlan.NO_PLAN]: 0, // No plan: 0 funnels
+  [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 funnels (not applicable)
   [UserPlan.FREE]: 1, // Free workspace: 1 funnel
   [UserPlan.BUSINESS]: 1, // Business workspace: 1 funnel
   [UserPlan.AGENCY]: 10, // Agency workspace: 10 funnels

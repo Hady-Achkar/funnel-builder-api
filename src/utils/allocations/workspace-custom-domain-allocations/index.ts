@@ -7,6 +7,8 @@ import { UserPlan, AddOnType } from "../../../generated/prisma-client";
 
 // Base custom domain allocations per workspace plan type
 const BASE_CUSTOM_DOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
+  [UserPlan.NO_PLAN]: 0, // No plan: 0 custom domains
+  [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 custom domains (not applicable)
   [UserPlan.FREE]: 0, // Free workspace: 0 custom domains
   [UserPlan.BUSINESS]: 1, // Business workspace: 1 custom domain
   [UserPlan.AGENCY]: 0, // Agency workspace: 0 custom domains
