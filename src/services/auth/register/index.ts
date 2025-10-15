@@ -38,6 +38,14 @@ export class RegisterService {
         userPlan = UserPlan.WORKSPACE_MEMBER;
       }
 
+      // Determine which token to save (affiliate or workspace invitation)
+      let registrationToken: string | undefined;
+      if (data.affiliateToken) {
+        registrationToken = data.affiliateToken;
+      } else if (data.workspaceInvitationToken) {
+        registrationToken = data.workspaceInvitationToken;
+      }
+
       // Set trial dates for all plans except WORKSPACE_MEMBER (default: 1 year)
       let trialStartDate: Date | undefined;
       let trialEndDate: Date | undefined;
@@ -62,7 +70,7 @@ export class RegisterService {
           isAdmin: data.isAdmin,
           plan: userPlan,
           registrationSource,
-          // Note: referralLinkUsedId will be set after payment is completed
+          registrationToken, // NEW: Save the token used during registration
           trialStartDate,
           trialEndDate,
         },
