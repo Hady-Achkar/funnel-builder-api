@@ -5,10 +5,11 @@ import { CreatePaymentLinkService } from "../../../services/payment/create-payme
 import { BadRequestError } from "../../../errors";
 import { getPrisma } from "../../../lib/prisma";
 import jwt from "jsonwebtoken";
+import { AuthRequest } from "../../../middleware/auth";
 
 export class CreatePaymentLinkController {
   static async createPaymentLink(
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
@@ -17,20 +18,7 @@ export class CreatePaymentLinkController {
       const validatedData = createPaymentLinkRequest.parse(req.body);
 
       const prisma = getPrisma();
-
-      // 2. CHECK BUYER EMAIL DOESN'T EXIST
-      const existingUser = await prisma.user.findUnique({
-        where: { email: validatedData.email },
-        select: { email: true },
-      });
-
-      if (existingUser) {
-        return next(
-          new BadRequestError(
-            "An account with this email already exists. Please use a different email address."
-          )
-        );
-      }
+      const userId = req.userId!; // Guaranteed by authenticateToken middleware
 
       // 3. PROCESS AFFILIATE TOKEN (if provided)
       let affiliateData = null;
