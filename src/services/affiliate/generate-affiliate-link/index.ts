@@ -103,7 +103,7 @@ export class AffiliateLinkService {
       throw new Error("FRONTEND_URL is not configured");
     }
 
-    const affiliateUrl = `${baseUrl}/affiliate?affiliate=${token}`;
+    const affiliateUrl = `${baseUrl}/register?affiliate=${token}`;
 
     // 9. RETURN RESPONSE
     return {

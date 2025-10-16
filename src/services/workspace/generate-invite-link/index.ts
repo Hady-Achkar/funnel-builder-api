@@ -94,7 +94,7 @@ export class GenerateInviteLinkService {
         expiresIn: data.expiresIn,
       } as jwt.SignOptions);
 
-      const link = `${process.env.FRONTEND_URL}/join-workspace?token=${invitationToken}`;
+      const link = `${process.env.FRONTEND_URL}/register?join-workspace=${invitationToken}`;
 
       return {
         link,

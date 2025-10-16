@@ -110,7 +110,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
-        link: expect.stringContaining("/join-workspace?token=mock-jwt-token"),
+        link: expect.stringContaining("/register?join-workspace=mock-jwt-token"),
         token: "mock-jwt-token",
       });
       expect(mockNext).not.toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
-        link: expect.stringContaining("/join-workspace?token=mock-jwt-token"),
+        link: expect.stringContaining("/register?join-workspace=mock-jwt-token"),
         token: "mock-jwt-token",
       });
     });

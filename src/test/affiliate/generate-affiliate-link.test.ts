@@ -135,7 +135,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
       expect(responseData.message).toBe("Affiliate link created successfully");
       expect(responseData.id).toBeTypeOf("number");
       expect(responseData.url).toContain(
-        "https://testsite.com/affiliate?affiliate="
+        "https://testsite.com/register?affiliate="
       );
       expect(responseData.token).toBeDefined();
 
