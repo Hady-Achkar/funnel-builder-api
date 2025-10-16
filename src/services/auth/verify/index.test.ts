@@ -59,6 +59,8 @@ describe("VerifyService", () => {
       where: { id: 1 },
       data: {
         verified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
       },
     });
 
@@ -81,7 +83,7 @@ describe("VerifyService", () => {
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(invalidToken)).rejects.toThrow(
-      "Invalid verification token"
+      "Invalid verification link. Please check your email for the correct verification link or request a new one."
     );
 
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
@@ -100,7 +102,7 @@ describe("VerifyService", () => {
 
     // Act & Assert
     await expect(VerifyService.verifyEmail(expiredToken)).rejects.toThrow(
-      "Verification token has expired"
+      "Your verification link has expired. Please request a new verification email to complete your registration."
     );
 
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
@@ -171,6 +173,41 @@ describe("VerifyService", () => {
     );
 
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it("should throw error when verification token has expired in database", async () => {
+    // Arrange
+    const userEmail = "test@example.com";
+    const token = "valid-jwt-token";
+
+    const tokenData = {
+      email: userEmail,
+    };
+
+    // Set expiration date to 1 hour ago
+    const expiredDate = new Date();
+    expiredDate.setHours(expiredDate.getHours() - 1);
+
+    const mockUser = {
+      id: 1,
+      email: userEmail,
+      verified: false,
+      verificationTokenExpiresAt: expiredDate,
+    };
+
+    vi.mocked(jwt.verify).mockReturnValue(tokenData as any);
+    mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+
+    // Act & Assert
+    await expect(VerifyService.verifyEmail(token)).rejects.toThrow(
+      "Your verification link has expired. Please request a new verification email to complete your registration."
+    );
+
+    expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: userEmail },
+    });
+
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
   });
 });
