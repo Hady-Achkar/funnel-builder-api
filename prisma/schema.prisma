@@ -235,7 +235,7 @@ model Domain {
   type                  DomainType
   status                DomainStatus   @default(PENDING)
   sslStatus             SslStatus      @default(PENDING)
-  workspaceId           Int
+  workspaceId           Int?
   createdBy             Int
   cloudflareHostnameId  String?        @unique
   cloudflareZoneId      String?
@@ -251,7 +251,7 @@ model Domain {
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
   creator               User           @relation("DomainCreator", fields: [createdBy], references: [id])
-  workspace             Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace             Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   funnelConnections     FunnelDomain[]
 
   @@index([workspaceId])

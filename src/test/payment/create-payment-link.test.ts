@@ -356,8 +356,143 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
   describe(
     "PLAN_PURCHASE - With Affiliate",
     () => {
+      it("should auto-populate affiliateToken from user registration when registrationSource is AFFILIATE", async () => {
+        // Arrange - Create user with AFFILIATE registrationSource
+        const affiliateUser = await prisma.user.create({
+          data: {
+            email: `affiliate-user-${Date.now()}@example.com`,
+            username: `affiliateuser${Date.now()}`,
+            firstName: "Affiliate",
+            lastName: "User",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: testAffiliateToken, // Stored during registration
+          },
+        });
+
+        const req = mockRequest(
+          {
+            // User details come from auth token
+            paymentType: "PLAN_PURCHASE",
+            planType: "BUSINESS",
+            planTitle: "Business Plan",
+            planDescription: "Auto-populated affiliate",
+            amount: 149.99,
+            returnUrl: "https://example.com/success",
+            failureReturnUrl: "https://example.com/failure",
+            termsAndConditionsUrl: "https://example.com/terms",
+            // NOTE: NO affiliateToken in request body!
+          },
+          affiliateUser.id
+        );
+        const res = mockResponse();
+
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_auto_affiliate",
+            link_url: "https://mamopay.com/pay/auto-affiliate",
+            payment_url: "https://mamopay.com/checkout/auto-affiliate",
+            title: "Business Plan",
+            description: "Auto-populated affiliate",
+            amount: 149.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
+
+        // Act
+        await CreatePaymentLinkController.createPaymentLink(
+          req as Request,
+          res as Response,
+          mockNext
+        );
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(200);
+        const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+
+        // Verify affiliate data was auto-populated from user.registrationToken
+        expect(payload.custom_data.affiliateLink).toMatchObject({
+          id: testAffiliateLinkId,
+          token: testAffiliateToken,
+          itemType: "AGENCY",
+          userId: testSellerId,
+          commissionPercentage: 15,
+        });
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: affiliateUser.id } });
+      });
+
+      it("should reject AGENCY plan for affiliate users (only BUSINESS allowed)", async () => {
+        // Arrange - Create affiliate user trying to buy AGENCY
+        const affiliateUser = await prisma.user.create({
+          data: {
+            email: `affiliate-agency-attempt-${Date.now()}@example.com`,
+            username: `affiliateagency${Date.now()}`,
+            firstName: "Affiliate",
+            lastName: "AgencyAttempt",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: testAffiliateToken,
+          },
+        });
+
+        const req = mockRequest(
+          {
+            paymentType: "PLAN_PURCHASE",
+            planType: "AGENCY", // ❌ Not allowed for affiliate users!
+            planTitle: "Agency Plan",
+            planDescription: "Should be rejected",
+            amount: 299.99,
+            returnUrl: "https://example.com/success",
+            failureReturnUrl: "https://example.com/failure",
+            termsAndConditionsUrl: "https://example.com/terms",
+          },
+          affiliateUser.id
+        );
+        const res = mockResponse();
+        const next = vi.fn();
+
+        // Act
+        await CreatePaymentLinkController.createPaymentLink(
+          req as Request,
+          res as Response,
+          next
+        );
+
+        // Assert - Should reject
+        expect(next).toHaveBeenCalled();
+        const error = next.mock.calls[0][0];
+        expect(error.message).toMatch(/affiliate.*business.*plan/i);
+        expect(res.status).not.toHaveBeenCalled();
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: affiliateUser.id } });
+      });
+
       it("should include affiliate data with commissionPercentage (NOT affiliateAmount)", async () => {
-        // Arrange
+        // Arrange - Create user with AFFILIATE registrationSource
+        const affiliateUser = await prisma.user.create({
+          data: {
+            email: `affiliate-user2-${Date.now()}@example.com`,
+            username: `affiliateuser2${Date.now()}`,
+            firstName: "Affiliate",
+            lastName: "User2",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: testAffiliateToken,
+          },
+        });
+
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -369,9 +504,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: testAffiliateToken,
+            // NO affiliateToken in request!
           },
-          testSellerId
+          affiliateUser.id
         );
         const res = mockResponse();
 
@@ -421,6 +556,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         ) as any;
         expect(decoded.commissionPercentage).toBe(15);
         expect(decoded.affiliateAmount).toBeUndefined(); // Should not exist
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: affiliateUser.id } });
       });
     },
     testSellerId
@@ -430,7 +568,21 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
     "WORKSPACE_PURCHASE - Success Cases",
     () => {
       it("should add workspaceId and workspaceName to custom_data.details", async () => {
-        // Arrange
+        // Arrange - Create user with AFFILIATE registrationSource
+        const workspaceBuyer = await prisma.user.create({
+          data: {
+            email: `workspace-buyer-${Date.now()}@example.com`,
+            username: `workspacebuyer${Date.now()}`,
+            firstName: "Workspace",
+            lastName: "Buyer",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: testAffiliateToken,
+          },
+        });
+
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -442,9 +594,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: testAffiliateToken,
+            // NO affiliateToken in request!
           },
-          testSellerId
+          workspaceBuyer.id
         );
         const res = mockResponse();
 
@@ -477,8 +629,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         // Verify workspace data in details
         expect(payload.custom_data.details).toMatchObject({
-          firstName: "Test", // From authenticated user
-          lastName: "Seller", // From authenticated user
+          firstName: "Workspace", // From authenticated user
+          lastName: "Buyer", // From authenticated user
           paymentType: "WORKSPACE_PURCHASE",
           planType: "AGENCY",
           workspaceId: testAgencyWorkspaceId,
@@ -490,10 +642,27 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           workspaceId: testAgencyWorkspaceId,
           commissionPercentage: 15,
         });
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: workspaceBuyer.id } });
       });
 
       it("should only allow AGENCY workspaces for WORKSPACE_PURCHASE", async () => {
-        // Arrange - Try to use BUSINESS workspace token
+        // Arrange - Create user with BUSINESS workspace token
+        const businessBuyer = await prisma.user.create({
+          data: {
+            email: `business-buyer-${Date.now()}@example.com`,
+            username: `businessbuyer${Date.now()}`,
+            firstName: "Business",
+            lastName: "Buyer",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: businessAffiliateToken, // BUSINESS workspace!
+          },
+        });
+
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -505,9 +674,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: businessAffiliateToken, // BUSINESS workspace!
+            // NO affiliateToken - comes from registration
           },
-          testSellerId
+          businessBuyer.id
         );
         const res = mockResponse();
         const next = vi.fn();
@@ -524,10 +693,13 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const error = next.mock.calls[0][0];
         expect(error.message).toMatch(/agency|workspace.*not found/i);
         expect(res.status).not.toHaveBeenCalled();
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: businessBuyer.id } });
       });
 
       it("should validate workspace ownership", async () => {
-        // Arrange - Create another seller
+        // Arrange - Create another seller with workspace
         const otherSeller = await prisma.user.create({
           data: {
             email: `other-seller-${Date.now()}@example.com`,
@@ -541,37 +713,96 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           },
         });
 
-        // Create fake token claiming ownership of testAgencyWorkspace
-        const fakeToken = jwt.sign(
+        // Create workspace for other seller
+        const otherWorkspace = await prisma.workspace.create({
+          data: {
+            name: "Other Agency Workspace",
+            slug: `other-agency-${Date.now()}`,
+            ownerId: otherSeller.id,
+            planType: "AGENCY",
+            status: "ACTIVE",
+          },
+        });
+
+        // Create affiliate link for other workspace
+        const otherAffiliateLink = await prisma.affiliateLink.create({
+          data: {
+            name: "Other Workspace Link",
+            token: "",
+            itemType: "AGENCY",
+            userId: otherSeller.id,
+            workspaceId: otherWorkspace.id,
+            settings: {},
+          },
+        });
+
+        // Create token for other seller's workspace
+        const otherToken = jwt.sign(
           {
-            userId: otherSeller.id, // Wrong owner!
-            workspaceId: testAgencyWorkspaceId,
-            name: "Fake Link",
+            userId: otherSeller.id,
+            workspaceId: otherWorkspace.id,
+            name: "Other Workspace Link",
             planType: "AGENCY",
             commissionPercentage: 10,
             settings: {},
-            affiliateLinkId: 999999,
+            affiliateLinkId: otherAffiliateLink.id,
           },
           process.env.JWT_SECRET!
         );
+
+        await prisma.affiliateLink.update({
+          where: { id: otherAffiliateLink.id },
+          data: { token: otherToken },
+        });
+
+        // Create buyer who registered with this token but tries to buy testAgencyWorkspace (wrong workspace)
+        const confusedBuyer = await prisma.user.create({
+          data: {
+            email: `confused-buyer-${Date.now()}@example.com`,
+            username: `confusedbuyer${Date.now()}`,
+            firstName: "Confused",
+            lastName: "Buyer",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: otherToken, // Registered with other seller's token
+          },
+        });
 
         const req = mockRequest(
           {
             // User details now come from auth token
             paymentType: "WORKSPACE_PURCHASE",
             planType: "AGENCY",
-            planTitle: "Fake Ownership",
-            planDescription: "Should be rejected",
+            planTitle: "Workspace Ownership Test",
+            planDescription: "Should succeed with correct workspace",
             amount: 299.99,
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: fakeToken,
+            // Token comes from user registration
           },
-          testSellerId
+          confusedBuyer.id
         );
         const res = mockResponse();
         const next = vi.fn();
+
+        // Mock MamoPay
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            id: "mamopay_ownership_test",
+            link_url: "https://mamopay.com/pay/ownership",
+            payment_url: "https://mamopay.com/checkout/ownership",
+            title: "Workspace Ownership Test",
+            description: "Should succeed with correct workspace",
+            amount: 299.99,
+            amount_currency: "USD",
+            active: true,
+            created_date: new Date().toISOString(),
+          }),
+        });
 
         // Act
         await CreatePaymentLinkController.createPaymentLink(
@@ -580,14 +811,18 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           next
         );
 
-        // Assert
-        expect(next).toHaveBeenCalled();
-        const error = next.mock.calls[0][0];
-        expect(error.message).toMatch(
-          /affiliate link.*no longer valid|seller/i
-        );
+        // Assert - Should SUCCEED with correct workspace from registration token
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(next).not.toHaveBeenCalled();
+
+        const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+        expect(payload.custom_data.details.workspaceId).toBe(otherWorkspace.id);
+        expect(payload.custom_data.affiliateLink.userId).toBe(otherSeller.id);
 
         // Cleanup
+        await prisma.user.delete({ where: { id: confusedBuyer.id } });
+        await prisma.affiliateLink.delete({ where: { id: otherAffiliateLink.id } });
+        await prisma.workspace.delete({ where: { id: otherWorkspace.id } });
         await prisma.user.delete({ where: { id: otherSeller.id } });
       });
     },
@@ -660,8 +895,22 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         await prisma.user.delete({ where: { id: existingUser.id } });
       });
 
-      it("should reject invalid JWT token", async () => {
-        // Arrange
+      it("should reject if user has invalid affiliate token in registration", async () => {
+        // Arrange - Create user with invalid token in registration
+        const invalidTokenUser = await prisma.user.create({
+          data: {
+            email: `invalid-token-${Date.now()}@example.com`,
+            username: `invalidtoken${Date.now()}`,
+            firstName: "Invalid",
+            lastName: "Token",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: "invalid-jwt-token", // Invalid token
+          },
+        });
+
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -673,9 +922,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: "invalid-jwt-token",
           },
-          testSellerId
+          invalidTokenUser.id
         );
         const res = mockResponse();
         const next = vi.fn();
@@ -693,9 +941,12 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(error.message).toMatch(
           /affiliate link.*invalid|expired|new link/i
         );
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: invalidTokenUser.id } });
       });
 
-      it("should reject if affiliate token not found in database", async () => {
+      it("should reject if affiliate token in registration not found in database", async () => {
         // Arrange - Create valid JWT but not in database
         const orphanToken = jwt.sign(
           {
@@ -710,6 +961,20 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           process.env.JWT_SECRET!
         );
 
+        const orphanUser = await prisma.user.create({
+          data: {
+            email: `orphan-user-${Date.now()}@example.com`,
+            username: `orphanuser${Date.now()}`,
+            firstName: "Orphan",
+            lastName: "User",
+            password: "hashed-password",
+            plan: "NO_PLAN",
+            verified: true,
+            registrationSource: "AFFILIATE",
+            registrationToken: orphanToken, // Valid JWT but not in DB
+          },
+        });
+
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -721,9 +986,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
-            affiliateToken: orphanToken,
           },
-          testSellerId
+          orphanUser.id
         );
         const res = mockResponse();
         const next = vi.fn();
@@ -741,6 +1005,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(error.message).toMatch(
           /affiliate link.*no longer valid|seller/i
         );
+
+        // Cleanup
+        await prisma.user.delete({ where: { id: orphanUser.id } });
       });
     },
     testSellerId

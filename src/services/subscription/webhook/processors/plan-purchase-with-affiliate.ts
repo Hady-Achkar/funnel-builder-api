@@ -5,10 +5,18 @@ import {
   TrialPeriodCalculator,
   calculateTrialDates,
 } from "../../../../utils/common-functions/trial-period";
-import { sendAffiliateCongratulationsEmail } from "../../../../helpers/subscription/emails/affiliate/congratulations";
+import {
+  getAffiliateCongratulationsEmailHtml,
+  getAffiliateCongratulationsEmailText,
+} from "../../../../constants/emails/affiliate/congratulations";
+import {
+  getSubscriptionConfirmationEmailHtml,
+  getSubscriptionConfirmationEmailText,
+} from "../../../../constants/emails/subscription/confirmation";
 import { CloneWorkspaceService } from "../../../workspace/clone-workspace";
 import jwt from "jsonwebtoken";
 import { UserPlan } from "../../../../generated/prisma-client";
+import sgMail from "@sendgrid/mail";
 
 interface PlanPurchaseWithAffiliateResult {
   success: boolean;
@@ -377,6 +385,46 @@ export class PlanPurchaseWithAffiliateProcessor {
         );
       }
 
+      // 14. Send subscription confirmation email to buyer
+      try {
+        const apiKey = process.env.SENDGRID_API_KEY;
+        if (!apiKey) {
+          throw new Error("SENDGRID_API_KEY is not configured");
+        }
+        sgMail.setApiKey(apiKey);
+
+        const emailData = {
+          userEmail: user.email,
+          planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
+          subscriptionId: subscription.subscriptionId,
+        };
+
+        const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
+        const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
+
+        await sgMail.send({
+          to: user.email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL,
+            name: "Digitalsite",
+          },
+          subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
+          html: getSubscriptionConfirmationEmailHtml(emailData),
+          text: getSubscriptionConfirmationEmailText(emailData),
+        });
+
+        console.log(
+          "[PlanPurchaseAffiliate] Subscription confirmation email sent to:",
+          user.email
+        );
+      } catch (emailError) {
+        console.error(
+          "[PlanPurchaseAffiliate] Failed to send subscription confirmation email:",
+          emailError
+        );
+        // Continue processing even if email fails
+      }
+
       return {
         success: true,
         message:
@@ -561,10 +609,23 @@ export class PlanPurchaseWithAffiliateProcessor {
 
     // 6. Send congratulations email to affiliate owner
     try {
-      await sendAffiliateCongratulationsEmail(
-        affiliateOwner.email,
-        affiliateOwner.firstName
-      );
+      const apiKey = process.env.SENDGRID_API_KEY;
+      if (!apiKey) {
+        throw new Error("SENDGRID_API_KEY is not configured");
+      }
+      sgMail.setApiKey(apiKey);
+
+      await sgMail.send({
+        to: affiliateOwner.email,
+        from: {
+          email: process.env.SENDGRID_FROM_EMAIL,
+          name: "Digitalsite",
+        },
+        subject: "New Affiliate Subscription | اشتراك جديد عبر الإحالة",
+        html: getAffiliateCongratulationsEmailHtml(),
+        text: getAffiliateCongratulationsEmailText(),
+      });
+
       console.log(
         "[PlanPurchaseAffiliate] Congratulations email sent to:",
         affiliateOwner.email

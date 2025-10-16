@@ -5,7 +5,12 @@ import {
   TrialPeriodCalculator,
   calculateTrialDates,
 } from "../../../../utils/common-functions/trial-period";
+import {
+  getSubscriptionConfirmationEmailHtml,
+  getSubscriptionConfirmationEmailText,
+} from "../../../../constants/emails/subscription/confirmation";
 import { UserPlan } from "../../../../generated/prisma-client";
+import sgMail from "@sendgrid/mail";
 
 interface PlanPurchaseResult {
   success: boolean;
@@ -191,6 +196,46 @@ export class PlanPurchaseProcessor {
         subscription.id
       );
 
+      // 9. Send subscription confirmation email to buyer
+      try {
+        const apiKey = process.env.SENDGRID_API_KEY;
+        if (!apiKey) {
+          throw new Error("SENDGRID_API_KEY is not configured");
+        }
+        sgMail.setApiKey(apiKey);
+
+        const emailData = {
+          userEmail: user.email,
+          planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
+          subscriptionId: subscription.subscriptionId,
+        };
+
+        const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
+        const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
+
+        await sgMail.send({
+          to: user.email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL,
+            name: "Digitalsite",
+          },
+          subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
+          html: getSubscriptionConfirmationEmailHtml(emailData),
+          text: getSubscriptionConfirmationEmailText(emailData),
+        });
+
+        console.log(
+          "[PlanPurchase] Subscription confirmation email sent to:",
+          user.email
+        );
+      } catch (emailError) {
+        console.error(
+          "[PlanPurchase] Failed to send subscription confirmation email:",
+          emailError
+        );
+        // Continue processing even if email fails
+      }
+
       return {
         success: true,
         message:
@@ -269,6 +314,46 @@ export class PlanPurchaseProcessor {
       "[PlanPurchase] Subscription renewed until:",
       newEndsAt.toISOString()
     );
+
+    // 4. Send subscription confirmation email for renewal
+    try {
+      const apiKey = process.env.SENDGRID_API_KEY;
+      if (!apiKey) {
+        throw new Error("SENDGRID_API_KEY is not configured");
+      }
+      sgMail.setApiKey(apiKey);
+
+      const emailData = {
+        userEmail: existingSubscription.user.email,
+        planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
+        subscriptionId: updatedSubscription.subscriptionId,
+      };
+
+      const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
+      const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
+
+      await sgMail.send({
+        to: existingSubscription.user.email,
+        from: {
+          email: process.env.SENDGRID_FROM_EMAIL,
+          name: "Digitalsite",
+        },
+        subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
+        html: getSubscriptionConfirmationEmailHtml(emailData),
+        text: getSubscriptionConfirmationEmailText(emailData),
+      });
+
+      console.log(
+        "[PlanPurchase] Renewal confirmation email sent to:",
+        existingSubscription.user.email
+      );
+    } catch (emailError) {
+      console.error(
+        "[PlanPurchase] Failed to send renewal confirmation email:",
+        emailError
+      );
+      // Continue processing even if email fails
+    }
 
     return {
       success: true,

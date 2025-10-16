@@ -120,7 +120,7 @@ export class CloneWorkspaceService {
 
       // 6. CLONE WORKSPACE AND CREATE SUBDOMAIN IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
-        // 6.1. Create Cloudflare A record with retry logic for conflicts
+        // 6.1. Create Cloudflare A record with retry logic for conflicts (DNS + Database)
         let aRecord;
         let finalSlug = uniqueSlug;
         let finalHostname = workspaceHostname;
@@ -129,6 +129,23 @@ export class CloneWorkspaceService {
 
         while (!aRecord && retryCounter <= maxRetries) {
           try {
+            // Check if domain already exists in database first
+            const existingDomain = await tx.domain.findUnique({
+              where: { hostname: finalHostname },
+            });
+
+            if (existingDomain) {
+              // Domain exists in database, retry with incremental suffix
+              console.log(
+                `[Workspace Clone] Domain ${finalHostname} already exists in database, trying with suffix`
+              );
+              finalSlug = `${uniqueSlug}-${retryCounter}`;
+              finalHostname = `${finalSlug}.${workspaceDomain}`;
+              retryCounter++;
+              continue;
+            }
+
+            // Try to create DNS record
             aRecord = await createARecord(finalSlug, workspaceZoneId, targetIp);
             console.log(
               `[Workspace Clone] Subdomain DNS created: ${finalHostname}`
@@ -336,18 +353,20 @@ export class CloneWorkspaceService {
           },
         });
 
-        // 6.4. Create Domain record in database
+        // 6.4. Create Domain record in database (NOT associated with workspace to avoid consuming allocation slot)
         await tx.domain.create({
           data: {
             hostname: finalHostname, // Use finalHostname to match the DNS record
             type: DomainType.SUBDOMAIN,
             status: DomainStatus.ACTIVE,
             sslStatus: SslStatus.ACTIVE,
-            workspaceId: clonedWorkspace.id,
-            createdBy: data.newOwnerId,
+            creator: {
+              connect: { id: data.newOwnerId },
+            },
             cloudflareRecordId: aRecord.id,
             cloudflareZoneId: workspaceZoneId,
             lastVerifiedAt: new Date(),
+            // workspaceId intentionally omitted - defaults to null to avoid consuming allocation
           },
         });
 

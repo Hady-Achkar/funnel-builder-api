@@ -97,10 +97,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   describe("Agency User Plan Purchase", () => {
     it("should create agency user with subscription, payment, and send set password email", async () => {
       // Arrange - Create verified user first
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "john.agency@test.com",
-          username: "johnagency",
+          email: `john.agency-${timestamp}@test.com`,
+          username: `johnagency${timestamp}`,
           firstName: "John",
           lastName: "Agency",
           password: "hashed_password",
@@ -119,7 +120,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "john.agency@test.com",
+            email: `john.agency-${timestamp}@test.com`,
             firstName: "John",
             lastName: "Agency",
             planType: "AGENCY",
@@ -134,7 +135,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "John Agency",
-          email: "john.agency@test.com",
+          email: `john.agency-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -161,13 +162,13 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       // Assert - User Updated with correct data
       const updatedUser = await prisma.user.findUnique({
-        where: { email: "john.agency@test.com" },
+        where: { email: `john.agency-${timestamp}@test.com` },
       });
 
       expect(updatedUser).toBeDefined();
       expect(updatedUser?.firstName).toBe("John");
       expect(updatedUser?.lastName).toBe("Agency");
-      expect(updatedUser?.email).toBe("john.agency@test.com");
+      expect(updatedUser?.email).toBe(`john.agency-${timestamp}@test.com`);
       expect(updatedUser?.plan).toBe(UserPlan.AGENCY);
       expect(updatedUser?.verified).toBe(true); // Still verified
       expect(updatedUser?.isAdmin).toBe(false);
@@ -230,10 +231,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
     it("should create agency user with annual subscription", async () => {
       // Arrange - Create verified user first
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "annual.agency@test.com",
-          username: "annualagency",
+          email: `annual.agency-${timestamp}@test.com`,
+          username: `annualagency${timestamp}`,
           firstName: "Annual",
           lastName: "Agency",
           password: "hashed_password",
@@ -252,7 +254,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "annual.agency@test.com",
+            email: `annual.agency-${timestamp}@test.com`,
             firstName: "Annual",
             lastName: "Agency",
             planType: "AGENCY",
@@ -267,7 +269,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Annual Agency",
-          email: "annual.agency@test.com",
+          email: `annual.agency-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -289,7 +291,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.received).toBe(true);
 
       const updatedUser = await prisma.user.findUnique({
-        where: { email: "annual.agency@test.com" },
+        where: { email: `annual.agency-${timestamp}@test.com` },
       });
       expect(updatedUser?.plan).toBe(UserPlan.AGENCY);
 
@@ -314,10 +316,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   describe("Business User Plan Purchase", () => {
     it("should create business user with subscription, payment, and send set password email", async () => {
       // Arrange - Create verified user first
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "jane.business@test.com",
-          username: "janebusiness",
+          email: `jane.business-${timestamp}@test.com`,
+          username: `janebusiness${timestamp}`,
           firstName: "Jane",
           lastName: "Business",
           password: "hashed_password",
@@ -336,7 +339,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "jane.business@test.com",
+            email: `jane.business-${timestamp}@test.com`,
             firstName: "Jane",
             lastName: "Business",
             planType: "BUSINESS",
@@ -351,7 +354,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Jane Business",
-          email: "jane.business@test.com",
+          email: `jane.business-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -378,7 +381,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       // Assert - User Updated
       const updatedUser = await prisma.user.findUnique({
-        where: { email: "jane.business@test.com" },
+        where: { email: `jane.business-${timestamp}@test.com` },
       });
 
       expect(updatedUser).toBeDefined();
@@ -410,10 +413,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
     it("should create business user with annual subscription", async () => {
       // Arrange - Create verified user first
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "annual.business@test.com",
-          username: "annualbusiness",
+          email: `annual.business-${timestamp}@test.com`,
+          username: `annualbusiness${timestamp}`,
           firstName: "Annual",
           lastName: "Business",
           password: "hashed_password",
@@ -432,7 +436,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "annual.business@test.com",
+            email: `annual.business-${timestamp}@test.com`,
             firstName: "Annual",
             lastName: "Business",
             planType: "BUSINESS",
@@ -447,7 +451,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Annual Business",
-          email: "annual.business@test.com",
+          email: `annual.business-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -469,7 +473,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.received).toBe(true);
 
       const updatedUser = await prisma.user.findUnique({
-        where: { email: "annual.business@test.com" },
+        where: { email: `annual.business-${timestamp}@test.com` },
       });
       expect(updatedUser?.plan).toBe(UserPlan.BUSINESS);
 
@@ -485,10 +489,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   describe("Edge Cases - Duplicate Prevention", () => {
     it("should not create duplicate user if email already exists", async () => {
       // Arrange - Create existing user
+      const timestamp = Date.now();
       const existingUser = await prisma.user.create({
         data: {
-          email: "existing@test.com",
-          username: "existinguser",
+          email: `existing-${timestamp}@test.com`,
+          username: `existinguser${timestamp}`,
           firstName: "Existing",
           lastName: "User",
           password: "$2b$10$hashedpassword",
@@ -512,7 +517,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "existing@test.com", // Same email
+            email: `existing-${timestamp}@test.com`, // Same email
             firstName: "Duplicate",
             lastName: "Attempt",
             planType: "AGENCY",
@@ -525,7 +530,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Duplicate Attempt",
-          email: "existing@test.com",
+          email: `existing-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -548,7 +553,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       // Verify only one user exists with this email
       const users = await prisma.user.findMany({
-        where: { email: "existing@test.com" },
+        where: { email: `existing-${timestamp}@test.com` },
       });
       expect(users).toHaveLength(1);
       expect(users[0].id).toBe(existingUser.id);
@@ -572,10 +577,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
     it("should not process duplicate payment (same transaction ID)", async () => {
       // Arrange - Create verified user first
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "unique1@test.com",
-          username: "unique1",
+          email: `unique1-${timestamp}@test.com`,
+          username: `unique1${timestamp}`,
           firstName: "First",
           lastName: "User",
           password: "hashed_password",
@@ -595,7 +601,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "unique1@test.com",
+            email: `unique1-${timestamp}@test.com`,
             firstName: "First",
             lastName: "User",
             planType: "AGENCY",
@@ -608,7 +614,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "First User",
-          email: "unique1@test.com",
+          email: `unique1-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -633,7 +639,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         custom_data: {
           details: {
             ...firstWebhook.custom_data.details,
-            email: "unique2@test.com", // Different email but same transaction
+            email: `unique2-${timestamp}@test.com`, // Different email but same transaction
           },
         },
       };
@@ -650,7 +656,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       // Verify no new user created
       const user2 = await prisma.user.findUnique({
-        where: { email: "unique2@test.com" },
+        where: { email: `unique2-${timestamp}@test.com` },
       });
       expect(user2).toBeNull();
 
@@ -873,10 +879,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   describe("Edge Cases - Email Service Failure", () => {
     it("should handle set password email failure gracefully", async () => {
       // Arrange - Create verified user first (no email should be sent now)
+      const timestamp = Date.now();
       const user = await prisma.user.create({
         data: {
-          email: "pwdfail@test.com",
-          username: "pwdfail",
+          email: `pwdfail-${timestamp}@test.com`,
+          username: `pwdfail${timestamp}`,
           firstName: "Password",
           lastName: "Fail",
           password: "hashed_password",
@@ -899,7 +906,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "pwdfail@test.com",
+            email: `pwdfail-${timestamp}@test.com`,
             firstName: "Password",
             lastName: "Fail",
             planType: "BUSINESS",
@@ -912,7 +919,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Password Fail",
-          email: "pwdfail@test.com",
+          email: `pwdfail-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {
@@ -934,7 +941,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(response.received).toBe(true);
 
       const updatedUser = await prisma.user.findUnique({
-        where: { email: "pwdfail@test.com" },
+        where: { email: `pwdfail-${timestamp}@test.com` },
       });
       expect(updatedUser).toBeDefined();
       expect(updatedUser?.plan).toBe(UserPlan.BUSINESS);
@@ -947,10 +954,11 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   describe("Subscription Renewal", () => {
     it("should handle renewal for existing subscription without sending emails again", async () => {
       // Arrange - Create existing user and subscription
+      const timestamp = Date.now();
       const existingUser = await prisma.user.create({
         data: {
-          email: "renewal@test.com",
-          username: "renewaluser",
+          email: `renewal-${timestamp}@test.com`,
+          username: `renewaluser${timestamp}`,
           firstName: "Renewal",
           lastName: "User",
           password: "$2b$10$hashedpassword",
@@ -991,7 +999,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         created_date: new Date().toISOString(),
         custom_data: {
           details: {
-            email: "renewal@test.com",
+            email: `renewal-${timestamp}@test.com`,
             firstName: "Renewal",
             lastName: "User",
             planType: "AGENCY",
@@ -1003,7 +1011,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         },
         customer_details: {
           name: "Renewal User",
-          email: "renewal@test.com",
+          email: `renewal-${timestamp}@test.com`,
           phone_number: "+1234567890",
         },
         payment_method: {

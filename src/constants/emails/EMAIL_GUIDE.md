@@ -171,59 +171,57 @@ try {
 - [ ] Both languages have all required fields
 - [ ] Button text is clear and action-oriented
 
-### Step 7: Create SendGrid Integration
-Set up the email sending function:
+### Step 7: Send Email Directly Using SendGrid
+**NO helper files needed!** Import email functions directly from constants and use SendGrid inline:
 
 ```typescript
-// src/helpers/workspace/emails/invitation/index.ts
+// In your service/processor/controller file
 import sgMail from '@sendgrid/mail';
-import { getWorkspaceInvitationEmail, WorkspaceInvitationData } from '../../../../constants/emails/workspace/invitation';
+import {
+  getWorkspaceInvitationEmailHtml,
+  getWorkspaceInvitationEmailText,
+  WorkspaceInvitationData
+} from '../constants/emails/workspace/invitation';
 
-let initialized = false;
-
-function initialize() {
-  if (!initialized) {
-    const apiKey = process.env.SENDGRID_API_KEY;
-    if (!apiKey) {
-      throw new Error('SENDGRID_API_KEY is not configured');
-    }
-    sgMail.setApiKey(apiKey);
-    initialized = true;
+// Send email directly in your business logic
+try {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) {
+    throw new Error('SENDGRID_API_KEY is not configured');
   }
-}
+  sgMail.setApiKey(apiKey);
 
-export async function sendWorkspaceInvitationEmail(
-  to: string,
-  data: WorkspaceInvitationData
-): Promise<void> {
-  try {
-    initialize();
+  const emailData: WorkspaceInvitationData = {
+    recipientName: 'John Doe',
+    workspaceName: 'My Workspace',
+    inviterName: 'Jane Smith',
+    role: 'Editor',
+    invitationUrl: 'https://example.com/invite?token=abc'
+  };
 
-    const html = getWorkspaceInvitationEmail(data);
+  await sgMail.send({
+    to: 'user@example.com',
+    from: {
+      email: process.env.SENDGRID_FROM_EMAIL,
+      name: 'Digitalsite',
+    },
+    subject: 'Workspace Invitation | دعوة إلى مساحة العمل',
+    html: getWorkspaceInvitationEmailHtml(emailData),
+    text: getWorkspaceInvitationEmailText(emailData),
+  });
 
-    const msg = {
-      to,
-      from: {
-        email: process.env.SENDGRID_FROM_EMAIL,
-        name: 'Digitalsite',
-      },
-      subject: 'Workspace Invitation | دعوة إلى مساحة العمل',
-      html,
-    };
-
-    await sgMail.send(msg);
-  } catch (error: any) {
-    console.error('Error sending workspace invitation email:', error);
-    if (error.response && error.response.body) {
-      console.error(
-        'SendGrid error details:',
-        JSON.stringify(error.response.body, null, 2)
-      );
-    }
-    throw new Error('Failed to send workspace invitation email');
-  }
+  console.log('Email sent successfully');
+} catch (error) {
+  console.error('Failed to send email:', error);
+  // Handle error appropriately
 }
 ```
+
+**Why no helpers?**
+- ✅ Simpler architecture - one less layer
+- ✅ Email logic visible where it's used
+- ✅ Easier to customize per use case
+- ✅ No need to create/maintain separate helper files
 
 ### Step 8: Test the Email
 Perform comprehensive testing:
@@ -317,29 +315,28 @@ Final steps before production:
 ---
 
 ## Quick Reference: File Structure
-When creating a new email, follow this structure:
+When creating a new email, follow this simplified structure:
 
 ```
 src/
-├── constants/
-│   └── emails/
-│       ├── EMAIL_GUIDE.md (this file)
-│       ├── templates/
-│       │   └── base-template.ts (shared functions)
-│       └── [category]/
-│           └── [email-name].ts (email template)
-└── helpers/
-    └── [category]/
-        └── emails/
-            └── [email-name]/
-                └── index.ts (SendGrid sender)
+└── constants/
+    └── emails/
+        ├── EMAIL_GUIDE.md (this file)
+        ├── templates/
+        │   └── base-template.ts (shared functions)
+        └── [category]/
+            └── [email-name].ts (email template with HTML/text functions)
 ```
 
 **Example:**
 ```
-src/constants/emails/workspace/invitation.ts  → Template
-src/helpers/workspace/emails/invitation/index.ts  → Sender
+src/constants/emails/subscription/confirmation.ts
+  ↳ Contains: getSubscriptionConfirmationEmailHtml()
+  ↳ Contains: getSubscriptionConfirmationEmailText()
+  ↳ Import directly in your service/processor/controller
 ```
+
+**No helper files needed!** Import email functions directly where you send emails.
 
 ---
 

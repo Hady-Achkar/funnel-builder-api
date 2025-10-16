@@ -1136,7 +1136,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(result.clonedWorkspace).toHaveProperty("planType");
     });
 
-    it("should create workspace subdomain on digitalsite.com", async () => {
+    it("should create workspace subdomain on digitalsite.com (not associated to avoid consuming allocation)", async () => {
       // Clone a workspace
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
@@ -1150,18 +1150,17 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       // Verify workspace was created
       const clonedWorkspace = await prisma.workspace.findUnique({
         where: { id: result.clonedWorkspaceId },
-        include: { domains: true },
       });
 
       expect(clonedWorkspace).toBeTruthy();
-      expect(clonedWorkspace!.domains.length).toBeGreaterThan(0);
 
-      // Find workspace subdomain
-      const workspaceSubdomain = clonedWorkspace!.domains.find(
-        (d) =>
-          d.type === "SUBDOMAIN" &&
-          d.hostname.endsWith(".digitalsite.com")
-      );
+      // Find the subdomain in domains table (not associated with workspace)
+      const workspaceSubdomain = await prisma.domain.findFirst({
+        where: {
+          hostname: `${clonedWorkspace!.slug}.digitalsite.com`,
+          createdBy: buyerUserId,
+        },
+      });
 
       expect(workspaceSubdomain).toBeTruthy();
       expect(workspaceSubdomain!.hostname).toBe(
@@ -1169,7 +1168,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       );
       expect(workspaceSubdomain!.status).toBe("ACTIVE");
       expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
-      expect(workspaceSubdomain!.workspaceId).toBe(result.clonedWorkspaceId);
+      expect(workspaceSubdomain!.workspaceId).toBeNull(); // NOT associated with workspace
       expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
 
@@ -1191,20 +1190,22 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       });
 
       // Verify workspace has subdomain with correct format
-      const clonedWorkspaceWithDomain = await prisma.workspace.findUnique({
+      const clonedWorkspace = await prisma.workspace.findUnique({
         where: { id: result.clonedWorkspaceId },
-        include: { domains: true },
       });
 
-      expect(clonedWorkspaceWithDomain).toBeTruthy();
+      expect(clonedWorkspace).toBeTruthy();
 
       // Verify slug is based on username (buyer{timestamp})
-      expect(clonedWorkspaceWithDomain!.slug).toMatch(/^buyer\d+(-\d+)?$/);
+      expect(clonedWorkspace!.slug).toMatch(/^buyer\d+(-\d+)?$/);
 
-      // Find the workspace subdomain
-      const workspaceSubdomain = clonedWorkspaceWithDomain!.domains.find(
-        (d) => d.type === "SUBDOMAIN"
-      );
+      // Find the workspace subdomain (not associated with workspace)
+      const workspaceSubdomain = await prisma.domain.findFirst({
+        where: {
+          hostname: `${clonedWorkspace!.slug}.digitalsite.com`,
+          createdBy: buyerUserId,
+        },
+      });
 
       expect(workspaceSubdomain).toBeTruthy();
 
@@ -1214,13 +1215,13 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
       // Should match: buyer{timestamp}.digitalsite.com or buyer{timestamp}-2.digitalsite.com, etc.
       expect(workspaceSubdomain!.hostname).toBe(
-        `${clonedWorkspaceWithDomain!.slug}.digitalsite.com`
+        `${clonedWorkspace!.slug}.digitalsite.com`
       );
 
       // Verify subdomain properties
       expect(workspaceSubdomain!.status).toBe("ACTIVE");
       expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
-      expect(workspaceSubdomain!.workspaceId).toBe(result.clonedWorkspaceId);
+      expect(workspaceSubdomain!.workspaceId).toBeNull(); // NOT associated with workspace
       expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
 

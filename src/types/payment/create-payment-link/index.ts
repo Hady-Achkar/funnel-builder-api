@@ -27,9 +27,6 @@ export const createPaymentLinkRequest = z.object({
   termsAndConditionsUrl: z
     .string()
     .url("Terms and conditions URL must be a valid URL"),
-
-  // Optional
-  affiliateToken: z.string().optional(),
 });
 
 export type CreatePaymentLinkRequest = z.infer<typeof createPaymentLinkRequest>;

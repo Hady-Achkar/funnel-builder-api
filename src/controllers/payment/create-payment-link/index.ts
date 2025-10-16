@@ -28,6 +28,8 @@ export class CreatePaymentLinkController {
           firstName: true,
           lastName: true,
           verified: true,
+          registrationSource: true,
+          registrationToken: true,
         },
       });
 
@@ -44,11 +46,33 @@ export class CreatePaymentLinkController {
         );
       }
 
-      // 3. PROCESS AFFILIATE TOKEN (if provided)
+      // 2b. GET AFFILIATE TOKEN from user registration (if registered via affiliate)
+      let affiliateToken: string | null = null;
+      if (user.registrationSource === "AFFILIATE" && user.registrationToken) {
+        affiliateToken = user.registrationToken;
+        console.log(
+          "[CreatePaymentLink] Using affiliateToken from user registration:",
+          userId
+        );
+
+        // 2c. VALIDATE: For PLAN_PURCHASE, affiliate users can only purchase BUSINESS plan
+        if (
+          validatedData.paymentType === "PLAN_PURCHASE" &&
+          validatedData.planType !== "BUSINESS"
+        ) {
+          return next(
+            new BadRequestError(
+              "Users who registered via affiliate link can only purchase the Business Plan. Please select the Business Plan to continue."
+            )
+          );
+        }
+      }
+
+      // 3. PROCESS AFFILIATE TOKEN (from registration only)
       let affiliateData = null;
       let workspaceData = null;
 
-      if (validatedData.affiliateToken) {
+      if (affiliateToken) {
         // 3a. Validate JWT_SECRET exists
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) {
@@ -62,7 +86,7 @@ export class CreatePaymentLinkController {
         // 3b. Decode JWT token
         let decoded: any;
         try {
-          decoded = jwt.verify(validatedData.affiliateToken, jwtSecret);
+          decoded = jwt.verify(affiliateToken, jwtSecret);
         } catch (error) {
           return next(
             new BadRequestError(
@@ -73,7 +97,7 @@ export class CreatePaymentLinkController {
 
         // 3c. Verify affiliate link exists in database
         const affiliateLink = await prisma.affiliateLink.findUnique({
-          where: { token: validatedData.affiliateToken },
+          where: { token: affiliateToken },
           select: {
             id: true,
             token: true,
