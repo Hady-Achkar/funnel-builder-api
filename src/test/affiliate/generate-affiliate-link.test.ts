@@ -54,7 +54,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
     process.env.JWT_SECRET = "test-secret-key-for-affiliate-links";
     process.env.FRONTEND_URL = "https://testsite.com";
 
-    // Create a test user with commission percentage
+    // Create a test user with AGENCY plan (required for affiliate links)
     const testUser = await prisma.user.create({
       data: {
         email: testUserEmail,
@@ -62,7 +62,7 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
         firstName: "Test",
         lastName: "Affiliate",
         password: "hashed-password",
-        plan: "BUSINESS",
+        plan: "AGENCY", // Must be AGENCY to generate affiliate links
         verified: true,
         commissionPercentage: 20, // 20% commission
       },
@@ -397,6 +397,114 @@ describe("AffiliateLinkController.generateLink - Integration Tests", () => {
   });
 
   describe("Validation Errors", () => {
+    it("should reject non-AGENCY users with friendly message", async () => {
+      // Arrange - Create a BUSINESS plan user
+      const businessUser = await prisma.user.create({
+        data: {
+          email: `business-user-${Date.now()}@example.com`,
+          username: `businessuser${Date.now()}`,
+          firstName: "Business",
+          lastName: "User",
+          password: "hashed-password",
+          plan: "BUSINESS", // Not AGENCY
+          verified: true,
+          commissionPercentage: 15,
+        },
+      });
+
+      // Create workspace for business user
+      const businessWorkspace = await prisma.workspace.create({
+        data: {
+          name: "Business User Workspace",
+          slug: `business-workspace-${Date.now()}`,
+          ownerId: businessUser.id,
+          planType: "BUSINESS",
+          status: "ACTIVE",
+        },
+      });
+
+      const req = mockRequest(
+        {
+          name: "Test Link",
+          workspaceSlug: businessWorkspace.slug,
+        },
+        businessUser.id
+      );
+      const res = mockResponse();
+      const next = mockNext;
+
+      // Act
+      await AffiliateLinkController.generateLink(
+        req as AuthRequest,
+        res as Response,
+        next
+      );
+
+      // Assert - Should call next with user-friendly error
+      expect(next).toHaveBeenCalled();
+      const error = next.mock.calls[0][0];
+      expect(error.message).toMatch(/agency plan|upgrade to the agency plan/i);
+      expect(res.status).not.toHaveBeenCalled();
+
+      // Cleanup
+      await prisma.workspace.delete({ where: { id: businessWorkspace.id } });
+      await prisma.user.delete({ where: { id: businessUser.id } });
+    });
+
+    it("should reject FREE plan users with friendly message", async () => {
+      // Arrange - Create a FREE plan user
+      const freeUser = await prisma.user.create({
+        data: {
+          email: `free-user-${Date.now()}@example.com`,
+          username: `freeuser${Date.now()}`,
+          firstName: "Free",
+          lastName: "User",
+          password: "hashed-password",
+          plan: "FREE", // Not AGENCY
+          verified: true,
+          commissionPercentage: 10,
+        },
+      });
+
+      // Create workspace for free user
+      const freeWorkspace = await prisma.workspace.create({
+        data: {
+          name: "Free User Workspace",
+          slug: `free-workspace-${Date.now()}`,
+          ownerId: freeUser.id,
+          planType: "FREE",
+          status: "ACTIVE",
+        },
+      });
+
+      const req = mockRequest(
+        {
+          name: "Test Link",
+          workspaceSlug: freeWorkspace.slug,
+        },
+        freeUser.id
+      );
+      const res = mockResponse();
+      const next = mockNext;
+
+      // Act
+      await AffiliateLinkController.generateLink(
+        req as AuthRequest,
+        res as Response,
+        next
+      );
+
+      // Assert - Should call next with user-friendly error
+      expect(next).toHaveBeenCalled();
+      const error = next.mock.calls[0][0];
+      expect(error.message).toMatch(/agency plan|upgrade to the agency plan/i);
+      expect(res.status).not.toHaveBeenCalled();
+
+      // Cleanup
+      await prisma.workspace.delete({ where: { id: freeWorkspace.id } });
+      await prisma.user.delete({ where: { id: freeUser.id } });
+    });
+
     it("should return error when user not found (edge case)", async () => {
       // Arrange
       // This is an edge case - normally auth middleware ensures user exists

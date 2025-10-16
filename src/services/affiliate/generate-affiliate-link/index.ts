@@ -13,10 +13,11 @@ export class AffiliateLinkService {
   ): Promise<GenerateAffiliateLinkResponse> {
     const prisma = getPrisma();
 
-    // 1. GET USER COMMISSION PERCENTAGE
+    // 1. GET USER DATA AND VALIDATE AGENCY PLAN
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        plan: true,
         commissionPercentage: true,
       },
     });
@@ -24,6 +25,13 @@ export class AffiliateLinkService {
     // User should always exist (authenticated by controller)
     if (!user) {
       throw new Error("User not found - this should not happen");
+    }
+
+    // Only AGENCY users can generate affiliate links
+    if (user.plan !== "AGENCY") {
+      throw new BadRequestError(
+        "Only Agency plan users can generate affiliate links. Please upgrade to the Agency plan to access this feature."
+      );
     }
 
     // 2. VALIDATE WORKSPACE EXISTS AND USER OWNS IT
