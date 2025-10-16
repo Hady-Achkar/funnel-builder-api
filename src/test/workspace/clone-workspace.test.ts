@@ -424,8 +424,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         planType: "BUSINESS",
       });
 
-      // Slug should be based on buyer's lastName (User -> user)
-      expect(result.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
+      // Slug should be based on buyer's username (buyer{timestamp})
+      expect(result.clonedWorkspace.slug).toMatch(/^buyer\d+(-\d+)?$/);
       expect(result.clonedWorkspace.slug).not.toBe(workspaceSlug);
 
       clonedWorkspaceId = result.clonedWorkspaceId;
@@ -525,9 +525,9 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         planType: "BUSINESS",
       });
 
-      // Both should be based on buyer's lastName (User -> user)
-      expect(result1.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
-      expect(result2.clonedWorkspace.slug).toMatch(/^user(-\d+)?$/);
+      // Both should be based on buyer's username (buyer{timestamp})
+      expect(result1.clonedWorkspace.slug).toMatch(/^buyer\d+(-\d+)?$/);
+      expect(result2.clonedWorkspace.slug).toMatch(/^buyer\d+(-\d+)?$/);
       expect(result1.clonedWorkspace.slug).not.toBe(result2.clonedWorkspace.slug);
 
       // Second clone should have incremental number (-2, -3, etc.)
@@ -1173,7 +1173,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
 
-    it("should create subdomain based on buyer's lastName", async () => {
+    it("should create subdomain based on buyer's username", async () => {
       // Clone workspace
       const result = await CloneWorkspaceService.cloneWorkspace({
         sourceWorkspaceId: sourceWorkspaceId,
@@ -1184,10 +1184,10 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
       clonedWorkspaceId = result.clonedWorkspaceId;
 
-      // Get buyer's lastName to verify slug naming
+      // Get buyer's username to verify slug naming
       const buyer = await prisma.user.findUnique({
         where: { id: buyerUserId },
-        select: { lastName: true },
+        select: { username: true },
       });
 
       // Verify workspace has subdomain with correct format
@@ -1198,8 +1198,8 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
       expect(clonedWorkspaceWithDomain).toBeTruthy();
 
-      // Verify slug is based on lastName (User -> user)
-      expect(clonedWorkspaceWithDomain!.slug).toMatch(/^user(-\d+)?$/);
+      // Verify slug is based on username (buyer{timestamp})
+      expect(clonedWorkspaceWithDomain!.slug).toMatch(/^buyer\d+(-\d+)?$/);
 
       // Find the workspace subdomain
       const workspaceSubdomain = clonedWorkspaceWithDomain!.domains.find(
@@ -1208,11 +1208,11 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
       expect(workspaceSubdomain).toBeTruthy();
 
-      // Subdomain should be based on buyer's lastName
-      const expectedPattern = new RegExp(`^user(-\\d+)?\\.digitalsite\\.com$`);
+      // Subdomain should be based on buyer's username
+      const expectedPattern = new RegExp(`^buyer\\d+(-\\d+)?\\.digitalsite\\.com$`);
       expect(workspaceSubdomain!.hostname).toMatch(expectedPattern);
 
-      // Should match: user.digitalsite.com or user-2.digitalsite.com, etc.
+      // Should match: buyer{timestamp}.digitalsite.com or buyer{timestamp}-2.digitalsite.com, etc.
       expect(workspaceSubdomain!.hostname).toBe(
         `${clonedWorkspaceWithDomain!.slug}.digitalsite.com`
       );

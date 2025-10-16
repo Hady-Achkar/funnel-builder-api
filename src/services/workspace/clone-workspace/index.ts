@@ -68,8 +68,7 @@ export class CloneWorkspaceService {
         where: { id: data.newOwnerId },
         select: {
           id: true,
-          lastName: true,
-          firstName: true,
+          username: true,
         },
       });
 
@@ -77,9 +76,9 @@ export class CloneWorkspaceService {
         throw new BadRequestError("New owner not found");
       }
 
-      // 4. GENERATE UNIQUE SLUG BASED ON NEW OWNER'S LAST NAME
-      // Use lastName as base slug, fallback to firstName if no lastName
-      const baseSlug = (newOwner.lastName || newOwner.firstName || "workspace")
+      // 4. GENERATE UNIQUE SLUG BASED ON NEW OWNER'S USERNAME
+      // Use username as base slug (usernames are unique in the database)
+      const baseSlug = newOwner.username
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphens
         .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
