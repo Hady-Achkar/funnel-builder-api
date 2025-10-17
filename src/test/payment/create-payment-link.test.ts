@@ -211,7 +211,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token, not request body
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Business Plan - Monthly",
             planDescription: "Full access to business features",
@@ -235,7 +235,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             link_url: "https://mamopay.com/pay/abc123",
             payment_url: "https://mamopay.com/checkout/abc123",
             title: "Business Plan", // From centralized pricing
-            description: "Full access to business features with unlimited funnels and advanced analytics", // From centralized pricing
+            description: "Full access to business features with unlimited funnels & analytics", // From centralized pricing
             amount: 999, // From centralized pricing ($999/year for DIRECT BUSINESS)
             amount_currency: "USD",
             active: true,
@@ -274,7 +274,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           lastName: "Seller", // From authenticated user
           // email will be seller's email from auth token
           planType: "BUSINESS",
-          paymentType: "PLAN_PURCHASE",
+          
           frequency: "annually", // From centralized pricing
           frequencyInterval: 1,
           trialDays: 0, // From centralized pricing
@@ -298,7 +298,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "AGENCY",
             planTitle: "Agency Plan",
             planDescription: "Premium features",
@@ -375,7 +375,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Business Plan",
             planDescription: "Auto-populated affiliate",
@@ -446,7 +446,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
 
         const req = mockRequest(
           {
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "AGENCY", // ❌ Not allowed for affiliate users!
             planTitle: "Agency Plan",
             planDescription: "Should be rejected",
@@ -496,7 +496,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Business Plan",
             planDescription: "Via affiliate",
@@ -586,7 +586,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Business Plan with Workspace",
             planDescription: "Complete workspace purchase",
@@ -631,7 +631,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(payload.custom_data.details).toMatchObject({
           firstName: "Workspace", // From authenticated user
           lastName: "Buyer", // From authenticated user
-          paymentType: "PLAN_PURCHASE",
+          
           planType: "BUSINESS", // Workspace purchases use BUSINESS plan
           workspaceId: testAgencyWorkspaceId,
           workspaceName: "Premium Agency Workspace",
@@ -666,7 +666,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Business Workspace",
             planDescription: "Should be rejected",
@@ -773,7 +773,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS", // Workspace purchases use BUSINESS plan
             planTitle: "Workspace Ownership Test",
             planDescription: "Should succeed with correct workspace",
@@ -850,7 +850,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token (existingUser)
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Test",
             planDescription: "Test",
@@ -914,7 +914,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Test",
             planDescription: "Test",
@@ -978,7 +978,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "PLAN_PURCHASE",
+            
             planType: "BUSINESS",
             planTitle: "Test",
             planDescription: "Test",
@@ -1019,7 +1019,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
       const req = mockRequest(
         {
           // User details now come from auth token
-          paymentType: "PLAN_PURCHASE",
+          
           planType: "BUSINESS",
           planTitle: "Test",
           planDescription: "Test",

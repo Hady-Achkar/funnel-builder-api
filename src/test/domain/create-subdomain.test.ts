@@ -220,13 +220,13 @@ describe("Create Subdomain Tests", () => {
       expect(result.domain.hostname).toBe(`${subdomain}.mydigitalsite.io`);
     });
 
-    it("should respect EXTRA_DOMAIN add-ons for increased limits", async () => {
+    it("should respect EXTRA_SUBDOMAIN add-ons for increased limits", async () => {
       mockPrisma.workspace.findUnique.mockResolvedValue({
         ...mockWorkspace,
         planType: UserPlan.FREE,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_SUBDOMAIN,
             quantity: 2,
             status: "ACTIVE",
           },
@@ -253,7 +253,7 @@ describe("Create Subdomain Tests", () => {
         planType: UserPlan.FREE,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_SUBDOMAIN,
             quantity: 2,
             status: "ACTIVE",
           },
@@ -276,7 +276,7 @@ describe("Create Subdomain Tests", () => {
         planType: UserPlan.FREE,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_SUBDOMAIN,
             quantity: 2,
             status: "INACTIVE", // Inactive add-on
           },

@@ -171,7 +171,7 @@ export class CreatePaymentLinkController {
       // 6. CALL SERVICE with processed data and pricing config
       const result = await CreatePaymentLinkService.createPaymentLink(
         {
-          paymentType: validatedData.paymentType,
+          paymentType: "PLAN_PURCHASE", // Implicit for this endpoint
           planType: validatedData.planType,
           ...pricingConfig, // Spread pricing config (amount, title, description, frequency, etc.)
           ...metadata, // Spread metadata (returnUrl, failureReturnUrl, termsAndConditionsUrl)

@@ -43,11 +43,11 @@ export class WorkspaceCustomDomainAllocations {
     // Start with base allocation from workspace plan type
     let totalCustomDomains = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra custom domains from active EXTRA_DOMAIN add-ons
+    // Add extra custom domains from active EXTRA_CUSTOM_DOMAIN add-ons
     const extraCustomDomains = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_DOMAIN && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_CUSTOM_DOMAIN && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

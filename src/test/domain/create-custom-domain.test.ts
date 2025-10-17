@@ -273,13 +273,13 @@ describe("Create Custom Domain Tests", () => {
       expect(result.domain.hostname).toBe(hostname);
     });
 
-    it("should respect EXTRA_DOMAIN add-ons for increased limits", async () => {
+    it("should respect EXTRA_CUSTOM_DOMAIN add-ons for increased limits", async () => {
       mockPrisma.workspace.findUnique.mockResolvedValue({
         ...mockWorkspace,
         planType: UserPlan.BUSINESS,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_CUSTOM_DOMAIN,
             quantity: 2,
             status: "ACTIVE",
           },
@@ -312,7 +312,7 @@ describe("Create Custom Domain Tests", () => {
         planType: UserPlan.BUSINESS,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_CUSTOM_DOMAIN,
             quantity: 2,
             status: "ACTIVE",
           },
@@ -329,13 +329,13 @@ describe("Create Custom Domain Tests", () => {
       ).rejects.toThrow(/maximum limit of 3 custom domain/);
     });
 
-    it("should allow FREE plan with EXTRA_DOMAIN add-ons", async () => {
+    it("should allow FREE plan with EXTRA_CUSTOM_DOMAIN add-ons", async () => {
       mockPrisma.workspace.findUnique.mockResolvedValue({
         ...mockWorkspace,
         planType: UserPlan.FREE,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_CUSTOM_DOMAIN,
             quantity: 1,
             status: "ACTIVE",
           },
@@ -367,7 +367,7 @@ describe("Create Custom Domain Tests", () => {
         planType: UserPlan.BUSINESS,
         addOns: [
           {
-            type: AddOnType.EXTRA_DOMAIN,
+            type: AddOnType.EXTRA_CUSTOM_DOMAIN,
             quantity: 2,
             status: "INACTIVE", // Inactive add-on
           },

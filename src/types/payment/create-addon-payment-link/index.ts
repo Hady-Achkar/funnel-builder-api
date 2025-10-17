@@ -1,13 +1,16 @@
 import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
-export const createPaymentLinkRequest = z.object({
-  planType: z.nativeEnum($Enums.UserPlan),
+export const createAddonPaymentLinkRequest = z.object({
+  addonType: z.nativeEnum($Enums.AddOnType),
+  workspaceSlug: z.string().min(1).optional(),
 });
 
-export type CreatePaymentLinkRequest = z.infer<typeof createPaymentLinkRequest>;
+export type CreateAddonPaymentLinkRequest = z.infer<
+  typeof createAddonPaymentLinkRequest
+>;
 
-export const createPaymentLinkResponse = z.object({
+export const createAddonPaymentLinkResponse = z.object({
   message: z.string(),
   paymentLink: z.object({
     id: z.string(),
@@ -22,10 +25,10 @@ export const createPaymentLinkResponse = z.object({
     trialPeriodDays: z.number(),
     active: z.boolean(),
     createdDate: z.string(),
-    planType: z.nativeEnum($Enums.UserPlan),
+    addonType: z.nativeEnum($Enums.AddOnType),
   }),
 });
 
-export type CreatePaymentLinkResponse = z.infer<
-  typeof createPaymentLinkResponse
+export type CreateAddonPaymentLinkResponse = z.infer<
+  typeof createAddonPaymentLinkResponse
 >;

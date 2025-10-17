@@ -394,11 +394,12 @@ describe("Create Workspace", () => {
 | GET    | `/api/affiliate`               | GetAllAffiliateLinksController.getAllAffiliateLinks | ❌ TODO |
 | POST   | `/api/affiliate/click`         | AffiliateLinkClickController.trackClick             | ❌ TODO |
 
-### Payment Routes (1 route)
+### Payment Routes (2 routes)
 
-| Method | Path                               | Controller                                    | Status  |
-| ------ | ---------------------------------- | --------------------------------------------- | ------- |
-| POST   | `/api/payment/create-payment-link` | CreatePaymentLinkController.createPaymentLink | ❌ TODO |
+| Method | Path                                    | Controller                                          | Status  |
+| ------ | --------------------------------------- | --------------------------------------------------- | ------- |
+| POST   | `/api/payment/create-payment-link`      | CreatePaymentLinkController.createPaymentLink       | ✅ DONE |
+| POST   | `/api/payment/create-addon-payment-link`| CreateAddonPaymentLinkController.createAddonPaymentLink | ✅ DONE |
 
 ### Subscription Routes (1 route)
 

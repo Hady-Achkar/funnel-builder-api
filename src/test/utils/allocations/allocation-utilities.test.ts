@@ -422,11 +422,11 @@ describe('Allocation Utilities', () => {
     });
 
     describe('calculateTotalAllocation', () => {
-      it('should add EXTRA_DOMAIN add-ons to base allocation', () => {
+      it('should add EXTRA_SUBDOMAIN add-ons to base allocation', () => {
         const total = WorkspaceSubdomainAllocations.calculateTotalAllocation({
           workspacePlanType: UserPlan.AGENCY,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 5, status: 'ACTIVE' }
+            { type: AddOnType.EXTRA_SUBDOMAIN, quantity: 5, status: 'ACTIVE' }
           ]
         });
         expect(total).toBe(6); // 1 base + 5 from add-ons
@@ -436,8 +436,8 @@ describe('Allocation Utilities', () => {
         const total = WorkspaceSubdomainAllocations.calculateTotalAllocation({
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 2, status: 'ACTIVE' },
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 3, status: 'INACTIVE' }
+            { type: AddOnType.EXTRA_SUBDOMAIN, quantity: 2, status: 'ACTIVE' },
+            { type: AddOnType.EXTRA_SUBDOMAIN, quantity: 3, status: 'INACTIVE' }
           ]
         });
         expect(total).toBe(3); // 1 base + 2 from active add-ons only
@@ -463,7 +463,7 @@ describe('Allocation Utilities', () => {
         const canCreate = WorkspaceSubdomainAllocations.canCreateSubdomain(2, {
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 3, status: 'ACTIVE' }
+            { type: AddOnType.EXTRA_SUBDOMAIN, quantity: 3, status: 'ACTIVE' }
           ]
         });
         expect(canCreate).toBe(true); // 2 < 4 (1 base + 3 add-ons)
@@ -500,11 +500,11 @@ describe('Allocation Utilities', () => {
     });
 
     describe('calculateTotalAllocation', () => {
-      it('should add EXTRA_DOMAIN add-ons to base allocation', () => {
+      it('should add EXTRA_CUSTOM_DOMAIN add-ons to base allocation', () => {
         const total = WorkspaceCustomDomainAllocations.calculateTotalAllocation({
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 2, status: 'ACTIVE' }
+            { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 2, status: 'ACTIVE' }
           ]
         });
         expect(total).toBe(3); // 1 base + 2 from add-ons
@@ -514,8 +514,8 @@ describe('Allocation Utilities', () => {
         const total = WorkspaceCustomDomainAllocations.calculateTotalAllocation({
           workspacePlanType: UserPlan.AGENCY,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 3, status: 'ACTIVE' },
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 5, status: 'INACTIVE' }
+            { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 3, status: 'ACTIVE' },
+            { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 5, status: 'INACTIVE' }
           ]
         });
         expect(total).toBe(3); // 0 base + 3 from active add-ons only
@@ -541,7 +541,7 @@ describe('Allocation Utilities', () => {
         const canCreate = WorkspaceCustomDomainAllocations.canCreateCustomDomain(1, {
           workspacePlanType: UserPlan.AGENCY,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 4, status: 'ACTIVE' }
+            { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 4, status: 'ACTIVE' }
           ]
         });
         expect(canCreate).toBe(true); // 1 < 4 (0 base + 4 add-ons)
@@ -553,7 +553,7 @@ describe('Allocation Utilities', () => {
         const summary = WorkspaceCustomDomainAllocations.getAllocationSummary(0, {
           workspacePlanType: UserPlan.AGENCY,
           addOns: [
-            { type: AddOnType.EXTRA_DOMAIN, quantity: 2, status: 'ACTIVE' }
+            { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 2, status: 'ACTIVE' }
           ]
         });
 
@@ -619,7 +619,8 @@ describe('Allocation Utilities', () => {
       const addOns = [
         { type: AddOnType.EXTRA_WORKSPACE, quantity: 1, status: 'ACTIVE' },
         { type: AddOnType.EXTRA_FUNNEL, quantity: 3, status: 'ACTIVE' },
-        { type: AddOnType.EXTRA_DOMAIN, quantity: 2, status: 'ACTIVE' },
+        { type: AddOnType.EXTRA_SUBDOMAIN, quantity: 2, status: 'ACTIVE' },
+        { type: AddOnType.EXTRA_CUSTOM_DOMAIN, quantity: 2, status: 'ACTIVE' },
         { type: AddOnType.EXTRA_PAGE, quantity: 2, status: 'ACTIVE' }
       ];
 

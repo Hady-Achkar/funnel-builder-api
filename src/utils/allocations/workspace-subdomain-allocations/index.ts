@@ -43,11 +43,11 @@ export class WorkspaceSubdomainAllocations {
     // Start with base allocation from workspace plan type
     let totalSubdomains = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra subdomains from active EXTRA_DOMAIN add-ons
+    // Add extra subdomains from active EXTRA_SUBDOMAIN add-ons
     const extraSubdomains = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_DOMAIN && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_SUBDOMAIN && addon.status === "ACTIVE"
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

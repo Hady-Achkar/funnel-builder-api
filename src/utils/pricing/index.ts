@@ -13,7 +13,8 @@ const PRICING = {
       BUSINESS: {
         amount: 999,
         title: "Business Plan",
-        description: "Full access to business features with unlimited funnels and advanced analytics",
+        description:
+          "Full access to business features with unlimited funnels & analytics",
         frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -21,7 +22,8 @@ const PRICING = {
       AGENCY: {
         amount: 50,
         title: "Partner Plan",
-        description: "Enterprise-level features for agencies and partners with white-label options",
+        description:
+          "Enterprise features for agencies & partners with white-label options",
         frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -31,7 +33,8 @@ const PRICING = {
       BUSINESS: {
         amount: 299,
         title: "Business Plan",
-        description: "Full access to business features via partner program with exclusive pricing",
+        description:
+          "Full access to business features via partner program with exclusive pricing",
         frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -63,20 +66,31 @@ const PRICING = {
       EXTRA_PAGE: {
         amount: 10,
         title: "Extra Pages",
-        description: "Add 5 additional pages per funnel to your Business workspace",
+        description:
+          "Add 5 additional pages per funnel to your Business workspace",
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
         effectDescription: "+5 pages per funnel",
       },
-      EXTRA_DOMAIN: {
+      EXTRA_SUBDOMAIN: {
         amount: 5,
-        title: "Extra Domain",
-        description: "Add an additional domain (subdomain or custom) to your Business workspace",
+        title: "Extra Subdomain",
+        description: "Add an additional subdomain to your Business workspace",
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
-        effectDescription: "+1 domain slot",
+        effectDescription: "+1 subdomain slot",
+      },
+      EXTRA_CUSTOM_DOMAIN: {
+        amount: 5,
+        title: "Extra Custom Domain",
+        description:
+          "Add an additional custom domain to your Business workspace",
+        frequency: "monthly" as const,
+        frequencyInterval: 1,
+        freeTrialPeriodInDays: 0,
+        effectDescription: "+1 custom domain slot",
       },
     },
     AGENCY: {
@@ -97,26 +111,18 @@ const PRICING = {
   userAddons: {
     BUSINESS: {
       EXTRA_WORKSPACE: {
-        amount: 25,
+        amount: 999,
         title: "Extra Workspace",
-        description: "Add an additional workspace slot to your Business account",
+        description:
+          "Add an additional workspace slot to your Business account",
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
         effectDescription: "+1 workspace slot",
       },
     },
-    AGENCY: {
-      EXTRA_WORKSPACE: {
-        amount: 20,
-        title: "Extra Workspace",
-        description: "Add an additional workspace slot to your Agency account",
-        frequency: "monthly" as const,
-        frequencyInterval: 1,
-        freeTrialPeriodInDays: 0,
-        effectDescription: "+1 workspace slot",
-      },
-    },
+    // AGENCY users have unlimited workspaces, so no EXTRA_WORKSPACE addon needed
+    AGENCY: {},
   },
 
   // 🔗 METADATA
@@ -224,14 +230,26 @@ export class PaymentLinkPricing {
 
       // User-friendly messages for disallowed addons
       const addonMessages: Record<$Enums.AddOnType, string> = {
-        [$Enums.AddOnType.EXTRA_FUNNEL]: "Additional funnels are not available for your workspace.",
-        [$Enums.AddOnType.EXTRA_PAGE]: "Additional pages are not available for your workspace.",
-        [$Enums.AddOnType.EXTRA_DOMAIN]: "Additional domains are not available for your workspace.",
-        [$Enums.AddOnType.EXTRA_WORKSPACE]: "To add more workspaces, please purchase from your account settings.",
+        [$Enums.AddOnType.EXTRA_FUNNEL]:
+          "Additional funnels are not available for your workspace.",
+        [$Enums.AddOnType.EXTRA_PAGE]:
+          "Additional pages are not available for your workspace.",
+        [$Enums.AddOnType.EXTRA_SUBDOMAIN]:
+          "Additional subdomains are not available for your workspace.",
+        [$Enums.AddOnType.EXTRA_CUSTOM_DOMAIN]:
+          "Additional custom domains are not available for your workspace.",
+        [$Enums.AddOnType.EXTRA_WORKSPACE]:
+          "Agency plan users already have unlimited workspaces. No need to purchase additional workspace slots.",
         [$Enums.AddOnType.EXTRA_ADMIN]: "",
       };
 
-      return addonMessages[addonType] || "This add-on is not available for your workspace.";
+      return (
+        addonMessages[addonType] ||
+        "This add-on is not available for your workspace."
+      );
+    }
+    if (workspacePlanType === $Enums.UserPlan.BUSINESS) {
+      return "This add-on is not available for your plan.";
     }
 
     // For other workspace types, generic message
