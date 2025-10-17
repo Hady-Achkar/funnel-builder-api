@@ -201,14 +201,58 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       where: { affiliateLinkId: affiliateLinkId },
     });
 
-    // 6. Delete domains created by buyers (to avoid foreign key constraint)
-    await prisma.domain.deleteMany({
+    // 6. Delete orphaned domains created by buyers (workspaceId = null)
+    const orphanedDomains = await prisma.domain.findMany({
       where: {
         creator: {
           referralLinkUsedId: affiliateLinkId,
         },
+        workspaceId: null, // Only get orphaned domains
+      },
+      select: {
+        id: true,
+        hostname: true,
+        cloudflareRecordId: true,
+        cloudflareZoneId: true,
+        type: true,
       },
     });
+
+    // Delete Cloudflare DNS records first for orphaned domains
+    for (const domain of orphanedDomains) {
+      if (
+        domain.type === "SUBDOMAIN" &&
+        domain.cloudflareRecordId &&
+        domain.cloudflareZoneId
+      ) {
+        try {
+          await deleteARecord(
+            domain.cloudflareRecordId,
+            domain.cloudflareZoneId
+          );
+          console.log(
+            `✅ Deleted orphaned Cloudflare DNS record for: ${domain.hostname}`
+          );
+        } catch (error: any) {
+          console.error(
+            `⚠️ Failed to delete orphaned Cloudflare DNS for ${domain.hostname}:`,
+            error.message
+          );
+          // Continue cleanup even if Cloudflare deletion fails
+        }
+      }
+    }
+
+    // Then delete orphaned domains from database
+    if (orphanedDomains.length > 0) {
+      await prisma.domain.deleteMany({
+        where: {
+          id: {
+            in: orphanedDomains.map((d) => d.id),
+          },
+        },
+      });
+    }
 
     // 7. Delete cloned workspaces (owned by buyers)
     await prisma.workspace.deleteMany({
