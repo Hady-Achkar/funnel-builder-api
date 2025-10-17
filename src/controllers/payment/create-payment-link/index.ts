@@ -6,6 +6,7 @@ import { BadRequestError } from "../../../errors";
 import { getPrisma } from "../../../lib/prisma";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../../../middleware/auth";
+import { PaymentLinkPricing } from "../../../utils/pricing";
 
 export class CreatePaymentLinkController {
   static async createPaymentLink(
@@ -46,7 +47,28 @@ export class CreatePaymentLinkController {
         );
       }
 
-      // 2b. GET AFFILIATE TOKEN from user registration (if registered via affiliate)
+      // 3. GET PRICING from centralized config
+      const pricingConfig = PaymentLinkPricing.getPlanPurchasePricing(
+        user.registrationSource,
+        validatedData.planType
+      );
+
+      if (!pricingConfig) {
+        const errorMessage = PaymentLinkPricing.getDisallowedPlanMessage(
+          user.registrationSource,
+          validatedData.planType
+        );
+        return next(new BadRequestError(errorMessage));
+      }
+
+      const metadata = PaymentLinkPricing.getMetadata();
+
+      console.log(
+        "[CreatePaymentLink] Pricing config:",
+        JSON.stringify(pricingConfig, null, 2)
+      );
+
+      // 4. GET AFFILIATE TOKEN from user registration (if registered via affiliate)
       let affiliateToken: string | null = null;
       if (user.registrationSource === "AFFILIATE" && user.registrationToken) {
         affiliateToken = user.registrationToken;
@@ -54,26 +76,14 @@ export class CreatePaymentLinkController {
           "[CreatePaymentLink] Using affiliateToken from user registration:",
           userId
         );
-
-        // 2c. VALIDATE: For PLAN_PURCHASE, affiliate users can only purchase BUSINESS plan
-        if (
-          validatedData.paymentType === "PLAN_PURCHASE" &&
-          validatedData.planType !== "BUSINESS"
-        ) {
-          return next(
-            new BadRequestError(
-              "Users who registered via affiliate link can only purchase the Business Plan. Please select the Business Plan to continue."
-            )
-          );
-        }
       }
 
-      // 3. PROCESS AFFILIATE TOKEN (from registration only)
+      // 5. PROCESS AFFILIATE TOKEN (from registration only)
       let affiliateData = null;
       let workspaceData = null;
 
       if (affiliateToken) {
-        // 3a. Validate JWT_SECRET exists
+        // 5a. Validate JWT_SECRET exists
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) {
           return next(
@@ -83,7 +93,7 @@ export class CreatePaymentLinkController {
           );
         }
 
-        // 3b. Decode JWT token
+        // 5b. Decode JWT token
         let decoded: any;
         try {
           decoded = jwt.verify(affiliateToken, jwtSecret);
@@ -95,7 +105,7 @@ export class CreatePaymentLinkController {
           );
         }
 
-        // 3c. Verify affiliate link exists in database
+        // 5c. Verify affiliate link exists in database
         const affiliateLink = await prisma.affiliateLink.findUnique({
           where: { token: affiliateToken },
           select: {
@@ -115,7 +125,7 @@ export class CreatePaymentLinkController {
           );
         }
 
-        // 3d. Build affiliate data (use commissionPercentage from JWT)
+        // 5d. Build affiliate data (use commissionPercentage from JWT)
         affiliateData = {
           id: affiliateLink.id,
           token: affiliateLink.token,
@@ -124,8 +134,8 @@ export class CreatePaymentLinkController {
           commissionPercentage: decoded.commissionPercentage,
         };
 
-        // 3e. If WORKSPACE_PURCHASE, validate workspace
-        if (validatedData.paymentType === "WORKSPACE_PURCHASE") {
+        // 5e. If affiliate link contains workspace data, validate the workspace (workspace purchase)
+        if (decoded.workspaceId) {
           const workspace = await prisma.workspace.findFirst({
             where: {
               id: decoded.workspaceId,
@@ -156,20 +166,16 @@ export class CreatePaymentLinkController {
           // Add workspaceId to affiliate data
           affiliateData.workspaceId = workspace.id;
         }
-      } else {
-        // 3f. WORKSPACE_PURCHASE requires affiliate token
-        if (validatedData.paymentType === "WORKSPACE_PURCHASE") {
-          return next(
-            new BadRequestError(
-              "Workspace purchases require an affiliate link. Please use a valid workspace purchase link."
-            )
-          );
-        }
       }
 
-      // 4. CALL SERVICE with processed data
+      // 6. CALL SERVICE with processed data and pricing config
       const result = await CreatePaymentLinkService.createPaymentLink(
-        validatedData,
+        {
+          paymentType: validatedData.paymentType,
+          planType: validatedData.planType,
+          ...pricingConfig, // Spread pricing config (amount, title, description, frequency, etc.)
+          ...metadata, // Spread metadata (returnUrl, failureReturnUrl, termsAndConditionsUrl)
+        },
         {
           email: user.email,
           firstName: user.firstName,
@@ -179,7 +185,7 @@ export class CreatePaymentLinkController {
         workspaceData
       );
 
-      // 5. SEND RESPONSE
+      // 7. SEND RESPONSE
       res.status(200).json(result);
     } catch (error) {
       // Handle Zod validation errors

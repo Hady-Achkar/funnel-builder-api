@@ -17,7 +17,7 @@ export const WebhookPaymentDetails = z.object({
   lastName: z.string(),
   planType: z.string(), // BUSINESS, AGENCY, etc.
   frequency: z.string(), // monthly, annually
-  paymentType: z.string(), // WORKSPACE_PURCHASE, PLAN_PURCHASE, ADD_ONS
+  paymentType: z.string(), 
   trialDays: z.number().optional(),
   trialEndDate: z.string().optional(),
   frequencyInterval: z.number().optional(),

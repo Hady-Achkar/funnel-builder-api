@@ -632,7 +632,6 @@ enum PaymentType {
   PLAN_PURCHASE
   ADDON_PURCHASE
   ADDON_RENEWAL
-  WORKSPACE_PURCHASE
 }
 
 enum WorkspaceRole {

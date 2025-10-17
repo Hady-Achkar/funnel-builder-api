@@ -119,18 +119,6 @@ export class PaymentWebhookService {
         };
       }
 
-      if (paymentType === "WORKSPACE_PURCHASE") {
-        // TODO: Implement workspace purchase processor
-        console.log(
-          "[Webhook] WORKSPACE_PURCHASE processing not yet implemented"
-        );
-        return {
-          received: true,
-          ignored: true,
-          reason: "WORKSPACE_PURCHASE processing not yet implemented",
-        };
-      }
-
       if (paymentType === "ADD_ONS") {
         // TODO: Implement add-ons processor
         console.log("[Webhook] ADD_ONS processing not yet implemented");

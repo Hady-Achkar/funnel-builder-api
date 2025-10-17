@@ -235,7 +235,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
         currency: "USD",
         status: "captured",
         itemType: "BUSINESS",
-        paymentType: "WORKSPACE_PURCHASE",
+        paymentType: "PLAN_PURCHASE",
         buyerId: buyerUserId,
         workspaceId: sourceWorkspaceId,
       },
@@ -343,7 +343,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -370,7 +370,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -412,7 +412,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -447,7 +447,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -493,7 +493,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -513,7 +513,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -570,7 +570,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -710,7 +710,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "AGENCY",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -946,7 +946,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -1009,7 +1009,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -1071,7 +1071,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });
@@ -1234,7 +1234,7 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
           currency: "USD",
           status: "captured",
           itemType: "BUSINESS",
-          paymentType: "WORKSPACE_PURCHASE",
+          paymentType: "PLAN_PURCHASE",
           buyerId: buyerUserId,
         },
       });

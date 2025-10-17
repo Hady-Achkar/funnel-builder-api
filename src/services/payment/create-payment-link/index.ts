@@ -3,6 +3,22 @@ import {
   CreatePaymentLinkResponse,
 } from "../../../types/payment/create-payment-link";
 import { BadRequestError } from "../../../errors/http-errors";
+import { PaymentType, UserPlan } from "../../../generated/prisma-client";
+
+// Type for enriched payment link data (includes pricing config)
+interface EnrichedPaymentLinkData {
+  paymentType: PaymentType;
+  planType: UserPlan;
+  amount: number;
+  title: string;
+  description: string;
+  frequency: "monthly" | "annually" | "weekly";
+  frequencyInterval: number;
+  freeTrialPeriodInDays: number;
+  returnUrl: string;
+  failureReturnUrl: string;
+  termsAndConditionsUrl: string;
+}
 
 // Type for processed affiliate data from controller
 interface AffiliateData {
@@ -11,7 +27,7 @@ interface AffiliateData {
   itemType: string;
   userId: number;
   commissionPercentage: number;
-  workspaceId?: number; // If WORKSPACE_PURCHASE
+  workspaceId?: number; 
 }
 
 // Type for workspace data from controller
@@ -30,7 +46,7 @@ interface UserData {
 
 export class CreatePaymentLinkService {
   static async createPaymentLink(
-    data: CreatePaymentLinkRequest,
+    data: EnrichedPaymentLinkData,
     userData: UserData,
     affiliateData: AffiliateData | null,
     workspaceData: WorkspaceData | null
@@ -64,7 +80,7 @@ export class CreatePaymentLinkService {
         },
       };
 
-      // Add workspace info if WORKSPACE_PURCHASE
+      // Add workspace info if workspace purchase (affiliate link with workspace)
       if (workspaceData) {
         customData.details.workspaceId = workspaceData.id;
         customData.details.workspaceName = workspaceData.name;
@@ -88,23 +104,21 @@ export class CreatePaymentLinkService {
 
       // 4. BUILD MAMOPAY PAYLOAD
       const mamoPayPayload = {
-        title: data.planTitle,
-        description: data.planDescription,
-        amount: data.amount,
+        title: data.title, // From centralized pricing config
+        description: data.description, // From centralized pricing config
+        amount: data.amount, // From centralized pricing config
         amount_currency: "USD",
         enable_customer_details: true,
         enable_quantity: false,
         enable_tips: false,
-        return_url: data.returnUrl,
-        failure_return_url: data.failureReturnUrl,
-        terms_and_conditions_url: data.termsAndConditionsUrl,
+        return_url: data.returnUrl, // From centralized pricing metadata
+        failure_return_url: data.failureReturnUrl, // From centralized pricing metadata
+        terms_and_conditions_url: data.termsAndConditionsUrl, // From centralized pricing metadata
         custom_data: customData,
-        // Subscription structure for MamoPay recurring payments
         subscription: {
-          frequency: data.frequency, // "annually", "monthly", "weekly"
-          frequency_interval: data.frequencyInterval, // 1, 2, 3, etc.
+          frequency: data.frequency, // "annually", "monthly", "weekly" - from pricing config
+          frequency_interval: data.frequencyInterval, // 1, 2, 3, etc. - from pricing config
         },
-        // Processing fee percentage
         processing_fee_percentage: 2,
       };
 
@@ -158,7 +172,6 @@ export class CreatePaymentLinkService {
         },
       };
     } catch (error) {
-      // Re-throw errors to be handled by global error handler
       throw error;
     }
   }

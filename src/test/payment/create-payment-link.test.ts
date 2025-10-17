@@ -20,7 +20,7 @@ import { CreatePaymentLinkController } from "../../controllers/payment/create-pa
  * 1. Validates request data
  * 2. Checks buyer email doesn't exist
  * 3. Decodes affiliate JWT (if provided)
- * 4. Validates workspace (if WORKSPACE_PURCHASE)
+ * 4. Validates workspace (if affiliate link contains workspaceId)
  * 5. Builds MamoPay payload with custom_data
  * 6. Calls MamoPay API
  * 7. Returns payment link
@@ -227,16 +227,16 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         );
         const res = mockResponse();
 
-        // Mock MamoPay API response
+        // Mock MamoPay API response (should return what we sent - centralized pricing values)
         global.fetch = vi.fn().mockResolvedValue({
           ok: true,
           json: async () => ({
             id: "mamopay_link_123",
             link_url: "https://mamopay.com/pay/abc123",
             payment_url: "https://mamopay.com/checkout/abc123",
-            title: "Business Plan - Monthly",
-            description: "Full access to business features",
-            amount: 99.99,
+            title: "Business Plan", // From centralized pricing
+            description: "Full access to business features with unlimited funnels and advanced analytics", // From centralized pricing
+            amount: 999, // From centralized pricing ($999/year for DIRECT BUSINESS)
             amount_currency: "USD",
             active: true,
             created_date: new Date().toISOString(),
@@ -258,10 +258,10 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(responseData.message).toBe("Payment link created successfully");
         expect(responseData.paymentLink).toMatchObject({
           url: "https://mamopay.com/pay/abc123",
-          amount: 99.99,
-          frequency: "monthly",
+          amount: 999, // From centralized pricing (not manual 99.99)
+          frequency: "annually", // From centralized pricing (not manual monthly)
           frequencyInterval: 1,
-          trialPeriodDays: 14,
+          trialPeriodDays: 0, // From centralized pricing (not manual 14)
           planType: "BUSINESS",
         });
 
@@ -275,9 +275,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           // email will be seller's email from auth token
           planType: "BUSINESS",
           paymentType: "PLAN_PURCHASE",
-          frequency: "monthly",
+          frequency: "annually", // From centralized pricing
           frequencyInterval: 1,
-          trialDays: 14,
+          trialDays: 0, // From centralized pricing
         });
 
         // Verify email comes from authenticated user
@@ -293,8 +293,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(payload.custom_data.details.admins).toBeUndefined();
       });
 
-      it("should use default values (monthly, interval 1, trial 0)", async () => {
-        // Arrange
+      it("should use centralized pricing values (annually, interval 1, trial 0)", async () => {
+        // Arrange - DIRECT user buying AGENCY plan (manual values in request should be ignored)
         const req = mockRequest(
           {
             // User details now come from auth token
@@ -302,7 +302,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             planType: "AGENCY",
             planTitle: "Agency Plan",
             planDescription: "Premium features",
-            amount: 199.99,
+            amount: 199.99, // This will be overridden by centralized pricing ($50)
             returnUrl: "https://example.com/success",
             failureReturnUrl: "https://example.com/failure",
             termsAndConditionsUrl: "https://example.com/terms",
@@ -318,9 +318,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
             id: "mamopay_defaults",
             link_url: "https://mamopay.com/pay/defaults",
             payment_url: "https://mamopay.com/checkout/defaults",
-            title: "Agency Plan",
-            description: "Premium features",
-            amount: 199.99,
+            title: "Partner Plan", // From centralized pricing
+            description: "Enterprise-level features for agencies and partners with white-label options",
+            amount: 50, // From centralized pricing
             amount_currency: "USD",
             active: true,
             created_date: new Date().toISOString(),
@@ -334,17 +334,17 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           mockNext
         );
 
-        // Assert
+        // Assert - Centralized pricing values should be used
         const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
         expect(payload.custom_data.details).toMatchObject({
-          frequency: "monthly", // Default
-          frequencyInterval: 1, // Default
-          trialDays: 0, // Default
+          frequency: "annually", // From centralized pricing (NOT monthly)
+          frequencyInterval: 1,
+          trialDays: 0,
         });
 
         const responseData = (res.json as any).mock.calls[0][0];
         expect(responseData.paymentLink).toMatchObject({
-          frequency: "monthly",
+          frequency: "annually", // From centralized pricing
           frequencyInterval: 1,
           trialPeriodDays: 0,
         });
@@ -565,7 +565,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
   );
 
   describe(
-    "WORKSPACE_PURCHASE - Success Cases",
+    "PLAN_PURCHASE - Workspace Purchase (Affiliate with Workspace)",
     () => {
       it("should add workspaceId and workspaceName to custom_data.details", async () => {
         // Arrange - Create user with AFFILIATE registrationSource
@@ -586,9 +586,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "WORKSPACE_PURCHASE",
-            planType: "AGENCY",
-            planTitle: "Agency Workspace",
+            paymentType: "PLAN_PURCHASE",
+            planType: "BUSINESS",
+            planTitle: "Business Plan with Workspace",
             planDescription: "Complete workspace purchase",
             amount: 299.99,
             returnUrl: "https://example.com/success",
@@ -631,8 +631,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         expect(payload.custom_data.details).toMatchObject({
           firstName: "Workspace", // From authenticated user
           lastName: "Buyer", // From authenticated user
-          paymentType: "WORKSPACE_PURCHASE",
-          planType: "AGENCY",
+          paymentType: "PLAN_PURCHASE",
+          planType: "BUSINESS", // Workspace purchases use BUSINESS plan
           workspaceId: testAgencyWorkspaceId,
           workspaceName: "Premium Agency Workspace",
         });
@@ -647,7 +647,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         await prisma.user.delete({ where: { id: workspaceBuyer.id } });
       });
 
-      it("should only allow AGENCY workspaces for WORKSPACE_PURCHASE", async () => {
+      it("should only allow AGENCY workspaces for workspace purchases", async () => {
         // Arrange - Create user with BUSINESS workspace token
         const businessBuyer = await prisma.user.create({
           data: {
@@ -666,7 +666,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "WORKSPACE_PURCHASE",
+            paymentType: "PLAN_PURCHASE",
             planType: "BUSINESS",
             planTitle: "Business Workspace",
             planDescription: "Should be rejected",
@@ -773,8 +773,8 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const req = mockRequest(
           {
             // User details now come from auth token
-            paymentType: "WORKSPACE_PURCHASE",
-            planType: "AGENCY",
+            paymentType: "PLAN_PURCHASE",
+            planType: "BUSINESS", // Workspace purchases use BUSINESS plan
             planTitle: "Workspace Ownership Test",
             planDescription: "Should succeed with correct workspace",
             amount: 299.99,

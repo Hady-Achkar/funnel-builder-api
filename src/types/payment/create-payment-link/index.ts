@@ -1,32 +1,15 @@
 import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
+/**
+ * Simplified payment link request schema
+ * All pricing and metadata are auto-populated from centralized pricing config
+ * based on user's registrationSource and selected planType
+ */
 export const createPaymentLinkRequest = z.object({
-  // Required fields - user details now come from auth token
+  // Only required fields - pricing is auto-populated from centralized config
   paymentType: z.nativeEnum($Enums.PaymentType),
   planType: z.nativeEnum($Enums.UserPlan),
-
-  planTitle: z.string().min(1, "Plan title is required"),
-  planDescription: z.string().min(1, "Plan description is required"),
-
-  amount: z.number().positive("Amount must be positive"),
-
-  // Fields with defaults
-  frequency: z.enum(["monthly", "annually", "weekly"]).default("monthly"),
-  frequencyInterval: z
-    .number()
-    .min(1, "Frequency interval must be at least 1")
-    .default(1),
-  freeTrialPeriodInDays: z
-    .number()
-    .min(0, "Free trial period cannot be negative")
-    .default(0),
-
-  returnUrl: z.string().url("Return URL must be a valid URL"),
-  failureReturnUrl: z.string().url("Failure return URL must be a valid URL"),
-  termsAndConditionsUrl: z
-    .string()
-    .url("Terms and conditions URL must be a valid URL"),
 });
 
 export type CreatePaymentLinkRequest = z.infer<typeof createPaymentLinkRequest>;
