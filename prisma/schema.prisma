@@ -117,23 +117,26 @@ model Payment {
 }
 
 model Subscription {
-  id               Int                @id @default(autoincrement())
-  subscriptionId   String             @unique
+  id               Int                    @id @default(autoincrement())
+  subscriptionId   String                 @unique
   startsAt         DateTime
   endsAt           DateTime
-  status           SubscriptionStatus @default(ACTIVE)
+  status           SubscriptionStatus     @default(ACTIVE)
   userId           Int?
   intervalUnit     IntervalUnit
-  intervalCount    Int                @default(1)
-  rawData          Json?              @default("{}")
-  subscriptionType UserPlan
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  user             User?              @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: SetNull)
+  intervalCount    Int                    @default(1)
+  rawData          Json?                  @default("{}")
+  itemType         SubscriptionItemType
+  subscriptionType UserPlan?
+  addonType        AddOnType?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  user             User?                  @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([status])
   @@index([subscriptionId])
+  @@index([itemType])
   @@map("subscriptions")
 }
 
@@ -620,6 +623,11 @@ enum SubscriptionStatus {
   CANCELLED
   EXPIRED
   PENDING
+}
+
+enum SubscriptionItemType {
+  PLAN
+  ADDON
 }
 
 enum IntervalUnit {

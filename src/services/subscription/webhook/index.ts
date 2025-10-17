@@ -7,6 +7,7 @@ import {
 } from "../../../types/subscription/webhook";
 import { PlanPurchaseProcessor } from "./processors/plan-purchase";
 import { PlanPurchaseWithAffiliateProcessor } from "./processors/plan-purchase-with-affiliate";
+import { AddonPurchaseProcessor } from "./processors/addon-purchase";
 
 export class PaymentWebhookService {
   static async processWebhook(data: unknown): Promise<WebhookResponse> {
@@ -119,13 +120,18 @@ export class PaymentWebhookService {
         };
       }
 
-      if (paymentType === "ADD_ONS") {
-        // TODO: Implement add-ons processor
-        console.log("[Webhook] ADD_ONS processing not yet implemented");
+      if (paymentType === "ADDON_PURCHASE") {
+        const result = await AddonPurchaseProcessor.process(validatedData);
+
         return {
           received: true,
-          ignored: true,
-          reason: "ADD_ONS processing not yet implemented",
+          message: result.message,
+          data: {
+            userId: result.userId,
+            paymentId: result.paymentId,
+            addonId: result.addonId,
+            subscriptionId: result.subscriptionId,
+          },
         };
       }
 

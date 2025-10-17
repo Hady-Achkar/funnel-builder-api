@@ -251,7 +251,9 @@ export class PlanPurchaseWithAffiliateProcessor {
           userId: user.id,
           intervalUnit,
           intervalCount,
+          itemType: "PLAN",
           subscriptionType: this.mapPlanType(planType),
+          addonType: null,
           rawData: webhookData as any,
         },
       });

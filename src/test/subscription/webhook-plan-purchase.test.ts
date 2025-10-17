@@ -212,7 +212,9 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(subscription?.subscriptionId).toBe("SUB-AGENCY-001");
       expect(subscription?.userId).toBe(user?.id);
       expect(subscription?.status).toBe("ACTIVE");
+      expect(subscription?.itemType).toBe("PLAN");
       expect(subscription?.subscriptionType).toBe(UserPlan.AGENCY);
+      expect(subscription?.addonType).toBeNull();
       expect(subscription?.intervalUnit).toBe("MONTH");
       expect(subscription?.intervalCount).toBe(1);
       expect(subscription?.startsAt).toBeDefined();
@@ -406,7 +408,9 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         where: { userId: updatedUser?.id },
       });
 
+      expect(subscription?.itemType).toBe("PLAN");
       expect(subscription?.subscriptionType).toBe(UserPlan.BUSINESS);
+      expect(subscription?.addonType).toBeNull();
       expect(subscription?.status).toBe("ACTIVE");
       expect(subscription?.intervalUnit).toBe("MONTH");
     });
@@ -984,7 +988,9 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
           status: "ACTIVE",
           intervalUnit: "MONTH",
           intervalCount: 1,
+          itemType: "PLAN",
           subscriptionType: UserPlan.AGENCY,
+          addonType: null,
         },
       });
 

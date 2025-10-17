@@ -201,7 +201,16 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       where: { affiliateLinkId: affiliateLinkId },
     });
 
-    // 6. Delete cloned workspaces (owned by buyers)
+    // 6. Delete domains created by buyers (to avoid foreign key constraint)
+    await prisma.domain.deleteMany({
+      where: {
+        creator: {
+          referralLinkUsedId: affiliateLinkId,
+        },
+      },
+    });
+
+    // 7. Delete cloned workspaces (owned by buyers)
     await prisma.workspace.deleteMany({
       where: {
         owner: {
@@ -210,7 +219,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       },
     });
 
-    // 7. Delete buyers (users who used affiliate link)
+    // 8. Delete buyers (users who used affiliate link)
     await prisma.user.deleteMany({
       where: { referralLinkUsedId: affiliateLinkId },
     });
@@ -366,6 +375,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       });
       expect(subscription).toBeDefined();
       expect(subscription?.status).toBe("ACTIVE");
+      expect(subscription?.itemType).toBe("PLAN");
+      expect(subscription?.addonType).toBeNull();
 
       // Verify affiliate owner balance updated (NEW: held in pendingBalance, not available balance)
       const affiliateOwner = await prisma.user.findUnique({
@@ -974,6 +985,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       });
       expect(subscription).toBeDefined();
       expect(subscription?.status).toBe("ACTIVE");
+      expect(subscription?.itemType).toBe("PLAN");
+      expect(subscription?.addonType).toBeNull();
     });
 
     it("should continue processing even if workspace cloning fails", async () => {

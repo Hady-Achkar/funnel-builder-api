@@ -15,12 +15,15 @@ export const WebhookPaymentDetails = z.object({
   email: z.string().email(),
   firstName: z.string(),
   lastName: z.string(),
-  planType: z.string(), // BUSINESS, AGENCY, etc.
+  planType: z.string().optional(),
+  addonType: z.string().optional(),
   frequency: z.string(), // monthly, annually
-  paymentType: z.string(), 
+  paymentType: z.string(),
   trialDays: z.number().optional(),
   trialEndDate: z.string().optional(),
   frequencyInterval: z.number().optional(),
+  workspaceId: z.number().optional(),
+  workspaceName: z.string().optional(),
 });
 
 // Affiliate link data (optional)
