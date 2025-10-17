@@ -52,6 +52,10 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
   const workspaceSlug = `test-workspace-${testTimestamp}`;
 
   beforeAll(async () => {
+    // Set required environment variables for workspace cloning
+    process.env.WORKSPACE_ZONE_ID = "test-zone-id";
+    process.env.WORKSPACE_DOMAIN = "digitalsite.com";
+
     // Verify we're using the test database
     const dbUrl = process.env.DATABASE_URL || "";
     const dbName = dbUrl.split("/").pop()?.split("?")[0];
@@ -293,6 +297,11 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
 
     await prisma.workspace.deleteMany({
       where: { ownerId: { in: [sellerUserId, buyerUserId] } },
+    });
+
+    // Delete domains created by test users (foreign key constraint requires this before deleting users)
+    await prisma.domain.deleteMany({
+      where: { createdBy: { in: [sellerUserId, buyerUserId] } },
     });
 
     await prisma.user.deleteMany({
