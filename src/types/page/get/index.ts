@@ -14,7 +14,7 @@ export type GetPageRequest = z.infer<typeof getPageRequest>;
 export const getPageResponse = z.object({
   id: z.number(),
   name: z.string(),
-  content: z.string(),
+  content: z.any(), // Can be string or parsed JSON (array/object)
   order: z.number(),
   type: z.enum(PageType),
   linkingId: z.string(),
@@ -22,6 +22,7 @@ export const getPageResponse = z.object({
   seoDescription: z.string().nullable(),
   seoKeywords: z.string().nullable(),
   funnelId: z.number(),
+  visits: z.number().default(0), // Number of page visits (explicitly 0 if none)
   createdAt: z.union([z.date(), z.string()]),
   updatedAt: z.union([z.date(), z.string()]),
 });

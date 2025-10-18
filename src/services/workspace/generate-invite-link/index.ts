@@ -4,10 +4,11 @@ import {
   GenerateInviteLinkRequest,
   GenerateInviteLinkResponse,
 } from "../../../types/workspace/generate-invite-link";
-import {
-  validateWorkspaceExists,
-  validateInviterPermissions,
-} from "../../../helpers/workspace/invite-member/validation";
+import { getPrisma } from "../../../lib/prisma";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
+import { BadRequestError, NotFoundError } from "../../../errors";
 
 export class GenerateInviteLinkService {
   static async generateInviteLink(
@@ -15,9 +16,68 @@ export class GenerateInviteLinkService {
     data: GenerateInviteLinkRequest
   ): Promise<GenerateInviteLinkResponse> {
     try {
-      const workspace = await validateWorkspaceExists(data.workspaceSlug);
+      const prisma = getPrisma();
 
-      validateInviterPermissions(workspace, creatorUserId);
+      // Check if workspace exists
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: data.workspaceSlug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          ownerId: true,
+        },
+      });
+
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
+
+      // Check if user has permission to invite members
+      await PermissionManager.requirePermission({
+        userId: creatorUserId,
+        workspaceId: workspace.id,
+        action: PermissionAction.INVITE_MEMBER,
+      });
+
+      // Check member allocation limit using WorkspaceMemberAllocations
+      const workspaceWithLimits = await prisma.workspace.findUnique({
+        where: { id: workspace.id },
+        select: {
+          planType: true,
+          addOns: {
+            where: { status: "ACTIVE" },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: {
+            in: ["ACTIVE", "PENDING"],
+          },
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspaceWithLimits!.planType,
+          addOns: workspaceWithLimits!.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot generate invite link. Workspace member limit reached."
+        );
+      }
 
       const linkId = uuidv4();
 
@@ -34,7 +94,7 @@ export class GenerateInviteLinkService {
         expiresIn: data.expiresIn,
       } as jwt.SignOptions);
 
-      const link = `${process.env.FRONTEND_URL}/join-workspace?token=${invitationToken}`;
+      const link = `${process.env.FRONTEND_URL}/register?join-workspace=${invitationToken}`;
 
       return {
         link,

@@ -64,7 +64,6 @@ describe("Workspace Get Tests", () => {
             email: "john@example.com",
             username: "johndoe",
             plan: UserPlan.BUSINESS,
-            maximumWorkspaces: 3,
           },
           members: [
             {
@@ -190,7 +189,6 @@ describe("Workspace Get Tests", () => {
             email: "john@example.com",
             username: "johndoe",
             plan: UserPlan.FREE,
-            maximumWorkspaces: 1,
           },
           members: [
             {
@@ -273,7 +271,6 @@ describe("Workspace Get Tests", () => {
             email: "john@example.com",
             username: "johndoe",
             plan: UserPlan.BUSINESS,
-            maximumWorkspaces: 3,
           },
           members: [], // No members
           domains: [],
@@ -321,7 +318,6 @@ describe("Workspace Get Tests", () => {
             email: "agency@example.com",
             username: "agency",
             plan: UserPlan.AGENCY,
-            maximumWorkspaces: 10,
           },
           members: [],
           domains: Array(15).fill(null).map((_, i) => ({
@@ -383,7 +379,6 @@ describe("Workspace Get Tests", () => {
             email: "john@example.com",
             username: "johndoe",
             plan: UserPlan.BUSINESS,
-            maximumWorkspaces: 3,
           },
           members: [],
           domains: [

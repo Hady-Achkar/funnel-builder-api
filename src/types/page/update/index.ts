@@ -11,7 +11,7 @@ export const updatePageRequest = z.object({
     .min(1, "Page name cannot be empty")
     .max(255, "Page name cannot exceed 255 characters")
     .optional(),
-  content: z.string({ message: "Page content must be a string" }).optional(),
+  content: z.any().optional(), // Can be string or JSON (array/object)
   type: z.enum(PageType).optional(),
   linkingId: z
     .string({ message: "Linking ID must be a string" })
@@ -43,7 +43,7 @@ export const updatePageResponse = z.object({
   page: z.object({
     id: z.number({ message: "Page ID must be a number" }),
     name: z.string({ message: "Page name must be a string" }),
-    content: z.string({ message: "Page content must be a string" }),
+    content: z.any(), // Can be string or JSON (array/object)
     order: z.number({ message: "Page order must be a number" }),
     type: z.enum(PageType),
     linkingId: z.string({ message: "Linking ID must be a string" }),

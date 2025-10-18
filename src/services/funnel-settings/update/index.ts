@@ -7,7 +7,7 @@ import {
 } from "../../../types/funnel-settings/update";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { hasPermissionToEditFunnelSettings } from "../../../helpers/funnel-settings/update";
+import { PermissionManager, PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const updateFunnelSettings = async (
   userId: number,
@@ -30,13 +30,6 @@ export const updateFunnelSettings = async (
         id: true,
         name: true,
         workspaceId: true,
-        workspace: {
-          select: {
-            id: true,
-            name: true,
-            ownerId: true,
-          },
-        },
       },
     });
 
@@ -44,40 +37,12 @@ export const updateFunnelSettings = async (
       throw new Error("Funnel not found");
     }
 
-    // Check permissions
-    const isOwner = funnel.workspace.ownerId === userId;
-
-    if (!isOwner) {
-      const member = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: funnel.workspaceId,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!member) {
-        throw new Error(
-          `You don't have access to the "${funnel.workspace.name}" workspace`
-        );
-      }
-
-      const canEditSettings = hasPermissionToEditFunnelSettings(
-        member.role,
-        member.permissions
-      );
-
-      if (!canEditSettings) {
-        throw new Error(
-          "You don't have permission to edit funnel settings in this workspace"
-        );
-      }
-    }
+    // Check permissions using centralized PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.EDIT_FUNNEL,
+    });
 
     // Check if settings already exist
     const existingSettings = await prisma.funnelSettings.findUnique({

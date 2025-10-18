@@ -9,12 +9,9 @@ import {
 } from "../../../types/funnel/update";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { hasPermissionToUpdateFunnel } from "../../../helpers/funnel/update";
-import {
-  generateSlug,
-  generateUniqueSlug,
-  validateSlugFormat,
-} from "../../../helpers/funnel/shared";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 
 export const updateFunnel = async (
   funnelId: number,
@@ -53,37 +50,18 @@ export const updateFunnel = async (
       throw new Error("Funnel not found");
     }
 
-    // Check permissions
-    const isOwner = existingFunnel.workspace.ownerId === userId;
+    // Check if user has permission to update this funnel
+    const permissionCheck = await PermissionManager.can({
+      userId,
+      workspaceId: existingFunnel.workspaceId,
+      action: PermissionAction.EDIT_FUNNEL,
+    });
 
-    if (!isOwner) {
-      const member = await prisma.workspaceMember.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId: userId,
-            workspaceId: existingFunnel.workspaceId,
-          },
-        },
-        select: {
-          role: true,
-          permissions: true,
-        },
-      });
-
-      if (!member) {
-        throw new Error(`You don't have access to this workspace`);
-      }
-
-      const canUpdateFunnel = hasPermissionToUpdateFunnel(
-        member.role,
-        member.permissions
+    if (!permissionCheck.allowed) {
+      throw new Error(
+        permissionCheck.reason ||
+        `You don't have permission to update funnels in this workspace`
       );
-
-      if (!canUpdateFunnel) {
-        throw new Error(
-          `You don't have permission to update funnels in this workspace`
-        );
-      }
     }
 
     // Build update object
@@ -103,44 +81,23 @@ export const updateFunnel = async (
       validatedData.slug !== undefined &&
       validatedData.slug.trim() !== existingFunnel.slug
     ) {
-      const newSlug = validatedData.slug.trim();
-
-      // Validate slug format
-      if (!validateSlugFormat(newSlug)) {
-        throw new Error(
-          "Funnel name contains invalid characters. Please use letters, numbers, and hyphens only."
-        );
-      }
-
-      // Check if slug is unique in workspace
-      const slugExists = await prisma.funnel.findFirst({
-        where: {
-          workspaceId: existingFunnel.workspaceId,
-          slug: newSlug,
-          id: { not: validatedParams.funnelId },
-        },
-        select: { id: true },
-      });
-
-      if (slugExists) {
-        throw new Error(
-          "This funnel name is already in use in your workspace. Please choose a different name."
-        );
-      }
-
-      updates.slug = newSlug;
+      updates.slug = await generateSlug(
+        prisma,
+        validatedData.slug.trim(),
+        existingFunnel.workspaceId,
+        validatedParams.funnelId
+      );
       changed.push("slug");
     }
 
     // Auto-update slug when name changes (if slug wasn't explicitly provided)
     if (updates.name && !validatedData.slug) {
-      const autoSlug = generateSlug(updates.name);
-      const uniqueSlug = await generateUniqueSlug(
-        autoSlug,
+      updates.slug = await generateSlug(
+        prisma,
+        updates.name,
         existingFunnel.workspaceId,
         validatedParams.funnelId
       );
-      updates.slug = uniqueSlug;
       changed.push("slug");
     }
 

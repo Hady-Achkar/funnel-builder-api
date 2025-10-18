@@ -1,6 +1,4 @@
 import jwt from "jsonwebtoken";
-import { BadRequestError, ForbiddenError } from "../../../../errors";
-import { MembershipStatus } from "../../../../generated/prisma-client";
 
 export interface InvitationTokenPayload {
   workspaceId: number;
@@ -13,70 +11,43 @@ export interface InvitationTokenPayload {
 
 export class TokenValidator {
   /**
-   * Validates an invitation token and checks if the email matches
-   * Throws user-friendly errors for various failure scenarios
+   * Validates an invitation token structure
+   * Returns null if invalid, payload if valid
+   * Pure function - no error throwing
    */
-  static async validateInvitationToken(
+  static validateInvitationToken(
     token: string,
-    email: string
-  ): Promise<InvitationTokenPayload> {
-    let tokenPayload: InvitationTokenPayload;
-
+    jwtSecret: string
+  ): InvitationTokenPayload | null {
     try {
-      tokenPayload = jwt.verify(
+      const tokenPayload = jwt.verify(
         token,
-        process.env.JWT_SECRET!
+        jwtSecret
       ) as InvitationTokenPayload;
-    } catch (error) {
-      throw new BadRequestError(
-        "Invalid or expired invitation token. Please request a new invitation from your workspace administrator."
-      );
-    }
 
-    if (tokenPayload.type !== "workspace_invitation") {
-      throw new BadRequestError("Invalid invitation token type.");
-    }
+      // Check if it's a workspace invitation type
+      if (tokenPayload.type !== "workspace_invitation") {
+        return null;
+      }
 
-    if (tokenPayload.email !== email) {
-      const maskedInvitedEmail = this.maskEmail(tokenPayload.email);
-      throw new ForbiddenError(
-        `This invitation was sent to ${maskedInvitedEmail}. Please register with that email address or request a new invitation.`
-      );
+      return tokenPayload;
+    } catch {
+      return null;
     }
-
-    return tokenPayload;
   }
 
   /**
-   * Checks if a pending invitation exists for the given email and workspace
+   * Checks if email matches the token email
    */
-  static async checkPendingInvitation(
-    email: string,
-    workspaceId: number,
-    prisma: any
-  ): Promise<boolean> {
-    const pendingInvitation = await prisma.workspaceMember.findFirst({
-      where: {
-        email,
-        workspaceId,
-        status: MembershipStatus.PENDING,
-      },
-    });
-
-    if (!pendingInvitation) {
-      throw new ForbiddenError(
-        "No pending invitation found for this email address. Please contact your workspace administrator."
-      );
-    }
-
-    return true;
+  static isEmailMatch(tokenEmail: string, providedEmail: string): boolean {
+    return tokenEmail.toLowerCase() === providedEmail.toLowerCase();
   }
 
   /**
    * Masks an email address for security purposes
    * Example: "john.doe@example.com" → "jo***@example.com"
    */
-  private static maskEmail(email: string): string {
+  static maskEmail(email: string): string {
     if (!email || typeof email !== 'string') {
       return '***@***.***';
     }

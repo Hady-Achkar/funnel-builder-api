@@ -134,7 +134,3 @@ service-principal.json
 *.pem
 *.key
 *.cert
-
-# Planning documents
-next_plan.md
-CLAUDE.md

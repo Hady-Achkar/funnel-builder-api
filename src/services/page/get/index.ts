@@ -1,5 +1,4 @@
 import {
-  GetPageRequest,
   GetPageResponse,
   getPageRequest,
   getPageResponse,
@@ -9,9 +8,11 @@ import { cacheService } from "../../cache/cache.service";
 import {
   BadRequestError,
   UnauthorizedError,
+  NotFoundError,
 } from "../../../errors";
 import { ZodError } from "zod";
-import { checkFunnelViewPermissions } from "../../../helpers/page/get";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 
 export const getPage = async (
   userId: number,
@@ -20,32 +21,12 @@ export const getPage = async (
   try {
     if (!userId) throw new UnauthorizedError("User ID is required");
 
-    // Parse and validate request data
     const validatedRequest = getPageRequest.parse(requestBody);
-
-    // Check permissions (funnel view access)
-    const permissionCheck = await checkFunnelViewPermissions(
-      userId,
-      validatedRequest.pageId
-    );
-
-    const funnelId = permissionCheck.funnel.id;
-    const pageId = validatedRequest.pageId;
-
-    // Try to get page from cache first
-    const pageCacheKey = `funnel:${funnelId}:page:${pageId}:full`;
-    let cachedPage = await cacheService.get(pageCacheKey);
-
-    if (cachedPage && typeof cachedPage === 'object') {
-      // Return cached data
-      return getPageResponse.parse(cachedPage);
-    }
-
-    // Cache miss - fetch from database
     const prisma = getPrisma();
-    
+
+    // Get page with workspace info for permission check
     const page = await prisma.page.findUnique({
-      where: { id: pageId },
+      where: { id: validatedRequest.pageId },
       select: {
         id: true,
         name: true,
@@ -57,38 +38,62 @@ export const getPage = async (
         seoDescription: true,
         seoKeywords: true,
         funnelId: true,
+        visits: true,
         createdAt: true,
         updatedAt: true,
+        funnel: {
+          select: {
+            id: true,
+            workspaceId: true,
+          },
+        },
       },
     });
 
     if (!page) {
-      throw new BadRequestError("Page not found");
+      throw new NotFoundError("Page not found");
     }
 
-    // Cache the page for future requests
-    try {
-      const pageData = {
-        id: page.id,
-        name: page.name,
-        content: page.content,
-        order: page.order,
-        type: page.type,
-        linkingId: page.linkingId,
-        seoTitle: page.seoTitle,
-        seoDescription: page.seoDescription,
-        seoKeywords: page.seoKeywords,
-        funnelId: page.funnelId,
-        createdAt: page.createdAt,
-        updatedAt: page.updatedAt,
-      };
+    // Check VIEW_PAGE permission
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: page.funnel.workspaceId,
+      action: PermissionAction.VIEW_PAGE,
+    });
 
-      await cacheService.set(pageCacheKey, pageData, { ttl: 0 });
+    // Try cache first
+    const cacheKey = `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:page:${page.id}:full`;
+    const cachedPage = await cacheService.get<any>(cacheKey);
+
+    if (cachedPage) {
+      return getPageResponse.parse(cachedPage);
+    }
+
+    // Prepare response data
+    const responseData = {
+      id: page.id,
+      name: page.name,
+      content: page.content,
+      order: page.order,
+      type: page.type,
+      linkingId: page.linkingId,
+      seoTitle: page.seoTitle,
+      seoDescription: page.seoDescription,
+      seoKeywords: page.seoKeywords,
+      funnelId: page.funnelId,
+      visits: page.visits ?? 0, // Explicitly set to 0 if null
+      createdAt: page.createdAt,
+      updatedAt: page.updatedAt,
+    };
+
+    // Cache for future requests
+    try {
+      await cacheService.set(cacheKey, responseData, { ttl: 0 });
     } catch (cacheError) {
       console.warn("Failed to cache page data:", cacheError);
     }
 
-    return getPageResponse.parse(page);
+    return getPageResponse.parse(responseData);
   } catch (error: unknown) {
     if (error instanceof ZodError) {
       const message = error.issues[0]?.message || "Invalid data provided";

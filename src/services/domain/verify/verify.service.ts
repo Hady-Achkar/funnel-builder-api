@@ -1,6 +1,10 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../helpers/domain/shared";
-import { getCustomHostnameDetails } from "../../../helpers/domain/shared";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
+import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import {
@@ -14,8 +18,7 @@ import {
   determineVerificationStatus,
   getStatusUpdateData,
   VerificationStatusResult,
-  validateVerifyAccess,
-} from "../../../helpers/domain/verify";
+} from "./utils/verification-status";
 
 export class VerifyDomainService {
   static async verify(
@@ -34,7 +37,11 @@ export class VerifyDomainService {
         throw new NotFoundError("Domain not found");
       }
 
-      await validateVerifyAccess(userId, domainRecord.workspaceId);
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: domainRecord.workspaceId,
+        action: PermissionAction.VERIFY_DOMAIN,
+      });
 
       if (domainRecord.status === 'ACTIVE') {
         const response: VerifyDomainResponse = {

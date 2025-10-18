@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { createSubscriptionController } from "../controllers/subscription/create";
+import { PaymentWebhookController } from "../controllers/subscription/webhook";
 
 const router = Router();
 
-router.post("/create", createSubscriptionController);
+// Webhook endpoint (no authentication required - external service)
+router.post("/webhook", PaymentWebhookController.handleWebhook);
 
 export default router;

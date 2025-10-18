@@ -123,7 +123,7 @@ describe("Get Workspace Domains Summary Tests", () => {
         expect(result).toEqual([{ id: 1, hostname: "example.com" }]);
       });
 
-      it("should return domains for user with CONNECT_DOMAINS permission", async () => {
+      it("should return domains for user with MANAGE_DOMAINS permission", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
@@ -134,7 +134,7 @@ describe("Get Workspace Domains Summary Tests", () => {
           userId,
           workspaceId: 1,
           role: WorkspaceRole.EDITOR,
-          permissions: [WorkspacePermission.CONNECT_DOMAINS],
+          permissions: [WorkspacePermission.MANAGE_DOMAINS],
         };
 
         const domainsData = [
@@ -269,7 +269,7 @@ describe("Get Workspace Domains Summary Tests", () => {
         ).rejects.toThrow(ForbiddenError);
       });
 
-      it("should throw ForbiddenError when user lacks CONNECT_DOMAINS permission", async () => {
+      it("should throw ForbiddenError when user lacks MANAGE_DOMAINS permission", async () => {
         const workspaceData = {
           id: 1,
           slug: workspaceSlug,
@@ -280,7 +280,7 @@ describe("Get Workspace Domains Summary Tests", () => {
           userId,
           workspaceId: 1,
           role: WorkspaceRole.VIEWER,
-          permissions: [], // No CONNECT_DOMAINS permission
+          permissions: [], // No MANAGE_DOMAINS permission
         };
 
         mockPrisma.workspace.findUnique.mockResolvedValue(workspaceData);

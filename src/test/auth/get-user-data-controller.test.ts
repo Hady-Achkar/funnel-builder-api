@@ -25,7 +25,6 @@ describe("Get User Data Controller Tests", () => {
     isAdmin: false,
     plan: UserPlan.FREE,
     balance: 0,
-    maximumAdmins: 1,
     trialStartDate: new Date("2024-01-01"),
     trialEndDate: new Date("2024-01-31"),
     createdAt: new Date("2024-01-01"),
@@ -117,10 +116,10 @@ describe("Get User Data Controller Tests", () => {
       const responseCall = (mockRes.json as any).mock.calls[0][0];
       const user = responseCall.user;
 
-      // Verify all 14 required fields are present
+      // Verify all 13 required fields are present
       const expectedFields = [
         "id", "email", "username", "firstName", "lastName", "avatar",
-        "isAdmin", "plan", "balance", "maximumAdmins",
+        "isAdmin", "plan", "balance",
         "trialStartDate", "trialEndDate", "createdAt", "updatedAt"
       ];
 
@@ -128,7 +127,7 @@ describe("Get User Data Controller Tests", () => {
         expect(user).toHaveProperty(field);
       });
 
-      expect(Object.keys(user)).toHaveLength(14);
+      expect(Object.keys(user)).toHaveLength(13);
     });
 
     it("should handle different user plans", async () => {

@@ -5,7 +5,10 @@ import { PrismaClient } from "../../../../generated/prisma-client";
  *
  * Naming pattern:
  * - First duplicate: "Original Name - copy"
- * - If exists: "Original Name - copy (2)", "Original Name - copy (3)", etc.
+ * - If exists: "Original Name - copy 2", "Original Name - copy 3", etc.
+ *
+ * Note: Uses "copy 2" instead of "copy (2)" to avoid parentheses which are
+ * not allowed in funnel names by the generateSlug validation.
  *
  * Prevents name conflicts by checking existing funnel names in the workspace.
  *
@@ -40,11 +43,11 @@ export const generateUniqueFunnelName = async (
     // If exact name exists, start looking for numbered versions
     if (existingNames.includes(finalFunnelName)) {
       let counter = 2;
-      let newName = `${finalFunnelName} (${counter})`;
+      let newName = `${finalFunnelName} ${counter}`;
 
       while (existingNames.includes(newName)) {
         counter++;
-        newName = `${finalFunnelName} (${counter})`;
+        newName = `${finalFunnelName} ${counter}`;
       }
 
       finalFunnelName = newName;

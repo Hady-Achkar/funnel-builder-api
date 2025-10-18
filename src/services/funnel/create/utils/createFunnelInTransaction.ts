@@ -1,10 +1,14 @@
-import { Prisma, PrismaClient } from "../../../../generated/prisma-client";
+import { PrismaClient } from "../../../../generated/prisma-client";
 import {
   CreateFunnelPayload,
   CreateFunnelSettingsPayload,
   CreateHomePagePayload,
 } from "../../../../types/funnel/create";
 import { $Enums } from "../../../../generated/prisma-client";
+import bcrypt from "bcryptjs";
+
+// Default password for funnels in DRAFT workspaces
+const DEFAULT_FUNNEL_PASSWORD = process.env.DEFAULT_FUNNEL_PASSWORD || "FunnelDefault123!";
 
 interface FunnelCreationResult {
   funnel: {
@@ -50,6 +54,7 @@ export const createFunnelInTransaction = async (
     status: $Enums.FunnelStatus;
     workspaceId: number;
     userId: number;
+    workspaceStatus: $Enums.WorkspaceStatus;
   }
 ): Promise<FunnelCreationResult> => {
   return await prisma.$transaction(async (tx) => {
@@ -78,6 +83,15 @@ export const createFunnelInTransaction = async (
       data: { activeThemeId: theme.id },
     });
 
+    // Check if workspace is DRAFT and set password protection accordingly
+    let isPasswordProtected = false;
+    let passwordHash: string | null = null;
+
+    if (data.workspaceStatus === $Enums.WorkspaceStatus.DRAFT) {
+      isPasswordProtected = true;
+      passwordHash = await bcrypt.hash(DEFAULT_FUNNEL_PASSWORD, 10);
+    }
+
     const createFunnelSettingsData: CreateFunnelSettingsPayload = {
       funnelId: funnel.id,
       defaultSeoTitle: null,
@@ -90,6 +104,8 @@ export const createFunnelInTransaction = async (
       cookieConsentText: null,
       privacyPolicyUrl: null,
       termsOfServiceUrl: null,
+      isPasswordProtected,
+      passwordHash,
     };
 
     await tx.funnelSettings.create({

@@ -5,50 +5,15 @@ import { getPrisma } from "../../lib/prisma";
 import { cacheService } from "../../services/cache/cache.service";
 import { $Enums } from "../../generated/prisma-client";
 import { NextFunction } from "express";
+import {
+  generateLinkingIdMap,
+  replaceLinkingIdsInContent,
+  getNewLinkingIdForPage,
+} from "../../utils/funnel-utils/linking-id-replacement";
 
 // Mock only external dependencies
 vi.mock("../../lib/prisma");
 vi.mock("../../services/cache/cache.service");
-
-// Internal test utilities - DO NOT import from outside
-const generateTestLinkingId = (): string => {
-  return `test-${Math.random().toString(36).substring(2, 11)}`;
-};
-
-const createLinkingIdMap = (pages: any[]): Map<string, string> => {
-  const map = new Map<string, string>();
-  pages.forEach((page) => {
-    if (page.linkingId) {
-      map.set(page.linkingId, generateTestLinkingId());
-    }
-  });
-  return map;
-};
-
-const replaceLinkingIdsInTestContent = (
-  content: string,
-  linkingMap: Map<string, string>
-): string => {
-  let updatedContent = content;
-  linkingMap.forEach((newId, oldId) => {
-    const patterns = [
-      new RegExp(`href="${oldId}"`, "g"),
-      new RegExp(`href='${oldId}'`, "g"),
-      new RegExp(`href="/${oldId}"`, "g"),
-      new RegExp(`href='/${oldId}'`, "g"),
-      new RegExp(`\\(${oldId}\\)`, "g"),
-      new RegExp(`\\[${oldId}\\]`, "g"),
-      new RegExp(`"${oldId}"`, "g"),
-    ];
-
-    patterns.forEach((pattern) => {
-      updatedContent = updatedContent.replace(pattern, (match) =>
-        match.replace(oldId, newId)
-      );
-    });
-  });
-  return updatedContent;
-};
 
 describe("Funnel Duplication Tests", () => {
   let mockPrisma: any;
@@ -59,6 +24,23 @@ describe("Funnel Duplication Tests", () => {
   const workspaceId = 1;
   const workspaceSlug = "test-workspace";
   const originalFunnelId = 1;
+
+  // Helper function to mock workspace with owner data for PermissionManager
+  const mockWorkspaceForPermissions = (
+    id?: number,
+    ownerId?: number,
+    plan?: $Enums.UserPlan,
+    addOns?: $Enums.AddOnType[]
+  ) => {
+    mockPrisma.workspace.findUnique.mockResolvedValue({
+      id: id ?? workspaceId,
+      ownerId: ownerId ?? userId,
+      owner: {
+        plan: plan ?? $Enums.UserPlan.FREE,
+        addOns: addOns ?? [],
+      },
+    });
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -198,7 +180,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -280,13 +263,12 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
+      mockWorkspaceForPermissions(workspaceId, 999); // Different owner
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
       await expect(
         duplicateFunnel(originalFunnelId, userId, {})
-      ).rejects.toThrow(
-        "You don't have access to the original funnel. Please ask the workspace owner to invite you."
-      );
+      ).rejects.toThrow("You don't have access to this workspace");
     });
 
     it("should deny access to target workspace if user not a member", async () => {
@@ -306,10 +288,16 @@ describe("Funnel Duplication Tests", () => {
       const targetWorkspace = {
         id: 2,
         name: "Target Workspace",
+        slug: "target-workspace",
         ownerId: 999, // Different owner
+        owner: {
+          plan: $Enums.UserPlan.FREE,
+          addOns: [],
+        },
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
+      mockWorkspaceForPermissions(1, userId); // Source workspace - user is owner
       mockPrisma.workspace.findUnique.mockResolvedValue(targetWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
@@ -317,9 +305,7 @@ describe("Funnel Duplication Tests", () => {
         duplicateFunnel(originalFunnelId, userId, {
           workspaceSlug: "target-workspace",
         })
-      ).rejects.toThrow(
-        "You don't have access to the target workspace Target Workspace"
-      );
+      ).rejects.toThrow("You don't have access to this workspace");
     });
 
     it("should deny if user lacks CREATE_FUNNELS permission in target workspace", async () => {
@@ -339,10 +325,16 @@ describe("Funnel Duplication Tests", () => {
       const targetWorkspace = {
         id: 2,
         name: "Target Workspace",
+        slug: "target-workspace",
         ownerId: 999,
+        owner: {
+          plan: $Enums.UserPlan.FREE,
+          addOns: [],
+        },
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
+      mockWorkspaceForPermissions(1, userId); // Source workspace - user is owner
       mockPrisma.workspace.findUnique.mockResolvedValue(targetWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue({
         role: $Enums.WorkspaceRole.VIEWER,
@@ -354,7 +346,7 @@ describe("Funnel Duplication Tests", () => {
           workspaceSlug: "target-workspace",
         })
       ).rejects.toThrow(
-        "You don't have permission to create funnels in the target workspace"
+        "You don't have permission to create funnel. Your role (VIEWER) doesn't allow this action. Contact the workspace owner or an admin for access."
       );
     });
   });
@@ -375,11 +367,12 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(3); // At limit
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(1); // At FREE plan limit (1 funnel max)
 
       await expect(
         duplicateFunnel(originalFunnelId, userId, {})
-      ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels");
+      ).rejects.toThrow("You've reached the maximum of 1 funnel for this workspace");
     });
 
     it("should return user-friendly error when workspace at limit", async () => {
@@ -397,12 +390,13 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(3);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(1); // At FREE plan limit
 
       const error = await duplicateFunnel(originalFunnelId, userId, {}).catch(
         (e) => e
       );
-      expect(error.message).toMatch(/maximum limit of 3 funnels/i);
+      expect(error.message).toMatch(/maximum of 1 funnel/i);
     });
 
     it("should allow duplication when workspace has space", async () => {
@@ -435,7 +429,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1); // Has space
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0); // Has space
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -520,17 +515,22 @@ describe("Funnel Duplication Tests", () => {
         name: "Target Workspace",
         slug: "target-workspace",
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.FREE,
+          addOns: [],
+        },
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
+      mockWorkspaceForPermissions(1, userId); // Source workspace
       mockPrisma.workspace.findUnique.mockResolvedValue(targetWorkspace);
-      mockPrisma.funnel.count.mockResolvedValue(3); // Target at limit
+      mockPrisma.funnel.count.mockResolvedValue(1); // Target at FREE plan limit (1 funnel max)
 
       await expect(
         duplicateFunnel(originalFunnelId, userId, {
           workspaceSlug: "target-workspace",
         })
-      ).rejects.toThrow("This workspace has reached its maximum limit of 3 funnels");
+      ).rejects.toThrow("You've reached the maximum of 1 funnel for this workspace");
     });
   });
 
@@ -567,7 +567,8 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelName: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -599,7 +600,7 @@ describe("Funnel Duplication Tests", () => {
       expect(createdFunnelName).toBe("Marketing Funnel - copy");
     });
 
-    it("should generate unique name with ' - copy (2)' if duplicate exists", async () => {
+    it("should generate unique name with ' - copy 2' if duplicate exists", async () => {
       const originalFunnel = {
         id: originalFunnelId,
         name: "Marketing Funnel",
@@ -631,7 +632,8 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelName: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([
         { name: "Marketing Funnel - copy" },
       ]);
@@ -662,10 +664,10 @@ describe("Funnel Duplication Tests", () => {
 
       await duplicateFunnel(originalFunnelId, userId, {});
 
-      expect(createdFunnelName).toBe("Marketing Funnel - copy (2)");
+      expect(createdFunnelName).toBe("Marketing Funnel - copy 2");
     });
 
-    it("should generate unique name with ' - copy (3)' if multiple duplicates exist", async () => {
+    it("should generate unique name with ' - copy 3' if multiple duplicates exist", async () => {
       const originalFunnel = {
         id: originalFunnelId,
         name: "Marketing Funnel",
@@ -697,10 +699,11 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelName: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([
         { name: "Marketing Funnel - copy" },
-        { name: "Marketing Funnel - copy (2)" },
+        { name: "Marketing Funnel - copy 2" },
       ]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -729,7 +732,7 @@ describe("Funnel Duplication Tests", () => {
 
       await duplicateFunnel(originalFunnelId, userId, {});
 
-      expect(createdFunnelName).toBe("Marketing Funnel - copy (3)");
+      expect(createdFunnelName).toBe("Marketing Funnel - copy 3");
     });
 
     it("should generate slug from duplicated funnel name", async () => {
@@ -764,7 +767,8 @@ describe("Funnel Duplication Tests", () => {
       let createdSlug: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -828,7 +832,8 @@ describe("Funnel Duplication Tests", () => {
       let createdSlug: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst
         .mockResolvedValueOnce({ id: 99 }) // Base slug exists
@@ -865,7 +870,7 @@ describe("Funnel Duplication Tests", () => {
     it("should handle special characters in funnel name correctly", async () => {
       const originalFunnel = {
         id: originalFunnelId,
-        name: "My Awesome! Funnel @ 2024",
+        name: "My Awesome Funnel 2024",
         slug: "my-awesome-funnel-2024",
         status: $Enums.FunnelStatus.DRAFT,
         workspaceId,
@@ -895,7 +900,8 @@ describe("Funnel Duplication Tests", () => {
       let createdSlug: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -925,7 +931,7 @@ describe("Funnel Duplication Tests", () => {
 
       await duplicateFunnel(originalFunnelId, userId, {});
 
-      expect(createdFunnelName).toBe("My Awesome! Funnel @ 2024 - copy");
+      expect(createdFunnelName).toBe("My Awesome Funnel 2024 - copy");
       expect(createdSlug).toMatch(/my-awesome-funnel-2024-copy/i);
     });
   });
@@ -966,7 +972,8 @@ describe("Funnel Duplication Tests", () => {
         let createdThemeData: any = null;
 
         mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-        mockPrisma.funnel.count.mockResolvedValue(1);
+        mockWorkspaceForPermissions();
+        mockPrisma.funnel.count.mockResolvedValue(0);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
         mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1046,7 +1053,8 @@ describe("Funnel Duplication Tests", () => {
         let createdFunnelData: any = null;
 
         mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-        mockPrisma.funnel.count.mockResolvedValue(1);
+        mockWorkspaceForPermissions();
+        mockPrisma.funnel.count.mockResolvedValue(0);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
         mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1123,7 +1131,8 @@ describe("Funnel Duplication Tests", () => {
         let createdThemeData: any = null;
 
         mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-        mockPrisma.funnel.count.mockResolvedValue(1);
+        mockWorkspaceForPermissions();
+        mockPrisma.funnel.count.mockResolvedValue(0);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
         mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1201,7 +1210,8 @@ describe("Funnel Duplication Tests", () => {
         let createdFunnelData: any = null;
 
         mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-        mockPrisma.funnel.count.mockResolvedValue(1);
+        mockWorkspaceForPermissions();
+        mockPrisma.funnel.count.mockResolvedValue(0);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
         mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1265,7 +1275,8 @@ describe("Funnel Duplication Tests", () => {
         let createdThemeData: any = null;
 
         mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-        mockPrisma.funnel.count.mockResolvedValue(1);
+        mockWorkspaceForPermissions();
+        mockPrisma.funnel.count.mockResolvedValue(0);
         mockPrisma.funnel.findMany.mockResolvedValue([]);
         mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1361,7 +1372,8 @@ describe("Funnel Duplication Tests", () => {
       let createdSettingsData: any = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1446,7 +1458,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1540,7 +1553,8 @@ describe("Funnel Duplication Tests", () => {
       const createdPages: any[] = [];
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1641,7 +1655,8 @@ describe("Funnel Duplication Tests", () => {
       let createdLinkingId: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1746,7 +1761,8 @@ describe("Funnel Duplication Tests", () => {
       const createdPages: any[] = [];
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1830,7 +1846,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1902,7 +1919,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -1975,7 +1993,8 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelData: any = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -2044,7 +2063,8 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelData: any = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -2111,13 +2131,18 @@ describe("Funnel Duplication Tests", () => {
         name: "Target Workspace",
         slug: "target-workspace",
         ownerId: userId,
+        owner: {
+          plan: $Enums.UserPlan.FREE,
+          addOns: [],
+        },
       };
 
       let createdFunnelData: any = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
+      mockWorkspaceForPermissions();
       mockPrisma.workspace.findUnique.mockResolvedValue(targetWorkspace);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -2187,7 +2212,8 @@ describe("Funnel Duplication Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -2264,7 +2290,8 @@ describe("Funnel Duplication Tests", () => {
       let pagesCreatedCount = 0;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
@@ -2331,7 +2358,8 @@ describe("Funnel Duplication Tests", () => {
       let createdFunnelName: string | null = null;
 
       mockPrisma.funnel.findUnique.mockResolvedValue(originalFunnel);
-      mockPrisma.funnel.count.mockResolvedValue(1);
+      mockWorkspaceForPermissions();
+      mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 

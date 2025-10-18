@@ -1,6 +1,6 @@
 import { getPrisma } from "../../../lib/prisma";
 import { ZodError } from "zod";
-import { BadRequestError } from "../../../errors";
+import { BadRequestError, NotFoundError } from "../../../errors";
 import {
   CreatePageVisitParams,
   CreatePageVisitRequest,
@@ -9,12 +9,7 @@ import {
   createPageVisitRequest,
   createPageVisitResponse,
 } from "../../../types/page/createPageVisit";
-import {
-  validatePageAndFunnelStatus,
-  findOrCreateSession,
-  isPageAlreadyVisited,
-  updatePageVisitCaches,
-} from "../../../helpers/page/createPageVisit";
+import { cacheService } from "../../cache/cache.service";
 
 export const createPageVisit = async (
   params: CreatePageVisitParams,
@@ -27,29 +22,73 @@ export const createPageVisit = async (
     const { pageId } = validatedParams;
     const { sessionId } = validatedRequest;
 
-    const validationResult = await validatePageAndFunnelStatus(pageId);
+    const prisma = getPrisma();
 
-    if (!validationResult.isLive) {
+    // Validate page exists and funnel is LIVE
+    const page = await prisma.page.findUnique({
+      where: { id: pageId },
+      select: {
+        id: true,
+        funnelId: true,
+        funnel: {
+          select: {
+            id: true,
+            workspaceId: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!page) {
+      throw new NotFoundError("Page not found");
+    }
+
+    if (page.funnel.status !== "LIVE") {
       const response = {
-        message: validationResult.message!,
+        message: "Visit tracking is only enabled for live funnels",
         isNewVisit: false,
       };
       return createPageVisitResponse.parse(response);
     }
 
-    const { page } = validationResult;
-    const prisma = getPrisma();
-
+    // Find or create session and record visit in transaction
     const result = await prisma.$transaction(async (tx) => {
-      const session = await findOrCreateSession(sessionId, page.funnelId);
+      // Find or create session
+      let session = await tx.session.findUnique({
+        where: { sessionId },
+        select: {
+          id: true,
+          visitedPages: true,
+          funnelId: true,
+        },
+      });
 
-      if (isPageAlreadyVisited(session.visitedPages, pageId)) {
+      if (!session) {
+        session = await tx.session.create({
+          data: {
+            sessionId,
+            funnelId: page.funnelId,
+            visitedPages: [],
+            interactions: {},
+          },
+          select: {
+            id: true,
+            visitedPages: true,
+            funnelId: true,
+          },
+        });
+      }
+
+      // Check if page already visited in this session
+      if (session.visitedPages.includes(pageId)) {
         return {
           message: "Page visit already recorded for this session",
           isNewVisit: false,
         };
       }
 
+      // Record visit
       await tx.session.update({
         where: { sessionId },
         data: {
@@ -69,12 +108,11 @@ export const createPageVisit = async (
       };
     });
 
+    // Invalidate page cache after recording visit
     if (result.isNewVisit) {
-      await updatePageVisitCaches({
-        pageId,
-        funnelId: page.funnelId,
-        workspaceId: page.funnel.workspaceId,
-      });
+      await cacheService.del(
+        `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:page:${pageId}:full`
+      );
     }
 
     return createPageVisitResponse.parse(result);

@@ -9,6 +9,9 @@ const mockPrismaInstance = {
   workspace: {
     findUnique: vi.fn(),
   },
+  workspaceMember: {
+    count: vi.fn(),
+  },
   workspaceRolePermTemplate: {
     findUnique: vi.fn(),
   },
@@ -27,9 +30,10 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../helpers/workspace/invite-member/validation", () => ({
-  validateWorkspaceExists: vi.fn(),
-  validateInviterPermissions: vi.fn(),
+vi.mock("../../utils/workspace-utils/workspace-permission-manager", () => ({
+  PermissionManager: {
+    requirePermission: vi.fn(),
+  },
 }));
 
 describe("Workspace Generate Invite Link Controller Tests", () => {
@@ -37,23 +41,23 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
   let mockPrisma: any;
-  let mockValidationHelpers: any;
+  let mockPermissionManager: any;
   let mockJwt: any;
 
   beforeEach(async () => {
-    const validationHelpers = await import(
-      "../../helpers/workspace/invite-member/validation"
+    const permissionManager = await import(
+      "../../utils/workspace-utils/workspace-permission-manager"
     );
     const jwt = await import("jsonwebtoken");
 
     mockPrisma = mockPrismaInstance;
-    mockValidationHelpers = validationHelpers;
+    mockPermissionManager = permissionManager.PermissionManager;
     mockJwt = jwt.default;
 
     mockReq = {
       userId: 1,
       params: {},
-      query: {},
+      body: {},
     };
     mockRes = {
       status: vi.fn().mockReturnThis(),
@@ -64,16 +68,19 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
     vi.clearAllMocks();
 
     // Set up default successful mocks
-    mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+    mockPrisma.workspace.findUnique.mockResolvedValue({
       id: 1,
       name: "Test Workspace",
       slug: "test-workspace",
       ownerId: 1,
+      planType: 'FREE',
+      addOns: [],
     });
-    mockValidationHelpers.validateInviterPermissions.mockResolvedValue(
-      undefined
-    );
+    mockPermissionManager.requirePermission.mockResolvedValue(undefined);
     mockJwt.sign.mockReturnValue("mock-jwt-token");
+
+    // Set up default allocation mocks (workspace has space for members)
+    mockPrisma.workspaceMember.count.mockResolvedValue(0);
   });
 
   describe("Successful Link Generation", () => {
@@ -85,13 +92,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -103,7 +110,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
-        link: expect.stringContaining("/join-workspace?token=mock-jwt-token"),
+        link: expect.stringContaining("/register?join-workspace=mock-jwt-token"),
         token: "mock-jwt-token",
       });
       expect(mockNext).not.toHaveBeenCalled();
@@ -117,13 +124,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 2, // Different owner
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
       mockReq.userId = 3; // Admin user
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -135,7 +142,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
-        link: expect.stringContaining("/join-workspace?token=mock-jwt-token"),
+        link: expect.stringContaining("/register?join-workspace=mock-jwt-token"),
         token: "mock-jwt-token",
       });
     });
@@ -148,13 +155,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -186,13 +193,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -224,13 +231,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
         ownerId: 1,
       };
 
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue(
+      mockPrisma.workspace.findUnique.mockResolvedValue(
         workspace
       );
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -256,7 +263,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       vi.clearAllMocks();
 
       // Set up workspace validation to succeed
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+      mockPrisma.workspace.findUnique.mockResolvedValue({
         id: 1,
         name: "Test Workspace",
         slug: "test-workspace",
@@ -264,13 +271,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       });
 
       // Set up permission validation to fail
-      mockValidationHelpers.validateInviterPermissions.mockRejectedValue(
+      mockPermissionManager.requirePermission.mockRejectedValue(
         new ForbiddenError("Insufficient permissions")
       );
 
       mockReq.userId = 3; // Regular member
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -290,7 +297,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       vi.clearAllMocks();
 
       // Set up workspace validation to succeed
-      mockValidationHelpers.validateWorkspaceExists.mockResolvedValue({
+      mockPrisma.workspace.findUnique.mockResolvedValue({
         id: 1,
         name: "Test Workspace",
         slug: "test-workspace",
@@ -298,13 +305,13 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
       });
 
       // Set up permission validation to fail
-      mockValidationHelpers.validateInviterPermissions.mockRejectedValue(
+      mockPermissionManager.requirePermission.mockRejectedValue(
         new ForbiddenError("You are not a member of this workspace")
       );
 
       mockReq.userId = 999; // Non-member
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.VIEWER,
       };
 
@@ -318,16 +325,52 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
     });
   });
 
+  describe("Member Allocation Limit", () => {
+    it("should prevent link generation when workspace member limit is reached", async () => {
+      const { GenerateInviteLinkService } = await import(
+        "../../services/workspace/generate-invite-link"
+      );
+      const { BadRequestError } = await import("../../errors");
+
+      const serviceSpy = vi
+        .spyOn(GenerateInviteLinkService, "generateInviteLink")
+        .mockRejectedValue(
+          new BadRequestError(
+            "Cannot generate invite link. Workspace member limit reached."
+          )
+        );
+
+      mockReq.userId = 1;
+      mockReq.params = { slug: "test-workspace" };
+      mockReq.body = {
+        role: WorkspaceRole.EDITOR,
+      };
+
+      await GenerateInviteLinkController.generateInviteLink(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Cannot generate invite link. Workspace member limit reached.",
+        })
+      );
+      expect(mockRes.json).not.toHaveBeenCalled();
+
+      serviceSpy.mockRestore();
+    });
+  });
+
   describe("Workspace Validation", () => {
     it("should reject when workspace doesn't exist", async () => {
       const { NotFoundError } = await import("../../errors");
-      mockValidationHelpers.validateWorkspaceExists.mockRejectedValue(
-        new NotFoundError("Workspace not found")
-      );
+      mockPrisma.workspace.findUnique.mockResolvedValue(null);
 
       mockReq.userId = 1;
       mockReq.params = { slug: "non-existent-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -349,7 +392,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -369,7 +412,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: "INVALID_ROLE",
       };
 
@@ -387,7 +430,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = {};
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 
@@ -405,7 +448,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = 1;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {};
+      mockReq.body = {};
 
       await GenerateInviteLinkController.generateInviteLink(
         mockReq as AuthRequest,
@@ -423,7 +466,7 @@ describe("Workspace Generate Invite Link Controller Tests", () => {
 
       mockReq.userId = undefined;
       mockReq.params = { slug: "test-workspace" };
-      mockReq.query = {
+      mockReq.body = {
         role: WorkspaceRole.EDITOR,
       };
 

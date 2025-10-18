@@ -1,68 +1,52 @@
 import jwt from "jsonwebtoken";
-import { MembershipStatus } from "../../../../generated/prisma-client";
-import { cacheService } from "../../../cache/cache.service";
+import { MembershipStatus, WorkspaceRole, WorkspacePermission } from "../../../../generated/prisma-client";
+
+export interface ProcessedInvitation {
+  id: number;
+  name: string;
+  slug: string;
+  role: WorkspaceRole;
+  permissions: WorkspacePermission[];
+}
 
 export class WorkspaceInvitationProcessor {
   /**
-   * Processes a workspace invitation token during user registration
-   * Updates the pending membership to active (validation already done in early validation)
+   * Decodes a workspace invitation token
+   * Pure function - no database calls
    */
-  static async processWorkspaceInvitation(
-    userId: number,
-    userEmail: string,
-    token: string,
-    prisma: any
-  ) {
-    // Decode token (already validated in early validation, but needed for data)
-    const tokenPayload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-
-    // Get workspace
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: tokenPayload.workspaceId },
-      select: { id: true, name: true, slug: true, ownerId: true },
-    });
-
-    if (!workspace) {
-      throw new Error("Workspace not found");
-    }
-
-    // Find existing PENDING membership by email (already validated in early validation)
-    const existingMember = await prisma.workspaceMember.findFirst({
-      where: {
-        email: userEmail,
-        workspaceId: workspace.id,
-        status: MembershipStatus.PENDING,
-      },
-    });
-
-    if (!existingMember) {
-      throw new Error("No pending invitation found for this workspace");
-    }
-
-    // Update the pending membership to active
-    const updatedMember = await prisma.workspaceMember.update({
-      where: { id: existingMember.id },
-      data: {
-        userId,
-        status: MembershipStatus.ACTIVE,
-        joinedAt: new Date(),
-      },
-    });
-
-    // Invalidate workspace cache since member status changed
+  static decodeInvitationToken(token: string, jwtSecret: string): any | null {
     try {
-      await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
-    } catch (cacheError) {
-      console.error("Failed to invalidate workspace cache:", cacheError);
-      // Don't fail the operation if cache invalidation fails
+      return jwt.verify(token, jwtSecret);
+    } catch {
+      return null;
     }
+  }
 
+  /**
+   * Prepares data for updating a pending membership
+   * Pure function - returns the data to be used in database update
+   */
+  static prepareMembershipUpdate() {
+    return {
+      status: MembershipStatus.ACTIVE,
+      joinedAt: new Date(),
+    };
+  }
+
+  /**
+   * Formats workspace data for response
+   * Pure function - transforms data
+   */
+  static formatWorkspaceResponse(
+    workspace: { id: number; name: string; slug: string },
+    member: { role: WorkspaceRole; permissions: WorkspacePermission[] }
+  ): ProcessedInvitation {
     return {
       id: workspace.id,
       name: workspace.name,
       slug: workspace.slug,
-      role: updatedMember.role,
-      permissions: updatedMember.permissions,
+      role: member.role,
+      permissions: member.permissions,
     };
   }
 }

@@ -15,6 +15,7 @@ const mockPrismaInstance = {
   workspaceMember: {
     findFirst: vi.fn(),
     create: vi.fn(),
+    count: vi.fn(),
   },
   workspaceRolePermTemplate: {
     findUnique: vi.fn(),
@@ -34,12 +35,6 @@ vi.mock("jsonwebtoken", () => ({
   },
 }));
 
-vi.mock("../../utils/allocations", () => ({
-  AllocationService: {
-    canAddMember: vi.fn(),
-  },
-}));
-
 describe("Workspace Join by Link Controller Tests", () => {
   let mockReq: Partial<AuthRequest>;
   let mockRes: Partial<Response>;
@@ -51,7 +46,6 @@ describe("Workspace Join by Link Controller Tests", () => {
   beforeEach(async () => {
     const jwt = await import("jsonwebtoken");
     const { cacheService } = await import("../../services/cache/cache.service");
-    const { AllocationService } = await import("../../utils/allocations");
 
     mockPrisma = mockPrismaInstance;
     mockJwt = jwt.default;
@@ -89,9 +83,12 @@ describe("Workspace Join by Link Controller Tests", () => {
       name: "Test Workspace",
       slug: "test-workspace",
       ownerId: 1,
+      planType: 'FREE',
+      addOns: [],
     });
 
     mockPrisma.workspaceMember.findFirst.mockResolvedValue(null); // No existing membership
+    mockPrisma.workspaceMember.count.mockResolvedValue(0); // No members yet
     mockPrisma.workspaceMember.create.mockResolvedValue({
       id: 1,
       userId: 2,
@@ -111,9 +108,6 @@ describe("Workspace Join by Link Controller Tests", () => {
     mockCacheService.del.mockResolvedValue(undefined);
     mockCacheService.invalidateWorkspaceCache.mockResolvedValue(undefined);
     mockCacheService.invalidateUserWorkspacesCache.mockResolvedValue(undefined);
-
-    // Mock allocation service to allow adding members by default
-    (AllocationService.canAddMember as any).mockResolvedValue(true);
   });
 
   describe("Successful Join Operations", () => {
@@ -510,10 +504,9 @@ describe("Workspace Join by Link Controller Tests", () => {
   describe("Member Allocation Limit", () => {
     it("should reject when workspace has reached member limit", async () => {
       const { BadRequestError } = await import("../../errors");
-      const { AllocationService } = await import("../../utils/allocations");
 
-      // Mock allocation service to reject (member limit reached)
-      (AllocationService.canAddMember as any).mockResolvedValue(false);
+      // Mock workspace count to be at limit (1 for FREE plan)
+      mockPrisma.workspaceMember.count.mockResolvedValue(1);
 
       mockReq.body = {
         token: "valid-jwt-token",
@@ -534,8 +527,9 @@ describe("Workspace Join by Link Controller Tests", () => {
       expect(mockRes.status).not.toHaveBeenCalled();
     });
 
-    it("should check allocation limit with correct workspace owner and ID", async () => {
-      const { AllocationService } = await import("../../utils/allocations");
+    it("should allow joining when workspace has available slots", async () => {
+      // Mock workspace count below limit (0 members < 1 limit for FREE plan)
+      mockPrisma.workspaceMember.count.mockResolvedValue(0);
 
       mockReq.body = {
         token: "valid-jwt-token",
@@ -547,8 +541,11 @@ describe("Workspace Join by Link Controller Tests", () => {
         mockNext
       );
 
-      // Verify canAddMember was called with workspace owner ID and workspace ID
-      expect(AllocationService.canAddMember).toHaveBeenCalledWith(1, 1);
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: "Successfully joined workspace",
+        workspace: expect.any(Object),
+      });
     });
   });
 

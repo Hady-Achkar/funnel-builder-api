@@ -1,121 +1,236 @@
-import bcrypt from "bcryptjs";
 import { getPrisma } from "../../../lib/prisma";
 import {
   RegisterRequest,
   RegisterResponse,
+  RegisterUserResponse,
+  RegisterWorkspaceResponse,
 } from "../../../types/auth/register";
-import { PlanLimitsHelper } from "../../../helpers/auth/register";
-import { sendVerificationEmail } from "../../../helpers/auth/emails/register";
-import { generateVerificationToken } from "../utils";
+import { TrialPeriodCalculator } from "../../../utils/common-functions/trial-period";
+import bcrypt from "bcryptjs";
+import {
+  generateVerificationToken,
+  getVerificationTokenExpiry,
+} from "./utils/generate-verification-token";
 import { WorkspaceInvitationProcessor } from "./utils/workspace-invitation.utils";
-import { TokenValidator } from "./utils/token-validator";
+import {
+  getVerificationEmail,
+  VerificationEmailData,
+} from "../../../constants/emails/auth/verification";
+import sgMail from "@sendgrid/mail";
+import { cacheService } from "../../cache/cache.service";
+import { RegistrationSource, UserPlan } from "../../../generated/prisma-client";
 
 export class RegisterService {
-  static async register(userData: RegisterRequest): Promise<RegisterResponse> {
+  static async register(
+    data: RegisterRequest,
+    registrationSource: RegistrationSource
+  ): Promise<RegisterResponse> {
     try {
-      const {
-        email,
-        username,
-        firstName,
-        lastName,
-        password,
-        isAdmin,
-        plan,
-        workspaceInvitationToken,
-      } = userData;
-
       const prisma = getPrisma();
 
-      // Early token validation if invitation token is provided
-      if (workspaceInvitationToken) {
-        // Validate token and check email match
-        const tokenPayload = await TokenValidator.validateInvitationToken(
-          workspaceInvitationToken,
-          email
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const verificationToken = generateVerificationToken(data);
+      const verificationTokenExpiresAt = getVerificationTokenExpiry();
+
+      // Determine user plan based on registration source
+      let userPlan = data.plan || UserPlan.NO_PLAN;
+      if (registrationSource === RegistrationSource.WORKSPACE_INVITE) {
+        userPlan = UserPlan.WORKSPACE_MEMBER;
+      }
+
+      // Determine which token to save (affiliate or workspace invitation)
+      let registrationToken: string | undefined;
+      if (data.affiliateToken) {
+        registrationToken = data.affiliateToken;
+      } else if (data.workspaceInvitationToken) {
+        registrationToken = data.workspaceInvitationToken;
+      }
+
+      // Set trial dates for all plans except WORKSPACE_MEMBER (default: 1 year)
+      let trialStartDate: Date | undefined;
+      let trialEndDate: Date | undefined;
+      if (userPlan !== UserPlan.WORKSPACE_MEMBER) {
+        const trialDates = TrialPeriodCalculator.getTrialDates(
+          data.trialPeriod
         );
-
-        // Check if pending invitation exists
-        await TokenValidator.checkPendingInvitation(
-          email,
-          tokenPayload.workspaceId,
-          prisma
-        );
+        trialStartDate = trialDates.trialStartDate;
+        trialEndDate = trialDates.trialEndDate;
       }
-
-      const existingUserByEmail = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (existingUserByEmail) {
-        throw new Error("User with this email already exists");
-      }
-
-      const existingUserByUsername = await prisma.user.findUnique({
-        where: { username },
-      });
-
-      if (existingUserByUsername) {
-        throw new Error("Username is already taken");
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const finalLimits = PlanLimitsHelper.calculateFinalLimits(plan, {});
-
-      const verificationToken = generateVerificationToken(userData);
-      const verificationTokenExpiresAt = new Date();
-      verificationTokenExpiresAt.setHours(
-        verificationTokenExpiresAt.getHours() + 24
-      );
 
       const user = await prisma.user.create({
         data: {
-          email,
-          username,
-          firstName,
-          lastName,
+          email: data.email,
+          username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
           password: hashedPassword,
           verified: false,
           verificationToken,
           verificationTokenExpiresAt,
-          isAdmin,
-          plan,
-          maximumWorkspaces: finalLimits.maximumWorkspaces,
+          isAdmin: data.isAdmin,
+          plan: userPlan,
+          registrationSource,
+          registrationToken, // NEW: Save the token used during registration
+          trialStartDate,
+          trialEndDate,
         },
       });
 
+      // Send verification email (non-blocking, don't fail registration if email fails)
       try {
-        await sendVerificationEmail(email, firstName, verificationToken);
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
+        const apiKey = process.env.SENDGRID_API_KEY;
+        if (!apiKey) {
+          throw new Error("SENDGRID_API_KEY is not configured");
+        }
+        sgMail.setApiKey(apiKey);
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+        const emailData: VerificationEmailData = {
+          firstName: user.firstName,
+          verificationUrl,
+        };
+
+        const html = getVerificationEmail(emailData);
+
+        const msg = {
+          to: user.email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL,
+            name: "Digitalsite",
+          },
+          subject: "Verify Your Email Address | تأكيد بريدك الإلكتروني",
+          html,
+        };
+
+        await sgMail.send(msg);
+      } catch (error: any) {
+        console.error("Failed to send verification email:", error);
+        if (error.response && error.response.body) {
+          console.error(
+            "SendGrid error details:",
+            JSON.stringify(error.response.body, null, 2)
+          );
+        }
+        // Continue with registration even if email fails
       }
 
-      // Process invitation token if provided (already validated)
-      let workspaceData = undefined;
-      if (workspaceInvitationToken) {
-        workspaceData =
-          await WorkspaceInvitationProcessor.processWorkspaceInvitation(
-            user.id,
-            email,
-            workspaceInvitationToken,
-            prisma
-          );
+      // Process workspace invitation if token provided
+      let workspaceData: RegisterWorkspaceResponse | undefined;
+      if (data.workspaceInvitationToken) {
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+          throw new Error("JWT secret not configured");
+        }
+
+        // Decode token to get workspace ID
+        const tokenPayload = WorkspaceInvitationProcessor.decodeInvitationToken(
+          data.workspaceInvitationToken,
+          jwtSecret
+        );
+
+        if (tokenPayload && tokenPayload.workspaceId) {
+          // Get workspace
+          const workspace = await prisma.workspace.findUnique({
+            where: { id: tokenPayload.workspaceId },
+            select: { id: true, name: true, slug: true },
+          });
+
+          if (workspace) {
+            const isDirectLink = tokenPayload.type === "workspace_direct_link";
+
+            if (isDirectLink) {
+              // For direct links, create a new workspace member
+              const newMember = await prisma.workspaceMember.create({
+                data: {
+                  userId: user.id,
+                  workspaceId: workspace.id,
+                  role: tokenPayload.role || "EDITOR",
+                  permissions: [],
+                  status: "ACTIVE",
+                  joinedAt: new Date(),
+                },
+              });
+
+              // Format response
+              workspaceData =
+                WorkspaceInvitationProcessor.formatWorkspaceResponse(
+                  workspace,
+                  {
+                    role: newMember.role,
+                    permissions: newMember.permissions,
+                  }
+                );
+            } else {
+              // For email invitations, find and update pending membership
+              const pendingMember = await prisma.workspaceMember.findFirst({
+                where: {
+                  email: user.email,
+                  workspaceId: workspace.id,
+                  status: "PENDING",
+                },
+              });
+
+              if (pendingMember) {
+                // Update membership to active and connect user
+                const updateData =
+                  WorkspaceInvitationProcessor.prepareMembershipUpdate();
+                const updatedMember = await prisma.workspaceMember.update({
+                  where: { id: pendingMember.id },
+                  data: {
+                    ...updateData,
+                    user: {
+                      connect: { id: user.id },
+                    },
+                  },
+                });
+
+                // Format response
+                workspaceData =
+                  WorkspaceInvitationProcessor.formatWorkspaceResponse(
+                    workspace,
+                    {
+                      role: updatedMember.role,
+                      permissions: updatedMember.permissions,
+                    }
+                  );
+              }
+            }
+
+            // Invalidate workspace cache
+            if (workspaceData) {
+              try {
+                await cacheService.del(`slug:${workspace.slug}`, {
+                  prefix: "workspace",
+                });
+              } catch (cacheError) {
+                console.error(
+                  "Failed to invalidate workspace cache:",
+                  cacheError
+                );
+              }
+            }
+          }
+        }
       }
+
+      // Build response
+      const userResponse: RegisterUserResponse = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isAdmin: user.isAdmin,
+        plan: user.plan,
+        verified: user.verified,
+      };
 
       return {
         message: workspaceData
           ? `User created successfully and added to workspace ${workspaceData.name}. Please check your email to verify your account.`
           : "User created successfully. Please check your email to verify your account.",
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          isAdmin: user.isAdmin || false,
-          plan: user.plan,
-          verified: user.verified,
-        },
+        user: userResponse,
         workspace: workspaceData,
       };
     } catch (error) {

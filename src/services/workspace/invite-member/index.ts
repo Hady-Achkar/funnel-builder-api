@@ -5,18 +5,15 @@ import {
   InviteMemberResponse,
 } from "../../../types/workspace/invite-member";
 import { MembershipStatus } from "../../../generated/prisma-client";
-import {
-  validateWorkspaceExists,
-  validateInviterPermissions,
-  validateMemberAllocationLimit,
-  validateInvitationRequest,
-  checkExistingMembership,
-} from "../../../helpers/workspace/invite-member/validation";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   sendWorkspaceInvitationEmail,
   sendWorkspaceRegisterInvitationEmail,
-} from "../../../helpers/workspace/invite-member";
+} from "./utils/send-emails";
 import { cacheService } from "../../cache/cache.service";
+import { WorkspaceMemberAllocations } from "../../../utils/allocations/workspace-member-allocations";
+import { BadRequestError, NotFoundError } from "../../../errors";
 
 export class InviteMemberService {
   static async inviteMember(
@@ -26,18 +23,95 @@ export class InviteMemberService {
     try {
       const prisma = getPrisma();
 
-      const workspace = await validateWorkspaceExists(data.workspaceSlug);
+      // Check if workspace exists
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: data.workspaceSlug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          ownerId: true,
+        },
+      });
 
-      validateInviterPermissions(workspace, inviterUserId);
+      if (!workspace) {
+        throw new NotFoundError("Workspace not found");
+      }
 
-      await validateMemberAllocationLimit(workspace.ownerId, workspace.id);
+      // Check if user has permission to invite members
+      await PermissionManager.requirePermission({
+        userId: inviterUserId,
+        workspaceId: workspace.id,
+        action: PermissionAction.INVITE_MEMBER,
+      });
+
+      // Check member allocation limit using WorkspaceMemberAllocations
+      const workspaceWithLimits = await prisma.workspace.findUnique({
+        where: { id: workspace.id },
+        select: {
+          planType: true,
+          addOns: {
+            where: { status: 'ACTIVE' },
+            select: {
+              type: true,
+              quantity: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      const currentMemberCount = await prisma.workspaceMember.count({
+        where: {
+          workspaceId: workspace.id,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      const canAddMember = WorkspaceMemberAllocations.canAddMember(
+        currentMemberCount,
+        {
+          workspacePlanType: workspaceWithLimits!.planType,
+          addOns: workspaceWithLimits!.addOns,
+        }
+      );
+
+      if (!canAddMember) {
+        throw new BadRequestError(
+          "Cannot add more members. Workspace member limit reached."
+        );
+      }
+
+      // Check if this email has already been invited (PENDING) or is already a member (ACTIVE)
+      const existingMemberByEmail = await prisma.workspaceMember.findFirst({
+        where: {
+          workspaceId: workspace.id,
+          email: data.email,
+          status: {
+            in: ['ACTIVE', 'PENDING'],
+          },
+        },
+      });
+
+      if (existingMemberByEmail) {
+        if (existingMemberByEmail.status === MembershipStatus.ACTIVE) {
+          throw new BadRequestError("User is already a member of this workspace");
+        } else {
+          throw new BadRequestError("This email has already been invited to the workspace");
+        }
+      }
 
       const userToInvite = await prisma.user.findUnique({
         where: { email: data.email },
         select: { id: true, email: true },
       });
 
-      validateInvitationRequest(userToInvite, workspace.ownerId);
+      // Prevent inviting workspace owner as a member
+      if (userToInvite && userToInvite.id === workspace.ownerId) {
+        throw new BadRequestError("Cannot invite the workspace owner as a member");
+      }
 
       const invitationToken = jwt.sign(
         {
@@ -85,9 +159,7 @@ export class InviteMemberService {
           invitationToken
         );
       } else {
-        // For existing users: Check membership then create pending membership
-        await checkExistingMembership(userToInvite.id, workspace.id);
-
+        // For existing users: Create pending membership
         await prisma.workspaceMember.create({
           data: {
             userId: userToInvite.id,

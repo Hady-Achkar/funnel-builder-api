@@ -1,7 +1,11 @@
 import { z } from "zod";
-import { $Enums, WorkspaceRole, WorkspacePermission } from "../../../generated/prisma-client";
+import {
+  WorkspaceRole,
+  WorkspacePermission,
+  UserPlan,
+} from "../../../generated/prisma-client";
 
-export const registerRequest = z.object({
+export const registerRequestSchema = z.object({
   email: z
     .string({
       message: "Email must be a string",
@@ -46,36 +50,74 @@ export const registerRequest = z.object({
     })
     .default(false),
   plan: z
-    .enum($Enums.UserPlan, {
-      message: "Plan must be BUSINESS or AGENCY",
-    })
-    .default($Enums.UserPlan.BUSINESS),
-  workspaceInvitationToken: z
+    .nativeEnum(UserPlan)
+    .default(UserPlan.NO_PLAN)
+    .optional()
+    .describe(
+      "Plan must be NO_PLAN, WORKSPACE_MEMBER, FREE, BUSINESS or AGENCY"
+    ),
+  trialPeriod: z
     .string()
+    .regex(/^\d+[ymwd]$/i, {
+      message:
+        "Trial period must be in format: 1y, 2m, 3w, 30d (year/month/week/day)",
+    })
+    .optional()
+    .describe(
+      "Optional trial period. Format: 1y, 2m, 3w, 30d. Defaults to 1 year. Not applied to WORKSPACE_MEMBER plan."
+    ),
+  workspaceInvitationToken: z
+    .string({ message: "Workspace invitation token must be a string" })
+    .min(1, "Workspace invitation token cannot be empty")
     .optional(),
+  affiliateToken: z
+    .string({ message: "Affiliate token must be a string" })
+    .min(1, "Affiliate token cannot be empty")
+    .optional()
+    .describe("Optional affiliate referral token"),
 });
 
-export type RegisterRequest = z.infer<typeof registerRequest>;
-
-export const registerResponse = z.object({
-  message: z.string(),
-  user: z.object({
+// User response schema using Prisma types inside Zod
+export const registerUserResponseSchema = z
+  .object({
     id: z.number(),
     email: z.string(),
     username: z.string(),
     firstName: z.string(),
     lastName: z.string(),
-    isAdmin: z.boolean().default(false),
-    plan: z.enum($Enums.UserPlan),
+    isAdmin: z.boolean(),
+    plan: z.nativeEnum(UserPlan),
     verified: z.boolean(),
-  }),
-  workspace: z.object({
+  })
+  .describe("User data from Prisma User model");
+
+// Workspace response schema using Prisma types inside Zod
+export const registerWorkspaceResponseSchema = z
+  .object({
     id: z.number(),
     name: z.string(),
     slug: z.string(),
-    role: z.enum(WorkspaceRole),
-    permissions: z.array(z.enum(WorkspacePermission)),
-  }).optional(),
+    role: z.nativeEnum(WorkspaceRole),
+    permissions: z.array(z.nativeEnum(WorkspacePermission)),
+  })
+  .describe(
+    "Workspace data from Prisma Workspace model with role and permissions"
+  );
+
+// Complete response schema
+export const registerResponseSchema = z.object({
+  message: z.string(),
+  user: registerUserResponseSchema,
+  workspace: registerWorkspaceResponseSchema.optional(),
 });
 
-export type RegisterResponse = z.infer<typeof registerResponse>;
+// Export inferred TypeScript types from Zod schemas
+export type RegisterRequest = z.infer<typeof registerRequestSchema>;
+export type RegisterUserResponse = z.infer<typeof registerUserResponseSchema>;
+export type RegisterWorkspaceResponse = z.infer<
+  typeof registerWorkspaceResponseSchema
+>;
+export type RegisterResponse = z.infer<typeof registerResponseSchema>;
+
+// For backward compatibility, export the request schema with the old name
+export const registerRequest = registerRequestSchema;

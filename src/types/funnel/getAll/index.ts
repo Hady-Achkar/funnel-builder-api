@@ -16,7 +16,6 @@ export const getAllFunnelsRequest = z.object({
 });
 
 export const getAllFunnelsResponse = z.object({
-  message: z.string(),
   funnels: z.array(
     z.object({
       id: z.number(),

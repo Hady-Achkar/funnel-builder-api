@@ -5,10 +5,8 @@ import {
   BadRequestError,
 } from "../../../errors/http-errors";
 import { ZodError } from "zod";
-import {
-  WorkspaceRole,
-  WorkspacePermission,
-} from "../../../generated/prisma-client";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import {
   GetWorkspaceDomainsSummaryRequestSchema,
   WorkspaceDomain,
@@ -33,37 +31,18 @@ export class GetWorkspaceDomainsSummaryService {
         throw new NotFoundError("Workspace not found");
       }
 
-      // Check if user is workspace owner
-      const isOwner = workspace.ownerId === userId;
+      // Check if user has permission to manage domains in this workspace
+      // Using MANAGE_DOMAIN which requires MANAGE_DOMAINS permission or ADMIN role
+      const permissionCheck = await PermissionManager.can({
+        userId,
+        workspaceId: workspace.id,
+        action: PermissionAction.MANAGE_DOMAIN,
+      });
 
-      if (!isOwner) {
-        // Check if user is a workspace member and get their role and permissions
-        const member = await getPrisma().workspaceMember.findUnique({
-          where: {
-            userId_workspaceId: {
-              userId,
-              workspaceId: workspace.id,
-            },
-          },
-          select: {
-            role: true,
-            permissions: true,
-          },
-        });
-
-        if (!member) {
-          throw new ForbiddenError("Access denied");
-        }
-
-        // Check if user is admin or has CONNECT_DOMAINS permission
-        const isAdmin = member.role === WorkspaceRole.ADMIN;
-        const hasConnectDomainsPermission = member.permissions.includes(
-          WorkspacePermission.CONNECT_DOMAINS
+      if (!permissionCheck.allowed) {
+        throw new ForbiddenError(
+          permissionCheck.reason || "You don't have permission to view domains in this workspace"
         );
-
-        if (!isAdmin && !hasConnectDomainsPermission) {
-          throw new ForbiddenError("Access denied");
-        }
       }
 
       // Get domains for the workspace

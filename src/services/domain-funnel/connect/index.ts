@@ -7,11 +7,14 @@ import {
   ConnectFunnelDomainResponseSchema,
 } from "../../../types/domain-funnel/connect";
 import {
-  validateConnectFunnelDomainAccess,
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
+import {
   validateFunnelExists,
   validateDomainExists,
   validateSameWorkspace,
-} from "../../../helpers/domain-funnel/connect";
+} from "./utils/validators";
 
 export class ConnectFunnelDomainService {
   static async connect(
@@ -24,10 +27,15 @@ export class ConnectFunnelDomainService {
 
       const funnel = await validateFunnelExists(funnelId);
       const domain = await validateDomainExists(domainId);
-      
+
       validateSameWorkspace(funnel, domain);
 
-      await validateConnectFunnelDomainAccess(userId, funnel.workspaceId);
+      // Check permissions using centralized PermissionManager
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: funnel.workspaceId,
+        action: PermissionAction.CONNECT_DOMAIN,
+      });
 
       const prisma = getPrisma();
 

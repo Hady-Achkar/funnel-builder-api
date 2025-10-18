@@ -25,9 +25,13 @@ export class VerifyService {
         tokenData = jwt.verify(validatedData.token, jwtSecret) as any;
       } catch (error: any) {
         if (error.name === "TokenExpiredError") {
-          throw new Error("Verification token has expired");
+          throw new Error(
+            "Your verification link has expired. Please request a new verification email to complete your registration."
+          );
         }
-        throw new Error("Invalid verification token");
+        throw new Error(
+          "Invalid verification link. Please check your email for the correct verification link or request a new one."
+        );
       }
 
       if (!tokenData.email) {
@@ -46,10 +50,23 @@ export class VerifyService {
         throw new Error("Email is already verified");
       }
 
+      // Check if the verification token has expired in the database
+      if (user.verificationTokenExpiresAt) {
+        const now = new Date();
+        if (now > user.verificationTokenExpiresAt) {
+          throw new Error(
+            "Your verification link has expired. Please request a new verification email to complete your registration."
+          );
+        }
+      }
+
+      // Verify and clear the verification token
       await prisma.user.update({
         where: { id: user.id },
         data: {
           verified: true,
+          verificationToken: null,
+          verificationTokenExpiresAt: null,
         },
       });
 

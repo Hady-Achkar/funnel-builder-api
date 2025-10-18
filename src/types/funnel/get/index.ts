@@ -34,6 +34,7 @@ export const getFunnelResponse = z.object({
     z.object({
       id: z.number(),
       name: z.string(),
+      type: z.nativeEnum($Enums.PageType),
       order: z.number(),
       linkingId: z.string().nullable(),
       seoTitle: z.string().nullable(),

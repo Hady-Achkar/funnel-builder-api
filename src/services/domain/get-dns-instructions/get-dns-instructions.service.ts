@@ -1,6 +1,10 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../helpers/domain/shared";
-import { getCustomHostnameDetails } from "../../../helpers/domain/shared";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
+import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import {
@@ -8,11 +12,8 @@ import {
   GetDNSInstructionsRequestSchema,
   GetDNSInstructionsResponseSchema,
 } from "../../../types/domain/get-dns-instructions";
-import {
-  validateDNSInstructionsAccess,
-  prepareDNSRecords,
-  calculateProgress,
-} from "../../../helpers/domain/get-dns-instructions";
+import { prepareDNSRecords } from "./utils/prepare-dns-records";
+import { calculateProgress } from "./utils/calculate-progress";
 
 export class GetDNSInstructionsService {
   static async getDNSInstructions(
@@ -31,7 +32,11 @@ export class GetDNSInstructionsService {
         throw new NotFoundError("Domain not found");
       }
 
-      await validateDNSInstructionsAccess(userId, domainRecord.workspaceId);
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: domainRecord.workspaceId,
+        action: PermissionAction.MANAGE_DOMAIN,
+      });
 
       let currentSslValidationRecords = null;
       if (domainRecord.cloudflareHostnameId) {
@@ -47,7 +52,7 @@ export class GetDNSInstructionsService {
             currentSslValidationRecords = cfHostname.ssl.validation_records;
           }
         } catch (error) {
-          return error;
+          return error as any;
         }
       }
 

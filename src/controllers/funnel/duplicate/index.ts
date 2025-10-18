@@ -32,6 +32,7 @@ export const duplicateFunnelController = async (
 
     try {
       const cacheKeysToInvalidate = [
+        `workspace:${workspaceId}:funnel:${response.funnelId}:full`,
         `workspace:${workspaceId}:funnels:all`,
         `workspace:${workspaceId}:funnels:list`,
         `user:${userId}:workspace:${workspaceId}:funnels`,

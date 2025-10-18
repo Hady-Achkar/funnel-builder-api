@@ -5,11 +5,10 @@ import {
   reorderPagesRequest,
   reorderPagesResponse,
 } from "../../../types/page/reorder";
-import {
-  checkReorderPermissions,
-  updateCacheAfterReorder,
-} from "../../../helpers/page/reorder";
-import { BadRequestError, UnauthorizedError } from "../../../errors";
+import { BadRequestError, UnauthorizedError, NotFoundError } from "../../../errors";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { cacheService } from "../../cache/cache.service";
 
 export const reorderPages = async (
   userId: number,
@@ -21,9 +20,37 @@ export const reorderPages = async (
     const validatedRequest = reorderPagesRequest.parse(requestBody);
     const { funnelId, pageOrders } = validatedRequest;
 
-    // Check permissions and get existing pages
-    const permissionResult = await checkReorderPermissions(userId, funnelId);
-    const { workspaceId, existingPages } = permissionResult;
+    const prisma = getPrisma();
+
+    // Get funnel with workspace info and existing pages
+    const funnel = await prisma.funnel.findFirst({
+      where: { id: funnelId },
+      select: {
+        id: true,
+        workspaceId: true,
+        pages: {
+          select: { id: true, order: true },
+          orderBy: { order: "asc" },
+        },
+      },
+    });
+
+    if (!funnel) {
+      throw new NotFoundError("Funnel not found");
+    }
+
+    if (funnel.pages.length === 0) {
+      throw new NotFoundError("No pages found in this funnel");
+    }
+
+    // Check permission using PermissionManager
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.REORDER_PAGE,
+    });
+
+    const { workspaceId, pages: existingPages } = funnel;
 
     // Validation: Ensure all provided page IDs exist in the funnel
     const existingPageIds = new Set(existingPages.map((page) => page.id));
@@ -61,8 +88,6 @@ export const reorderPages = async (
       }
     }
 
-    const prisma = getPrisma();
-
     // Update page orders in a transaction
     await prisma.$transaction(
       pageOrders.map(({ id, order }) =>
@@ -73,12 +98,10 @@ export const reorderPages = async (
       )
     );
 
-    // Update cache
-    await updateCacheAfterReorder({
-      workspaceId,
-      funnelId,
-      pageOrders,
-    });
+    // Simplified cache invalidation - just delete the funnel cache
+    await cacheService.del(
+      `workspace:${workspaceId}:funnel:${funnelId}:full`
+    );
 
     const response: ReorderPagesResponse = {
       message: "Pages reordered successfully",

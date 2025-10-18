@@ -30,15 +30,6 @@ export const createFunnelResponse = z.object({
   funnelId: z.number(),
 });
 
-export const workspacePayload = z.object(
-  {
-    id: z.number({ message: "Invalid workspace" }),
-    name: z.string({ message: "Workspace name is required" }),
-    ownerId: z.number({ message: "Workspace owner information is missing" }),
-  },
-  { message: "Workspace information is required" }
-);
-
 export const workspaceMemberPayload = z.object({
   role: z.enum($Enums.WorkspaceRole, "Invalid member role"),
   permissions: z.array(z.enum($Enums.WorkspacePermission)),
@@ -77,6 +68,8 @@ export const createFunnelSettingsPayload = z.object(
     cookieConsentText: z.string().nullable().optional(),
     privacyPolicyUrl: z.string().nullable().optional(),
     termsOfServiceUrl: z.string().nullable().optional(),
+    isPasswordProtected: z.boolean().optional().default(false),
+    passwordHash: z.string().nullable().optional(),
   },
   { message: "Funnel settings information is required" }
 );
@@ -109,7 +102,6 @@ export const createHomePagePayload = z.object(
 
 export type CreateFunnelRequest = z.infer<typeof createFunnelRequest>;
 export type CreateFunnelResponse = z.infer<typeof createFunnelResponse>;
-export type WorkspacePayload = z.infer<typeof workspacePayload>;
 export type WorkspaceMemberPayload = z.infer<typeof workspaceMemberPayload>;
 export type CreateFunnelPayload = z.infer<typeof createFunnelPayload>;
 export type CreateFunnelSettingsPayload = z.infer<
