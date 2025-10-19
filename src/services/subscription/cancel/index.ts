@@ -3,6 +3,12 @@ import {
   CancelSubscriptionResponse,
 } from "../../../types/subscription/cancel";
 import { cancelMamoPaySubscription } from "../../../utils/mamopay-utils/cancel-subscription";
+import sgMail from "@sendgrid/mail";
+import {
+  getSubscriptionCancellationEmailHtml,
+  getSubscriptionCancellationEmailText,
+  SubscriptionCancellationData,
+} from "../../../constants/emails/subscription/cancellation";
 
 export class CancelSubscriptionService {
   static async cancel(
@@ -27,7 +33,7 @@ export class CancelSubscriptionService {
 
       // Update subscription to CANCELLED within a transaction
       const result = await prisma.$transaction(async (tx) => {
-        // Update subscription status
+        // Update subscription status and include user data
         const subscription = await tx.subscription.update({
           where: {
             subscriptionId,
@@ -35,6 +41,15 @@ export class CancelSubscriptionService {
           data: {
             status: "CANCELLED",
             updatedAt: new Date(),
+          },
+          include: {
+            user: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         });
 
@@ -62,6 +77,68 @@ export class CancelSubscriptionService {
         mamopayCancelled = await cancelMamoPaySubscription(
           existingSubscription.subscriptionId,
           existingSubscription.subscriberId
+        );
+      }
+
+      // Send cancellation email to user
+      try {
+        const apiKey = process.env.SENDGRID_API_KEY;
+        const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+
+        if (apiKey && fromEmail && result.user) {
+          sgMail.setApiKey(apiKey);
+
+          // Prepare user-friendly subscription type label
+          let subscriptionTypeLabel = "";
+          if (result.itemType === "PLAN") {
+            // Map plan types to user-friendly names
+            const planLabels: Record<string, string> = {
+              BUSINESS: "Business Plan",
+              AGENCY: "Agency Plan",
+              FREE: "Free Plan",
+            };
+            subscriptionTypeLabel = planLabels[result.subscriptionType || ""] || "Plan";
+          } else if (result.itemType === "ADDON") {
+            // Map addon types to user-friendly names
+            const addonLabels: Record<string, string> = {
+              EXTRA_WORKSPACE: "Extra Workspace",
+              EXTRA_ADMIN: "Additional Team Member",
+              EXTRA_FUNNEL: "Additional Funnel",
+              EXTRA_SUBDOMAIN: "Additional Subdomain",
+              EXTRA_CUSTOM_DOMAIN: "Additional Custom Domain",
+            };
+            subscriptionTypeLabel = addonLabels[result.addonType || ""] || "Add-on";
+          }
+
+          const emailData: SubscriptionCancellationData = {
+            recipientName: result.user.firstName || "User",
+            subscriptionType: subscriptionTypeLabel,
+            itemType: result.itemType,
+            subscriptionId: result.subscriptionId,
+            endsAt: result.endsAt,
+            startsAt: result.startsAt,
+          };
+
+          await sgMail.send({
+            to: result.user.email,
+            from: {
+              email: fromEmail,
+              name: "Digitalsite",
+            },
+            subject: "Subscription Cancelled | تم إلغاء الاشتراك",
+            html: getSubscriptionCancellationEmailHtml(emailData),
+            text: getSubscriptionCancellationEmailText(emailData),
+          });
+
+          console.log(
+            `[CancelSubscription] Cancellation email sent to ${result.user.email}`
+          );
+        }
+      } catch (emailError) {
+        // Log email error but don't fail the cancellation
+        console.error(
+          "[CancelSubscription] Failed to send cancellation email:",
+          emailError
         );
       }
 
