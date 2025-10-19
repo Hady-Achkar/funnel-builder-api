@@ -58,6 +58,7 @@ export class CreateWorkspaceService {
           type: true,
           quantity: true,
           status: true,
+          endDate: true, // Required for validating if addon is expired
         },
       });
 

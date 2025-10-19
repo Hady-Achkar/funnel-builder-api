@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating member allocations per workspace based on workspace plan type and add-ons
@@ -20,6 +21,7 @@ export interface MemberAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -43,11 +45,12 @@ export class WorkspaceMemberAllocations {
     // Start with base allocation from workspace plan type
     let totalMembers = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra member slots from active EXTRA_ADMIN add-ons (mainly for Agency plan)
+    // Add extra member slots from valid EXTRA_ADMIN add-ons (active or cancelled but not expired)
     const extraMembers = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_ADMIN && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_ADMIN &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

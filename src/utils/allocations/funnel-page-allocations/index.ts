@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating page allocations per funnel based on workspace plan type and add-ons
@@ -20,6 +21,7 @@ export interface PageAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -44,12 +46,13 @@ export class FunnelPageAllocations {
     // Start with base allocation from workspace plan type
     let totalPages = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra pages from active EXTRA_PAGE add-ons
+    // Add extra pages from valid EXTRA_PAGE add-ons (active or cancelled but not expired)
     // Each add-on quantity represents units, where each unit gives 5 extra pages
     const extraPages = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_PAGE && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_PAGE &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity * 5, 0); // 5 pages per add-on unit
 

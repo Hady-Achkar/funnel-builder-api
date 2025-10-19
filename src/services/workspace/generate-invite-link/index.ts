@@ -46,11 +46,20 @@ export class GenerateInviteLinkService {
         select: {
           planType: true,
           addOns: {
-            where: { status: "ACTIVE" },
+            where: {
+              OR: [
+                { status: "ACTIVE" },
+                {
+                  status: "CANCELLED",
+                  endDate: { gt: new Date() },
+                },
+              ],
+            },
             select: {
               type: true,
               quantity: true,
               status: true,
+              endDate: true,
             },
           },
         },

@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating workspace allocations based on user plan and add-ons
@@ -20,6 +21,7 @@ export interface WorkspaceAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -43,11 +45,12 @@ export class UserWorkspaceAllocations {
     // Start with base allocation
     let totalWorkspaces = this.getBaseAllocation(plan);
 
-    // Add extra workspaces from active add-ons
+    // Add extra workspaces from valid add-ons (active or cancelled but not expired)
     const extraWorkspaces = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_WORKSPACE && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_WORKSPACE &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

@@ -85,12 +85,27 @@ export class AddonPurchaseProcessor {
       // 5. Convert frequency to billing cycle
       const billingCycle = this.mapFrequencyToIntervalUnit(frequency);
 
-      // 6. Calculate start and end dates
+      // 6. Calculate start date (end date will be calculated later to match subscription)
       const startDate = new Date();
-      const endDate = trialEndDate ? new Date(trialEndDate) : null;
 
       // 7. Use transaction to create payment and addon atomically
       const result = await prisma.$transaction(async (tx) => {
+        // Calculate subscription dates first to ensure AddOn and Subscription have matching dates
+        const startsAt = startDate;
+        const intervalUnit =
+          FrequencyConverter.convertToIntervalUnit(frequency);
+        const intervalCount = frequencyInterval || 1;
+
+        // Calculate subscription end date
+        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+          frequency,
+          intervalCount
+        );
+        const endsAt = TrialPeriodCalculator.calculateEndDate(
+          startsAt,
+          trialPeriod
+        );
+
         // Create Payment record
         const payment = await tx.payment.create({
           data: {
@@ -107,7 +122,7 @@ export class AddonPurchaseProcessor {
           },
         });
 
-        // Create AddOn record
+        // Create AddOn record with endDate matching subscription endsAt
         const addon = await tx.addOn.create({
           data: {
             userId: user.id,
@@ -118,7 +133,7 @@ export class AddonPurchaseProcessor {
             status: AddOnStatus.ACTIVE,
             billingCycle,
             startDate,
-            endDate,
+            endDate: endsAt, // Use calculated subscription end date
           },
         });
 
@@ -180,22 +195,7 @@ export class AddonPurchaseProcessor {
           }
         }
 
-        // Create Subscription record for addon
-        const startsAt = new Date();
-        const intervalUnit =
-          FrequencyConverter.convertToIntervalUnit(frequency);
-        const intervalCount = frequencyInterval || 1;
-
-        // Calculate subscription end date
-        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
-          frequency,
-          intervalCount
-        );
-        const endsAt = TrialPeriodCalculator.calculateEndDate(
-          startsAt,
-          trialPeriod
-        );
-
+        // Create Subscription record for addon (using dates calculated earlier)
         const subscription = await tx.subscription.create({
           data: {
             subscriptionId: subscription_id || `SUB-ADDON-${transactionId}`,

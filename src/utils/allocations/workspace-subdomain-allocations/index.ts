@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating subdomain allocations per workspace based on workspace plan type and add-ons
@@ -20,6 +21,7 @@ export interface SubdomainAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -43,11 +45,12 @@ export class WorkspaceSubdomainAllocations {
     // Start with base allocation from workspace plan type
     let totalSubdomains = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra subdomains from active EXTRA_SUBDOMAIN add-ons
+    // Add extra subdomains from valid EXTRA_SUBDOMAIN add-ons (active or cancelled but not expired)
     const extraSubdomains = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_SUBDOMAIN && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_SUBDOMAIN &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

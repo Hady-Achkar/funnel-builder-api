@@ -133,16 +133,23 @@ export class RegisterController {
         // For direct links, we need to check the limit before accepting
         // For email invitations, the pending member was already counted when invited
         if (isDirectLink) {
-          // Get workspace add-ons to check total allocation
+          // Get workspace add-ons to check total allocation (active or cancelled but not expired)
           const addOns = await prisma.addOn.findMany({
             where: {
               workspaceId: workspace.id,
-              status: "ACTIVE",
+              OR: [
+                { status: "ACTIVE" },
+                {
+                  status: "CANCELLED",
+                  endDate: { gt: new Date() },
+                },
+              ],
             },
             select: {
               type: true,
               quantity: true,
               status: true,
+              endDate: true,
             },
           });
 
