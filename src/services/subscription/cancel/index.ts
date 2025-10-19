@@ -2,6 +2,7 @@ import { getPrisma } from "../../../lib/prisma";
 import {
   CancelSubscriptionResponse,
 } from "../../../types/subscription/cancel";
+import { cancelMamoPaySubscription } from "../../../utils/mamopay-utils/cancel-subscription";
 
 export class CancelSubscriptionService {
   static async cancel(
@@ -10,6 +11,19 @@ export class CancelSubscriptionService {
   ): Promise<CancelSubscriptionResponse> {
     try {
       const prisma = getPrisma();
+
+      // First, fetch the subscription with subscriberId
+      const existingSubscription = await prisma.subscription.findUnique({
+        where: { subscriptionId },
+        select: {
+          subscriberId: true,
+          subscriptionId: true,
+        },
+      });
+
+      if (!existingSubscription) {
+        throw new Error("Subscription not found");
+      }
 
       // Update subscription to CANCELLED within a transaction
       const result = await prisma.$transaction(async (tx) => {
@@ -42,11 +56,20 @@ export class CancelSubscriptionService {
         return subscription;
       });
 
+      // Attempt to cancel on MamoPay side
+      let mamopayCancelled = false;
+      if (existingSubscription.subscriberId) {
+        mamopayCancelled = await cancelMamoPaySubscription(
+          existingSubscription.subscriptionId,
+          existingSubscription.subscriberId
+        );
+      }
+
       // Format response with user-friendly date
-      const formattedDate = result.endsAt.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      const formattedDate = result.endsAt.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
 
       return {
@@ -57,6 +80,7 @@ export class CancelSubscriptionService {
         itemType: result.itemType,
         addonType: result.addonType,
         subscriptionType: result.subscriptionType,
+        mamopayCancelled,
       };
     } catch (error) {
       console.error("[CancelSubscription] Error:", error);

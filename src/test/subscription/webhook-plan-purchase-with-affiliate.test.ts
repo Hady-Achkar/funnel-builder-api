@@ -12,12 +12,22 @@ import { PrismaClient, UserPlan } from "../../generated/prisma-client";
 import { PaymentWebhookService } from "../../services/subscription/webhook";
 import * as setPasswordEmail from "../../helpers/subscription/emails/set-password";
 import sgMail from "@sendgrid/mail";
+import axios from "axios";
 
 // Mock SendGrid
 vi.mock("@sendgrid/mail", () => ({
   default: {
     setApiKey: vi.fn(),
     send: vi.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
+
+// Mock axios for MamoPay API calls
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(),
   },
 }));
 
@@ -299,6 +309,28 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         partnerLevel: 1,
         commissionPercentage: 5,
       },
+    });
+
+    // Mock MamoPay API - getSubscribers returns subscriberId
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [
+        {
+          id: "MPB-SUBSCRIBER-TEST-AFFILIATE",
+          status: "Active",
+          customer: {
+            id: "CUS-TEST",
+            name: "Test User",
+            email: "test@example.com",
+          },
+          number_of_payments: 0,
+          total_paid: "AED 0.00",
+          next_payment_date: new Date().toISOString(),
+        },
+      ],
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config: {} as any,
     });
   });
 
@@ -877,6 +909,94 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         where: { transactionId: payload.id },
       });
       expect(payment).toBeDefined();
+    });
+  });
+
+  describe("MamoPay Integration with Affiliate Link", () => {
+    it("should fetch and store subscriberId with affiliate purchase", async () => {
+      const email = `mamopay-affiliate-${Date.now()}@example.com`;
+      await createVerifiedUser(email);
+
+      const payload = createWebhookPayload(email, "BUSINESS", "monthly", 1, "SUB-AFFILIATE-MAMOPAY");
+
+      const result = await PaymentWebhookService.processWebhook(payload);
+
+      expect(result.received).toBe(true);
+
+      // Verify MamoPay API was called
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining("/subscriptions/SUB-AFFILIATE-MAMOPAY/subscribers"),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining("Bearer"),
+          }),
+        })
+      );
+
+      // Verify subscriberId stored
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          subscriptionId: "SUB-AFFILIATE-MAMOPAY",
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBe("MPB-SUBSCRIBER-TEST-AFFILIATE");
+
+      // Verify commission still processed
+      const affiliateOwner = await prisma.user.findUnique({
+        where: { id: affiliateOwnerId },
+      });
+      expect(affiliateOwner?.pendingBalance).toBe(50);
+    });
+
+    it("should handle MamoPay failure gracefully during affiliate purchase", async () => {
+      // Mock MamoPay API to fail
+      vi.mocked(axios.get).mockRejectedValueOnce(new Error("MamoPay unavailable"));
+
+      const email = `mamopay-fail-affiliate-${Date.now()}@example.com`;
+      await createVerifiedUser(email);
+
+      const payload = createWebhookPayload(email, "BUSINESS", "monthly", 1, "SUB-FAIL-001");
+
+      // Should still process successfully
+      const result = await PaymentWebhookService.processWebhook(payload);
+      expect(result.received).toBe(true);
+
+      // Verify subscription created without subscriberId
+      const subscription = await prisma.subscription.findFirst({
+        where: { subscriptionId: "SUB-FAIL-001" },
+      });
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
+
+      // Verify commission still processed despite MamoPay failure
+      const affiliateOwner = await prisma.user.findUnique({
+        where: { id: affiliateOwnerId },
+      });
+      expect(affiliateOwner?.pendingBalance).toBe(50);
+
+      // Reset mock
+      vi.mocked(axios.get).mockResolvedValue({
+        data: [
+          {
+            id: "MPB-SUBSCRIBER-TEST-AFFILIATE",
+            status: "Active",
+            customer: {
+              id: "CUS-TEST",
+              name: "Test User",
+              email: "test@example.com",
+            },
+            number_of_payments: 0,
+            total_paid: "AED 0.00",
+            next_payment_date: new Date().toISOString(),
+          },
+        ],
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {} as any,
+      });
     });
   });
 

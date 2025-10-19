@@ -8,6 +8,7 @@ import {
 import { PlanPurchaseProcessor } from "./processors/plan-purchase";
 import { PlanPurchaseWithAffiliateProcessor } from "./processors/plan-purchase-with-affiliate";
 import { AddonPurchaseProcessor } from "./processors/addon-purchase";
+import { fetchAndStoreSubscriberId } from "../../../utils/mamopay-utils/fetch-and-store-subscriber-id";
 
 export class PaymentWebhookService {
   static async processWebhook(data: unknown): Promise<WebhookResponse> {
@@ -93,6 +94,12 @@ export class PaymentWebhookService {
       if (paymentType === "PLAN_PURCHASE" && !hasAffiliateLink) {
         const result = await PlanPurchaseProcessor.process(validatedData);
 
+        // Fetch and store subscriberId from MamoPay
+        await fetchAndStoreSubscriberId(
+          result.subscriptionId,
+          validatedData.subscription_id
+        );
+
         return {
           received: true,
           message: result.message,
@@ -109,6 +116,12 @@ export class PaymentWebhookService {
           validatedData
         );
 
+        // Fetch and store subscriberId from MamoPay
+        await fetchAndStoreSubscriberId(
+          result.subscriptionId,
+          validatedData.subscription_id
+        );
+
         return {
           received: true,
           message: result.message,
@@ -122,6 +135,12 @@ export class PaymentWebhookService {
 
       if (paymentType === "ADDON_PURCHASE") {
         const result = await AddonPurchaseProcessor.process(validatedData);
+
+        // Fetch and store subscriberId from MamoPay
+        await fetchAndStoreSubscriberId(
+          result.subscriptionId,
+          validatedData.subscription_id
+        );
 
         return {
           received: true,

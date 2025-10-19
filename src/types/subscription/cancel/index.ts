@@ -14,6 +14,7 @@ export const cancelSubscriptionResponseSchema = z.object({
   itemType: z.string(),
   addonType: z.string().nullable().optional(),
   subscriptionType: z.string().nullable().optional(),
+  mamopayCancelled: z.boolean().optional(),
 });
 
 // Inferred types

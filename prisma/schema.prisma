@@ -119,6 +119,7 @@ model Payment {
 model Subscription {
   id               Int                    @id @default(autoincrement())
   subscriptionId   String                 @unique
+  subscriberId     String?
   startsAt         DateTime
   endsAt           DateTime
   status           SubscriptionStatus     @default(ACTIVE)
