@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient, UserPlan, AddOnType, AddOnStatus } from "../../generated/prisma-client";
-import { PaymentWebhookService } from "../../services/subscription/webhook";
+import { PaymentWebhookService } from "../../services/subscription/first-subscription-webhook";
 import axios from "axios";
 
 // Mock email services

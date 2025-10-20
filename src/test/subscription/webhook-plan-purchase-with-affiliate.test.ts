@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient, UserPlan } from "../../generated/prisma-client";
-import { PaymentWebhookService } from "../../services/subscription/webhook";
+import { PaymentWebhookService } from "../../services/subscription/first-subscription-webhook";
 import * as setPasswordEmail from "../../helpers/subscription/emails/set-password";
 import sgMail from "@sendgrid/mail";
 import axios from "axios";
