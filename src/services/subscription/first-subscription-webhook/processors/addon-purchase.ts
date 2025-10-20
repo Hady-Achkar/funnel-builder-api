@@ -118,7 +118,7 @@ export class AddonPurchaseProcessor {
             addOnQuantity: 1, // Always 1 as per requirement
             buyerId: user.id,
             workspaceId: finalWorkspaceId,
-            rawData: webhookData as any,
+            rawData: [webhookData] as any, // Store as array from the start
           },
         });
 
@@ -208,7 +208,7 @@ export class AddonPurchaseProcessor {
             itemType: "ADDON",
             subscriptionType: null,
             addonType: addonType as AddOnType,
-            rawData: webhookData as any,
+            rawData: [webhookData] as any, // Store as array from the start
           },
         });
 

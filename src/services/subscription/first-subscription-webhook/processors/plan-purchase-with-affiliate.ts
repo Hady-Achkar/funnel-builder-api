@@ -221,7 +221,7 @@ export class PlanPurchaseWithAffiliateProcessor {
           commissionStatus: commissionAmount > 0 ? "PENDING" : null, // NEW: On hold if commission exists
           commissionHeldUntil:
             commissionAmount > 0 ? commissionHeldUntil : null, // NEW: Release date
-          rawData: webhookData as any,
+          rawData: [webhookData] as any, // Store as array from the start
         },
       });
 
@@ -254,7 +254,7 @@ export class PlanPurchaseWithAffiliateProcessor {
           itemType: "PLAN",
           subscriptionType: this.mapPlanType(planType),
           addonType: null,
-          rawData: webhookData as any,
+          rawData: [webhookData] as any, // Store as array from the start
         },
       });
 

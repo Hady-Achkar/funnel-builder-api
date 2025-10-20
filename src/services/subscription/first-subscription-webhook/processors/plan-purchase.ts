@@ -159,7 +159,7 @@ export class PlanPurchaseProcessor {
           itemType: this.mapPlanType(planType),
           paymentType: "PLAN_PURCHASE",
           buyerId: user.id,
-          rawData: webhookData as any, // Store complete webhook data
+          rawData: [webhookData] as any, // Store as array from the start
         },
       });
 
@@ -189,7 +189,7 @@ export class PlanPurchaseProcessor {
           itemType: "PLAN",
           subscriptionType: this.mapPlanType(planType),
           addonType: null,
-          rawData: webhookData as any, // Store complete webhook data
+          rawData: [webhookData] as any, // Store as array from the start
         },
       });
 
@@ -286,7 +286,7 @@ export class PlanPurchaseProcessor {
         itemType: this.mapPlanType(planType),
         paymentType: "PLAN_PURCHASE",
         buyerId: existingSubscription.userId,
-        rawData: webhookData as any,
+        rawData: [webhookData] as any, // Store as array from the start
       },
     });
 
