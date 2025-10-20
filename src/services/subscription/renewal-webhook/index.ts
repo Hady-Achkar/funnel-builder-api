@@ -1,6 +1,7 @@
 import { getPrisma } from "../../../lib/prisma";
 import { RenewalWebhookResponse } from "../../../types/subscription/renewal-webhook";
 import { PlanRenewalProcessor } from "./processors/plan-renewal";
+import { AddonRenewalProcessor } from "./processors/addon-renewal";
 import { fetchAndStoreSubscriberId } from "../../../utils/mamopay-utils/fetch-and-store-subscriber-id";
 
 export class RenewalWebhookService {
@@ -68,10 +69,19 @@ export class RenewalWebhookService {
         };
       }
 
-      // 5. Route to plan renewal processor (no strict Zod validation - flexible structure)
-      // For now, we only handle plan renewals
-      // Later we can add addon renewal processor
-      const result = await PlanRenewalProcessor.process(webhookData);
+      // 5. Determine payment type and route to appropriate processor
+      const paymentType =
+        webhookData.custom_data?.details?.paymentType || "PLAN_PURCHASE";
+
+      console.log(`[RenewalWebhook] Routing to processor for: ${paymentType}`);
+
+      let result;
+      if (paymentType === "ADDON_PURCHASE") {
+        result = await AddonRenewalProcessor.process(webhookData);
+      } else {
+        // Default to plan renewal for PLAN_PURCHASE or any other type
+        result = await PlanRenewalProcessor.process(webhookData);
+      }
 
       // 6. Fetch and store subscriberId from MamoPay
       await fetchAndStoreSubscriberId(
@@ -86,6 +96,7 @@ export class RenewalWebhookService {
           userId: result.userId,
           paymentId: result.paymentId,
           subscriptionId: result.subscriptionId,
+          addonId: result.addonId, // Will be undefined for plan renewals
         },
       };
     } catch (error) {

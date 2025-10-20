@@ -564,6 +564,20 @@ For security, please change your password after your first login.
 
 ## Common Phrases & Translations
 
+### Special Translation Rules
+
+**IMPORTANT: Never use the word "Funnel" in user-facing content**
+- In English: Use "Website" instead of "Funnel"
+- In Arabic: Use "الموقع" (website) instead of "مسار" (funnel)
+- Rationale: "Funnel" is technical jargon that confuses users. They understand "Website" better.
+
+**Examples:**
+- ❌ "Your funnel has been published" → ✅ "Your website has been published"
+- ❌ "إضافة مسار" → ✅ "إضافة موقع"
+- ❌ "Funnel addon" → ✅ "Website addon"
+
+### Standard Phrases
+
 | English | Arabic |
 |---------|--------|
 | Welcome | مرحبًا بك |
@@ -582,6 +596,12 @@ For security, please change your password after your first login.
 | Accept invitation | قبول الدعوة |
 | Best regards | مع أطيب التحيات |
 | The Digitalsite Team | فريق Digitalsite |
+| Website | الموقع |
+| Page | الصفحة |
+| Domain | النطاق |
+| Workspace | مساحة العمل |
+| Subdomain | النطاق الفرعي |
+| Admin | مدير |
 
 ---
 
