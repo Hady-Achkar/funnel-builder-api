@@ -91,7 +91,6 @@ model Payment {
   addOnQuantity         Int?
   buyerId               Int?
   affiliateLinkId       Int?
-  level1AffiliateAmount Float?
   affiliatePaid         Boolean            @default(false)
   commissionAmount      Float?
   commissionStatus      CommissionStatus?

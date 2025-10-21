@@ -462,16 +462,27 @@ describe("Subscription Webhook - Addon Purchase", () => {
       const expectedCommission = 999 * 0.1; // 10% of 999 = 99.9
       expect(updatedReferrer?.pendingBalance).toBe(expectedCommission);
 
-      // Assert - Balance transaction created
+      // Assert - Payment record has commission fields set
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: webhookPayload.id },
+      });
+      expect(payment).toBeDefined();
+      expect(payment?.affiliateLinkId).toBe(affiliateLink.id);
+      expect(payment?.commissionAmount).toBe(expectedCommission);
+      expect(payment?.commissionStatus).toBe("PENDING");
+      expect(payment?.commissionHeldUntil).toBeInstanceOf(Date);
+      expect(payment?.affiliatePaid).toBe(false);
+
+      // Assert - Balance transaction created (COMMISSION_HOLD type)
       const balanceTransaction = await prisma.balanceTransaction.findFirst({
         where: { userId: referrer.id },
       });
       expect(balanceTransaction).toBeDefined();
-      expect(balanceTransaction?.type).toBe("COMMISSION");
+      expect(balanceTransaction?.type).toBe("COMMISSION_HOLD");
       expect(balanceTransaction?.amount).toBe(expectedCommission);
       expect(balanceTransaction?.balanceBefore).toBe(0);
-      expect(balanceTransaction?.balanceAfter).toBe(expectedCommission);
-      expect(balanceTransaction?.referenceType).toBe("ADDON_PURCHASE");
+      expect(balanceTransaction?.balanceAfter).toBe(0); // Available balance unchanged
+      expect(balanceTransaction?.referenceType).toBe("Payment");
       expect(balanceTransaction?.notes).toContain(buyer.email);
       expect(balanceTransaction?.notes).toContain("EXTRA_WORKSPACE");
       expect(balanceTransaction?.releasedAt).toBeNull(); // Not released yet

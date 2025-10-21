@@ -228,7 +228,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(payment?.addOnId).toBeNull(); // No add-on
       expect(payment?.addOnType).toBeNull();
       expect(payment?.addOnQuantity).toBeNull();
-      expect(payment?.level1AffiliateAmount).toBeNull();
+      expect(payment?.commissionAmount).toBeNull();
       expect(payment?.affiliatePaid).toBe(false);
       expect(payment?.rawData).toBeDefined();
 

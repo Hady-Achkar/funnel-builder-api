@@ -163,30 +163,53 @@ export class AddonPurchaseProcessor {
               referrer.commissionPercentage
             );
 
+            // Calculate commission hold period (30 days)
+            const commissionHeldUntil = new Date();
+            commissionHeldUntil.setDate(commissionHeldUntil.getDate() + 30);
+
+            // Update payment with commission details
+            await tx.payment.update({
+              where: { id: payment.id },
+              data: {
+                affiliateLinkId: affiliateLink.id,
+                commissionAmount,
+                commissionStatus: "PENDING",
+                commissionHeldUntil,
+                affiliatePaid: false, // Will be true when released
+              },
+            });
+
             // Get current balance for transaction record
             const balanceBefore = referrer.pendingBalance || 0;
             const balanceAfter = balanceBefore + commissionAmount;
 
-            // Update referrer's pending balance
+            // Update referrer's pending balance and totalSales
             await tx.user.update({
               where: { id: referrer.id },
-              data: { pendingBalance: balanceAfter },
+              data: {
+                pendingBalance: { increment: commissionAmount },
+                totalSales: { increment: 1 },
+              },
             });
 
-            // Create balance transaction record for audit trail
+            // Create balance transaction record for audit trail (COMMISSION_HOLD)
             await tx.balanceTransaction.create({
               data: {
                 userId: referrer.id,
-                type: "COMMISSION",
+                type: "COMMISSION_HOLD",
                 amount: commissionAmount,
-                balanceBefore,
-                balanceAfter,
-                referenceType: "ADDON_PURCHASE",
+                balanceBefore: referrer.balance,
+                balanceAfter: referrer.balance, // Available balance unchanged
+                referenceType: "Payment",
                 referenceId: payment.id,
-                notes: `Commission from ${user.email} addon purchase (${addonType})`,
-                // releasedAt will be set later when commission is released
+                releasedAt: null, // NULL until released
+                notes: `Commission held for 30 days - ${addonType} addon purchase from ${user.email}`,
               },
             });
+
+            console.log(
+              `[AddonPurchase] Commission ${commissionAmount} held for 30 days. Will be released on ${commissionHeldUntil.toISOString()}`
+            );
           } else {
             console.warn(
               "[AddonPurchase] Referrer not found:",

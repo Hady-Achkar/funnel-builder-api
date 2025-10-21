@@ -442,8 +442,8 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       });
       expect(payment).toBeDefined();
       expect(payment?.affiliateLinkId).toBe(affiliateLinkId);
-      expect(payment?.level1AffiliateAmount).toBe(50); // Level 1 commission
-      expect(payment?.affiliatePaid).toBe(true);
+      expect(payment?.commissionAmount).toBe(50); // Level 1 commission
+      expect(payment?.affiliatePaid).toBe(false);
 
       // Verify subscription created
       const subscription = await prisma.subscription.findFirst({
@@ -522,7 +522,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(75);
+      expect(payment?.commissionAmount).toBe(75);
 
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
@@ -580,7 +580,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(100);
+      expect(payment?.commissionAmount).toBe(100);
 
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
@@ -610,7 +610,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(0);
+      expect(payment?.commissionAmount).toBe(0);
       expect(payment?.affiliatePaid).toBe(false);
 
       // Verify affiliate balance NOT updated
@@ -642,7 +642,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(0);
+      expect(payment?.commissionAmount).toBe(0);
 
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
@@ -668,7 +668,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(0);
+      expect(payment?.commissionAmount).toBe(0);
 
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
@@ -693,7 +693,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.level1AffiliateAmount).toBe(0);
+      expect(payment?.commissionAmount).toBe(0);
 
       const affiliateOwner = await prisma.user.findUnique({
         where: { id: affiliateOwnerId },
@@ -790,7 +790,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const payment = await prisma.payment.findUnique({
         where: { transactionId: payload.id },
       });
-      expect(payment?.affiliatePaid).toBe(true);
+      expect(payment?.affiliatePaid).toBe(false);
     });
 
     it("should handle existing user with affiliate link", async () => {
@@ -1142,7 +1142,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       });
       expect(payment).toBeDefined();
       expect(payment?.affiliateLinkId).toBe(affiliateLinkId);
-      expect(payment?.level1AffiliateAmount).toBe(50);
+      expect(payment?.commissionAmount).toBe(50);
 
       const subscription = await prisma.subscription.findFirst({
         where: { userId: buyerId },

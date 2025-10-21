@@ -215,12 +215,11 @@ export class PlanPurchaseWithAffiliateProcessor {
           paymentType: "PLAN_PURCHASE",
           buyerId: user.id,
           affiliateLinkId: affiliateLink.id,
-          level1AffiliateAmount: commissionAmount, // Keep for backward compatibility
-          affiliatePaid: false, // Keep for backward compatibility
-          commissionAmount, // NEW: Commission amount
-          commissionStatus: commissionAmount > 0 ? "PENDING" : null, // NEW: On hold if commission exists
+          affiliatePaid: false,
+          commissionAmount,
+          commissionStatus: commissionAmount > 0 ? "PENDING" : null,
           commissionHeldUntil:
-            commissionAmount > 0 ? commissionHeldUntil : null, // NEW: Release date
+            commissionAmount > 0 ? commissionHeldUntil : null,
           rawData: [webhookData] as any, // Store as array from the start
         },
       });
@@ -485,9 +484,11 @@ export class PlanPurchaseWithAffiliateProcessor {
    * - Creates BalanceTransaction (COMMISSION_HOLD)
    * - Sets release date to 30 days from now
    * - Updates partner level if thresholds reached
-   * - Marks payment as paid (backward compatibility)
    * - Updates affiliate link stats
    * - Sends congratulations email
+   *
+   * Note: affiliatePaid is NOT set to true here - it will be set when
+   * commission is released after 30 days by the commission release cron job
    */
   private static async processCommission(
     affiliateOwner: {
@@ -581,15 +582,7 @@ export class PlanPurchaseWithAffiliateProcessor {
       );
     }
 
-    // 4. Mark payment as paid
-    await prisma.payment.update({
-      where: { id: paymentId },
-      data: { affiliatePaid: true },
-    });
-
-    console.log("[PlanPurchaseAffiliate] Payment marked as paid:", paymentId);
-
-    // 5. Update affiliate link stats
+    // 4. Update affiliate link stats
     const affiliateLinkId = await prisma.payment.findUnique({
       where: { id: paymentId },
       select: { affiliateLinkId: true },
