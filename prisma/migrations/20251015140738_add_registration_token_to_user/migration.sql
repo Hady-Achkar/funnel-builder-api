@@ -65,11 +65,19 @@ ALTER TABLE "public"."themes" ADD COLUMN     "funnelId" INTEGER,
 ADD COLUMN     "type" "public"."ThemeType" NOT NULL DEFAULT 'CUSTOM';
 
 -- AlterTable
-ALTER TABLE "public"."users" DROP COLUMN "maximumAdmins",
-DROP COLUMN "maximumWorkspaces",
-ADD COLUMN     "pendingBalance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-ADD COLUMN     "registrationToken" TEXT,
-ALTER COLUMN "plan" SET DEFAULT 'NO_PLAN';
+ALTER TABLE "public"."users" DROP COLUMN IF EXISTS "maximumAdmins",
+DROP COLUMN IF EXISTS "maximumWorkspaces",
+ADD COLUMN IF NOT EXISTS "pendingBalance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS "registrationToken" TEXT;
+
+-- Update plan default if column exists
+DO $$
+BEGIN
+    ALTER TABLE "public"."users" ALTER COLUMN "plan" SET DEFAULT 'NO_PLAN';
+EXCEPTION
+    WHEN undefined_column THEN
+        NULL; -- Column doesn't exist, ignore
+END $$;
 
 -- AlterTable
 ALTER TABLE "public"."workspace_members" ALTER COLUMN "status" SET DEFAULT 'ACTIVE';
