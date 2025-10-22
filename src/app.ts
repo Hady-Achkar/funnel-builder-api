@@ -25,6 +25,7 @@ import affiliateRoutes from "./routes/affiliate";
 import paymentRoutes from "./routes/payment";
 import subscriptionRoutes from "./routes/subscription";
 import cronRoutes from "./routes/cron";
+import payoutRoutes from "./routes/payout";
 
 export function createServer(): Express {
   const app = express();
@@ -71,6 +72,7 @@ export function createServer(): Express {
   app.use("/api/payment", paymentRoutes);
   app.use("/api/subscription", subscriptionRoutes);
   app.use("/api/cron", cronRoutes);
+  app.use("/api/payout", payoutRoutes);
 
   // Health check endpoint
   app.get("/health", async (_req, res) => {

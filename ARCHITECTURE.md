@@ -407,17 +407,23 @@ describe("Create Workspace", () => {
 | ------ | -------------------------- | ---------------------------- | ------- |
 | POST   | `/api/subscription/create` | createSubscriptionController | ❌ TODO |
 
+### Payout Routes (1 route)
+
+| Method | Path                        | Controller                     | Status  |
+| ------ | --------------------------- | ------------------------------ | ------- |
+| POST   | `/api/payout/request`       | RequestPayoutController.create | ✅ DONE |
+
 ---
 
 ## 📊 Progress Summary
 
-**Total Routes**: 87
+**Total Routes**: 88
 
 - ❌ TODO: 76
-- ✅ DONE: 11
+- ✅ DONE: 12
 - 🚧 WIP: 0
 
-**Completion**: 12.64%
+**Completion**: 13.64%
 
 ---
 
@@ -527,7 +533,7 @@ When refactoring a route to the new architecture:
 
 ---
 
-Last Updated: 2025-10Oct
+Last Updated: 2025-01-10
 
 ## 🎯 Recently Completed Routes
 
@@ -592,3 +598,33 @@ Last Updated: 2025-10Oct
   - Controllers: HTTP handling, Zod validation, error handling with `return next(error)`
   - Services: Business logic, Prisma operations, single try-catch
   - Utils: Pure functions or focused utilities
+
+### Payout Request Route - ✅ DONE (2025-01-10)
+
+**Files Created/Modified**:
+
+- `src/types/payout/request/index.ts` - Request/response types using ONLY Zod schemas with conditional validation
+- `src/services/payout/request/index.ts` - Core payout creation logic with single try-catch
+- `src/services/payout/request/utils/calculate-fees.ts` - Pure fee calculation utility
+- `src/services/payout/request/utils/format-payout-response.ts` - Pure response formatter
+- `src/controllers/payout/request/index.ts` - HTTP handling, validation, error decisions
+- `src/controllers/payout/request/utils/validate-balance.ts` - Pure balance validation
+- `src/controllers/payout/request/utils/check-pending-payouts.ts` - Pure pending amount calculation
+- `src/controllers/payout/request/utils/check-duplicate-submission.ts` - Pure duplicate check
+- `src/routes/payout/index.ts` - Route definition
+- `src/app.ts` - Route registration
+- `src/test/payout/request-payout.test.ts` - 65 comprehensive tests (60 passing)
+
+**Key Features**:
+
+- Full Zod validation with conditional fields based on payment method
+- Three payment methods: UAE_BANK, INTERNATIONAL_BANK, USDT
+- Fee calculation: UAE $1, International $38, USDT $3 + 3%
+- Balance validation: $50 minimum, available balance checking
+- Pending payout consideration (PENDING, PROCESSING, ON_HOLD states)
+- Duplicate submission prevention (5-second window)
+- NO immediate balance deduction (only creates PENDING payout)
+- Complete separation of concerns:
+  - Controller: All error decisions, Zod validation, authentication
+  - Service: Database operations with try-catch
+  - Utils: Pure functions, no Prisma, no error throwing
