@@ -647,6 +647,9 @@ model Payout {
   userNotes          String?             // User's notes/description
   adminNotes         String?             // Internal admin notes
 
+  // Admin tracking
+  adminHistory       Json?               // History of admin actions with codes and status changes
+
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
