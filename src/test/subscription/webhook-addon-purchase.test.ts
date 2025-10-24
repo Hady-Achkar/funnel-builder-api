@@ -9,13 +9,23 @@ import {
 } from "vitest";
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient, UserPlan, AddOnType, AddOnStatus } from "../../generated/prisma-client";
-import { PaymentWebhookService } from "../../services/subscription/webhook";
+import { PaymentWebhookService } from "../../services/subscription/first-subscription-webhook";
+import axios from "axios";
 
 // Mock email services
 vi.mock("@sendgrid/mail", () => ({
   default: {
     setApiKey: vi.fn(),
     send: vi.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
+
+// Mock axios for MamoPay API calls
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(),
   },
 }));
 
@@ -71,6 +81,28 @@ describe("Subscription Webhook - Addon Purchase", () => {
     }
 
     vi.clearAllMocks();
+
+    // Mock MamoPay API - getSubscribers returns subscriberId
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [
+        {
+          id: "MPB-SUBSCRIBER-ADDON-TEST",
+          status: "Active",
+          customer: {
+            id: "CUS-TEST",
+            name: "Test User",
+            email: "test@example.com",
+          },
+          number_of_payments: 0,
+          total_paid: "AED 0.00",
+          next_payment_date: new Date().toISOString(),
+        },
+      ],
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config: {} as any,
+    });
   });
 
   describe("User-Level Addon (EXTRA_WORKSPACE)", () => {
@@ -430,16 +462,27 @@ describe("Subscription Webhook - Addon Purchase", () => {
       const expectedCommission = 999 * 0.1; // 10% of 999 = 99.9
       expect(updatedReferrer?.pendingBalance).toBe(expectedCommission);
 
-      // Assert - Balance transaction created
+      // Assert - Payment record has commission fields set
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: webhookPayload.id },
+      });
+      expect(payment).toBeDefined();
+      expect(payment?.affiliateLinkId).toBe(affiliateLink.id);
+      expect(payment?.commissionAmount).toBe(expectedCommission);
+      expect(payment?.commissionStatus).toBe("PENDING");
+      expect(payment?.commissionHeldUntil).toBeInstanceOf(Date);
+      expect(payment?.affiliatePaid).toBe(false);
+
+      // Assert - Balance transaction created (COMMISSION_HOLD type)
       const balanceTransaction = await prisma.balanceTransaction.findFirst({
         where: { userId: referrer.id },
       });
       expect(balanceTransaction).toBeDefined();
-      expect(balanceTransaction?.type).toBe("COMMISSION");
+      expect(balanceTransaction?.type).toBe("COMMISSION_HOLD");
       expect(balanceTransaction?.amount).toBe(expectedCommission);
       expect(balanceTransaction?.balanceBefore).toBe(0);
-      expect(balanceTransaction?.balanceAfter).toBe(expectedCommission);
-      expect(balanceTransaction?.referenceType).toBe("ADDON_PURCHASE");
+      expect(balanceTransaction?.balanceAfter).toBe(0); // Available balance unchanged
+      expect(balanceTransaction?.referenceType).toBe("Payment");
       expect(balanceTransaction?.notes).toContain(buyer.email);
       expect(balanceTransaction?.notes).toContain("EXTRA_WORKSPACE");
       expect(balanceTransaction?.releasedAt).toBeNull(); // Not released yet
@@ -452,6 +495,258 @@ describe("Subscription Webhook - Addon Purchase", () => {
       expect(subscription?.itemType).toBe("ADDON");
       expect(subscription?.addonType).toBe(AddOnType.EXTRA_WORKSPACE);
       expect(subscription?.subscriptionType).toBeNull();
+    });
+  });
+
+  describe("MamoPay Integration for Addon Purchase", () => {
+    it("should fetch and store subscriberId for addon subscription", async () => {
+      // Arrange
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `addon-mamopay-${timestamp}@example.com`,
+          username: `addonmamopay${timestamp}`,
+          firstName: "Addon",
+          lastName: "MamoPay",
+          password: "hashed-password",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+        },
+      });
+
+      const webhookPayload = {
+        status: "captured",
+        id: `PAY-ADDON-MAMOPAY-${timestamp}`,
+        amount: 1018.98,
+        amount_currency: "USD",
+        subscription_id: `MPB-SUB-ADDON-${timestamp}`,
+        custom_data: {
+          details: {
+            email: user.email,
+            lastName: "MamoPay",
+            addonType: "EXTRA_WORKSPACE",
+            firstName: "Addon",
+            frequency: "monthly",
+            paymentType: "ADDON_PURCHASE",
+            trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            frequencyInterval: 1,
+          },
+        },
+        created_date: new Date().toISOString(),
+        customer_details: {
+          name: "Addon MamoPay",
+          email: user.email,
+          phone_number: "-",
+        },
+        payment_method: {
+          type: "CREDIT VISA",
+          card_holder_name: "Addon MamoPay",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2028",
+          origin: "International card",
+        },
+        event_type: "charge.succeeded",
+      };
+
+      // Act
+      const result = await PaymentWebhookService.processWebhook(webhookPayload);
+
+      // Assert - Webhook processed
+      expect(result.received).toBe(true);
+
+      // Assert - MamoPay API was called
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining(`/subscriptions/MPB-SUB-ADDON-${timestamp}/subscribers`),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining("Bearer"),
+          }),
+        })
+      );
+
+      // Assert - subscriberId stored in subscription
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          subscriptionId: `MPB-SUB-ADDON-${timestamp}`,
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBe("MPB-SUBSCRIBER-ADDON-TEST");
+      expect(subscription?.itemType).toBe("ADDON");
+      expect(subscription?.addonType).toBe(AddOnType.EXTRA_WORKSPACE);
+    });
+
+    it("should handle MamoPay API failure gracefully for addon", async () => {
+      // Arrange - Mock MamoPay to fail
+      vi.mocked(axios.get).mockRejectedValueOnce(new Error("MamoPay API error"));
+
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `addon-fail-${timestamp}@example.com`,
+          username: `addonfail${timestamp}`,
+          firstName: "Addon",
+          lastName: "Fail",
+          password: "hashed-password",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+        },
+      });
+
+      const webhookPayload = {
+        status: "captured",
+        id: `PAY-ADDON-FAIL-${timestamp}`,
+        amount: 1018.98,
+        amount_currency: "USD",
+        subscription_id: `MPB-SUB-FAIL-${timestamp}`,
+        custom_data: {
+          details: {
+            email: user.email,
+            lastName: "Fail",
+            addonType: "EXTRA_WORKSPACE",
+            firstName: "Addon",
+            frequency: "monthly",
+            paymentType: "ADDON_PURCHASE",
+            trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            frequencyInterval: 1,
+          },
+        },
+        created_date: new Date().toISOString(),
+        customer_details: {
+          name: "Addon Fail",
+          email: user.email,
+          phone_number: "-",
+        },
+        payment_method: {
+          type: "CREDIT VISA",
+          card_holder_name: "Addon Fail",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2028",
+          origin: "International card",
+        },
+        event_type: "charge.succeeded",
+      };
+
+      // Act - Should not throw
+      const result = await PaymentWebhookService.processWebhook(webhookPayload);
+
+      // Assert - Webhook still processed
+      expect(result.received).toBe(true);
+
+      // Assert - Subscription created without subscriberId
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          subscriptionId: `MPB-SUB-FAIL-${timestamp}`,
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
+
+      // Assert - Addon still created
+      const addon = await prisma.addOn.findFirst({
+        where: { userId: user.id },
+      });
+      expect(addon).toBeDefined();
+      expect(addon?.status).toBe(AddOnStatus.ACTIVE);
+
+      // Reset mock
+      vi.mocked(axios.get).mockResolvedValue({
+        data: [
+          {
+            id: "MPB-SUBSCRIBER-ADDON-TEST",
+            status: "Active",
+            customer: {
+              id: "CUS-TEST",
+              name: "Test User",
+              email: "test@example.com",
+            },
+            number_of_payments: 0,
+            total_paid: "AED 0.00",
+            next_payment_date: new Date().toISOString(),
+          },
+        ],
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {} as any,
+      });
+    });
+
+    it("should skip MamoPay fetch when subscription_id is missing for addon", async () => {
+      // Arrange
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `addon-nosub-${timestamp}@example.com`,
+          username: `addonnosub${timestamp}`,
+          firstName: "Addon",
+          lastName: "NoSub",
+          password: "hashed-password",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+        },
+      });
+
+      const webhookPayload = {
+        status: "captured",
+        id: `PAY-ADDON-NOSUB-${timestamp}`,
+        amount: 1018.98,
+        amount_currency: "USD",
+        subscription_id: null, // No subscription_id
+        custom_data: {
+          details: {
+            email: user.email,
+            lastName: "NoSub",
+            addonType: "EXTRA_WORKSPACE",
+            firstName: "Addon",
+            frequency: "monthly",
+            paymentType: "ADDON_PURCHASE",
+            trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            frequencyInterval: 1,
+          },
+        },
+        created_date: new Date().toISOString(),
+        customer_details: {
+          name: "Addon NoSub",
+          email: user.email,
+          phone_number: "-",
+        },
+        payment_method: {
+          type: "CREDIT VISA",
+          card_holder_name: "Addon NoSub",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2028",
+          origin: "International card",
+        },
+        event_type: "charge.succeeded",
+      };
+
+      // Clear mocks
+      vi.clearAllMocks();
+
+      // Act
+      const result = await PaymentWebhookService.processWebhook(webhookPayload);
+
+      // Assert - Webhook processed
+      expect(result.received).toBe(true);
+
+      // Assert - MamoPay API NOT called
+      expect(axios.get).not.toHaveBeenCalled();
+
+      // Assert - Subscription created with null subscriberId
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: user.id },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
     });
   });
 

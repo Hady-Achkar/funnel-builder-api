@@ -417,11 +417,14 @@ text-align: right;
 ```
 
 ### Button Rules
-- Always black background, white text
-- One primary button per section (English and Arabic each get one)
-- Button text must be action-oriented and clear
-- English: "Verify Email", "Reset Password", "Join Workspace"
-- Arabic: "تأكيد البريد الإلكتروني", "إعادة تعيين كلمة المرور", "الانضمام إلى مساحة العمل"
+- **Buttons are OPTIONAL** - only include if explicitly needed for the email's primary purpose
+- If no button is requested or needed, use plain text instructions instead (e.g., "please contact support")
+- When buttons ARE included:
+  - Always black background, white text
+  - One primary button per section (English and Arabic each get one)
+  - Button text must be action-oriented and clear
+  - English examples: "Verify Email", "Reset Password", "Join Workspace"
+  - Arabic examples: "تأكيد البريد الإلكتروني", "إعادة تعيين كلمة المرور", "الانضمام إلى مساحة العمل"
 
 ---
 
@@ -564,6 +567,20 @@ For security, please change your password after your first login.
 
 ## Common Phrases & Translations
 
+### Special Translation Rules
+
+**IMPORTANT: Never use the word "Funnel" in user-facing content**
+- In English: Use "Website" instead of "Funnel"
+- In Arabic: Use "الموقع" (website) instead of "مسار" (funnel)
+- Rationale: "Funnel" is technical jargon that confuses users. They understand "Website" better.
+
+**Examples:**
+- ❌ "Your funnel has been published" → ✅ "Your website has been published"
+- ❌ "إضافة مسار" → ✅ "إضافة موقع"
+- ❌ "Funnel addon" → ✅ "Website addon"
+
+### Standard Phrases
+
 | English | Arabic |
 |---------|--------|
 | Welcome | مرحبًا بك |
@@ -582,6 +599,12 @@ For security, please change your password after your first login.
 | Accept invitation | قبول الدعوة |
 | Best regards | مع أطيب التحيات |
 | The Digitalsite Team | فريق Digitalsite |
+| Website | الموقع |
+| Page | الصفحة |
+| Domain | النطاق |
+| Workspace | مساحة العمل |
+| Subdomain | النطاق الفرعي |
+| Admin | مدير |
 
 ---
 

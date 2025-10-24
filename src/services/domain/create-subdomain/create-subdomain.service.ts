@@ -36,12 +36,19 @@ export class CreateSubdomainService {
         include: {
           addOns: {
             where: {
-              status: "ACTIVE",
+              OR: [
+                { status: "ACTIVE" },
+                {
+                  status: "CANCELLED",
+                  endDate: { gt: new Date() },
+                },
+              ],
             },
             select: {
               type: true,
               quantity: true,
               status: true,
+              endDate: true,
             },
           },
         },

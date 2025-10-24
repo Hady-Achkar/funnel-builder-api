@@ -163,13 +163,11 @@ export class WorkspaceValidator {
           ...(options.includePlan && { plan: true }),
           ...(options.includeAddOns && {
             addOns: {
-              where: {
-                status: "ACTIVE",
-              },
               select: {
                 type: true,
                 quantity: true,
                 status: true,
+                endDate: true, // Required for validating if addon is expired
               },
             },
           }),

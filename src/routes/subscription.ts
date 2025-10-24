@@ -1,9 +1,19 @@
 import { Router } from "express";
-import { PaymentWebhookController } from "../controllers/subscription/webhook";
+import { FirstSubscriptionWebhookController } from "../controllers/subscription/first-subscription-webhook";
+import { RenewalWebhookController } from "../controllers/subscription/renewal-webhook";
+import { CancelSubscriptionController } from "../controllers/subscription/cancel";
+import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 
-// Webhook endpoint (no authentication required - external service)
-router.post("/webhook", PaymentWebhookController.handleWebhook);
+router.post(
+  "/first-subscription-webhook",
+  FirstSubscriptionWebhookController.handleWebhook
+);
+
+router.post("/renewal-webhook", RenewalWebhookController.handleWebhook);
+
+// Cancel subscription endpoint (authenticated)
+router.post("/cancel", authenticateToken, CancelSubscriptionController.cancel);
 
 export default router;

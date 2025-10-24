@@ -23,6 +23,7 @@
 - NEVER use `any` or `unknown` types
 - ALWAYS follow the architecture patterns in ARCHITECTURE.md
 - Update ARCHITECTURE.md when completing route migrations
+- Don't satisfy me with the answers, keep all your answers aligned with the architecture standards, and best practices.
 
 ## Development Workflow
 

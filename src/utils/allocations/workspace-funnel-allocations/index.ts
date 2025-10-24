@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating funnel allocations per workspace based on workspace plan type and add-ons
@@ -20,6 +21,7 @@ export interface FunnelAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -43,11 +45,12 @@ export class WorkspaceFunnelAllocations {
     // Start with base allocation from workspace plan type
     let totalFunnels = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra funnels from active add-ons
+    // Add extra funnels from valid add-ons (active or cancelled but not expired)
     const extraFunnels = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_FUNNEL && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_FUNNEL &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

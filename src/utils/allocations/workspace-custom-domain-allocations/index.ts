@@ -1,4 +1,5 @@
 import { UserPlan, AddOnType } from "../../../generated/prisma-client";
+import { SubscriptionValidator } from "../../subscription-utils/subscription-validator";
 
 /**
  * Centralized utility for calculating custom domain allocations per workspace based on workspace plan type and add-ons
@@ -20,6 +21,7 @@ export interface CustomDomainAllocationInput {
     type: AddOnType;
     quantity: number;
     status: string;
+    endDate?: Date | null;
   }>;
 }
 
@@ -43,11 +45,12 @@ export class WorkspaceCustomDomainAllocations {
     // Start with base allocation from workspace plan type
     let totalCustomDomains = this.getBaseAllocation(workspacePlanType);
 
-    // Add extra custom domains from active EXTRA_CUSTOM_DOMAIN add-ons
+    // Add extra custom domains from valid EXTRA_CUSTOM_DOMAIN add-ons (active or cancelled but not expired)
     const extraCustomDomains = addOns
       .filter(
         (addon) =>
-          addon.type === AddOnType.EXTRA_CUSTOM_DOMAIN && addon.status === "ACTIVE"
+          addon.type === AddOnType.EXTRA_CUSTOM_DOMAIN &&
+          SubscriptionValidator.isAddonValid(addon as any)
       )
       .reduce((sum, addon) => sum + addon.quantity, 0);
 

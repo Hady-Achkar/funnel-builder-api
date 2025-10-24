@@ -9,9 +9,10 @@ import {
 } from "vitest";
 import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient } from "../../generated/prisma-client";
-import { PaymentWebhookService } from "../../services/subscription/webhook";
+import { PaymentWebhookService } from "../../services/subscription/first-subscription-webhook";
 import { sendSetPasswordEmail } from "../../helpers/subscription/emails/set-password";
 import { UserPlan } from "../../generated/prisma-client";
+import axios from "axios";
 
 // Mock email services
 vi.mock("@sendgrid/mail", () => ({
@@ -21,6 +22,15 @@ vi.mock("@sendgrid/mail", () => ({
   },
 }));
 vi.mock("../../helpers/subscription/emails/set-password");
+
+// Mock axios for MamoPay API calls
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(),
+  },
+}));
 
 describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   // Initialize Prisma for test environment
@@ -92,6 +102,28 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
     // Setup mock implementations
     vi.mocked(sendSetPasswordEmail).mockResolvedValue(undefined);
+
+    // Mock MamoPay API - getSubscribers returns subscriberId
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [
+        {
+          id: "MPB-SUBSCRIBER-TEST123",
+          status: "Active",
+          customer: {
+            id: "CUS-TEST",
+            name: "Test User",
+            email: "test@example.com",
+          },
+          number_of_payments: 0,
+          total_paid: "AED 0.00",
+          next_payment_date: new Date().toISOString(),
+        },
+      ],
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config: {} as any,
+    });
   });
 
   describe("Agency User Plan Purchase", () => {
@@ -196,7 +228,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(payment?.addOnId).toBeNull(); // No add-on
       expect(payment?.addOnType).toBeNull();
       expect(payment?.addOnQuantity).toBeNull();
-      expect(payment?.level1AffiliateAmount).toBeNull();
+      expect(payment?.commissionAmount).toBeNull();
       expect(payment?.affiliatePaid).toBe(false);
       expect(payment?.rawData).toBeDefined();
 
@@ -210,6 +242,7 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
 
       expect(subscription).toBeDefined();
       expect(subscription?.subscriptionId).toBe("SUB-AGENCY-001");
+      expect(subscription?.subscriberId).toBe("MPB-SUBSCRIBER-TEST123"); // NEW: subscriberId should be fetched and stored
       expect(subscription?.userId).toBe(user?.id);
       expect(subscription?.status).toBe("ACTIVE");
       expect(subscription?.itemType).toBe("PLAN");
@@ -220,6 +253,16 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
       expect(subscription?.startsAt).toBeDefined();
       expect(subscription?.endsAt).toBeDefined();
       expect(subscription?.rawData).toBeDefined();
+
+      // Assert - MamoPay API was called to fetch subscriberId
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining("/subscriptions/SUB-AGENCY-001/subscribers"),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining("Bearer"),
+          }),
+        })
+      );
 
       // Verify subscription period is correct (1 month from start)
       const startDate = new Date(subscription!.startsAt);
@@ -1062,6 +1105,367 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
         where: { userId: existingUser.id },
       });
       expect(subscriptions).toHaveLength(1);
+    });
+  });
+
+  describe("MamoPay Integration", () => {
+    it("should fetch and store subscriberId from MamoPay API", async () => {
+      // Arrange - Create verified user
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `mamopay-success-${timestamp}@test.com`,
+          username: `mamopaysuccess${timestamp}`,
+          firstName: "MamoPay",
+          lastName: "Success",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
+      const mockWebhookPayload = {
+        event_type: "charge.succeeded",
+        status: "captured",
+        id: "PAY-MAMOPAY-001",
+        amount: 99.99,
+        amount_currency: "USD",
+        subscription_id: "SUB-MAMOPAY-001",
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: `mamopay-success-${timestamp}@test.com`,
+            firstName: "MamoPay",
+            lastName: "Success",
+            planType: "AGENCY",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 14,
+            trialEndDate: new Date(
+              Date.now() + 14 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+        },
+        customer_details: {
+          name: "MamoPay Success",
+          email: `mamopay-success-${timestamp}@test.com`,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "MamoPay Success",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act
+      const response = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert - Response
+      expect(response.received).toBe(true);
+
+      // Assert - MamoPay API was called with correct parameters
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining("/subscriptions/SUB-MAMOPAY-001/subscribers"),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining("Bearer"),
+          }),
+        })
+      );
+
+      // Assert - subscriberId stored in database
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          subscriptionId: "SUB-MAMOPAY-001",
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBe("MPB-SUBSCRIBER-TEST123");
+    });
+
+    it("should handle MamoPay API failure gracefully", async () => {
+      // Arrange - Mock MamoPay API to fail
+      vi.mocked(axios.get).mockRejectedValueOnce(
+        new Error("MamoPay API unavailable")
+      );
+
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `mamopay-fail-${timestamp}@test.com`,
+          username: `mamopayfail${timestamp}`,
+          firstName: "MamoPay",
+          lastName: "Fail",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
+      const mockWebhookPayload = {
+        event_type: "charge.succeeded",
+        status: "captured",
+        id: "PAY-MAMOPAY-FAIL-001",
+        amount: 99.99,
+        amount_currency: "USD",
+        subscription_id: "SUB-MAMOPAY-FAIL-001",
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: `mamopay-fail-${timestamp}@test.com`,
+            firstName: "MamoPay",
+            lastName: "Fail",
+            planType: "AGENCY",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 14,
+            trialEndDate: new Date(
+              Date.now() + 14 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+        },
+        customer_details: {
+          name: "MamoPay Fail",
+          email: `mamopay-fail-${timestamp}@test.com`,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "MamoPay Fail",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act - Should not throw, continues processing
+      const response = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert - Webhook still processed successfully
+      expect(response.received).toBe(true);
+
+      // Assert - Subscription created but subscriberId is null
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          subscriptionId: "SUB-MAMOPAY-FAIL-001",
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
+
+      // Reset mock for other tests
+      vi.mocked(axios.get).mockResolvedValue({
+        data: [
+          {
+            id: "MPB-SUBSCRIBER-TEST123",
+            status: "Active",
+            customer: {
+              id: "CUS-TEST",
+              name: "Test User",
+              email: "test@example.com",
+            },
+            number_of_payments: 0,
+            total_paid: "AED 0.00",
+            next_payment_date: new Date().toISOString(),
+          },
+        ],
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {} as any,
+      });
+    });
+
+    it("should handle empty subscribers response from MamoPay", async () => {
+      // Arrange - Mock MamoPay API to return empty array
+      vi.mocked(axios.get).mockResolvedValueOnce({
+        data: [], // No subscribers
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {} as any,
+      });
+
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `mamopay-empty-${timestamp}@test.com`,
+          username: `mamopayempty${timestamp}`,
+          firstName: "MamoPay",
+          lastName: "Empty",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
+      const mockWebhookPayload = {
+        event_type: "charge.succeeded",
+        status: "captured",
+        id: "PAY-MAMOPAY-EMPTY-001",
+        amount: 99.99,
+        amount_currency: "USD",
+        subscription_id: "SUB-MAMOPAY-EMPTY-001",
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: `mamopay-empty-${timestamp}@test.com`,
+            firstName: "MamoPay",
+            lastName: "Empty",
+            planType: "BUSINESS",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 14,
+            trialEndDate: new Date(
+              Date.now() + 14 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+        },
+        customer_details: {
+          name: "MamoPay Empty",
+          email: `mamopay-empty-${timestamp}@test.com`,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "MamoPay Empty",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Act
+      const response = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert - Webhook still processed successfully
+      expect(response.received).toBe(true);
+
+      // Assert - Subscription created but subscriberId is null
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          subscriptionId: "SUB-MAMOPAY-EMPTY-001",
+        },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
+
+      // Reset mock
+      vi.mocked(axios.get).mockResolvedValue({
+        data: [
+          {
+            id: "MPB-SUBSCRIBER-TEST123",
+            status: "Active",
+            customer: {
+              id: "CUS-TEST",
+              name: "Test User",
+              email: "test@example.com",
+            },
+            number_of_payments: 0,
+            total_paid: "AED 0.00",
+            next_payment_date: new Date().toISOString(),
+          },
+        ],
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {} as any,
+      });
+    });
+
+    it("should skip MamoPay fetch when subscription_id is null", async () => {
+      // Arrange
+      const timestamp = Date.now();
+      const user = await prisma.user.create({
+        data: {
+          email: `mamopay-nosub-${timestamp}@test.com`,
+          username: `mamopaynosub${timestamp}`,
+          firstName: "MamoPay",
+          lastName: "NoSub",
+          password: "hashed_password",
+          verified: true,
+          plan: UserPlan.FREE,
+        },
+      });
+
+      const mockWebhookPayload = {
+        event_type: "charge.succeeded",
+        status: "captured",
+        id: "PAY-MAMOPAY-NOSUB-001",
+        amount: 99.99,
+        amount_currency: "USD",
+        subscription_id: null, // No subscription_id
+        created_date: new Date().toISOString(),
+        custom_data: {
+          details: {
+            email: `mamopay-nosub-${timestamp}@test.com`,
+            firstName: "MamoPay",
+            lastName: "NoSub",
+            planType: "BUSINESS",
+            paymentType: "PLAN_PURCHASE",
+            frequency: "monthly",
+            frequencyInterval: 1,
+            trialDays: 0,
+            trialEndDate: new Date().toISOString(),
+          },
+        },
+        customer_details: {
+          name: "MamoPay NoSub",
+          email: `mamopay-nosub-${timestamp}@test.com`,
+          phone_number: "+1234567890",
+        },
+        payment_method: {
+          type: "card",
+          card_holder_name: "MamoPay NoSub",
+          card_last4: "4242",
+          card_expiry_month: "12",
+          card_expiry_year: "2025",
+          origin: "web",
+        },
+      };
+
+      // Clear mocks to verify axios.get is not called
+      vi.clearAllMocks();
+
+      // Act
+      const response = await PaymentWebhookService.processWebhook(
+        mockWebhookPayload
+      );
+
+      // Assert - Webhook processed successfully
+      expect(response.received).toBe(true);
+
+      // Assert - MamoPay API was NOT called
+      expect(axios.get).not.toHaveBeenCalled();
+
+      // Assert - Subscription created with null subscriberId
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: user.id },
+      });
+
+      expect(subscription).toBeDefined();
+      expect(subscription?.subscriberId).toBeNull();
     });
   });
 

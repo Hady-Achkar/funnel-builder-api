@@ -347,7 +347,10 @@ describe("Workspace Creation Tests", () => {
         plan: UserPlan.FREE,
       });
 
-      // User has CANCELLED add-on (should not count)
+      // User has CANCELLED add-on with past endDate (should not count)
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 1); // Yesterday
+
       mockPrisma.addOn.findMany.mockResolvedValue([
         {
           id: 1,
@@ -355,6 +358,7 @@ describe("Workspace Creation Tests", () => {
           type: "EXTRA_WORKSPACE",
           quantity: 1,
           status: AddOnStatus.CANCELLED,
+          endDate: pastDate,
         },
       ]);
 

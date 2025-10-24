@@ -42,6 +42,7 @@ model User {
   createdFunnels             Funnel[]             @relation("FunnelCreator")
   imageFolders               ImageFolder[]
   payments                   Payment[]            @relation("UserPayments")
+  payouts                    Payout[]
   subscriptions              Subscription[]       @relation("UserSubscriptions")
   templates                  Template[]
   workspaceSales             WorkspaceClone[]     @relation("WorkspaceSales")
@@ -91,7 +92,6 @@ model Payment {
   addOnQuantity         Int?
   buyerId               Int?
   affiliateLinkId       Int?
-  level1AffiliateAmount Float?
   affiliatePaid         Boolean            @default(false)
   commissionAmount      Float?
   commissionStatus      CommissionStatus?
@@ -119,6 +119,7 @@ model Payment {
 model Subscription {
   id               Int                    @id @default(autoincrement())
   subscriptionId   String                 @unique
+  subscriberId     String?
   startsAt         DateTime
   endsAt           DateTime
   status           SubscriptionStatus     @default(ACTIVE)
@@ -546,21 +547,22 @@ model FunnelSettings {
 }
 
 model AddOn {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  workspaceId  Int?
-  type         AddOnType
-  quantity     Int          @default(1)
-  pricePerUnit Float
-  status       AddOnStatus  @default(ACTIVE)
-  billingCycle IntervalUnit @default(MONTH)
-  startDate    DateTime     @default(now())
-  endDate      DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  user         User         @relation("UserAddOns", fields: [userId], references: [id], onDelete: Cascade)
-  workspace    Workspace?   @relation("WorkspaceAddOns", fields: [workspaceId], references: [id], onDelete: Cascade)
-  payments     Payment[]
+  id                  Int          @id @default(autoincrement())
+  userId              Int
+  workspaceId         Int?
+  type                AddOnType
+  quantity            Int          @default(1)
+  pricePerUnit        Float
+  status              AddOnStatus  @default(ACTIVE)
+  billingCycle        IntervalUnit @default(MONTH)
+  startDate           DateTime     @default(now())
+  endDate             DateTime?
+  expirationReminders Json?        @default("{}") // Track sent reminder emails and resource processing: {day7: true, day3: true, day1: true, resourcesProcessed: true}
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  user                User         @relation("UserAddOns", fields: [userId], references: [id], onDelete: Cascade)
+  workspace           Workspace?   @relation("WorkspaceAddOns", fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments            Payment[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -580,7 +582,9 @@ model BalanceTransaction {
   notes           String?
   releasedAt      DateTime?
   createdAt       DateTime               @default(now())
+  payoutId        Int?                   @unique
   user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payout          Payout?                @relation(fields: [payoutId], references: [id])
 
   @@index([userId])
   @@index([referenceType, referenceId])
@@ -608,6 +612,57 @@ model WorkspaceClone {
   @@index([buyerId])
   @@index([paymentId])
   @@map("workspace_clones")
+}
+
+model Payout {
+  id                 Int                 @id @default(autoincrement())
+  userId             Int
+  amount             Float               // Requested amount
+  fees               Float               @default(0) // Platform fees
+  netAmount          Float               // Amount after fees (amount - fees)
+  currency           String              @default("USD")
+  status             PayoutStatus
+  method             PayoutMethod        // UAE_BANK, INTERNATIONAL_BANK, USDT
+
+  // Payment destination details
+  accountHolderName  String?             // Bank account holder name
+  bankName           String?             // Bank name
+  accountNumber      String?             // Bank account/IBAN
+  swiftCode          String?             // SWIFT/BIC for international
+  bankAddress        String?             // Bank address for international transfers
+  usdtWalletAddress  String?             // USDT wallet address
+  usdtNetwork        String?             // TRC20, ERC20, etc.
+
+  // Supporting documents
+  documentUrl        String?             // Uploaded file (invoice, ID, etc.)
+  documentType       String?             // Type of document uploaded
+
+  // Processing details
+  processedAt        DateTime?
+  failedAt           DateTime?
+  failureReason      String?
+  transactionId      String?      @unique // External payment ID
+  transactionProof   String?             // URL to transaction proof/receipt
+
+  // Notes
+  userNotes          String?             // User's notes/description
+  adminNotes         String?             // Internal admin notes
+
+  // Admin tracking
+  adminHistory       Json?               // History of admin actions with codes and status changes
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  // Relations
+  user               User         @relation(fields: [userId], references: [id])
+  balanceTransaction BalanceTransaction?
+
+  @@index([userId])
+  @@index([status])
+  @@index([method])
+  @@index([createdAt])
+  @@map("payouts")
 }
 
 enum UserPlan {
@@ -672,6 +727,8 @@ enum MembershipStatus {
 enum WorkspaceStatus {
   ACTIVE
   DRAFT
+  ARCHIVED
+  SUSPENDED
 }
 
 enum FunnelStatus {
@@ -747,6 +804,7 @@ enum AddOnStatus {
 enum BalanceTransactionType {
   COMMISSION
   WITHDRAWAL
+  WITHDRAWAL_REVERSAL
   ADJUSTMENT
   REFUND
   COMMISSION_HOLD
@@ -764,4 +822,19 @@ enum RegistrationSource {
   DIRECT
   WORKSPACE_INVITE
   AFFILIATE
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  ON_HOLD
+}
+
+enum PayoutMethod {
+  UAE_BANK
+  INTERNATIONAL_BANK
+  USDT
 }

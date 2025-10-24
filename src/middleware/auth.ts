@@ -4,6 +4,7 @@ import { getPrisma } from "../lib/prisma";
 
 export interface AuthRequest extends Request {
   userId?: number;
+  isAdmin?: boolean;
 }
 
 // Routes that NO_PLAN users can access (whitelist)
@@ -40,13 +41,14 @@ export const authenticateToken = async (
     const decoded = jwt.verify(token, jwtSecret) as any;
     const userId = decoded.id; // Changed from decoded.userId to decoded.id
 
-    // Get user from database to check trial status and plan
+    // Get user from database to check trial status, plan, and admin status
     const user = await getPrisma().user.findUnique({
       where: { id: userId },
       select: {
         id: true,
         trialEndDate: true,
         plan: true,
+        isAdmin: true,
       },
     });
 
@@ -80,6 +82,7 @@ export const authenticateToken = async (
     }
 
     req.userId = userId;
+    req.isAdmin = user.isAdmin || false;
     next();
   } catch (err) {
     res.status(403).json({ error: "Invalid or expired token" });
