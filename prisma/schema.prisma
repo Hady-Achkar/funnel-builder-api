@@ -547,21 +547,22 @@ model FunnelSettings {
 }
 
 model AddOn {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  workspaceId  Int?
-  type         AddOnType
-  quantity     Int          @default(1)
-  pricePerUnit Float
-  status       AddOnStatus  @default(ACTIVE)
-  billingCycle IntervalUnit @default(MONTH)
-  startDate    DateTime     @default(now())
-  endDate      DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  user         User         @relation("UserAddOns", fields: [userId], references: [id], onDelete: Cascade)
-  workspace    Workspace?   @relation("WorkspaceAddOns", fields: [workspaceId], references: [id], onDelete: Cascade)
-  payments     Payment[]
+  id                  Int          @id @default(autoincrement())
+  userId              Int
+  workspaceId         Int?
+  type                AddOnType
+  quantity            Int          @default(1)
+  pricePerUnit        Float
+  status              AddOnStatus  @default(ACTIVE)
+  billingCycle        IntervalUnit @default(MONTH)
+  startDate           DateTime     @default(now())
+  endDate             DateTime?
+  expirationReminders Json?        @default("{}") // Track sent reminder emails and resource processing: {day7: true, day3: true, day1: true, resourcesProcessed: true}
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  user                User         @relation("UserAddOns", fields: [userId], references: [id], onDelete: Cascade)
+  workspace           Workspace?   @relation("WorkspaceAddOns", fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments            Payment[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -726,6 +727,8 @@ enum MembershipStatus {
 enum WorkspaceStatus {
   ACTIVE
   DRAFT
+  ARCHIVED
+  SUSPENDED
 }
 
 enum FunnelStatus {

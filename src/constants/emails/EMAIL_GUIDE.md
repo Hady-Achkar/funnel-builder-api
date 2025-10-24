@@ -417,11 +417,14 @@ text-align: right;
 ```
 
 ### Button Rules
-- Always black background, white text
-- One primary button per section (English and Arabic each get one)
-- Button text must be action-oriented and clear
-- English: "Verify Email", "Reset Password", "Join Workspace"
-- Arabic: "تأكيد البريد الإلكتروني", "إعادة تعيين كلمة المرور", "الانضمام إلى مساحة العمل"
+- **Buttons are OPTIONAL** - only include if explicitly needed for the email's primary purpose
+- If no button is requested or needed, use plain text instructions instead (e.g., "please contact support")
+- When buttons ARE included:
+  - Always black background, white text
+  - One primary button per section (English and Arabic each get one)
+  - Button text must be action-oriented and clear
+  - English examples: "Verify Email", "Reset Password", "Join Workspace"
+  - Arabic examples: "تأكيد البريد الإلكتروني", "إعادة تعيين كلمة المرور", "الانضمام إلى مساحة العمل"
 
 ---
 
