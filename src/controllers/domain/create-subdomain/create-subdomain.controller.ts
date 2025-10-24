@@ -19,6 +19,11 @@ export class CreateSubdomainController {
       console.log(
         `[Subdomain Create] Processing subdomain creation for user ${userId}`
       );
+      console.log('[Subdomain Create] Request headers:', req.headers);
+      console.log('[Subdomain Create] Request body:', req.body);
+      console.log('[Subdomain Create] Request body type:', typeof req.body);
+      console.log('[Subdomain Create] subdomain value:', req.body?.subdomain);
+      console.log('[Subdomain Create] workspaceSlug value:', req.body?.workspaceSlug);
 
       const result = await CreateSubdomainService.create(userId, req.body);
 

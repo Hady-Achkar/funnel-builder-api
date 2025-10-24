@@ -27,7 +27,12 @@ export class CreateSubdomainService {
     domainConfig?: DomainConfig
   ): Promise<CreateSubdomainResponse> {
     try {
+      console.log('[Subdomain Service] Received request data:', requestData);
+      console.log('[Subdomain Service] Request data type:', typeof requestData);
+
       const validatedData = createSubdomainRequest.parse(requestData);
+      console.log('[Subdomain Service] Validated data:', validatedData);
+
       const { subdomain, workspaceSlug } = validatedData;
 
       // Get workspace by slug
@@ -167,9 +172,13 @@ export class CreateSubdomainService {
       return createSubdomainResponse.parse(response);
     } catch (error: unknown) {
       if (error instanceof ZodError) {
-        const message = error.issues[0]?.message || "Invalid request data";
+        console.error('[Subdomain Service] Zod validation error:', error.issues);
+        const firstIssue = error.issues[0];
+        const fieldPath = firstIssue?.path?.join('.') || 'unknown field';
+        const message = `${fieldPath}: ${firstIssue?.message || "Invalid request data"}`;
         throw new BadRequestError(message);
       }
+      console.error('[Subdomain Service] Unexpected error:', error);
       throw error;
     }
   }
