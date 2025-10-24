@@ -11,6 +11,7 @@ export interface AuthRequest extends Request {
 const NO_PLAN_ALLOWED_ROUTES = [
   "/api/payment/create-payment-link",
   "/api/auth/user", // Allow getting user data (will match /api/auth/user/*)
+  "/api/auth/user/fresh-data", // Allow getting fresh user data
 ];
 
 export const authenticateToken = async (
