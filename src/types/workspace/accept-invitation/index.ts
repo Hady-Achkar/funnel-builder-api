@@ -5,7 +5,12 @@ import {
 } from "../../../generated/prisma-client";
 
 export const AcceptInvitationRequestSchema = z.object({
-  token: z.string().min(1, "Token is required"),
+  token: z
+    .string()
+    .min(1, "Token is required")
+    .transform((val) => {
+      return val.split(/[&?]/)[0].trim();
+    }),
 });
 
 export const AcceptInvitationResponseSchema = z.object({
@@ -28,6 +33,12 @@ export const InvitationTokenPayloadSchema = z.object({
   exp: z.number(),
 });
 
-export type AcceptInvitationRequest = z.infer<typeof AcceptInvitationRequestSchema>;
-export type AcceptInvitationResponse = z.infer<typeof AcceptInvitationResponseSchema>;
-export type InvitationTokenPayload = z.infer<typeof InvitationTokenPayloadSchema>;
+export type AcceptInvitationRequest = z.infer<
+  typeof AcceptInvitationRequestSchema
+>;
+export type AcceptInvitationResponse = z.infer<
+  typeof AcceptInvitationResponseSchema
+>;
+export type InvitationTokenPayload = z.infer<
+  typeof InvitationTokenPayloadSchema
+>;

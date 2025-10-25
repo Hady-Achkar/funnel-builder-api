@@ -44,7 +44,9 @@ export const createForm = async (
       }
 
       if (funnel.createdBy !== userId) {
-        throw new ForbiddenError("You can only create forms for your own funnels");
+        throw new ForbiddenError(
+          "You can only create forms for your own funnels"
+        );
       }
     }
 
@@ -55,6 +57,10 @@ export const createForm = async (
         formContent: validatedRequest.formContent,
         isActive: validatedRequest.isActive,
         funnelId: validatedRequest.funnelId,
+        webhookUrl: validatedRequest.webhookUrl,
+        webhookEnabled: validatedRequest.webhookEnabled ?? false,
+        webhookHeaders: validatedRequest.webhookHeaders || {},
+        webhookSecret: validatedRequest.webhookSecret,
       },
       include: {
         submissions: {

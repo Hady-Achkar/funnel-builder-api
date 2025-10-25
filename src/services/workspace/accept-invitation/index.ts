@@ -71,9 +71,9 @@ export class AcceptInvitationService {
           addOns: {
             where: {
               OR: [
-                { status: 'ACTIVE' },
+                { status: "ACTIVE" },
                 {
-                  status: 'CANCELLED',
+                  status: "CANCELLED",
                   endDate: { gt: new Date() },
                 },
               ],
@@ -126,8 +126,12 @@ export class AcceptInvitationService {
 
       // Invalidate workspace cache since member status changed
       try {
-        await cacheService.del(`slug:${workspace.slug}`, { prefix: "workspace" });
-        console.log(`[Cache] Invalidated workspace cache for ${workspace.slug} after invitation accepted`);
+        await cacheService.del(`slug:${workspace.slug}`, {
+          prefix: "workspace",
+        });
+        console.log(
+          `[Cache] Invalidated workspace cache for ${workspace.slug} after invitation accepted`
+        );
       } catch (cacheError) {
         console.error("Failed to invalidate workspace cache:", cacheError);
         // Don't fail the operation if cache invalidation fails

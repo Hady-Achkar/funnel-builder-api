@@ -28,9 +28,11 @@ vi.mock("../../lib/prisma", () => ({
   getPrisma: vi.fn(() => mockPrismaInstance),
 }));
 
-vi.mock("../../services/workspace/invite-member/utils/send-emails", () => ({
-  sendWorkspaceInvitationEmail: vi.fn(),
-  sendWorkspaceRegisterInvitationEmail: vi.fn(),
+vi.mock("@sendgrid/mail", () => ({
+  default: {
+    setApiKey: vi.fn(),
+    send: vi.fn(),
+  },
 }));
 
 vi.mock("jsonwebtoken", () => ({
