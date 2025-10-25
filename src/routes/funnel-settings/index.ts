@@ -5,6 +5,7 @@ import { getFunnelSettingsController } from "../../controllers/funnel-settings/g
 import { lockFunnelController } from "../../controllers/funnel-settings/lock-funnel";
 import { unlockFunnelController } from "../../controllers/funnel-settings/unlock-funnel";
 import { verifyPasswordController } from "../../controllers/funnel-settings/verify-password";
+import { updatePasswordController } from "../../controllers/funnel-settings/update-password";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.post("/verify-password/:funnelId", verifyPasswordController);
 router.put("/:id", authenticateToken, updateFunnelSettingsController);
 router.post("/lock-funnel/:funnelId", authenticateToken, lockFunnelController);
 router.post("/unlock-funnel/:funnelId", authenticateToken, unlockFunnelController);
+router.post("/update-password/:funnelId", authenticateToken, updatePasswordController);
 
 export default router;

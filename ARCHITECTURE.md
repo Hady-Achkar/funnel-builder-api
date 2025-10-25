@@ -349,15 +349,16 @@ describe("Create Workspace", () => {
 | POST   | `/api/insight-submission`           | createInsightSubmissionController  | ❌ TODO |
 | GET    | `/api/insight-submission/:funnelId` | getAllInsightSubmissionsController | ❌ TODO |
 
-### Funnel Settings Routes (5 routes)
+### Funnel Settings Routes (6 routes)
 
-| Method | Path                                             | Controller                     | Status  |
-| ------ | ------------------------------------------------ | ------------------------------ | ------- |
-| GET    | `/api/funnel-settings/:funnelId`                 | getFunnelSettingsController    | ❌ TODO |
-| POST   | `/api/funnel-settings/verify-password/:funnelId` | verifyPasswordController       | ❌ TODO |
-| PUT    | `/api/funnel-settings/:id`                       | updateFunnelSettingsController | ❌ TODO |
-| POST   | `/api/funnel-settings/lock-funnel/:funnelId`     | lockFunnelController           | ❌ TODO |
-| POST   | `/api/funnel-settings/unlock-funnel/:funnelId`   | unlockFunnelController         | ❌ TODO |
+| Method | Path                                                | Controller                     | Status  |
+| ------ | --------------------------------------------------- | ------------------------------ | ------- |
+| GET    | `/api/funnel-settings/:funnelId`                    | getFunnelSettingsController    | ❌ TODO |
+| POST   | `/api/funnel-settings/verify-password/:funnelId`    | verifyPasswordController       | ❌ TODO |
+| PUT    | `/api/funnel-settings/:id`                          | updateFunnelSettingsController | ❌ TODO |
+| POST   | `/api/funnel-settings/lock-funnel/:funnelId`        | lockFunnelController           | ❌ TODO |
+| POST   | `/api/funnel-settings/unlock-funnel/:funnelId`      | unlockFunnelController         | ❌ TODO |
+| POST   | `/api/funnel-settings/update-password/:funnelId`    | updatePasswordController       | ✅ DONE |
 
 ### Theme Routes (1 route)
 
@@ -417,13 +418,13 @@ describe("Create Workspace", () => {
 
 ## 📊 Progress Summary
 
-**Total Routes**: 88
+**Total Routes**: 89
 
 - ❌ TODO: 76
-- ✅ DONE: 12
+- ✅ DONE: 13
 - 🚧 WIP: 0
 
-**Completion**: 13.64%
+**Completion**: 14.61%
 
 ---
 

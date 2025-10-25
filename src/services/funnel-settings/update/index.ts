@@ -7,7 +7,10 @@ import {
 } from "../../../types/funnel-settings/update";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
-import { PermissionManager, PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const updateFunnelSettings = async (
   userId: number,
@@ -78,8 +81,14 @@ export const updateFunnelSettings = async (
 
     updateFields.forEach((field) => {
       if (field in data) {
-        updateData[field] =
-          validatedData[field as keyof UpdateFunnelSettingsRequest];
+        let value = validatedData[field as keyof UpdateFunnelSettingsRequest];
+
+        // Convert SEO keywords array to JSON string for database storage
+        if (field === "defaultSeoKeywords" && Array.isArray(value)) {
+          value = JSON.stringify(value) as any;
+        }
+
+        updateData[field] = value;
       }
     });
 
@@ -108,14 +117,18 @@ export const updateFunnelSettings = async (
 
       // Delete all cache keys in parallel
       await Promise.all(
-        cacheKeysToInvalidate.map(key =>
-          cacheService.del(key).catch(err =>
-            console.warn(`Failed to invalidate cache key ${key}:`, err)
-          )
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
         )
       );
 
-      console.log(`[Cache] Invalidated funnel settings caches for funnel ${funnel.id}`);
+      console.log(
+        `[Cache] Invalidated funnel settings caches for funnel ${funnel.id}`
+      );
     } catch (cacheError) {
       console.error("Failed to invalidate funnel settings cache:", cacheError);
       // Don't fail the operation if cache invalidation fails

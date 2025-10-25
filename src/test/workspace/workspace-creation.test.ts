@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CreateWorkspaceService } from "../../services/workspace/create";
 import { getPrisma } from "../../lib/prisma";
-import { BadRequestError } from "../../errors/http-errors";
+import { BadRequestError, ForbiddenError } from "../../errors/http-errors";
 import { UserPlan, AddOnStatus } from "../../generated/prisma-client";
 import * as createARecordModule from "../../services/domain/create-subdomain/utils/create-a-record";
 
@@ -587,6 +587,29 @@ describe("Workspace Creation Tests", () => {
         CreateWorkspaceService.create(userId, workspaceData)
       ).rejects.toThrow(
         "This workspace name is already taken. Please choose another one."
+      );
+    });
+
+    it("should throw ForbiddenError when WORKSPACE_MEMBER tries to create workspace", async () => {
+      const userId = 1;
+      const workspaceData = {
+        name: "Test Workspace",
+        slug: "test-workspace",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        plan: UserPlan.WORKSPACE_MEMBER,
+      });
+
+      await expect(
+        CreateWorkspaceService.create(userId, workspaceData)
+      ).rejects.toThrow(ForbiddenError);
+
+      await expect(
+        CreateWorkspaceService.create(userId, workspaceData)
+      ).rejects.toThrow(
+        "Workspace members cannot create workspaces. Please upgrade your account to a full plan to create your own workspace."
       );
     });
   });

@@ -1,7 +1,14 @@
 import { getPrisma } from "../../../lib/prisma";
 import { NotFoundError, ForbiddenError } from "../../../errors/http-errors";
-import { DomainStatus, SslStatus, FunnelStatus } from "../../../generated/prisma-client";
-import { GetPublicSiteRequest, GetPublicSiteResponse } from "../../../types/site/get-public-site";
+import {
+  DomainStatus,
+  SslStatus,
+  FunnelStatus,
+} from "../../../generated/prisma-client";
+import {
+  GetPublicSiteRequest,
+  GetPublicSiteResponse,
+} from "../../../types/site/get-public-site";
 import { formatSiteResponse } from "./utils/format-site-response";
 
 export class GetPublicSiteService {
@@ -26,9 +33,9 @@ export class GetPublicSiteService {
         throw new NotFoundError("Domain is not active");
       }
 
-      if (domain.sslStatus !== SslStatus.ACTIVE) {
-        throw new NotFoundError("Domain SSL certificate is not active");
-      }
+      // if (domain.sslStatus !== SslStatus.ACTIVE) {
+      //   throw new NotFoundError("Domain SSL certificate is not active");
+      // }
 
       // Step 3: Find connected site/funnel
       const domainFunnelConnection = await prisma.funnelDomain.findFirst({

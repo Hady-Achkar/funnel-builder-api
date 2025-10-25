@@ -47,9 +47,9 @@ describe("Update Funnel Settings Tests", () => {
 
   describe("Validation", () => {
     it("should throw error if user ID is not provided", async () => {
-      await expect(
-        updateFunnelSettings(0, { funnelId })
-      ).rejects.toThrow("User ID is required");
+      await expect(updateFunnelSettings(0, { funnelId })).rejects.toThrow(
+        "User ID is required"
+      );
     });
 
     it("should throw error for invalid funnel ID (negative)", async () => {
@@ -115,9 +115,9 @@ describe("Update Funnel Settings Tests", () => {
       mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
 
-      await expect(
-        updateFunnelSettings(userId, { funnelId })
-      ).rejects.toThrow("Nothing to update");
+      await expect(updateFunnelSettings(userId, { funnelId })).rejects.toThrow(
+        "Nothing to update"
+      );
     });
 
     it("should validate privacy policy URL format", async () => {
@@ -262,7 +262,7 @@ describe("Update Funnel Settings Tests", () => {
       funnelId,
       defaultSeoTitle: "Old Title",
       defaultSeoDescription: "Old Description",
-      defaultSeoKeywords: "old, keywords",
+      defaultSeoKeywords: JSON.stringify(["old", "keywords"]),
     };
 
     beforeEach(() => {
@@ -308,40 +308,50 @@ describe("Update Funnel Settings Tests", () => {
       });
     });
 
-    it("should update SEO keywords", async () => {
+    it("should update SEO keywords with array", async () => {
+      const keywords = ["new", "keywords", "seo"];
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
-        defaultSeoKeywords: "new, keywords, seo",
+        defaultSeoKeywords: JSON.stringify(keywords),
       });
 
       await updateFunnelSettings(userId, {
         funnelId,
-        defaultSeoKeywords: "new, keywords, seo",
+        defaultSeoKeywords: keywords,
       });
 
       expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
         where: { funnelId },
         data: {
-          defaultSeoKeywords: "new, keywords, seo",
+          defaultSeoKeywords: JSON.stringify(keywords),
         },
       });
     });
 
-    it("should set SEO title to null", async () => {
+    it("should reject empty array for SEO keywords", async () => {
+      await expect(
+        updateFunnelSettings(userId, {
+          funnelId,
+          defaultSeoKeywords: [],
+        })
+      ).rejects.toThrow("Invalid input");
+    });
+
+    it("should set SEO keywords to null", async () => {
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
-        defaultSeoTitle: null,
+        defaultSeoKeywords: null,
       });
 
       await updateFunnelSettings(userId, {
         funnelId,
-        defaultSeoTitle: null,
+        defaultSeoKeywords: null,
       });
 
       expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
         where: { funnelId },
         data: {
-          defaultSeoTitle: null,
+          defaultSeoKeywords: null,
         },
       });
     });
@@ -808,11 +818,12 @@ describe("Update Funnel Settings Tests", () => {
     });
 
     it("should update all settings fields", async () => {
+      const keywords = ["complete", "keywords"];
       const allUpdates = {
         funnelId,
         defaultSeoTitle: "Complete Title",
         defaultSeoDescription: "Complete Description",
-        defaultSeoKeywords: "complete, keywords",
+        defaultSeoKeywords: keywords,
         favicon: "https://example.com/favicon.ico",
         ogImage: "https://example.com/og.png",
         googleAnalyticsId: "GA-123",
@@ -830,6 +841,7 @@ describe("Update Funnel Settings Tests", () => {
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
         ...allUpdates,
+        defaultSeoKeywords: JSON.stringify(keywords),
       });
 
       await updateFunnelSettings(userId, allUpdates);
@@ -839,6 +851,7 @@ describe("Update Funnel Settings Tests", () => {
         data: expect.objectContaining({
           defaultSeoTitle: "Complete Title",
           defaultSeoDescription: "Complete Description",
+          defaultSeoKeywords: JSON.stringify(keywords),
           googleAnalyticsId: "GA-123",
           facebookPixelId: "FB-456",
           enableCookieConsent: true,

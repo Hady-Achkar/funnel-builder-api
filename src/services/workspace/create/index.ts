@@ -4,6 +4,7 @@ import {
   BadRequestError,
   InternalServerError,
   BadGatewayError,
+  ForbiddenError,
 } from "../../../errors/http-errors";
 import {
   WorkspaceRole,
@@ -49,7 +50,14 @@ export class CreateWorkspaceService {
         throw new InternalServerError("User not found");
       }
 
-      // 3. GET USER ADD-ONS (for limit calculation)
+      // 3. CHECK IF USER IS WORKSPACE_MEMBER (not allowed to create workspaces)
+      if (user.plan === UserPlan.WORKSPACE_MEMBER) {
+        throw new ForbiddenError(
+          "Workspace members cannot create workspaces. Please upgrade your account to a full plan to create your own workspace."
+        );
+      }
+
+      // 4. GET USER ADD-ONS (for limit calculation)
       const userAddOns = await prisma.addOn.findMany({
         where: {
           userId: userId,
@@ -62,7 +70,7 @@ export class CreateWorkspaceService {
         },
       });
 
-      // 4. CHECK WORKSPACE LIMIT (using allocation utility)
+      // 5. CHECK WORKSPACE LIMIT (using allocation utility)
       const currentCount = await prisma.workspace.count({
         where: { ownerId: userId },
       });
@@ -81,7 +89,7 @@ export class CreateWorkspaceService {
         );
       }
 
-      // 5. CHECK SLUG AVAILABILITY
+      // 6. CHECK SLUG AVAILABILITY
       const existingWorkspace = await prisma.workspace.findUnique({
         where: { slug: data.slug },
       });
@@ -92,7 +100,7 @@ export class CreateWorkspaceService {
         );
       }
 
-      // 6. CHECK DOMAIN CONFLICT
+      // 7. CHECK DOMAIN CONFLICT
       const workspaceDomain = process.env.WORKSPACE_DOMAIN;
       const potentialHostname = `${data.slug}.${workspaceDomain}`;
 
@@ -106,7 +114,7 @@ export class CreateWorkspaceService {
         );
       }
 
-      // 7. CHECK NAME UNIQUENESS
+      // 8. CHECK NAME UNIQUENESS
       const existingName = await prisma.workspace.findFirst({
         where: {
           ownerId: userId,
@@ -122,21 +130,21 @@ export class CreateWorkspaceService {
 
       // BUSINESS LOGIC LAYER
 
-      // 8. DETERMINE WORKSPACE PLAN TYPE (using service util)
+      // 9. DETERMINE WORKSPACE PLAN TYPE (using service util)
       // Inherits user's plan by default, or uses explicit override
       const workspacePlanType = determineWorkspacePlanType(
         user.plan,
         data.planType
       );
 
-      // 9. DETERMINE WORKSPACE STATUS
+      // 10. DETERMINE WORKSPACE STATUS
       // Set to DRAFT for FREE and AGENCY plans, ACTIVE for BUSINESS
       const workspaceStatus =
         user.plan === UserPlan.FREE || user.plan === UserPlan.AGENCY
           ? WorkspaceStatus.DRAFT
           : WorkspaceStatus.ACTIVE;
 
-      // 10. CREATE WORKSPACE IN TRANSACTION
+      // 11. CREATE WORKSPACE IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
         // Create workspace with planType and status
         const workspaceData: {
@@ -207,7 +215,7 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 11. CREATE WORKSPACE SUBDOMAIN DNS RECORD ON DIGITALSITE.COM
+      // 12. CREATE WORKSPACE SUBDOMAIN DNS RECORD ON DIGITALSITE.COM
       if (!workspaceDomain) {
         throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
       }
@@ -250,7 +258,7 @@ export class CreateWorkspaceService {
         );
       }
 
-      // 12. INVALIDATE USER'S WORKSPACES CACHE
+      // 13. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {
