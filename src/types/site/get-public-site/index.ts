@@ -57,7 +57,7 @@ export const getPublicSiteResponseSchema = z.object({
     updatedAt: z.date(),
     pages: z.array(publicPageSchema),
     settings: publicSiteSettingsSchema,
-    customTheme: publicSiteThemeSchema.nullable(),
+    theme: publicSiteThemeSchema,
   }),
 });
 

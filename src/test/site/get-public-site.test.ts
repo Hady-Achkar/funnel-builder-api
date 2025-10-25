@@ -72,6 +72,40 @@ describe("Get Public Site Tests", () => {
     updatedAt: new Date(),
   };
 
+  const mockActiveTheme = {
+    id: 1,
+    name: "Active Theme",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    buttonColor: "#007bff",
+    buttonTextColor: "#ffffff",
+    borderColor: "#cccccc",
+    optionColor: "#f0f0f0",
+    fontFamily: "Inter, sans-serif",
+    borderRadius: "SOFT",
+    type: "CUSTOM",
+    funnelId: 1,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockGlobalTheme = {
+    id: 2,
+    name: "Global Theme",
+    backgroundColor: "#0e1e12",
+    textColor: "#d4ecd0",
+    buttonColor: "#387e3d",
+    buttonTextColor: "#e8f5e9",
+    borderColor: "#214228",
+    optionColor: "#16331b",
+    fontFamily: "Roboto, sans-serif",
+    borderRadius: "ROUNDED",
+    type: "GLOBAL",
+    funnelId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const mockFunnel = {
     id: 1,
     name: "My Awesome Site",
@@ -79,7 +113,7 @@ describe("Get Public Site Tests", () => {
     status: FunnelStatus.LIVE,
     workspaceId: 1,
     createdBy: 1,
-    activeThemeId: null,
+    activeThemeId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     pages: [
@@ -152,22 +186,7 @@ describe("Get Public Site Tests", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
-    customTheme: {
-      id: 1,
-      name: "Custom Theme",
-      backgroundColor: "#ffffff",
-      textColor: "#000000",
-      buttonColor: "#007bff",
-      buttonTextColor: "#ffffff",
-      borderColor: "#cccccc",
-      optionColor: "#f0f0f0",
-      fontFamily: "Inter, sans-serif",
-      borderRadius: "SOFT",
-      type: "CUSTOM",
-      funnelId: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
+    activeTheme: mockActiveTheme,
   };
 
   describe("Success Cases", () => {
@@ -233,7 +252,7 @@ describe("Get Public Site Tests", () => {
       );
     });
 
-    it("should include custom theme in the response", async () => {
+    it("should include active theme in the response", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
@@ -244,10 +263,10 @@ describe("Get Public Site Tests", () => {
         hostname: "example.mydigitalsite.io",
       });
 
-      expect(result.site.customTheme).toBeDefined();
-      expect(result.site.customTheme?.backgroundColor).toBe("#ffffff");
-      expect(result.site.customTheme?.textColor).toBe("#000000");
-      expect(result.site.customTheme?.fontFamily).toBe("Inter, sans-serif");
+      expect(result.site.theme).toBeDefined();
+      expect(result.site.theme?.backgroundColor).toBe("#ffffff");
+      expect(result.site.theme?.textColor).toBe("#000000");
+      expect(result.site.theme?.fontFamily).toBe("Inter, sans-serif");
     });
 
     it("should order pages correctly", async () => {
@@ -266,8 +285,8 @@ describe("Get Public Site Tests", () => {
       expect(result.site.pages[2].order).toBe(2);
     });
 
-    it("should handle site with null custom theme", async () => {
-      const funnelWithoutTheme = { ...mockFunnel, customTheme: null };
+    it("should handle site with null active theme", async () => {
+      const funnelWithoutTheme = { ...mockFunnel, activeThemeId: null, activeTheme: null };
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
@@ -278,7 +297,7 @@ describe("Get Public Site Tests", () => {
         hostname: "example.mydigitalsite.io",
       });
 
-      expect(result.site.customTheme).toBeNull();
+      expect(result.site.theme).toBeNull();
     });
 
     it("should handle site with null settings", async () => {
@@ -552,6 +571,96 @@ describe("Get Public Site Tests", () => {
 
       expect(result).toBeDefined();
       expect(result.site.id).toBe(1);
+    });
+  });
+
+  describe("Theme Handling Tests", () => {
+    it("should return GLOBAL theme when funnel uses a global theme", async () => {
+      const funnelWithGlobalTheme = {
+        ...mockFunnel,
+        activeThemeId: 2,
+        activeTheme: mockGlobalTheme,
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithGlobalTheme);
+
+      const result = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+      });
+
+      expect(result.site.theme).toBeDefined();
+      expect(result.site.theme?.backgroundColor).toBe("#0e1e12");
+      expect(result.site.theme?.textColor).toBe("#d4ecd0");
+      expect(result.site.theme?.buttonColor).toBe("#387e3d");
+      expect(result.site.theme?.fontFamily).toBe("Roboto, sans-serif");
+      expect(result.site.theme?.borderRadius).toBe("ROUNDED");
+    });
+
+    it("should return CUSTOM theme when funnel uses a custom theme", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+
+      const result = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+      });
+
+      expect(result.site.theme).toBeDefined();
+      expect(result.site.theme?.backgroundColor).toBe("#ffffff");
+      expect(result.site.theme?.textColor).toBe("#000000");
+      expect(result.site.theme?.buttonColor).toBe("#007bff");
+      expect(result.site.theme?.fontFamily).toBe("Inter, sans-serif");
+      expect(result.site.theme?.borderRadius).toBe("SOFT");
+    });
+
+    it("should return the ACTIVE theme, not the custom theme relation", async () => {
+      // Funnel has activeThemeId pointing to global theme (not its custom theme)
+      const funnelWithGlobalActive = {
+        ...mockFunnel,
+        activeThemeId: 2,
+        activeTheme: mockGlobalTheme,
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithGlobalActive);
+
+      const result = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+      });
+
+      // Should return the global theme (active), not custom theme
+      expect(result.site.theme).toBeDefined();
+      expect(result.site.theme?.fontFamily).toBe("Roboto, sans-serif");
+      expect(result.site.theme?.backgroundColor).toBe("#0e1e12");
+    });
+
+    it("should return null when funnel has no active theme", async () => {
+      const funnelWithNoTheme = {
+        ...mockFunnel,
+        activeThemeId: null,
+        activeTheme: null,
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithNoTheme);
+
+      const result = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+      });
+
+      expect(result.site.theme).toBeNull();
     });
   });
 });

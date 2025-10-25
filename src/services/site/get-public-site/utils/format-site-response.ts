@@ -1,4 +1,9 @@
-import { Funnel, Page, FunnelSettings, Theme } from "../../../../generated/prisma-client";
+import {
+  Funnel,
+  Page,
+  FunnelSettings,
+  Theme,
+} from "../../../../generated/prisma-client";
 import {
   GetPublicSiteResponse,
   PublicPage,
@@ -9,10 +14,12 @@ import {
 interface FunnelWithRelations extends Funnel {
   pages: Page[];
   settings: FunnelSettings | null;
-  customTheme: Theme | null;
+  activeTheme: Theme;
 }
 
-export function formatSiteResponse(funnel: FunnelWithRelations): GetPublicSiteResponse {
+export function formatSiteResponse(
+  funnel: FunnelWithRelations
+): GetPublicSiteResponse {
   const pages: PublicPage[] = funnel.pages
     .sort((a, b) => a.order - b.order)
     .map((page) => ({
@@ -49,18 +56,18 @@ export function formatSiteResponse(funnel: FunnelWithRelations): GetPublicSiteRe
         },
       };
 
-  const customTheme: PublicSiteTheme | null = funnel.customTheme
+  const theme: PublicSiteTheme | null = funnel.activeTheme
     ? {
-        primaryColor: funnel.customTheme.buttonColor,
-        secondaryColor: funnel.customTheme.borderColor,
-        fontFamily: funnel.customTheme.fontFamily,
-        backgroundColor: funnel.customTheme.backgroundColor,
-        textColor: funnel.customTheme.textColor,
-        buttonColor: funnel.customTheme.buttonColor,
-        buttonTextColor: funnel.customTheme.buttonTextColor,
-        borderColor: funnel.customTheme.borderColor,
-        optionColor: funnel.customTheme.optionColor,
-        borderRadius: funnel.customTheme.borderRadius,
+        primaryColor: funnel.activeTheme.buttonColor,
+        secondaryColor: funnel.activeTheme.borderColor,
+        fontFamily: funnel.activeTheme.fontFamily,
+        backgroundColor: funnel.activeTheme.backgroundColor,
+        textColor: funnel.activeTheme.textColor,
+        buttonColor: funnel.activeTheme.buttonColor,
+        buttonTextColor: funnel.activeTheme.buttonTextColor,
+        borderColor: funnel.activeTheme.borderColor,
+        optionColor: funnel.activeTheme.optionColor,
+        borderRadius: funnel.activeTheme.borderRadius,
       }
     : null;
 
@@ -75,7 +82,7 @@ export function formatSiteResponse(funnel: FunnelWithRelations): GetPublicSiteRe
       updatedAt: funnel.updatedAt,
       pages,
       settings,
-      customTheme,
+      theme,
     },
   };
 }

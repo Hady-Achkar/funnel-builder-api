@@ -59,7 +59,7 @@ export class GetPublicSiteService {
             },
           },
           settings: true,
-          customTheme: true,
+          activeTheme: true,
         },
       });
 
