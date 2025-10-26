@@ -49,6 +49,8 @@ describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
     process.env.FRONTEND_URL = "https://test.example.com";
     process.env.SENDGRID_API_KEY = "test-key";
     process.env.SENDGRID_FROM_EMAIL = "test@example.com";
+    process.env.MAMOPAY_API_URL = "https://test-mamopay.com";
+    process.env.MAMOPAY_API_KEY = "test-mamopay-key";
   });
 
   afterAll(async () => {

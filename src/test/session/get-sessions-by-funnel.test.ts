@@ -394,7 +394,7 @@ describe("Get Sessions by Funnel Tests", () => {
         where: {
           funnelId,
           updatedAt: {
-            gte: new Date("2025-10-01"),
+            gte: new Date("2025-10-01T00:00:00.000Z"),
           },
         },
         select: {
