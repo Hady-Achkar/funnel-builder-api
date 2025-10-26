@@ -45,9 +45,18 @@ export function createServer(): Express {
   const allowedOrigins = [
     process.env.FRONTEND_URL,                      // Main frontend
     /^https:\/\/.*\.digitalsite\.io$/,             // All digitalsite.io subdomains
+    /^https:\/\/.*\.digitalsite\.com$/,            // All digitalsite.com subdomains
+    /^https:\/\/.*\.digitalsite\.ai$/,             // All digitalsite.ai subdomains
+    /^https:\/\/.*\.digitalsite\.us$/,             // All digitalsite.us subdomains
+    /^https:\/\/digitalsite\.io$/,                 // Main digitalsite.io domain
+    /^https:\/\/digitalsite\.com$/,                // Main digitalsite.com domain
+    /^https:\/\/digitalsite\.ai$/,                 // Main digitalsite.ai domain
+    /^https:\/\/digitalsite\.us$/,                 // Main digitalsite.us domain
     /^https:\/\/.*\.azurecontainerapps\.io$/,      // Azure Container Apps
     /^https:\/\/.*\.azurefd\.net$/,                // Azure Front Door
+    /^https:\/\/.*\.vercel\.app$/,                 // Vercel deployments
     "http://localhost:3000",                       // Development frontend
+    "http://localhost:3001",                       // Alternative dev port
     "http://localhost:4444",                       // Development API
   ].filter(Boolean); // Remove undefined values
 
