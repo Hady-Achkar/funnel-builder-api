@@ -74,10 +74,16 @@ export const getSessionsByFunnel = async (
     if (validatedParams.startDate || validatedParams.endDate) {
       whereClause.updatedAt = {};
       if (validatedParams.startDate) {
-        whereClause.updatedAt.gte = validatedParams.startDate;
+        // Set to start of day (00:00:00)
+        const startOfDay = new Date(validatedParams.startDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        whereClause.updatedAt.gte = startOfDay;
       }
       if (validatedParams.endDate) {
-        whereClause.updatedAt.lte = validatedParams.endDate;
+        // Set to end of day (23:59:59.999) to include entire day
+        const endOfDay = new Date(validatedParams.endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        whereClause.updatedAt.lte = endOfDay;
       }
     }
 

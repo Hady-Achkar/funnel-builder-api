@@ -72,10 +72,16 @@ export const getAllFormSubmissions = async (
     if (validatedRequest.startDate || validatedRequest.endDate) {
       whereClause.updatedAt = {};
       if (validatedRequest.startDate) {
-        whereClause.updatedAt.gte = validatedRequest.startDate;
+        // Set to start of day (00:00:00)
+        const startOfDay = new Date(validatedRequest.startDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        whereClause.updatedAt.gte = startOfDay;
       }
       if (validatedRequest.endDate) {
-        whereClause.updatedAt.lte = validatedRequest.endDate;
+        // Set to end of day (23:59:59.999) to include entire day
+        const endOfDay = new Date(validatedRequest.endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        whereClause.updatedAt.lte = endOfDay;
       }
     }
 
