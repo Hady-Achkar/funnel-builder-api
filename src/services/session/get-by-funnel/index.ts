@@ -11,7 +11,9 @@ import {
 
 export const getSessionsByFunnel = async (
   funnelId: number,
-  userId: number
+  userId: number,
+  startDate?: string,
+  endDate?: string
 ): Promise<GetSessionsByFunnelResponse> => {
   try {
     if (!userId) {
@@ -19,16 +21,29 @@ export const getSessionsByFunnel = async (
     }
 
     // Validate params
-    const validatedParams = getSessionsByFunnelParams.parse({ funnelId });
+    const validatedParams = getSessionsByFunnelParams.parse({
+      funnelId,
+      startDate,
+      endDate,
+    });
 
     const prisma = getPrisma();
 
-    // Check if funnel exists and get workspace info
+    // Check if funnel exists and get workspace info and pages
     const funnel = await prisma.funnel.findUnique({
       where: { id: validatedParams.funnelId },
       select: {
         id: true,
         workspaceId: true,
+        pages: {
+          select: {
+            id: true,
+            name: true,
+          },
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
     });
 
@@ -50,11 +65,25 @@ export const getSessionsByFunnel = async (
       );
     }
 
+    // Build where clause with optional date filters
+    const whereClause: any = {
+      funnelId: validatedParams.funnelId,
+    };
+
+    // Add date filters if provided
+    if (validatedParams.startDate || validatedParams.endDate) {
+      whereClause.updatedAt = {};
+      if (validatedParams.startDate) {
+        whereClause.updatedAt.gte = validatedParams.startDate;
+      }
+      if (validatedParams.endDate) {
+        whereClause.updatedAt.lte = validatedParams.endDate;
+      }
+    }
+
     // Get all sessions for this funnel
     const sessions = await prisma.session.findMany({
-      where: {
-        funnelId: validatedParams.funnelId,
-      },
+      where: whereClause,
       select: {
         id: true,
         sessionId: true,
@@ -70,6 +99,7 @@ export const getSessionsByFunnel = async (
     const response = {
       sessions,
       total: sessions.length,
+      pages: funnel.pages,
     };
 
     return getSessionsByFunnelResponse.parse(response);

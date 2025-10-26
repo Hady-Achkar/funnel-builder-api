@@ -71,6 +71,10 @@ describe("Get Sessions by Funnel Tests", () => {
     const mockFunnel = {
       id: funnelId,
       workspaceId,
+      pages: [
+        { id: 1, name: "Home" },
+        { id: 2, name: "About" },
+      ],
     };
 
     beforeEach(() => {
@@ -132,6 +136,10 @@ describe("Get Sessions by Funnel Tests", () => {
     const mockFunnel = {
       id: funnelId,
       workspaceId,
+      pages: [
+        { id: 1, name: "Home" },
+        { id: 2, name: "About" },
+      ],
     };
 
     beforeEach(() => {
@@ -275,6 +283,10 @@ describe("Get Sessions by Funnel Tests", () => {
     const mockFunnel = {
       id: funnelId,
       workspaceId,
+      pages: [
+        { id: 1, name: "Home" },
+        { id: 2, name: "About" },
+      ],
     };
 
     beforeEach(() => {
@@ -336,6 +348,183 @@ describe("Get Sessions by Funnel Tests", () => {
 
       expect(result.total).toBe(result.sessions.length);
       expect(result.total).toBe(3);
+    });
+  });
+
+  describe("Date Filtering", () => {
+    const mockFunnel = {
+      id: funnelId,
+      workspaceId,
+      pages: [
+        { id: 1, name: "Home" },
+        { id: 2, name: "About" },
+      ],
+    };
+
+    beforeEach(() => {
+      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      (PermissionManager.can as any).mockResolvedValue({
+        allowed: true,
+      });
+    });
+
+    it("should filter sessions by startDate", async () => {
+      const mockSessions = [
+        {
+          id: "session-1",
+          sessionId: "sess-1",
+          visitedPages: [1],
+          createdAt: new Date("2025-10-05"),
+          updatedAt: new Date("2025-10-05"),
+        },
+        {
+          id: "session-2",
+          sessionId: "sess-2",
+          visitedPages: [1],
+          createdAt: new Date("2025-10-06"),
+          updatedAt: new Date("2025-10-06"),
+        },
+      ];
+
+      mockPrisma.session.findMany.mockResolvedValue(mockSessions);
+
+      await getSessionsByFunnel(funnelId, userId, "2025-10-01", undefined);
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          funnelId,
+          updatedAt: {
+            gte: new Date("2025-10-01"),
+          },
+        },
+        select: {
+          id: true,
+          sessionId: true,
+          visitedPages: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    });
+
+    it("should filter sessions by endDate", async () => {
+      const mockSessions = [
+        {
+          id: "session-1",
+          sessionId: "sess-1",
+          visitedPages: [1],
+          createdAt: new Date("2025-10-05"),
+          updatedAt: new Date("2025-10-05"),
+        },
+      ];
+
+      mockPrisma.session.findMany.mockResolvedValue(mockSessions);
+
+      await getSessionsByFunnel(funnelId, userId, undefined, "2025-10-08");
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          funnelId,
+          updatedAt: {
+            lte: new Date("2025-10-08"),
+          },
+        },
+        select: {
+          id: true,
+          sessionId: true,
+          visitedPages: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    });
+
+    it("should filter sessions by date range (startDate and endDate)", async () => {
+      const mockSessions = [
+        {
+          id: "session-1",
+          sessionId: "sess-1",
+          visitedPages: [1],
+          createdAt: new Date("2025-10-05"),
+          updatedAt: new Date("2025-10-05"),
+        },
+      ];
+
+      mockPrisma.session.findMany.mockResolvedValue(mockSessions);
+
+      await getSessionsByFunnel(funnelId, userId, "2025-09-30", "2025-10-08");
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          funnelId,
+          updatedAt: {
+            gte: new Date("2025-09-30"),
+            lte: new Date("2025-10-08"),
+          },
+        },
+        select: {
+          id: true,
+          sessionId: true,
+          visitedPages: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    });
+
+    it("should return all sessions when no date filters provided", async () => {
+      const mockSessions = [
+        {
+          id: "session-1",
+          sessionId: "sess-1",
+          visitedPages: [1],
+          createdAt: new Date("2025-10-05"),
+          updatedAt: new Date("2025-10-05"),
+        },
+      ];
+
+      mockPrisma.session.findMany.mockResolvedValue(mockSessions);
+
+      await getSessionsByFunnel(funnelId, userId, undefined, undefined);
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          funnelId,
+        },
+        select: {
+          id: true,
+          sessionId: true,
+          visitedPages: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    });
+
+    it("should return empty array when no sessions match date filter", async () => {
+      mockPrisma.session.findMany.mockResolvedValue([]);
+
+      const result = await getSessionsByFunnel(
+        funnelId,
+        userId,
+        "2025-11-01",
+        "2025-11-30"
+      );
+
+      expect(result.sessions).toEqual([]);
+      expect(result.total).toBe(0);
     });
   });
 

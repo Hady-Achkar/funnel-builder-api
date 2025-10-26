@@ -5,6 +5,14 @@ export const getSessionsByFunnelParams = z.object({
     .number()
     .int("Funnel ID must be an integer")
     .positive("Funnel ID must be a positive number"),
+  startDate: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
+  endDate: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
 });
 
 export type GetSessionsByFunnelParams = z.infer<
@@ -19,9 +27,15 @@ export const sessionSchema = z.object({
   updatedAt: z.date(),
 });
 
+export const pageSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
+
 export const getSessionsByFunnelResponse = z.object({
   sessions: z.array(sessionSchema),
   total: z.number(),
+  pages: z.array(pageSchema),
 });
 
 export type SessionSchema = z.infer<typeof sessionSchema>;

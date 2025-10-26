@@ -24,7 +24,16 @@ export const getSessionsByFunnelController = async (
       });
     }
 
-    const result = await getSessionsByFunnel(funnelId, userId);
+    // Get optional query parameters for date filtering
+    const startDate = req.query.startDate as string | undefined;
+    const endDate = req.query.endDate as string | undefined;
+
+    const result = await getSessionsByFunnel(
+      funnelId,
+      userId,
+      startDate,
+      endDate
+    );
 
     return res.status(200).json(result);
   } catch (error: unknown) {
