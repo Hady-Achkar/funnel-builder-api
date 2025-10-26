@@ -1008,7 +1008,7 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       });
     });
 
-    it("should clone workspace when provided, OR process payment successfully if cloning fails", async () => {
+    it("should clone workspace when provided in webhook payload", async () => {
       const email = `buyer-workspace-clone-${Date.now()}@example.com`;
       await createVerifiedUser(email);
 
@@ -1064,69 +1064,34 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
         },
       });
 
-      if (workspaceClone) {
-        // Workspace cloning SUCCEEDED (Cloudflare API call succeeded)
-        console.log("✅ Workspace cloning succeeded");
+      // Workspace cloning should always succeed now (no Cloudflare DNS creation)
+      expect(workspaceClone).toBeDefined();
 
-        // Verify cloned workspace exists in buyer's ownedWorkspaces
-        expect(buyer?.ownedWorkspaces).toHaveLength(1);
-        const clonedWorkspace = buyer?.ownedWorkspaces[0];
-        expect(clonedWorkspace?.name).toBe("Test Affiliate Workspace");
-        expect(clonedWorkspace?.ownerId).toBe(buyerId);
-        expect(clonedWorkspace?.planType).toBe("BUSINESS");
+      // Verify cloned workspace exists in buyer's ownedWorkspaces
+      expect(buyer?.ownedWorkspaces).toHaveLength(1);
+      const clonedWorkspace = buyer?.ownedWorkspaces[0];
+      expect(clonedWorkspace?.name).toBe("Test Affiliate Workspace");
+      expect(clonedWorkspace?.ownerId).toBe(buyerId);
+      expect(clonedWorkspace?.planType).toBe("BUSINESS");
 
-        // Verify WorkspaceClone record
-        expect(workspaceClone.sourceWorkspaceId).toBe(workspaceId);
-        expect(workspaceClone.clonedWorkspaceId).toBe(clonedWorkspace?.id);
-        expect(workspaceClone.sellerId).toBe(affiliateOwnerId);
-        expect(workspaceClone.buyerId).toBe(buyerId);
+      // Verify WorkspaceClone record
+      expect(workspaceClone!.sourceWorkspaceId).toBe(workspaceId);
+      expect(workspaceClone!.clonedWorkspaceId).toBe(clonedWorkspace?.id);
+      expect(workspaceClone!.sellerId).toBe(affiliateOwnerId);
+      expect(workspaceClone!.buyerId).toBe(buyerId);
 
-        // Verify workspace subdomain created (NOT associated with workspace to avoid consuming allocation)
-        const workspaceDomains = await prisma.domain.findMany({
-          where: {
-            createdBy: buyerId,
-            type: "SUBDOMAIN",
-            workspaceId: null, // Domain created but not associated with workspace
-          },
-        });
+      // Verify payment linked to workspace clone
+      const clonePayment = await prisma.payment.findUnique({
+        where: { transactionId: payload.id },
+        include: { workspaceClone: true },
+      });
 
-        expect(workspaceDomains.length).toBeGreaterThanOrEqual(1);
-        expect(workspaceDomains[0].type).toBe("SUBDOMAIN");
-        expect(workspaceDomains[0].status).toBe("ACTIVE");
-        expect(workspaceDomains[0].hostname).toContain(clonedWorkspace?.slug);
+      expect(clonePayment?.workspaceClone).toBeDefined();
+      expect(clonePayment?.workspaceClone?.clonedWorkspaceId).toBe(
+        clonedWorkspace?.id
+      );
 
-        // Verify payment linked to workspace clone
-        const payment = await prisma.payment.findUnique({
-          where: { transactionId: payload.id },
-          include: { workspaceClone: true },
-        });
-
-        expect(payment?.workspaceClone).toBeDefined();
-        expect(payment?.workspaceClone?.clonedWorkspaceId).toBe(
-          clonedWorkspace?.id
-        );
-      } else {
-        // Workspace cloning FAILED (likely Cloudflare DNS conflict)
-        console.log(
-          "⚠️ Workspace cloning failed (likely Cloudflare DNS conflict), but payment processed successfully"
-        );
-
-        // Verify buyer has NO owned workspaces (cloning failed and was cleaned up)
-        expect(buyer?.ownedWorkspaces).toHaveLength(0);
-
-        // Verify NO WorkspaceClone record
-        expect(workspaceClone).toBeNull();
-
-        // Verify payment NOT linked to workspace clone
-        const payment = await prisma.payment.findUnique({
-          where: { transactionId: payload.id },
-          include: { workspaceClone: true },
-        });
-
-        expect(payment?.workspaceClone).toBeNull();
-      }
-
-      // Regardless of cloning success/failure, verify these are ALWAYS true:
+      // Verify core payment processing functionality:
       // - User created
       // - Password reset token set
       // - Emails sent

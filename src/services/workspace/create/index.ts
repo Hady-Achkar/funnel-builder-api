@@ -17,7 +17,6 @@ import { cacheService } from "../../cache/cache.service";
 import { determineWorkspacePlanType } from "./utils/workspace-plan";
 import { isSlugReserved } from "./utils/reserved-slugs";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
-import { createARecord } from "../../domain/create-subdomain/utils/create-a-record";
 export class CreateWorkspaceService {
   static async create(
     userId: number,
@@ -100,21 +99,7 @@ export class CreateWorkspaceService {
         );
       }
 
-      // 7. CHECK DOMAIN CONFLICT
-      const workspaceDomain = process.env.WORKSPACE_DOMAIN;
-      const potentialHostname = `${data.slug}.${workspaceDomain}`;
-
-      const existingDomain = await prisma.domain.findUnique({
-        where: { hostname: potentialHostname },
-      });
-
-      if (existingDomain) {
-        throw new BadRequestError(
-          "This workspace name is already taken. Please choose another one."
-        );
-      }
-
-      // 8. CHECK NAME UNIQUENESS
+      // 7. CHECK NAME UNIQUENESS
       const existingName = await prisma.workspace.findFirst({
         where: {
           ownerId: userId,
@@ -130,21 +115,21 @@ export class CreateWorkspaceService {
 
       // BUSINESS LOGIC LAYER
 
-      // 9. DETERMINE WORKSPACE PLAN TYPE (using service util)
+      // 8. DETERMINE WORKSPACE PLAN TYPE (using service util)
       // Inherits user's plan by default, or uses explicit override
       const workspacePlanType = determineWorkspacePlanType(
         user.plan,
         data.planType
       );
 
-      // 10. DETERMINE WORKSPACE STATUS
+      // 9. DETERMINE WORKSPACE STATUS
       // Set to DRAFT for FREE and AGENCY plans, ACTIVE for BUSINESS
       const workspaceStatus =
         user.plan === UserPlan.FREE || user.plan === UserPlan.AGENCY
           ? WorkspaceStatus.DRAFT
           : WorkspaceStatus.ACTIVE;
 
-      // 11. CREATE WORKSPACE IN TRANSACTION
+      // 10. CREATE WORKSPACE IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
         // Create workspace with planType and status
         const workspaceData: {
@@ -215,50 +200,7 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 12. CREATE WORKSPACE SUBDOMAIN DNS RECORD ON DIGITALSITE.COM
-      if (!workspaceDomain) {
-        throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
-      }
-
-      const workspaceHostname = `${result.slug}.${workspaceDomain}`;
-
-      try {
-        // Get Cloudflare configuration for WORKSPACE domain (digitalsite.com)
-        const workspaceZoneId = process.env.WORKSPACE_ZONE_ID;
-        if (!workspaceZoneId) {
-          throw new InternalServerError("WORKSPACE_ZONE_ID is not configured");
-        }
-
-        const targetIp = "74.234.194.84";
-
-        // Create A record in Cloudflare for workspace subdomain
-        // This allows the workspace to be accessible at slug.digitalsite.com
-        await createARecord(result.slug, workspaceZoneId, targetIp);
-
-        console.log(
-          `✅ Workspace DNS record created: ${workspaceHostname} (not stored in domains table)`
-        );
-      } catch (error: any) {
-        const errMsg =
-          error.response?.data?.errors?.[0]?.message || error.message;
-        console.error(
-          `[Workspace Create] Failed to create DNS record: ${errMsg}`,
-          {
-            stack: error.stack,
-          }
-        );
-
-        // Clean up: delete the workspace since DNS creation failed
-        await prisma.workspace.delete({
-          where: { id: result.id },
-        });
-
-        throw new BadGatewayError(
-          "We couldn't set up your workspace address. Please try again or contact support if the issue persists."
-        );
-      }
-
-      // 13. INVALIDATE USER'S WORKSPACES CACHE
+      // 11. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {

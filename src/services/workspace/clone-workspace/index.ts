@@ -11,12 +11,7 @@ import {
 import {
   $Enums,
   UserPlan,
-  DomainType,
-  DomainStatus,
-  SslStatus,
 } from "../../../generated/prisma-client";
-import { createARecord } from "../../domain/create-subdomain/utils/create-a-record";
-
 export class CloneWorkspaceService {
   static async cloneWorkspace(
     data: CloneWorkspaceRequest
@@ -104,93 +99,13 @@ export class CloneWorkspaceService {
         }
       }
 
-      // 5. VALIDATE WORKSPACE DOMAIN CONFIGURATION
-      const workspaceDomain = process.env.WORKSPACE_DOMAIN;
-      if (!workspaceDomain) {
-        throw new InternalServerError("WORKSPACE_DOMAIN is not configured");
-      }
-
-      const workspaceZoneId = process.env.WORKSPACE_ZONE_ID;
-      if (!workspaceZoneId) {
-        throw new InternalServerError("WORKSPACE_ZONE_ID is not configured");
-      }
-
-      const workspaceHostname = `${uniqueSlug}.${workspaceDomain}`;
-      const targetIp = "74.234.194.84";
-
-      // 6. CLONE WORKSPACE AND CREATE SUBDOMAIN IN TRANSACTION
+      // 5. CLONE WORKSPACE IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
-        // 6.1. Create Cloudflare A record with retry logic for conflicts (DNS + Database)
-        let aRecord;
-        let finalSlug = uniqueSlug;
-        let finalHostname = workspaceHostname;
-        let retryCounter = 2;
-        const maxRetries = 100;
-
-        while (!aRecord && retryCounter <= maxRetries) {
-          try {
-            // Check if domain already exists in database first
-            const existingDomain = await tx.domain.findUnique({
-              where: { hostname: finalHostname },
-            });
-
-            if (existingDomain) {
-              // Domain exists in database, retry with incremental suffix
-              console.log(
-                `[Workspace Clone] Domain ${finalHostname} already exists in database, trying with suffix`
-              );
-              finalSlug = `${uniqueSlug}-${retryCounter}`;
-              finalHostname = `${finalSlug}.${workspaceDomain}`;
-              retryCounter++;
-              continue;
-            }
-
-            // Try to create DNS record
-            aRecord = await createARecord(finalSlug, workspaceZoneId, targetIp);
-            console.log(
-              `[Workspace Clone] Subdomain DNS created: ${finalHostname}`
-            );
-          } catch (error: any) {
-            const errMsg =
-              error.response?.data?.errors?.[0]?.message || error.message;
-
-            // Check if error is due to duplicate DNS record (Cloudflare conflict)
-            const isDuplicateError =
-              errMsg.includes("already exists") ||
-              errMsg.includes("An identical record already exists") ||
-              error.response?.data?.errors?.[0]?.code === 81057;
-
-            if (isDuplicateError && retryCounter <= maxRetries) {
-              // Retry with incremental suffix
-              finalSlug = `${uniqueSlug}-${retryCounter}`;
-              finalHostname = `${finalSlug}.${workspaceDomain}`;
-              console.log(
-                `[Workspace Clone] DNS conflict detected, retrying with: ${finalHostname}`
-              );
-              retryCounter++;
-            } else {
-              // Non-conflict error or exceeded retries
-              console.error(
-                `[Workspace Clone] Failed to create subdomain DNS record: ${errMsg}`
-              );
-              throw new BadGatewayError(
-                "We couldn't set up your workspace address. Please try again or contact support if the issue persists."
-              );
-            }
-          }
-        }
-
-        if (!aRecord) {
-          throw new BadGatewayError(
-            "Unable to create a unique workspace subdomain. Please contact support."
-          );
-        }
-
-        // 6.2. Create cloned workspace with final slug (matches DNS)
+        // 5.1. Create cloned workspace
         const clonedWorkspace = await tx.workspace.create({
           data: {
             name: sourceWorkspace.name,
-            slug: finalSlug, // Use finalSlug to match the DNS record
+            slug: uniqueSlug,
             ownerId: data.newOwnerId,
             description: sourceWorkspace.description,
             settings: sourceWorkspace.settings,
@@ -342,7 +257,7 @@ export class CloneWorkspaceService {
           }
         }
 
-        // 6.3. Create WorkspaceClone tracking record
+        // 5.2. Create WorkspaceClone tracking record
         const cloneRecord = await tx.workspaceClone.create({
           data: {
             sourceWorkspaceId: data.sourceWorkspaceId,
@@ -352,25 +267,6 @@ export class CloneWorkspaceService {
             paymentId: payment.id, // Use the database payment ID
           },
         });
-
-        // 6.4. Create Domain record in database (NOT associated with workspace to avoid consuming allocation slot)
-        await tx.domain.create({
-          data: {
-            hostname: finalHostname, // Use finalHostname to match the DNS record
-            type: DomainType.SUBDOMAIN,
-            status: DomainStatus.ACTIVE,
-            sslStatus: SslStatus.ACTIVE,
-            creator: {
-              connect: { id: data.newOwnerId },
-            },
-            cloudflareRecordId: aRecord.id,
-            cloudflareZoneId: workspaceZoneId,
-            lastVerifiedAt: new Date(),
-            // workspaceId intentionally omitted - defaults to null to avoid consuming allocation
-          },
-        });
-
-        console.log(`✅ Cloned workspace subdomain created: ${finalHostname}`);
 
         return {
           clonedWorkspace,

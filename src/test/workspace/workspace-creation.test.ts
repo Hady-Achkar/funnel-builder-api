@@ -3,21 +3,9 @@ import { CreateWorkspaceService } from "../../services/workspace/create";
 import { getPrisma } from "../../lib/prisma";
 import { BadRequestError, ForbiddenError } from "../../errors/http-errors";
 import { UserPlan, AddOnStatus } from "../../generated/prisma-client";
-import * as createARecordModule from "../../services/domain/create-subdomain/utils/create-a-record";
 
 // Mock the prisma client
 vi.mock("../../lib/prisma");
-
-// Mock Cloudflare API calls for workspace subdomains
-// Note: Workspace subdomains use WORKSPACE_ZONE_ID (for digitalsite.com)
-vi.mock("../../services/domain/create-subdomain/utils/create-a-record", () => ({
-  createARecord: vi.fn().mockResolvedValue({
-    id: "mock-cloudflare-record-id",
-    type: "A",
-    name: "test",
-    content: "74.234.194.84",
-  }),
-}));
 
 describe("Workspace Creation Tests", () => {
   let mockPrisma: any;
@@ -25,27 +13,12 @@ describe("Workspace Creation Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Set required environment variables for testing
-    process.env.WORKSPACE_ZONE_ID = "test-zone-id";
-    process.env.WORKSPACE_DOMAIN = "digitalsite.com";
-    process.env.WORKSPACE_IP = "20.56.136.29";
-
     mockPrisma = {
       workspace: {
         findUnique: vi.fn(),
         findFirst: vi.fn(),
         create: vi.fn(),
         count: vi.fn(),
-      },
-      domain: {
-        findUnique: vi.fn(),
-        create: vi.fn().mockResolvedValue({
-          id: 1,
-          hostname: "test.digitalsite.com",
-          type: "SUBDOMAIN",
-          status: "ACTIVE",
-          sslStatus: "ACTIVE",
-        }),
       },
       user: {
         findUnique: vi.fn(),
@@ -84,7 +57,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0); // No existing workspaces
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
@@ -153,7 +125,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
@@ -197,7 +168,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(2); // Has 2, can create 3rd
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
@@ -253,7 +223,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(1); // Has 1, can create 2nd
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
@@ -307,7 +276,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(4); // Has 4, can create 5th
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
@@ -389,7 +357,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceData: any = null;
 
@@ -436,7 +403,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceData: any = null;
 
@@ -483,7 +449,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceData: any = null;
 
@@ -655,7 +620,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceStatus: string | undefined;
 
@@ -705,7 +669,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceStatus: string | undefined;
 
@@ -755,7 +718,6 @@ describe("Workspace Creation Tests", () => {
       mockPrisma.workspace.count.mockResolvedValue(0);
       mockPrisma.workspace.findUnique.mockResolvedValue(null);
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       let createdWorkspaceStatus: string | undefined;
 
@@ -787,167 +749,6 @@ describe("Workspace Creation Tests", () => {
       await CreateWorkspaceService.create(userId, workspaceData);
 
       expect(createdWorkspaceStatus).toBe("DRAFT");
-    });
-  });
-
-  describe("Workspace Subdomain Creation", () => {
-    it("should create workspace subdomain on digitalsite.com", async () => {
-      const userId = 1;
-      const workspaceData = {
-        name: "My Workspace",
-        slug: "my-workspace",
-      };
-
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: userId,
-        plan: UserPlan.BUSINESS,
-      });
-
-      mockPrisma.addOn.findMany.mockResolvedValue([]);
-      mockPrisma.workspace.count.mockResolvedValue(0);
-      mockPrisma.workspace.findUnique.mockResolvedValue(null);
-      mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
-
-      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-        const txMock = {
-          workspace: {
-            create: vi.fn().mockResolvedValue({
-              id: 1,
-              name: workspaceData.name,
-              slug: workspaceData.slug,
-              ownerId: userId,
-              planType: UserPlan.BUSINESS,
-            }),
-          },
-          workspaceMember: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-          workspaceRolePermTemplate: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
-
-      await CreateWorkspaceService.create(userId, workspaceData);
-
-      // Verify domain.create was NOT called (subdomain DNS is created but not stored in database)
-      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
-
-      // Verify createARecord was called to create DNS record
-      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
-        "my-workspace",
-        "test-zone-id",
-        "74.234.194.84"
-      );
-    });
-
-    it("should use WORKSPACE_ZONE_ID for workspace subdomains", async () => {
-      const userId = 1;
-      const workspaceData = {
-        name: "Test Workspace",
-        slug: "test-workspace",
-      };
-
-      // Set specific zone ID for this test
-      process.env.WORKSPACE_ZONE_ID = "workspace-specific-zone-id";
-
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: userId,
-        plan: UserPlan.BUSINESS,
-      });
-
-      mockPrisma.addOn.findMany.mockResolvedValue([]);
-      mockPrisma.workspace.count.mockResolvedValue(0);
-      mockPrisma.workspace.findUnique.mockResolvedValue(null);
-      mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
-
-      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-        const txMock = {
-          workspace: {
-            create: vi.fn().mockResolvedValue({
-              id: 1,
-              name: workspaceData.name,
-              slug: workspaceData.slug,
-              ownerId: userId,
-              planType: UserPlan.BUSINESS,
-            }),
-          },
-          workspaceMember: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-          workspaceRolePermTemplate: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
-
-      await CreateWorkspaceService.create(userId, workspaceData);
-
-      // Verify the correct zone ID was used in DNS creation
-      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
-        "test-workspace",
-        "workspace-specific-zone-id",
-        "74.234.194.84"
-      );
-
-      // Verify domain.create was NOT called
-      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
-    });
-
-    it("should create subdomain with workspace slug in hostname", async () => {
-      const userId = 1;
-      const workspaceData = {
-        name: "Premium Workspace",
-        slug: "premium-workspace-123",
-      };
-
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: userId,
-        plan: UserPlan.AGENCY,
-      });
-
-      mockPrisma.addOn.findMany.mockResolvedValue([]);
-      mockPrisma.workspace.count.mockResolvedValue(0);
-      mockPrisma.workspace.findUnique.mockResolvedValue(null);
-      mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      mockPrisma.domain.findUnique.mockResolvedValue(null);
-
-      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-        const txMock = {
-          workspace: {
-            create: vi.fn().mockResolvedValue({
-              id: 5,
-              name: workspaceData.name,
-              slug: workspaceData.slug,
-              ownerId: userId,
-              planType: UserPlan.AGENCY,
-            }),
-          },
-          workspaceMember: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-          workspaceRolePermTemplate: {
-            create: vi.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
-
-      await CreateWorkspaceService.create(userId, workspaceData);
-
-      // Verify DNS record was created with correct slug
-      expect(createARecordModule.createARecord).toHaveBeenCalledWith(
-        "premium-workspace-123",
-        "test-zone-id",
-        "74.234.194.84"
-      );
-
-      // Verify domain.create was NOT called
-      expect(mockPrisma.domain.create).not.toHaveBeenCalled();
     });
   });
 });
