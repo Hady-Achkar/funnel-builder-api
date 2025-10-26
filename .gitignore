@@ -133,4 +133,5 @@ service-principal.json
 **/credentials/
 *.pem
 *.key
-*.cert
+*.cert.env.azure
+SETUP_COMPLETE.md

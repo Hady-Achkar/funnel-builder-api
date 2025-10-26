@@ -268,6 +268,26 @@ export class CloneWorkspaceService {
           },
         });
 
+<<<<<<< Updated upstream
+=======
+        // 6.4. Create Domain record in database (NOT associated with workspace to avoid consuming allocation slot)
+        await tx.domain.create({
+          data: {
+            hostname: finalHostname, // Use finalHostname to match the DNS record
+            type: DomainType.SUBDOMAIN,
+            status: DomainStatus.ACTIVE,
+            sslStatus: SslStatus.ACTIVE,
+            creator: {
+              connect: { id: data.newOwnerId },
+            },
+            lastVerifiedAt: new Date(),
+            // workspaceId intentionally omitted - defaults to null to avoid consuming allocation
+          },
+        });
+
+        console.log(`✅ Cloned workspace subdomain created: ${finalHostname}`);
+
+>>>>>>> Stashed changes
         return {
           clonedWorkspace,
           cloneRecord,

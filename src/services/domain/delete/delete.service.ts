@@ -1,6 +1,8 @@
 import { DomainType } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { deleteCustomHostname, deleteARecord } from "./utils/cloudflare-cleanup";
+import {
+  deleteAzureFrontDoorCustomDomain,
+} from "../../../utils/domain-utils/azure-frontdoor-custom-domain";
 import {
   PermissionManager,
   PermissionAction,
@@ -32,9 +34,7 @@ export class DeleteDomainService {
           hostname: true,
           type: true,
           workspaceId: true,
-          cloudflareRecordId: true,
-          cloudflareHostnameId: true,
-          cloudflareZoneId: true,
+          azureCustomDomainName: true,
         },
       });
 
@@ -50,52 +50,43 @@ export class DeleteDomainService {
         action: PermissionAction.DELETE_DOMAIN,
       });
 
-      let customHostnameDeleted = false;
-      let dnsRecordsDeleted = false;
+      let azureDeleted = false;
 
-      let cloudflareSuccess = false;
-      try {
-        if (domainRecord.type === DomainType.CUSTOM_DOMAIN) {
-          if (domainRecord.cloudflareHostnameId) {
-            customHostnameDeleted = await deleteCustomHostname(
-              domainRecord.cloudflareHostnameId,
-              domainRecord.cloudflareZoneId || ""
-            );
-            cloudflareSuccess = customHostnameDeleted;
-          }
-        } else if (domainRecord.type === DomainType.SUBDOMAIN) {
-          if (domainRecord.cloudflareRecordId) {
-            dnsRecordsDeleted = await deleteARecord(
-              domainRecord.cloudflareRecordId,
-              domainRecord.cloudflareZoneId || ""
-            );
-            cloudflareSuccess = dnsRecordsDeleted;
-          }
+      // Delete from Azure Front Door if it's a custom domain
+      if (domainRecord.type === DomainType.CUSTOM_DOMAIN && domainRecord.azureCustomDomainName) {
+        try {
+          await deleteAzureFrontDoorCustomDomain(domainRecord.azureCustomDomainName);
+          azureDeleted = true;
+          console.log(`[Domain Delete] Successfully deleted from Azure: ${domainRecord.hostname}`);
+        } catch (error: any) {
+          console.error(`[Domain Delete] Azure API Error: ${error.message}`, {
+            hostname: domainRecord.hostname,
+            azureName: domainRecord.azureCustomDomainName,
+            stack: error.stack,
+          });
+          // Continue with database deletion even if Azure deletion fails
         }
-      } catch (error: any) {
-        const errMsg =
-          error.response?.data?.errors?.[0]?.message || error.message;
-        console.error(`[Domain Delete] CloudFlare API Error: ${errMsg}`, {
-          stack: error.stack,
-        });
       }
+
+      // For subdomains (*.digitalsite.io), no Azure deletion needed - wildcard handles them
+      // Just delete from database
 
       await getPrisma().domain.delete({
         where: { id: domainRecord.id },
       });
 
-      const message = cloudflareSuccess
-        ? "Domain deleted successfully"
-        : "Domain removed from database. External service cleanup may have failed.";
+      const message = domainRecord.type === DomainType.SUBDOMAIN
+        ? "Subdomain deleted successfully"
+        : azureDeleted
+        ? "Domain deleted successfully from both database and Azure Front Door"
+        : "Domain removed from database. Azure deletion may have failed (check logs).";
 
       const response: DeleteDomainResponse = {
         message,
         details: {
           hostname: domainRecord.hostname,
-          customHostnameDeleted,
-          dnsRecordsDeleted,
-          cloudflareRecordId: domainRecord.cloudflareRecordId,
-          cloudflareHostnameId: domainRecord.cloudflareHostnameId,
+          azureDeleted,
+          type: domainRecord.type,
         },
       };
 

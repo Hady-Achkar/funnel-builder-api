@@ -75,7 +75,7 @@ export const VerifyDomainResponseSchema = z.object({
   message: z.string(),
   domain: DomainVerificationStatusSchema,
   isFullyActive: z.boolean(),
-  nextStep: SslValidationRecordSchema.nullable(),
+  nextStep: z.string().nullable(),
 });
 
 export type VerifyDomainResponse = z.infer<typeof VerifyDomainResponseSchema>;

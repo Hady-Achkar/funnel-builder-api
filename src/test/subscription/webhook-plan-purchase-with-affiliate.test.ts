@@ -129,40 +129,9 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       select: {
         id: true,
         hostname: true,
-        cloudflareRecordId: true,
-        cloudflareZoneId: true,
         type: true,
       },
     });
-
-    // Delete Cloudflare DNS records for subdomains
-    const { deleteARecord } = await import(
-      "../../services/domain/delete/utils/cloudflare-cleanup"
-    );
-
-    for (const domain of domainsToDelete) {
-      if (
-        domain.type === "SUBDOMAIN" &&
-        domain.cloudflareRecordId &&
-        domain.cloudflareZoneId
-      ) {
-        try {
-          await deleteARecord(
-            domain.cloudflareRecordId,
-            domain.cloudflareZoneId
-          );
-          console.log(
-            `✅ Deleted Cloudflare DNS record for: ${domain.hostname}`
-          );
-        } catch (error: any) {
-          console.error(
-            `⚠️ Failed to delete Cloudflare DNS for ${domain.hostname}:`,
-            error.message
-          );
-          // Continue cleanup even if Cloudflare deletion fails
-        }
-      }
-    }
 
     // Delete domains from database
     await prisma.domain.deleteMany({
@@ -222,38 +191,11 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       select: {
         id: true,
         hostname: true,
-        cloudflareRecordId: true,
-        cloudflareZoneId: true,
         type: true,
       },
     });
 
-    // Delete Cloudflare DNS records first for orphaned domains
-    for (const domain of orphanedDomains) {
-      if (
-        domain.type === "SUBDOMAIN" &&
-        domain.cloudflareRecordId &&
-        domain.cloudflareZoneId
-      ) {
-        try {
-          await deleteARecord(
-            domain.cloudflareRecordId,
-            domain.cloudflareZoneId
-          );
-          console.log(
-            `✅ Deleted orphaned Cloudflare DNS record for: ${domain.hostname}`
-          );
-        } catch (error: any) {
-          console.error(
-            `⚠️ Failed to delete orphaned Cloudflare DNS for ${domain.hostname}:`,
-            error.message
-          );
-          // Continue cleanup even if Cloudflare deletion fails
-        }
-      }
-    }
-
-    // Then delete orphaned domains from database
+    // Delete orphaned domains from database
     if (orphanedDomains.length > 0) {
       await prisma.domain.deleteMany({
         where: {

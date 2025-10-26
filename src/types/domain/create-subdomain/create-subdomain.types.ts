@@ -5,7 +5,8 @@ import {
   SslStatus,
 } from "../../../generated/prisma-client";
 
-export const createSubdomainRequest = z.object({
+// Request schema
+export const CreateSubdomainRequestSchema = z.object({
   subdomain: z
     .string()
     .min(1, "Subdomain is required")
@@ -20,9 +21,10 @@ export const createSubdomainRequest = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
-export type CreateSubdomainRequest = z.infer<typeof createSubdomainRequest>;
+export type CreateSubdomainRequest = z.infer<typeof CreateSubdomainRequestSchema>;
 
-export const subdomainData = z.object({
+// Subdomain data schema
+export const SubdomainDataSchema = z.object({
   id: z.number({ message: "Domain ID must be a number" }),
   hostname: z.string({ message: "Hostname must be a string" }),
   type: z.enum(DomainType, {
@@ -42,16 +44,22 @@ export const subdomainData = z.object({
   }),
   isVerified: z.boolean({ message: "Is verified must be a boolean" }),
   isActive: z.boolean({ message: "Is active must be a boolean" }),
-  cloudflareRecordId: z.string().nullable(),
+  azureCustomDomainName: z.string().nullable(),
   createdAt: z.date({ message: "Created at must be a date" }),
   updatedAt: z.date({ message: "Updated at must be a date" }),
 });
 
-export type SubdomainData = z.infer<typeof subdomainData>;
+export type SubdomainData = z.infer<typeof SubdomainDataSchema>;
 
-export const createSubdomainResponse = z.object({
+// Response schema
+export const CreateSubdomainResponseSchema = z.object({
   message: z.string({ message: "Message must be a string" }),
-  domain: subdomainData,
+  domain: SubdomainDataSchema,
 });
 
-export type CreateSubdomainResponse = z.infer<typeof createSubdomainResponse>;
+export type CreateSubdomainResponse = z.infer<typeof CreateSubdomainResponseSchema>;
+
+// Backward compatibility exports
+export const createSubdomainRequest = CreateSubdomainRequestSchema;
+export const subdomainData = SubdomainDataSchema;
+export const createSubdomainResponse = CreateSubdomainResponseSchema;

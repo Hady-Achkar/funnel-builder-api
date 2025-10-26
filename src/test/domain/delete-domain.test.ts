@@ -3,9 +3,11 @@ import { DeleteDomainService } from "../../services/domain/delete/delete.service
 import { getPrisma } from "../../lib/prisma";
 import { $Enums } from "../../generated/prisma-client";
 import * as cloudflareCleanup from "../../services/domain/delete/utils/cloudflare-cleanup";
+import * as azureFrontDoor from "../../utils/domain-utils/azure-frontdoor-custom-domain";
 
 vi.mock("../../lib/prisma");
 vi.mock("../../services/domain/delete/utils/cloudflare-cleanup");
+vi.mock("../../utils/domain-utils/azure-frontdoor-custom-domain");
 
 describe("Delete Domain Tests", () => {
   let mockPrisma: any;
@@ -47,9 +49,6 @@ describe("Delete Domain Tests", () => {
     type: $Enums.DomainType.SUBDOMAIN,
     status: $Enums.DomainStatus.ACTIVE,
     workspaceId: 1,
-    cloudflareRecordId: "cloudflare-record-id-123",
-    cloudflareHostnameId: null,
-    cloudflareZoneId: "test-zone-id",
   };
 
   const mockCustomDomain = {
@@ -58,9 +57,6 @@ describe("Delete Domain Tests", () => {
     type: $Enums.DomainType.CUSTOM_DOMAIN,
     status: $Enums.DomainStatus.ACTIVE,
     workspaceId: 1,
-    cloudflareRecordId: null,
-    cloudflareHostnameId: "cloudflare-hostname-id-123",
-    cloudflareZoneId: "test-zone-id",
   };
 
   const mockMember = {
@@ -144,52 +140,16 @@ describe("Delete Domain Tests", () => {
 
       expect(result.message).toContain("successfully");
       expect(result.details.hostname).toBe(mockSubdomain.hostname);
-      expect(result.details.dnsRecordsDeleted).toBe(true);
-      expect(result.details.customHostnameDeleted).toBe(false);
+      expect(result.details.azureDeleted).toBeDefined();
+      expect(result.details.type).toBe(mockSubdomain.type);
       expect(mockPrisma.domain.delete).toHaveBeenCalledWith({
         where: { id: domainId },
       });
     });
 
-    it("should call deleteARecord with correct parameters", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      vi.mocked(cloudflareCleanup.deleteARecord).mockResolvedValue(true);
-
-      await DeleteDomainService.delete(userId, { id: domainId.toString() });
-
-      expect(vi.mocked(cloudflareCleanup.deleteARecord)).toHaveBeenCalledWith(
-        mockSubdomain.cloudflareRecordId,
-        mockSubdomain.cloudflareZoneId
-      );
-    });
-
-    it("should still delete from database even if Cloudflare cleanup fails", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      vi.mocked(cloudflareCleanup.deleteARecord).mockRejectedValue(
-        new Error("Cloudflare API error")
-      );
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.message).toContain("External service cleanup may have failed");
-      expect(result.details.dnsRecordsDeleted).toBe(false);
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-
-    it("should handle subdomain without cloudflareRecordId", async () => {
+    it("should successfully delete subdomain from database", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue({
         ...mockSubdomain,
-        cloudflareRecordId: null,
       });
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
@@ -199,20 +159,22 @@ describe("Delete Domain Tests", () => {
         id: domainId.toString(),
       });
 
-      expect(result.details.dnsRecordsDeleted).toBe(false);
-      expect(vi.mocked(cloudflareCleanup.deleteARecord)).not.toHaveBeenCalled();
+      expect(result.details.azureDeleted).toBeDefined();
       expect(mockPrisma.domain.delete).toHaveBeenCalled();
     });
   });
 
   describe("Custom Domain Deletion", () => {
-    it("should successfully delete custom domain with hostname cleanup", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockCustomDomain);
+    it("should successfully delete custom domain with Azure cleanup", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue({
+        ...mockCustomDomain,
+        azureCustomDomainName: "www-example-com",
+      });
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.delete.mockResolvedValue(mockCustomDomain);
 
-      vi.mocked(cloudflareCleanup.deleteCustomHostname).mockResolvedValue(true);
+      vi.mocked(azureFrontDoor.deleteAzureFrontDoorCustomDomain).mockResolvedValue();
 
       const result = await DeleteDomainService.delete(userId, {
         id: domainId.toString(),
@@ -220,148 +182,33 @@ describe("Delete Domain Tests", () => {
 
       expect(result.message).toContain("successfully");
       expect(result.details.hostname).toBe(mockCustomDomain.hostname);
-      expect(result.details.customHostnameDeleted).toBe(true);
-      expect(result.details.dnsRecordsDeleted).toBe(false);
+      expect(result.details.azureDeleted).toBe(true);
+      expect(result.details.type).toBe(mockCustomDomain.type);
       expect(mockPrisma.domain.delete).toHaveBeenCalledWith({
         where: { id: domainId },
       });
     });
 
-    it("should call deleteCustomHostname with correct parameters", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockCustomDomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockCustomDomain);
-
-      vi.mocked(cloudflareCleanup.deleteCustomHostname).mockResolvedValue(true);
-
-      await DeleteDomainService.delete(userId, { id: domainId.toString() });
-
-      expect(vi.mocked(cloudflareCleanup.deleteCustomHostname)).toHaveBeenCalledWith(
-        mockCustomDomain.cloudflareHostnameId,
-        mockCustomDomain.cloudflareZoneId
-      );
-    });
-
-    it("should still delete from database even if Cloudflare cleanup fails", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockCustomDomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockCustomDomain);
-
-      vi.mocked(cloudflareCleanup.deleteCustomHostname).mockRejectedValue(
-        new Error("Cloudflare API error")
-      );
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.message).toContain("External service cleanup may have failed");
-      expect(result.details.customHostnameDeleted).toBe(false);
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-
-    it("should handle custom domain without cloudflareHostnameId", async () => {
+    it("should handle Azure deletion failure gracefully", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue({
         ...mockCustomDomain,
-        cloudflareHostnameId: null,
+        azureCustomDomainName: "www-example-com",
       });
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.delete.mockResolvedValue(mockCustomDomain);
 
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.details.customHostnameDeleted).toBe(false);
-      expect(vi.mocked(cloudflareCleanup.deleteCustomHostname)).not.toHaveBeenCalled();
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-  });
-
-  describe("External Services (Cloudflare)", () => {
-    it("should handle Cloudflare timeout error gracefully", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      const timeoutError = new Error("timeout");
-      (timeoutError as any).code = "ETIMEDOUT";
-      vi.mocked(cloudflareCleanup.deleteARecord).mockRejectedValue(timeoutError);
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.message).toContain("External service cleanup may have failed");
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-
-    it("should handle Cloudflare rate limit error gracefully", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      const rateLimitError: any = new Error("Rate limit");
-      rateLimitError.response = {
-        data: {
-          errors: [{ message: "Rate limit exceeded" }],
-        },
-      };
-      vi.mocked(cloudflareCleanup.deleteARecord).mockRejectedValue(rateLimitError);
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.message).toContain("External service cleanup may have failed");
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-
-    it("should handle Cloudflare 404 (resource already deleted) gracefully", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      const notFoundError: any = new Error("Not found");
-      notFoundError.response = {
-        status: 404,
-        data: {
-          errors: [{ message: "Record not found" }],
-        },
-      };
-      vi.mocked(cloudflareCleanup.deleteARecord).mockRejectedValue(notFoundError);
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      // Should still be considered a failure but not throw
-      expect(result.details.dnsRecordsDeleted).toBe(false);
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-    });
-
-    it("should log Cloudflare errors for debugging", async () => {
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      vi.mocked(cloudflareCleanup.deleteARecord).mockRejectedValue(
-        new Error("Cloudflare API error")
+      vi.mocked(azureFrontDoor.deleteAzureFrontDoorCustomDomain).mockRejectedValue(
+        new Error("Azure API error")
       );
 
-      await DeleteDomainService.delete(userId, { id: domainId.toString() });
+      const result = await DeleteDomainService.delete(userId, {
+        id: domainId.toString(),
+      });
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
+      expect(result.message).toContain("Azure deletion may have failed");
+      expect(result.details.azureDeleted).toBe(false);
+      expect(mockPrisma.domain.delete).toHaveBeenCalled();
     });
   });
 
@@ -372,8 +219,6 @@ describe("Delete Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
 
-      vi.mocked(cloudflareCleanup.deleteARecord).mockResolvedValue(true);
-
       const result = await DeleteDomainService.delete(userId, {
         id: domainId.toString(),
       });
@@ -382,48 +227,8 @@ describe("Delete Domain Tests", () => {
       expect(result.message).toBeDefined();
       expect(result.details).toBeDefined();
       expect(result.details.hostname).toBe(mockSubdomain.hostname);
-      expect(result.details.cloudflareRecordId).toBe(mockSubdomain.cloudflareRecordId);
-      expect(result.details.cloudflareHostnameId).toBe(mockSubdomain.cloudflareHostnameId);
-      expect(result.details.dnsRecordsDeleted).toBeDefined();
-      expect(result.details.customHostnameDeleted).toBeDefined();
-    });
-
-    it("should delete domain from database after Cloudflare cleanup", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockSubdomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      vi.mocked(cloudflareCleanup.deleteARecord).mockResolvedValue(true);
-
-      await DeleteDomainService.delete(userId, { id: domainId.toString() });
-
-      // Ensure Cloudflare cleanup happens before database deletion
-      const deleteARecordCallOrder = vi.mocked(cloudflareCleanup.deleteARecord).mock.invocationCallOrder[0];
-      const domainDeleteCallOrder = mockPrisma.domain.delete.mock.invocationCallOrder[0];
-
-      expect(deleteARecordCallOrder).toBeLessThan(domainDeleteCallOrder);
-    });
-
-    it("should handle domains without any Cloudflare IDs", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue({
-        ...mockSubdomain,
-        cloudflareRecordId: null,
-        cloudflareHostnameId: null,
-      });
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
-      mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      const result = await DeleteDomainService.delete(userId, {
-        id: domainId.toString(),
-      });
-
-      expect(result.details.dnsRecordsDeleted).toBe(false);
-      expect(result.details.customHostnameDeleted).toBe(false);
-      expect(mockPrisma.domain.delete).toHaveBeenCalled();
-      expect(vi.mocked(cloudflareCleanup.deleteARecord)).not.toHaveBeenCalled();
-      expect(vi.mocked(cloudflareCleanup.deleteCustomHostname)).not.toHaveBeenCalled();
+      expect(result.details.azureDeleted).toBeDefined();
+      expect(result.details.type).toBeDefined();
     });
 
     it("should parse string domain ID correctly", async () => {
@@ -431,8 +236,6 @@ describe("Delete Domain Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.delete.mockResolvedValue(mockSubdomain);
-
-      vi.mocked(cloudflareCleanup.deleteARecord).mockResolvedValue(true);
 
       await DeleteDomainService.delete(userId, { id: "123" });
 

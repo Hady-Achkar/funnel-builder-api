@@ -1,24 +1,20 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
-import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import {
+  getAzureFrontDoorCustomDomainDetails,
+  validateAzureFrontDoorCustomDomain,
+  associateCustomDomainWithRoute,
+} from "../../../utils/domain-utils/azure-frontdoor-custom-domain";
 import {
   PermissionManager,
   PermissionAction,
 } from "../../../utils/workspace-utils/workspace-permission-manager";
-import { NotFoundError, BadRequestError } from "../../../errors/http-errors";
+import { NotFoundError, BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 import {
   VerifyDomainResponse,
   VerifyDomainRequestSchema,
   VerifyDomainResponseSchema,
-  CloudFlareHostnameStatus,
-  CloudFlareSslStatus
 } from "../../../types/domain/verify";
-import {
-  determineVerificationStatus,
-  getStatusUpdateData,
-  VerificationStatusResult,
-} from "./utils/verification-status";
 
 export class VerifyDomainService {
   static async verify(
@@ -55,7 +51,7 @@ export class VerifyDomainService {
             isVerified: true,
             isActive: true,
             verificationToken: domainRecord.verificationToken,
-            customHostnameId: domainRecord.cloudflareHostnameId,
+            customHostnameId: domainRecord.azureCustomDomainName,
             overallStatus: domainRecord.status,
             createdAt: domainRecord.createdAt,
             updatedAt: domainRecord.updatedAt,
@@ -67,53 +63,12 @@ export class VerifyDomainService {
         return VerifyDomainResponseSchema.parse(response);
       }
 
-      const customHostnameId = domainRecord.cloudflareHostnameId;
-      if (!customHostnameId) {
+      const azureCustomDomainName = domainRecord.azureCustomDomainName;
+      if (!azureCustomDomainName) {
         throw new BadRequestError('Domain is not configured correctly');
       }
 
-      const cloudflareHelper = getCloudFlareAPIHelper();
-      const config = cloudflareHelper.getConfig();
-      const cfHostname = await getCustomHostnameDetails(customHostnameId, config.cfZoneId);
-
-      const { status, ssl } = cfHostname;
-      const hostnameStatus = status as CloudFlareHostnameStatus;
-      const sslStatus = ssl?.status as CloudFlareSslStatus;
-
-      const verificationResult: VerificationStatusResult = determineVerificationStatus(
-        hostnameStatus,
-        sslStatus,
-        ssl?.validation_records
-      );
-
-      const updateData = getStatusUpdateData(hostnameStatus, sslStatus, verificationResult);
-
-      const updatedDomain = await getPrisma().domain.update({
-        where: { id: domainRecord.id },
-        data: updateData,
-      });
-
-      const response: VerifyDomainResponse = {
-        message: verificationResult.message,
-        domain: {
-          id: updatedDomain.id,
-          hostname: updatedDomain.hostname,
-          type: updatedDomain.type,
-          status: updatedDomain.status,
-          sslStatus: updatedDomain.sslStatus,
-          isVerified: verificationResult.shouldUpdateVerified || updatedDomain.status !== 'PENDING',
-          isActive: verificationResult.shouldUpdateActive || updatedDomain.status === 'ACTIVE',
-          verificationToken: updatedDomain.verificationToken,
-          customHostnameId: updatedDomain.cloudflareHostnameId,
-          overallStatus: hostnameStatus,
-          createdAt: updatedDomain.createdAt,
-          updatedAt: updatedDomain.updatedAt,
-        },
-        isFullyActive: verificationResult.isFullyActive,
-        nextStep: verificationResult.nextStep,
-      };
-
-      return VerifyDomainResponseSchema.parse(response);
+      return await this.verifyAzureFrontDoorDomain(domainRecord);
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         throw new BadRequestError(
@@ -121,6 +76,96 @@ export class VerifyDomainService {
         );
       }
       throw error;
+    }
+  }
+
+  /**
+   * Verify Azure Front Door custom domain
+   */
+  private static async verifyAzureFrontDoorDomain(domainRecord: any): Promise<VerifyDomainResponse> {
+    try {
+      const azureCustomDomainName = domainRecord.azureCustomDomainName;
+
+      // Trigger validation
+      await validateAzureFrontDoorCustomDomain(azureCustomDomainName);
+
+      // Get updated status
+      const azureDomain = await getAzureFrontDoorCustomDomainDetails(azureCustomDomainName);
+
+      const { domainValidationState, tlsSettings } = azureDomain;
+
+      let status = domainRecord.status;
+      let sslStatus = domainRecord.sslStatus;
+      let message = "Domain verification in progress.";
+      let isFullyActive = false;
+      let nextStep: string | null = "Please wait for Azure to validate your DNS records.";
+
+      // Update status based on Azure validation state
+      if (domainValidationState === "Approved") {
+        status = "VERIFIED";
+        message = "Domain ownership verified!";
+
+        // Check SSL certificate status
+        if (tlsSettings?.certificateType === "ManagedCertificate") {
+          sslStatus = "ACTIVE";
+          status = "ACTIVE";
+          message = "Domain is fully active with SSL certificate!";
+          isFullyActive = true;
+          nextStep = null;
+
+          // Associate domain with Front Door route if verified
+          try {
+            await associateCustomDomainWithRoute(azureCustomDomainName);
+          } catch (error: any) {
+            console.error("[Verify Domain] Failed to associate with route:", error);
+            // Continue even if association fails - can be retried later
+          }
+        } else {
+          nextStep = "Waiting for SSL certificate to be issued by Azure.";
+        }
+      } else if (domainValidationState === "Rejected") {
+        status = "FAILED";
+        message = "Domain validation failed. Please check your DNS records.";
+        nextStep = "Verify that the TXT and CNAME records are correctly configured.";
+      }
+
+      const updatedDomain = await getPrisma().domain.update({
+        where: { id: domainRecord.id },
+        data: {
+          status,
+          sslStatus,
+          azureDomainStatus: domainValidationState,
+          azureCertStatus: tlsSettings?.certificateType || "Pending",
+          lastVerifiedAt: new Date(),
+        },
+      });
+
+      const response: VerifyDomainResponse = {
+        message,
+        domain: {
+          id: updatedDomain.id,
+          hostname: updatedDomain.hostname,
+          type: updatedDomain.type,
+          status: updatedDomain.status,
+          sslStatus: updatedDomain.sslStatus,
+          isVerified: domainValidationState === "Approved",
+          isActive: status === "ACTIVE",
+          verificationToken: updatedDomain.verificationToken,
+          customHostnameId: updatedDomain.azureCustomDomainName,
+          overallStatus: domainValidationState,
+          createdAt: updatedDomain.createdAt,
+          updatedAt: updatedDomain.updatedAt,
+        },
+        isFullyActive,
+        nextStep,
+      };
+
+      return VerifyDomainResponseSchema.parse(response);
+    } catch (error: any) {
+      console.error("[Verify Azure Domain] Error:", error);
+      throw new BadGatewayError(
+        "Failed to verify domain with Azure Front Door. Please try again later."
+      );
     }
   }
 }
