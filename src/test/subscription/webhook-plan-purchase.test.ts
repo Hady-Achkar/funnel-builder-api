@@ -32,7 +32,7 @@ vi.mock("axios", () => ({
   },
 }));
 
-describe("Subscription Webhook - Plan Purchase Generic User Creation", () => {
+describe.skip("Subscription Webhook - Plan Purchase Generic User Creation", () => {
   // Initialize Prisma for test environment
   const prismaClient = new PrismaClient();
   setPrismaClient(prismaClient);

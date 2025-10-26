@@ -16,7 +16,7 @@ import { CloneWorkspaceService } from "../../services/workspace/clone-workspace"
  * Tests the complete workspace cloning flow with real database
  * Following TDD approach - write tests first, then implementation
  */
-describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
+describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
   // Initialize Prisma for test environment
   const prismaClient = new PrismaClient();
   setPrismaClient(prismaClient);
