@@ -63,14 +63,20 @@ export const sessionHistoryData = z.object({
 
 export type SessionHistoryData = z.infer<typeof sessionHistoryData>;
 
-export const getSessionHistoryResponse = z.object({
-  sessions: z.array(sessionHistoryData),
-  total: z.number(),
-  completedSessions: z.number(), // Number of sessions with form submissions
-  ctr: z.number(), // Conversion rate as integer percentage (0-100)
+export const paginationMetadata = z.object({
   page: z.number(),
   limit: z.number(),
+  total: z.number(),
   totalPages: z.number(),
+});
+
+export type PaginationMetadata = z.infer<typeof paginationMetadata>;
+
+export const getSessionHistoryResponse = z.object({
+  sessions: z.array(sessionHistoryData),
+  completedSessions: z.number(), // Number of sessions with form submissions
+  ctr: z.number(), // Conversion rate as integer percentage (0-100)
+  pagination: paginationMetadata,
 });
 
 export type GetSessionHistoryResponse = z.infer<

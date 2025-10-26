@@ -112,7 +112,7 @@ describe("Get Session History", () => {
       );
 
       expect(result.sessions).toEqual([]);
-      expect(result.total).toBe(0);
+      expect(result.pagination.total).toBe(0);
       expect(result.completedSessions).toBe(0);
       expect(result.ctr).toBe(0);
     });
@@ -148,7 +148,7 @@ describe("Get Session History", () => {
       );
 
       expect(result.sessions).toHaveLength(2);
-      expect(result.total).toBe(2);
+      expect(result.pagination.total).toBe(2);
       expect(result.completedSessions).toBe(0);
       expect(result.ctr).toBe(0);
 
@@ -206,7 +206,7 @@ describe("Get Session History", () => {
       );
 
       expect(result.sessions).toHaveLength(1);
-      expect(result.total).toBe(1);
+      expect(result.pagination.total).toBe(1);
       expect(result.completedSessions).toBe(1);
       expect(result.ctr).toBe(100); // 1/1 = 100%
       expect(result.sessions[0].isCompleted).toBe(true);
@@ -259,7 +259,7 @@ describe("Get Session History", () => {
         userId
       );
 
-      expect(result.total).toBe(10);
+      expect(result.pagination.total).toBe(10);
       expect(result.completedSessions).toBe(3);
       expect(result.ctr).toBe(30); // 3/10 = 30%
 
@@ -308,7 +308,7 @@ describe("Get Session History", () => {
         userId
       );
 
-      expect(result.total).toBe(4);
+      expect(result.pagination.total).toBe(4);
       expect(result.completedSessions).toBe(2);
       expect(result.ctr).toBe(50); // 2/4 = 50%
     });
@@ -350,7 +350,7 @@ describe("Get Session History", () => {
         userId
       );
 
-      expect(result.total).toBe(3);
+      expect(result.pagination.total).toBe(3);
       expect(result.completedSessions).toBe(1);
       expect(result.ctr).toBe(33); // Math.round(33.33) = 33
     });
@@ -672,7 +672,7 @@ describe("Get Session History", () => {
 
       expect(result.sessions).toHaveLength(1);
       expect(result.sessions[0].sessionId).toBe("abc123-unique-session");
-      expect(result.total).toBe(1);
+      expect(result.pagination.total).toBe(1);
     });
 
     it("should search in form submission data (name)", async () => {
@@ -751,7 +751,7 @@ describe("Get Session History", () => {
 
       expect(result.sessions).toHaveLength(1);
       expect(result.sessions[0].sessionId).toBe("session-john");
-      expect(result.total).toBe(1);
+      expect(result.pagination.total).toBe(1);
     });
 
     it("should search in form submission data (email)", async () => {
@@ -886,7 +886,7 @@ describe("Get Session History", () => {
       );
 
       expect(result.sessions).toHaveLength(0);
-      expect(result.total).toBe(0);
+      expect(result.pagination.total).toBe(0);
     });
 
     it("should handle case-insensitive search", async () => {
@@ -965,7 +965,7 @@ describe("Get Session History", () => {
         userId
       );
 
-      expect(result.total).toBe(3);
+      expect(result.pagination.total).toBe(3);
       expect(result.completedSessions).toBe(2);
       expect(result.ctr).toBe(67); // 2/3 = 66.67% rounded to 67
     });

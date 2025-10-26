@@ -174,11 +174,13 @@ export const getSessionHistory = async (
 
   return {
     sessions: sessionsWithCompletion,
-    total: totalFilteredSessions,
     completedSessions: completedSessionsCount,
     ctr: ctr,
-    page: params.page,
-    limit: params.limit,
-    totalPages: totalPages,
+    pagination: {
+      page: params.page,
+      limit: params.limit,
+      total: totalFilteredSessions,
+      totalPages: totalPages,
+    },
   };
 };
