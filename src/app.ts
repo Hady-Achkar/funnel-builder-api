@@ -40,7 +40,53 @@ export function createServer(): Express {
 
   // Security middleware
   app.use(helmet());
-  app.use(cors());
+
+  // CORS Configuration
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,                      // Main frontend
+    /^https:\/\/.*\.digitalsite\.io$/,             // All digitalsite.io subdomains
+    /^https:\/\/.*\.azurecontainerapps\.io$/,      // Azure Container Apps
+    /^https:\/\/.*\.azurefd\.net$/,                // Azure Front Door
+    "http://localhost:3000",                       // Development frontend
+    "http://localhost:4444",                       // Development API
+  ].filter(Boolean); // Remove undefined values
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+
+        // Check if origin matches allowed patterns
+        const isAllowed = allowedOrigins.some((allowed) => {
+          if (typeof allowed === "string") {
+            return origin === allowed;
+          }
+          if (allowed instanceof RegExp) {
+            return allowed.test(origin);
+          }
+          return false;
+        });
+
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
+      },
+      credentials: true, // Required for cookies and Authorization headers
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+      ],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      exposedHeaders: ["Set-Cookie"],
+      maxAge: 86400, // 24 hours - cache preflight requests
+    })
+  );
 
   // Cookie parsing middleware
   app.use(cookieParser());
