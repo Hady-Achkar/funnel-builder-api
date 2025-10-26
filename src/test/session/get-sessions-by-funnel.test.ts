@@ -390,11 +390,14 @@ describe("Get Sessions by Funnel Tests", () => {
 
       await getSessionsByFunnel(funnelId, userId, "2025-10-01", undefined);
 
+      const expectedStartDate = new Date("2025-10-01");
+      expectedStartDate.setHours(0, 0, 0, 0);
+
       expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
         where: {
           funnelId,
           updatedAt: {
-            gte: new Date("2025-10-01"),
+            gte: expectedStartDate,
           },
         },
         select: {
@@ -425,11 +428,14 @@ describe("Get Sessions by Funnel Tests", () => {
 
       await getSessionsByFunnel(funnelId, userId, undefined, "2025-10-08");
 
+      const expectedEndDate = new Date("2025-10-08");
+      expectedEndDate.setHours(23, 59, 59, 999);
+
       expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
         where: {
           funnelId,
           updatedAt: {
-            lte: new Date("2025-10-08"),
+            lte: expectedEndDate,
           },
         },
         select: {
@@ -460,12 +466,17 @@ describe("Get Sessions by Funnel Tests", () => {
 
       await getSessionsByFunnel(funnelId, userId, "2025-09-30", "2025-10-08");
 
+      const expectedStartDate = new Date("2025-09-30");
+      expectedStartDate.setHours(0, 0, 0, 0);
+      const expectedEndDate = new Date("2025-10-08");
+      expectedEndDate.setHours(23, 59, 59, 999);
+
       expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
         where: {
           funnelId,
           updatedAt: {
-            gte: new Date("2025-09-30"),
-            lte: new Date("2025-10-08"),
+            gte: expectedStartDate,
+            lte: expectedEndDate,
           },
         },
         select: {
