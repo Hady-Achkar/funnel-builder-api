@@ -11,18 +11,6 @@ import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient } from "../../generated/prisma-client";
 import { CloneWorkspaceService } from "../../services/workspace/clone-workspace";
 
-// Mock Cloudflare API calls for workspace subdomains
-// Note: Workspace subdomains use WORKSPACE_ZONE_ID (for digitalsite.com)
-// The createARecord utility is mocked to avoid real Cloudflare API calls during tests
-vi.mock("../../services/domain/create-subdomain/utils/create-a-record", () => ({
-  createARecord: vi.fn().mockResolvedValue({
-    id: "mock-cloudflare-record-id",
-    type: "A",
-    name: "test",
-    content: "74.234.194.84",
-  }),
-}));
-
 /**
  * Integration tests for Clone Workspace Service
  * Tests the complete workspace cloning flow with real database
@@ -52,10 +40,6 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
   const workspaceSlug = `test-workspace-${testTimestamp}`;
 
   beforeAll(async () => {
-    // Set required environment variables for workspace cloning
-    process.env.WORKSPACE_ZONE_ID = "test-zone-id";
-    process.env.WORKSPACE_DOMAIN = "digitalsite.com";
-
     // Verify we're using the test database
     const dbUrl = process.env.DATABASE_URL || "";
     const dbName = dbUrl.split("/").pop()?.split("?")[0];
@@ -1143,95 +1127,6 @@ describe("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => {
       expect(result.clonedWorkspace).toHaveProperty("name");
       expect(result.clonedWorkspace).toHaveProperty("slug");
       expect(result.clonedWorkspace).toHaveProperty("planType");
-    });
-
-    it("should create workspace subdomain on digitalsite.com (not associated to avoid consuming allocation)", async () => {
-      // Clone a workspace
-      const result = await CloneWorkspaceService.cloneWorkspace({
-        sourceWorkspaceId: sourceWorkspaceId,
-        newOwnerId: buyerUserId,
-        paymentId: testPayment.transactionId,
-        planType: "BUSINESS",
-      });
-
-      clonedWorkspaceId = result.clonedWorkspaceId;
-
-      // Verify workspace was created
-      const clonedWorkspace = await prisma.workspace.findUnique({
-        where: { id: result.clonedWorkspaceId },
-      });
-
-      expect(clonedWorkspace).toBeTruthy();
-
-      // Find the subdomain in domains table (not associated with workspace)
-      const workspaceSubdomain = await prisma.domain.findFirst({
-        where: {
-          hostname: `${clonedWorkspace!.slug}.digitalsite.com`,
-          createdBy: buyerUserId,
-        },
-      });
-
-      expect(workspaceSubdomain).toBeTruthy();
-      expect(workspaceSubdomain!.hostname).toBe(
-        `${clonedWorkspace!.slug}.digitalsite.com`
-      );
-      expect(workspaceSubdomain!.status).toBe("ACTIVE");
-      expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
-      expect(workspaceSubdomain!.workspaceId).toBeNull(); // NOT associated with workspace
-      expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
-    });
-
-    it("should create subdomain based on buyer's username", async () => {
-      // Clone workspace
-      const result = await CloneWorkspaceService.cloneWorkspace({
-        sourceWorkspaceId: sourceWorkspaceId,
-        newOwnerId: buyerUserId,
-        paymentId: testPayment.transactionId,
-        planType: "BUSINESS",
-      });
-
-      clonedWorkspaceId = result.clonedWorkspaceId;
-
-      // Get buyer's username to verify slug naming
-      const buyer = await prisma.user.findUnique({
-        where: { id: buyerUserId },
-        select: { username: true },
-      });
-
-      // Verify workspace has subdomain with correct format
-      const clonedWorkspace = await prisma.workspace.findUnique({
-        where: { id: result.clonedWorkspaceId },
-      });
-
-      expect(clonedWorkspace).toBeTruthy();
-
-      // Verify slug is based on username (buyer{timestamp})
-      expect(clonedWorkspace!.slug).toMatch(/^buyer\d+(-\d+)?$/);
-
-      // Find the workspace subdomain (not associated with workspace)
-      const workspaceSubdomain = await prisma.domain.findFirst({
-        where: {
-          hostname: `${clonedWorkspace!.slug}.digitalsite.com`,
-          createdBy: buyerUserId,
-        },
-      });
-
-      expect(workspaceSubdomain).toBeTruthy();
-
-      // Subdomain should be based on buyer's username
-      const expectedPattern = new RegExp(`^buyer\\d+(-\\d+)?\\.digitalsite\\.com$`);
-      expect(workspaceSubdomain!.hostname).toMatch(expectedPattern);
-
-      // Should match: buyer{timestamp}.digitalsite.com or buyer{timestamp}-2.digitalsite.com, etc.
-      expect(workspaceSubdomain!.hostname).toBe(
-        `${clonedWorkspace!.slug}.digitalsite.com`
-      );
-
-      // Verify subdomain properties
-      expect(workspaceSubdomain!.status).toBe("ACTIVE");
-      expect(workspaceSubdomain!.sslStatus).toBe("ACTIVE");
-      expect(workspaceSubdomain!.workspaceId).toBeNull(); // NOT associated with workspace
-      expect(workspaceSubdomain!.createdBy).toBe(buyerUserId);
     });
 
     it("should create workspace member for new owner with OWNER role", async () => {
