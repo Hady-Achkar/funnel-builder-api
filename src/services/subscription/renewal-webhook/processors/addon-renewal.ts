@@ -147,7 +147,59 @@ export class AddonRenewalProcessor {
         );
       }
 
-      // 4. Create Payment record for renewal
+      // 4. Calculate original price (remove 2% processing fee)
+      const pricePerUnit = this.calculateOriginalPrice(amount);
+
+      // 5. Check if user has referral link for commission
+      const user = await prisma.user.findUnique({
+        where: { id: existingSubscription.userId },
+        select: { referralLinkUsedId: true },
+      });
+
+      let commissionAmount = 0;
+      let affiliateLinkId: number | null = null;
+      let commissionHeldUntil: Date | null = null;
+
+      if (user?.referralLinkUsedId) {
+        console.log(
+          "[AddonRenewal] User has referral link, processing commission:",
+          user.referralLinkUsedId
+        );
+
+        const affiliateLink = await prisma.affiliateLink.findUnique({
+          where: { id: user.referralLinkUsedId },
+          include: { user: true },
+        });
+
+        const referrer = affiliateLink?.user;
+
+        if (referrer) {
+          commissionAmount = this.calculateCommission(
+            pricePerUnit,
+            referrer.commissionPercentage
+          );
+
+          // Calculate commission hold period (30 days)
+          commissionHeldUntil = new Date();
+          commissionHeldUntil.setDate(commissionHeldUntil.getDate() + 30);
+
+          affiliateLinkId = affiliateLink.id;
+
+          console.log("[AddonRenewal] Commission calculated:", {
+            pricePerUnit,
+            commissionPercentage: referrer.commissionPercentage,
+            commissionAmount,
+            commissionHeldUntil,
+          });
+        } else {
+          console.warn(
+            "[AddonRenewal] Referrer not found:",
+            user.referralLinkUsedId
+          );
+        }
+      }
+
+      // 6. Create Payment record for renewal with commission details
       const payment = await prisma.payment.create({
         data: {
           transactionId,
@@ -161,16 +213,30 @@ export class AddonRenewalProcessor {
           addOnQuantity: addon.quantity,
           addOnId: addon.id,
           rawData: [webhookData] as any,
-          // NO affiliate fields - renewals don't generate commission
-          affiliateLinkId: null,
-          commissionAmount: null,
-          commissionStatus: null,
+          // Commission fields
+          affiliateLinkId,
+          commissionAmount: commissionAmount > 0 ? commissionAmount : null,
+          commissionStatus: commissionAmount > 0 ? "PENDING" : null,
+          commissionHeldUntil,
+          affiliatePaid: false, // Will be true when released
         },
       });
 
       console.log("[AddonRenewal] Payment record created:", payment.id);
 
-      // 5. Prepare updated subscription rawData - append new webhook to existing array
+      // 7. Process commission if applicable
+      if (commissionAmount > 0 && affiliateLinkId) {
+        await this.processCommission(
+          affiliateLinkId,
+          commissionAmount,
+          payment.id,
+          existingSubscription.user.email,
+          addon.type,
+          prisma
+        );
+      }
+
+      // 8. Prepare updated subscription rawData - append new webhook to existing array
       const existingSubscriptionRawData =
         (existingSubscription.rawData as any) || [];
 
@@ -186,7 +252,7 @@ export class AddonRenewalProcessor {
         updatedSubscriptionRawData.length
       );
 
-      // 6. Update subscription with new end date, status, and accumulated rawData
+      // 9. Update subscription with new end date, status, and accumulated rawData
       const updatedSubscription = await prisma.subscription.update({
         where: { id: existingSubscription.id },
         data: {
@@ -202,7 +268,7 @@ export class AddonRenewalProcessor {
         newEndsAt.toISOString()
       );
 
-      // 7. Update addon with new end date and status (no rawData field in AddOn model)
+      // 10. Update addon with new end date and status (no rawData field in AddOn model)
       const updatedAddon = await prisma.addOn.update({
         where: { id: addon.id },
         data: {
@@ -217,7 +283,7 @@ export class AddonRenewalProcessor {
         newEndsAt.toISOString()
       );
 
-      // 8. Send addon renewal confirmation email
+      // 11. Send addon renewal confirmation email
       try {
         const apiKey = process.env.SENDGRID_API_KEY;
         if (!apiKey) {
@@ -301,5 +367,128 @@ export class AddonRenewalProcessor {
       console.error("[AddonRenewal] Error processing addon renewal:", error);
       throw error;
     }
+  }
+
+  /**
+   * Calculate original price by removing 2% processing fee
+   */
+  private static calculateOriginalPrice(amountWithFee: number): number {
+    return Math.round((amountWithFee / 1.02) * 100) / 100;
+  }
+
+  /**
+   * Calculate commission based on original price and percentage
+   */
+  private static calculateCommission(
+    originalPrice: number,
+    commissionPercentage: number
+  ): number {
+    return Math.round(originalPrice * (commissionPercentage / 100) * 100) / 100;
+  }
+
+  /**
+   * Process commission payment to affiliate owner (30-day hold)
+   * - Adds commission to pendingBalance (NOT available balance)
+   * - Increments totalSales
+   * - Creates BalanceTransaction (COMMISSION_HOLD)
+   * - Sets release date to 30 days from now
+   * - Updates affiliate link stats
+   *
+   * Note: affiliatePaid is NOT set to true here - it will be set when
+   * commission is released after 30 days by the commission release cron job
+   */
+  private static async processCommission(
+    affiliateLinkId: number,
+    commissionAmount: number,
+    paymentId: number,
+    buyerEmail: string,
+    addonType: string,
+    prisma: any
+  ): Promise<void> {
+    console.log("[AddonRenewal] Processing commission:", {
+      affiliateLinkId,
+      commissionAmount,
+    });
+
+    // Get affiliate link and referrer
+    const affiliateLink = await prisma.affiliateLink.findUnique({
+      where: { id: affiliateLinkId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            balance: true,
+            pendingBalance: true,
+            totalSales: true,
+          },
+        },
+      },
+    });
+
+    if (!affiliateLink?.user) {
+      console.error(
+        "[AddonRenewal] Affiliate link or user not found:",
+        affiliateLinkId
+      );
+      return;
+    }
+
+    const referrer = affiliateLink.user;
+
+    console.log("[AddonRenewal] Processing commission for referrer:", {
+      referrerId: referrer.id,
+      currentBalance: referrer.balance,
+      currentPendingBalance: referrer.pendingBalance,
+      currentTotalSales: referrer.totalSales,
+    });
+
+    // 1. Update referrer's pending balance and totalSales (atomic)
+    const updatedUser = await prisma.user.update({
+      where: { id: referrer.id },
+      data: {
+        pendingBalance: { increment: commissionAmount },
+        totalSales: { increment: 1 },
+      },
+    });
+
+    console.log("[AddonRenewal] Referrer pending balance updated:", {
+      newPendingBalance: updatedUser.pendingBalance,
+      availableBalance: updatedUser.balance, // Unchanged
+      newTotalSales: updatedUser.totalSales,
+    });
+
+    // 2. Create BalanceTransaction for audit trail (COMMISSION_HOLD)
+    await prisma.balanceTransaction.create({
+      data: {
+        userId: referrer.id,
+        type: "COMMISSION_HOLD",
+        amount: commissionAmount,
+        balanceBefore: referrer.balance, // Available balance unchanged
+        balanceAfter: referrer.balance, // Available balance unchanged
+        referenceType: "Payment",
+        referenceId: paymentId,
+        releasedAt: null, // NULL until actually released (not the scheduled date)
+        notes: `Commission held for 30 days - ${addonType} addon renewal from ${buyerEmail}`,
+      },
+    });
+
+    console.log(
+      "[AddonRenewal] BalanceTransaction (COMMISSION_HOLD) created for payment:",
+      paymentId,
+      "- Will be released in 30 days if not refunded"
+    );
+
+    // 3. Update affiliate link stats
+    await prisma.affiliateLink.update({
+      where: { id: affiliateLinkId },
+      data: {
+        totalAmount: { increment: commissionAmount },
+      },
+    });
+
+    console.log(
+      "[AddonRenewal] AffiliateLink stats updated:",
+      affiliateLinkId
+    );
   }
 }

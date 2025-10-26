@@ -1179,4 +1179,579 @@ describe("Renewal Webhook - Addon Renewal", () => {
       expect(payment).toBeTruthy();
     });
   });
+
+  describe("Referral Commission Tests", () => {
+    it("should pay referral commission on addon renewal with correct percentage", async () => {
+      // Arrange - Create referrer with AGENCY plan and Level 2 (10% commission)
+      const referrer = await prisma.user.create({
+        data: {
+          email: "referrer@test.com",
+          username: "referrer",
+          firstName: "Referrer",
+          lastName: "User",
+          password: "$2b$10$hashedpassword",
+          verified: true,
+          plan: UserPlan.AGENCY,
+          partnerLevel: 2,
+          commissionPercentage: 10,
+          balance: 100.0,
+          pendingBalance: 50.0,
+          totalSales: 5,
+        },
+      });
+
+      // Create workspace for affiliate link
+      const workspace = await prisma.workspace.create({
+        data: {
+          name: "Referrer Workspace",
+          slug: "referrer-workspace",
+          ownerId: referrer.id,
+        },
+      });
+
+      // Create affiliate link
+      const affiliateLink = await prisma.affiliateLink.create({
+        data: {
+          userId: referrer.id,
+          workspaceId: workspace.id,
+          itemType: UserPlan.AGENCY,
+          name: "Referrer Link",
+          token: "referrer-token",
+          clickCount: 10,
+          totalAmount: 50.0,
+        },
+      });
+
+      // Create user who used the referral link
+      const buyer = await prisma.user.create({
+        data: {
+          email: "buyer-with-referral@test.com",
+          username: "buyerreferral",
+          firstName: "Buyer",
+          lastName: "WithRef",
+          password: "$2b$10$hashedpassword",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+          referralLinkUsedId: affiliateLink.id,
+          trialStartDate: new Date("2024-01-01"),
+          trialEndDate: new Date("2025-02-01"),
+        },
+      });
+
+      // Create existing subscription for addon
+      const existingSubscription = await prisma.subscription.create({
+        data: {
+          subscriptionId: "MPB-SUB-REFERRAL-RENEWAL",
+          userId: buyer.id,
+          startsAt: new Date("2024-01-20"),
+          endsAt: new Date("2025-01-20"),
+          status: "ACTIVE",
+          intervalUnit: "MONTH",
+          intervalCount: 1,
+          itemType: "ADDON",
+          subscriptionType: null,
+          addonType: AddOnType.EXTRA_CUSTOM_DOMAIN,
+          rawData: [],
+        },
+      });
+
+      // Create addon
+      const existingAddon = await prisma.addOn.create({
+        data: {
+          userId: buyer.id,
+          type: AddOnType.EXTRA_CUSTOM_DOMAIN,
+          quantity: 1,
+          pricePerUnit: 10.0,
+          status: "ACTIVE",
+          billingCycle: "MONTH",
+          startDate: new Date("2024-01-20"),
+          endDate: new Date("2025-01-20"),
+        },
+      });
+
+      // Renewal webhook: $10.20 total (10.20 / 1.02 = $10 original)
+      // Commission: $10 * 10% = $1.00
+      const renewalWebhook = {
+        event_type: "subscription.succeeded",
+        status: "captured",
+        id: "PAY-REFERRAL-RENEWAL-001",
+        amount: 10.2,
+        amount_currency: "USD",
+        subscription_id: "MPB-SUB-REFERRAL-RENEWAL",
+        next_payment_date: "20/02/2025",
+        custom_data: {
+          details: {
+            email: "buyer-with-referral@test.com",
+            addonType: "EXTRA_CUSTOM_DOMAIN",
+            frequency: "monthly",
+            paymentType: "ADDON_PURCHASE",
+            frequencyInterval: 1,
+          },
+        },
+        customer_details: {
+          name: "Buyer WithRef",
+          email: "buyer-with-referral@test.com",
+        },
+        payment_method: {
+          type: "CREDIT VISA",
+          card_holder_name: "Buyer WithRef",
+          card_last4: "4242",
+        },
+      };
+
+      // Act
+      const mockReq = { body: renewalWebhook } as Request;
+      const mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as unknown as Response;
+      const mockNext = vi.fn() as NextFunction;
+
+      await RenewalWebhookController.handleWebhook(mockReq, mockRes, mockNext);
+
+      // Assert - Payment includes commission details
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: "PAY-REFERRAL-RENEWAL-001" },
+      });
+
+      expect(payment).toBeTruthy();
+      expect(payment?.affiliateLinkId).toBe(affiliateLink.id);
+      expect(payment?.commissionAmount).toBe(1.0); // $10 * 10% = $1.00
+      expect(payment?.commissionStatus).toBe("PENDING");
+      expect(payment?.commissionHeldUntil).toBeTruthy();
+      expect(payment?.affiliatePaid).toBe(false);
+
+      // Verify commission held for 30 days
+      const holdDate = payment?.commissionHeldUntil;
+      const daysDiff = holdDate
+        ? Math.round(
+            (holdDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+          )
+        : 0;
+      expect(daysDiff).toBeGreaterThanOrEqual(29);
+      expect(daysDiff).toBeLessThanOrEqual(30);
+
+      // Assert - Referrer's pending balance increased
+      const updatedReferrer = await prisma.user.findUnique({
+        where: { id: referrer.id },
+      });
+      expect(updatedReferrer?.pendingBalance).toBe(51.0); // 50.0 + 1.0
+      expect(updatedReferrer?.balance).toBe(100.0); // Unchanged
+      expect(updatedReferrer?.totalSales).toBe(6); // 5 + 1
+
+      // Assert - BalanceTransaction created
+      const balanceTransaction = await prisma.balanceTransaction.findFirst({
+        where: {
+          userId: referrer.id,
+          referenceType: "Payment",
+          referenceId: payment?.id,
+        },
+      });
+
+      expect(balanceTransaction).toBeTruthy();
+      expect(balanceTransaction?.type).toBe("COMMISSION_HOLD");
+      expect(balanceTransaction?.amount).toBe(1.0);
+      expect(balanceTransaction?.balanceBefore).toBe(100.0);
+      expect(balanceTransaction?.balanceAfter).toBe(100.0); // Available balance unchanged
+      expect(balanceTransaction?.releasedAt).toBeNull();
+
+      // Assert - Affiliate link stats updated
+      const updatedLink = await prisma.affiliateLink.findUnique({
+        where: { id: affiliateLink.id },
+      });
+      expect(updatedLink?.totalAmount).toBe(51.0); // 50.0 + 1.0
+    });
+
+    it("should calculate correct commission for different partner levels", async () => {
+      // Test Level 1 (5%), Level 2 (10%), Level 3 (15%)
+      const testCases = [
+        { level: 1, percentage: 5, expectedCommission: 0.5 },
+        { level: 2, percentage: 10, expectedCommission: 1.0 },
+        { level: 3, percentage: 15, expectedCommission: 1.5 },
+      ];
+
+      for (const testCase of testCases) {
+        vi.clearAllMocks();
+
+        // Create referrer
+        const referrer = await prisma.user.create({
+          data: {
+            email: `referrer-level${testCase.level}@test.com`,
+            username: `referrerlevel${testCase.level}`,
+            firstName: "Referrer",
+            lastName: `Level${testCase.level}`,
+            password: "$2b$10$hashedpassword",
+            verified: true,
+            plan: UserPlan.AGENCY,
+            partnerLevel: testCase.level,
+            commissionPercentage: testCase.percentage,
+            balance: 0,
+            pendingBalance: 0,
+            totalSales: 0,
+          },
+        });
+
+        const workspace = await prisma.workspace.create({
+          data: {
+            name: `Level ${testCase.level} Workspace`,
+            slug: `level${testCase.level}-workspace`,
+            ownerId: referrer.id,
+          },
+        });
+
+        const affiliateLink = await prisma.affiliateLink.create({
+          data: {
+            userId: referrer.id,
+            workspaceId: workspace.id,
+            itemType: UserPlan.AGENCY,
+            name: `Level ${testCase.level} Link`,
+            token: `level${testCase.level}-token`,
+            clickCount: 0,
+            totalAmount: 0,
+          },
+        });
+
+        const buyer = await prisma.user.create({
+          data: {
+            email: `buyer-level${testCase.level}@test.com`,
+            username: `buyerlevel${testCase.level}`,
+            firstName: "Buyer",
+            lastName: `Level${testCase.level}`,
+            password: "$2b$10$hashedpassword",
+            verified: true,
+            plan: UserPlan.BUSINESS,
+            referralLinkUsedId: affiliateLink.id,
+          },
+        });
+
+        const subscription = await prisma.subscription.create({
+          data: {
+            subscriptionId: `MPB-SUB-LEVEL${testCase.level}`,
+            userId: buyer.id,
+            startsAt: new Date("2024-01-20"),
+            endsAt: new Date("2025-01-20"),
+            status: "ACTIVE",
+            intervalUnit: "MONTH",
+            intervalCount: 1,
+            itemType: "ADDON",
+            subscriptionType: null,
+            addonType: AddOnType.EXTRA_WORKSPACE,
+            rawData: [],
+          },
+        });
+
+        await prisma.addOn.create({
+          data: {
+            userId: buyer.id,
+            type: AddOnType.EXTRA_WORKSPACE,
+            quantity: 1,
+            pricePerUnit: 10.0,
+            status: "ACTIVE",
+            billingCycle: "MONTH",
+            startDate: new Date("2024-01-20"),
+            endDate: new Date("2025-01-20"),
+          },
+        });
+
+        // Amount: $10.20 (original $10)
+        const webhookData = {
+          event_type: "subscription.succeeded",
+          status: "captured",
+          id: `PAY-LEVEL${testCase.level}`,
+          amount: 10.2,
+          amount_currency: "USD",
+          subscription_id: `MPB-SUB-LEVEL${testCase.level}`,
+          next_payment_date: "20/02/2025",
+          custom_data: {
+            details: {
+              email: `buyer-level${testCase.level}@test.com`,
+              addonType: "EXTRA_WORKSPACE",
+              paymentType: "ADDON_PURCHASE",
+            },
+          },
+          customer_details: {
+            email: `buyer-level${testCase.level}@test.com`,
+          },
+          payment_method: { type: "CREDIT VISA" },
+        };
+
+        const mockReq = { body: webhookData } as Request;
+        const mockRes = {
+          status: vi.fn().mockReturnThis(),
+          json: vi.fn(),
+        } as unknown as Response;
+        const mockNext = vi.fn() as NextFunction;
+
+        await RenewalWebhookController.handleWebhook(
+          mockReq,
+          mockRes,
+          mockNext
+        );
+
+        // Assert commission amount
+        const payment = await prisma.payment.findFirst({
+          where: { transactionId: `PAY-LEVEL${testCase.level}` },
+        });
+
+        expect(payment?.commissionAmount).toBe(testCase.expectedCommission);
+
+        const updatedReferrer = await prisma.user.findUnique({
+          where: { id: referrer.id },
+        });
+        expect(updatedReferrer?.pendingBalance).toBe(
+          testCase.expectedCommission
+        );
+      }
+    });
+
+    it("should NOT pay commission if user has no referral link", async () => {
+      // Create buyer without referral link
+      const buyer = await prisma.user.create({
+        data: {
+          email: "buyer-no-ref@test.com",
+          username: "buyernoref",
+          firstName: "Buyer",
+          lastName: "NoRef",
+          password: "$2b$10$hashedpassword",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+          referralLinkUsedId: null, // No referral link
+        },
+      });
+
+      const subscription = await prisma.subscription.create({
+        data: {
+          subscriptionId: "MPB-SUB-NO-REF",
+          userId: buyer.id,
+          startsAt: new Date("2024-01-20"),
+          endsAt: new Date("2025-01-20"),
+          status: "ACTIVE",
+          intervalUnit: "MONTH",
+          intervalCount: 1,
+          itemType: "ADDON",
+          subscriptionType: null,
+          addonType: AddOnType.EXTRA_CUSTOM_DOMAIN,
+          rawData: [],
+        },
+      });
+
+      await prisma.addOn.create({
+        data: {
+          userId: buyer.id,
+          type: AddOnType.EXTRA_CUSTOM_DOMAIN,
+          quantity: 1,
+          pricePerUnit: 10.0,
+          status: "ACTIVE",
+          billingCycle: "MONTH",
+          startDate: new Date("2024-01-20"),
+          endDate: new Date("2025-01-20"),
+        },
+      });
+
+      const webhookData = {
+        event_type: "subscription.succeeded",
+        status: "captured",
+        id: "PAY-NO-REF",
+        amount: 10.2,
+        amount_currency: "USD",
+        subscription_id: "MPB-SUB-NO-REF",
+        next_payment_date: "20/02/2025",
+        custom_data: {
+          details: {
+            email: "buyer-no-ref@test.com",
+            addonType: "EXTRA_CUSTOM_DOMAIN",
+            paymentType: "ADDON_PURCHASE",
+          },
+        },
+        customer_details: { email: "buyer-no-ref@test.com" },
+        payment_method: { type: "CREDIT VISA" },
+      };
+
+      const mockReq = { body: webhookData } as Request;
+      const mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as unknown as Response;
+      const mockNext = vi.fn() as NextFunction;
+
+      await RenewalWebhookController.handleWebhook(mockReq, mockRes, mockNext);
+
+      // Assert no commission
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: "PAY-NO-REF" },
+      });
+
+      expect(payment?.affiliateLinkId).toBeNull();
+      expect(payment?.commissionAmount).toBeNull();
+      expect(payment?.commissionStatus).toBeNull();
+      expect(payment?.commissionHeldUntil).toBeNull();
+    });
+
+    it("should NOT create duplicate commission on multiple renewals for same referral", async () => {
+      // Create referrer and buyer
+      const referrer = await prisma.user.create({
+        data: {
+          email: "referrer-multi@test.com",
+          username: "referrermulti",
+          firstName: "Referrer",
+          lastName: "Multi",
+          password: "$2b$10$hashedpassword",
+          verified: true,
+          plan: UserPlan.AGENCY,
+          partnerLevel: 2,
+          commissionPercentage: 10,
+          balance: 0,
+          pendingBalance: 0,
+          totalSales: 0,
+        },
+      });
+
+      const workspace = await prisma.workspace.create({
+        data: {
+          name: "Multi Renewal Workspace",
+          slug: "multi-renewal-workspace",
+          ownerId: referrer.id,
+        },
+      });
+
+      const affiliateLink = await prisma.affiliateLink.create({
+        data: {
+          userId: referrer.id,
+          workspaceId: workspace.id,
+          itemType: UserPlan.AGENCY,
+          name: "Multi Renewal Link",
+          token: "multi-token",
+          clickCount: 0,
+          totalAmount: 0,
+        },
+      });
+
+      const buyer = await prisma.user.create({
+        data: {
+          email: "buyer-multi@test.com",
+          username: "buyermulti",
+          firstName: "Buyer",
+          lastName: "Multi",
+          password: "$2b$10$hashedpassword",
+          verified: true,
+          plan: UserPlan.BUSINESS,
+          referralLinkUsedId: affiliateLink.id,
+        },
+      });
+
+      const subscription = await prisma.subscription.create({
+        data: {
+          subscriptionId: "MPB-SUB-MULTI-REF",
+          userId: buyer.id,
+          startsAt: new Date("2024-01-20"),
+          endsAt: new Date("2025-01-20"),
+          status: "ACTIVE",
+          intervalUnit: "MONTH",
+          intervalCount: 1,
+          itemType: "ADDON",
+          subscriptionType: null,
+          addonType: AddOnType.EXTRA_WORKSPACE,
+          rawData: [],
+        },
+      });
+
+      await prisma.addOn.create({
+        data: {
+          userId: buyer.id,
+          type: AddOnType.EXTRA_WORKSPACE,
+          quantity: 1,
+          pricePerUnit: 10.0,
+          status: "ACTIVE",
+          billingCycle: "MONTH",
+          startDate: new Date("2024-01-20"),
+          endDate: new Date("2025-01-20"),
+        },
+      });
+
+      // First renewal
+      const renewal1 = {
+        event_type: "subscription.succeeded",
+        status: "captured",
+        id: "PAY-MULTI-1",
+        amount: 10.2,
+        amount_currency: "USD",
+        subscription_id: "MPB-SUB-MULTI-REF",
+        next_payment_date: "20/02/2025",
+        custom_data: {
+          details: {
+            email: "buyer-multi@test.com",
+            addonType: "EXTRA_WORKSPACE",
+            paymentType: "ADDON_PURCHASE",
+          },
+        },
+        customer_details: { email: "buyer-multi@test.com" },
+        payment_method: { type: "CREDIT VISA" },
+      };
+
+      let mockReq = { body: renewal1 } as Request;
+      let mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as unknown as Response;
+      let mockNext = vi.fn() as NextFunction;
+
+      await RenewalWebhookController.handleWebhook(mockReq, mockRes, mockNext);
+
+      // Check after first renewal
+      const referrerAfterFirst = await prisma.user.findUnique({
+        where: { id: referrer.id },
+      });
+      expect(referrerAfterFirst?.pendingBalance).toBe(1.0); // $10 * 10%
+      expect(referrerAfterFirst?.totalSales).toBe(1);
+
+      // Second renewal (simulate next month)
+      vi.clearAllMocks();
+
+      const renewal2 = {
+        ...renewal1,
+        id: "PAY-MULTI-2",
+        next_payment_date: "20/03/2025",
+      };
+
+      mockReq = { body: renewal2 } as Request;
+      mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as unknown as Response;
+      mockNext = vi.fn() as NextFunction;
+
+      await RenewalWebhookController.handleWebhook(mockReq, mockRes, mockNext);
+
+      // Check after second renewal - commission added again
+      const referrerAfterSecond = await prisma.user.findUnique({
+        where: { id: referrer.id },
+      });
+      expect(referrerAfterSecond?.pendingBalance).toBe(2.0); // 1.0 + 1.0
+      expect(referrerAfterSecond?.totalSales).toBe(2); // Each renewal counts
+
+      // Assert two separate payments with commissions
+      const payments = await prisma.payment.findMany({
+        where: { buyerId: buyer.id },
+        orderBy: { createdAt: "asc" },
+      });
+
+      expect(payments).toHaveLength(2);
+      expect(payments[0].commissionAmount).toBe(1.0);
+      expect(payments[1].commissionAmount).toBe(1.0);
+      expect(payments[0].transactionId).toBe("PAY-MULTI-1");
+      expect(payments[1].transactionId).toBe("PAY-MULTI-2");
+
+      // Assert two separate balance transactions
+      const transactions = await prisma.balanceTransaction.findMany({
+        where: { userId: referrer.id },
+        orderBy: { createdAt: "asc" },
+      });
+
+      expect(transactions).toHaveLength(2);
+      expect(transactions[0].amount).toBe(1.0);
+      expect(transactions[1].amount).toBe(1.0);
+      expect(transactions[0].type).toBe("COMMISSION_HOLD");
+      expect(transactions[1].type).toBe("COMMISSION_HOLD");
+    });
+  });
 });
