@@ -268,15 +268,16 @@ export class CloneWorkspaceService {
           },
         });
 
-<<<<<<< Updated upstream
-=======
         // 6.4. Create Domain record in database (NOT associated with workspace to avoid consuming allocation slot)
+        const workspaceDomain = process.env.WORKSPACE_DOMAIN || "digitalsite.com";
+        const workspaceHostname = `${clonedWorkspace.slug}.${workspaceDomain}`;
+
         await tx.domain.create({
           data: {
-            hostname: finalHostname, // Use finalHostname to match the DNS record
-            type: DomainType.SUBDOMAIN,
-            status: DomainStatus.ACTIVE,
-            sslStatus: SslStatus.ACTIVE,
+            hostname: workspaceHostname,
+            type: $Enums.DomainType.SUBDOMAIN,
+            status: $Enums.DomainStatus.ACTIVE,
+            sslStatus: $Enums.SslStatus.ACTIVE,
             creator: {
               connect: { id: data.newOwnerId },
             },
@@ -285,9 +286,8 @@ export class CloneWorkspaceService {
           },
         });
 
-        console.log(`✅ Cloned workspace subdomain created: ${finalHostname}`);
+        console.log(`✅ Cloned workspace subdomain created: ${workspaceHostname}`);
 
->>>>>>> Stashed changes
         return {
           clonedWorkspace,
           cloneRecord,
