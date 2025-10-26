@@ -6,13 +6,21 @@ export const getSessionsByFunnelParams = z.object({
     .int("Funnel ID must be an integer")
     .positive("Funnel ID must be a positive number"),
   startDate: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
+    .union([z.string(), z.date()])
+    .transform((val) => {
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
+    })
+    .optional(),
   endDate: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
+    .union([z.string(), z.date()])
+    .transform((val) => {
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
+    })
+    .optional(),
 });
 
 export type GetSessionsByFunnelParams = z.infer<

@@ -72,14 +72,14 @@ export const getAllInsightSubmissions = async (
       }
     }
 
-    // Date range filtering
-    if (validatedRequest.dateFrom || validatedRequest.dateTo) {
-      whereClause.createdAt = {};
-      if (validatedRequest.dateFrom) {
-        whereClause.createdAt.gte = validatedRequest.dateFrom;
+    // Date range filtering on updatedAt
+    if (validatedRequest.startDate || validatedRequest.endDate) {
+      whereClause.updatedAt = {};
+      if (validatedRequest.startDate) {
+        whereClause.updatedAt.gte = validatedRequest.startDate;
       }
-      if (validatedRequest.dateTo) {
-        whereClause.createdAt.lte = validatedRequest.dateTo;
+      if (validatedRequest.endDate) {
+        whereClause.updatedAt.lte = validatedRequest.endDate;
       }
     }
 
@@ -143,8 +143,8 @@ export const getAllInsightSubmissions = async (
         type: validatedRequest.type,
         insightId: validatedRequest.insightId,
         sessionId: validatedRequest.sessionId,
-        dateFrom: validatedRequest.dateFrom,
-        dateTo: validatedRequest.dateTo,
+        startDate: validatedRequest.startDate,
+        endDate: validatedRequest.endDate,
         completedOnly: validatedRequest.completedOnly,
         sortBy: validatedRequest.sortBy,
         sortOrder: validatedRequest.sortOrder,

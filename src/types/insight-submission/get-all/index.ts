@@ -29,15 +29,21 @@ export const getAllInsightSubmissionsRequest = z.object({
     })
     .optional(),
   sessionId: z.string().optional(),
-  dateFrom: z
-    .string()
-    .datetime()
-    .transform((val) => new Date(val))
+  startDate: z
+    .union([z.string(), z.date()])
+    .transform((val) => {
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
+    })
     .optional(),
-  dateTo: z
-    .string()
-    .datetime()
-    .transform((val) => new Date(val))
+  endDate: z
+    .union([z.string(), z.date()])
+    .transform((val) => {
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
+    })
     .optional(),
   completedOnly: z
     .union([z.string(), z.boolean()])
@@ -105,8 +111,8 @@ export const getAllInsightSubmissionsResponse = z.object({
     type: z.enum(["QUIZ", "SINGLE_CHOICE", "MULTIPLE_CHOICE"]).optional(),
     insightId: z.number().optional(),
     sessionId: z.string().optional(),
-    dateFrom: z.date().optional(),
-    dateTo: z.date().optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
     completedOnly: z.boolean().optional(),
     sortBy: z.enum(["createdAt", "updatedAt"]),
     sortOrder: z.enum(["asc", "desc"]),

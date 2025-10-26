@@ -28,28 +28,20 @@ export const getAllFormSubmissionsRequest = z.object({
     })
     .optional(),
   sessionId: z.string().optional(),
-  dateFrom: z
-    .union([z.string(), z.number()])
+  startDate: z
+    .union([z.string(), z.date()])
     .transform((val) => {
-      const num = typeof val === "string" ? parseInt(val, 10) : val;
-      if (isNaN(num)) {
-        throw new Error("Invalid timestamp for dateFrom");
-      }
-      // Convert to milliseconds if needed and create Date
-      const timestamp = num > 1000000000000 ? num : num * 1000;
-      return new Date(timestamp);
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
     })
     .optional(),
-  dateTo: z
-    .union([z.string(), z.number()])
+  endDate: z
+    .union([z.string(), z.date()])
     .transform((val) => {
-      const num = typeof val === "string" ? parseInt(val, 10) : val;
-      if (isNaN(num)) {
-        throw new Error("Invalid timestamp for dateTo");
-      }
-      // Convert to milliseconds if needed and create Date
-      const timestamp = num > 1000000000000 ? num : num * 1000;
-      return new Date(timestamp);
+      if (!val) return undefined;
+      if (val instanceof Date) return val;
+      return new Date(val);
     })
     .optional(),
   completedOnly: z
@@ -117,8 +109,8 @@ export const getAllFormSubmissionsResponse = z.object({
   filters: z.object({
     formId: z.number().optional(),
     sessionId: z.string().optional(),
-    dateFrom: z.date().optional(),
-    dateTo: z.date().optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
     completedOnly: z.boolean().optional(),
     sortBy: z.enum(["createdAt", "updatedAt"]),
     sortOrder: z.enum(["asc", "desc"]),
