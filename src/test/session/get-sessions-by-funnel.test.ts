@@ -429,7 +429,7 @@ describe("Get Sessions by Funnel Tests", () => {
         where: {
           funnelId,
           updatedAt: {
-            lte: new Date("2025-10-08"),
+            lte: new Date("2025-10-08T23:59:59.999Z"),
           },
         },
         select: {
@@ -464,8 +464,8 @@ describe("Get Sessions by Funnel Tests", () => {
         where: {
           funnelId,
           updatedAt: {
-            gte: new Date("2025-09-30"),
-            lte: new Date("2025-10-08"),
+            gte: new Date("2025-09-30T00:00:00.000Z"),
+            lte: new Date("2025-10-08T23:59:59.999Z"),
           },
         },
         select: {
