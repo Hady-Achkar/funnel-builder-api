@@ -10,10 +10,9 @@ export const updateFunnelSettingsRequest = z.object({
 
   defaultSeoDescription: z.string().nullable().optional(),
 
-  // Must be an array with at least 1 string, or null
+  // Can be an array of strings (including empty array), null, or undefined
   defaultSeoKeywords: z
     .array(z.string())
-    .min(1, "SEO keywords array must contain at least one keyword")
     .nullable()
     .optional(),
 

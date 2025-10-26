@@ -328,13 +328,23 @@ describe("Update Funnel Settings Tests", () => {
       });
     });
 
-    it("should reject empty array for SEO keywords", async () => {
-      await expect(
-        updateFunnelSettings(userId, {
-          funnelId,
-          defaultSeoKeywords: [],
-        })
-      ).rejects.toThrow("Invalid input");
+    it("should accept empty array for SEO keywords", async () => {
+      mockPrisma.funnelSettings.update.mockResolvedValue({
+        ...existingSettings,
+        defaultSeoKeywords: JSON.stringify([]),
+      });
+
+      await updateFunnelSettings(userId, {
+        funnelId,
+        defaultSeoKeywords: [],
+      });
+
+      expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
+        where: { funnelId },
+        data: {
+          defaultSeoKeywords: JSON.stringify([]),
+        },
+      });
     });
 
     it("should set SEO keywords to null", async () => {

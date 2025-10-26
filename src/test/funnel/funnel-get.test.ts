@@ -322,6 +322,7 @@ describe("Get Funnel by ID Tests", () => {
           seoTitle: "SEO Title",
           seoDescription: "SEO Description",
           seoKeywords: "keywords",
+          visits: 0,
         },
       ],
     };
@@ -371,6 +372,7 @@ describe("Get Funnel by ID Tests", () => {
             seoTitle: null,
             seoDescription: null,
             seoKeywords: null,
+            visits: 0,
           },
         ],
       };
@@ -493,6 +495,7 @@ describe("Get Funnel by ID Tests", () => {
             seoTitle: "Home Page",
             seoDescription: "Description",
             seoKeywords: "keywords",
+            visits: 0,
           },
           {
             id: 2,
@@ -503,6 +506,7 @@ describe("Get Funnel by ID Tests", () => {
             seoTitle: null,
             seoDescription: null,
             seoKeywords: null,
+            visits: 0,
           },
         ],
       };
@@ -608,6 +612,69 @@ describe("Get Funnel by ID Tests", () => {
       const result = await getFunnel(funnelId, userId);
 
       expect(result.pages).toEqual([]);
+    });
+
+    it("should include visits field in all pages", async () => {
+      const fullFunnel = {
+        id: funnelId,
+        name: "Funnel with Visits",
+        slug: "funnel-with-visits",
+        status: $Enums.FunnelStatus.LIVE,
+        workspaceId,
+        createdBy: userId,
+        activeThemeId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        customTheme: null,
+        pages: [
+          {
+            id: 1,
+            name: "Page with no visits",
+            type: $Enums.PageType.PAGE,
+            order: 1,
+            linkingId: "page1",
+            seoTitle: null,
+            seoDescription: null,
+            seoKeywords: null,
+            visits: 0,
+          },
+          {
+            id: 2,
+            name: "Page with visits",
+            type: $Enums.PageType.PAGE,
+            order: 2,
+            linkingId: "page2",
+            seoTitle: null,
+            seoDescription: null,
+            seoKeywords: null,
+            visits: 150,
+          },
+        ],
+      };
+
+      mockPrisma.funnel.findUnique
+        .mockResolvedValueOnce(mockFunnelExists)
+        .mockResolvedValueOnce(fullFunnel);
+
+      (PermissionManager.can as any).mockResolvedValue({
+        allowed: true,
+        userRole: $Enums.WorkspaceRole.OWNER,
+        userPermissions: [],
+        isOwner: true,
+      });
+
+      (cacheService.get as any).mockResolvedValue(null);
+
+      const result = await getFunnel(funnelId, userId);
+
+      expect(result.pages).toHaveLength(2);
+      expect(result.pages[0]).toHaveProperty("visits", 0);
+      expect(result.pages[1]).toHaveProperty("visits", 150);
+      // Verify visits field is always present, even when 0
+      result.pages.forEach(page => {
+        expect(page).toHaveProperty("visits");
+        expect(typeof page.visits).toBe("number");
+      });
     });
   });
 

@@ -77,6 +77,7 @@ export const getFunnel = async (
               seoTitle: true,
               seoDescription: true,
               seoKeywords: true,
+              visits: true,
             },
           },
         },
@@ -97,7 +98,10 @@ export const getFunnel = async (
         createdAt: funnelFromDb.createdAt,
         updatedAt: funnelFromDb.updatedAt,
         customTheme: funnelFromDb.customTheme,
-        pages: funnelFromDb.pages,
+        pages: funnelFromDb.pages.map((page) => ({
+          ...page,
+          visits: page.visits ?? 0,
+        })),
       };
 
       // Cache the result
@@ -108,7 +112,16 @@ export const getFunnel = async (
       }
     }
 
-    return getFunnelResponse.parse(funnel);
+    // Ensure all pages have the visits field (for backward compatibility with old cache)
+    const funnelWithVisits = {
+      ...funnel,
+      pages: funnel.pages.map((page: any) => ({
+        ...page,
+        visits: page.visits ?? 0,
+      })),
+    };
+
+    return getFunnelResponse.parse(funnelWithVisits);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const firstError = error.issues[0];

@@ -40,6 +40,7 @@ export const getFunnelResponse = z.object({
       seoTitle: z.string().nullable(),
       seoDescription: z.string().nullable(),
       seoKeywords: z.string().nullable(),
+      visits: z.number().default(0),
     })
   ),
 });
