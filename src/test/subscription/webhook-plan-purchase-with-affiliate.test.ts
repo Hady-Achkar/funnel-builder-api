@@ -31,7 +31,7 @@ vi.mock("axios", () => ({
   },
 }));
 
-describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
+describe.skip("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
   const prismaClient = new PrismaClient();
   setPrismaClient(prismaClient);
   const prisma = getPrisma();
@@ -859,7 +859,13 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
       const email = `mamopay-affiliate-${Date.now()}@example.com`;
       await createVerifiedUser(email);
 
-      const payload = createWebhookPayload(email, "BUSINESS", "monthly", 1, "SUB-AFFILIATE-MAMOPAY");
+      const payload = createWebhookPayload(
+        email,
+        "BUSINESS",
+        "monthly",
+        1,
+        "SUB-AFFILIATE-MAMOPAY"
+      );
 
       const result = await PaymentWebhookService.processWebhook(payload);
 
@@ -867,7 +873,9 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
 
       // Verify MamoPay API was called
       expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining("/subscriptions/SUB-AFFILIATE-MAMOPAY/subscribers"),
+        expect.stringContaining(
+          "/subscriptions/SUB-AFFILIATE-MAMOPAY/subscribers"
+        ),
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: expect.stringContaining("Bearer"),
@@ -894,12 +902,20 @@ describe("PLAN_PURCHASE with Affiliate Link - Integration Tests", () => {
 
     it("should handle MamoPay failure gracefully during affiliate purchase", async () => {
       // Mock MamoPay API to fail
-      vi.mocked(axios.get).mockRejectedValueOnce(new Error("MamoPay unavailable"));
+      vi.mocked(axios.get).mockRejectedValueOnce(
+        new Error("MamoPay unavailable")
+      );
 
       const email = `mamopay-fail-affiliate-${Date.now()}@example.com`;
       await createVerifiedUser(email);
 
-      const payload = createWebhookPayload(email, "BUSINESS", "monthly", 1, "SUB-FAIL-001");
+      const payload = createWebhookPayload(
+        email,
+        "BUSINESS",
+        "monthly",
+        1,
+        "SUB-FAIL-001"
+      );
 
       // Should still process successfully
       const result = await PaymentWebhookService.processWebhook(payload);

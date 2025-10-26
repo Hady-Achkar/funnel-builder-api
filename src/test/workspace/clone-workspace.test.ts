@@ -43,7 +43,9 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
     // Verify we're using the test database
     const dbUrl = process.env.DATABASE_URL || "";
     const dbName = dbUrl.split("/").pop()?.split("?")[0];
-    console.log(`\n🔧 Running clone workspace tests against database: ${dbName}\n`);
+    console.log(
+      `\n🔧 Running clone workspace tests against database: ${dbName}\n`
+    );
 
     // Create seller user (workspace owner)
     const seller = await prisma.user.create({
@@ -458,8 +460,12 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       expect(clonedWorkspace).toBeDefined();
       expect(clonedWorkspace!.name).toBe("Premium Templates Workspace");
-      expect(clonedWorkspace!.description).toBe("A workspace full of premium templates");
-      expect(clonedWorkspace!.image).toBe("https://example.com/workspace-image.jpg");
+      expect(clonedWorkspace!.description).toBe(
+        "A workspace full of premium templates"
+      );
+      expect(clonedWorkspace!.image).toBe(
+        "https://example.com/workspace-image.jpg"
+      );
       expect(clonedWorkspace!.settings).toEqual(
         JSON.stringify({ theme: "dark", notifications: true })
       );
@@ -521,7 +527,9 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       // Both should be based on buyer's username (buyer{timestamp})
       expect(result1.clonedWorkspace.slug).toMatch(/^buyer\d+(-\d+)?$/);
       expect(result2.clonedWorkspace.slug).toMatch(/^buyer\d+(-\d+)?$/);
-      expect(result1.clonedWorkspace.slug).not.toBe(result2.clonedWorkspace.slug);
+      expect(result1.clonedWorkspace.slug).not.toBe(
+        result2.clonedWorkspace.slug
+      );
 
       // Second clone should have incremental number (-2, -3, etc.)
       expect(result2.clonedWorkspace.slug).toMatch(/-\d+$/); // Should end with -2, -3, etc.
@@ -529,11 +537,15 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       // Clean up
       await prisma.workspaceClone.deleteMany({
         where: {
-          clonedWorkspaceId: { in: [result1.clonedWorkspaceId, result2.clonedWorkspaceId] },
+          clonedWorkspaceId: {
+            in: [result1.clonedWorkspaceId, result2.clonedWorkspaceId],
+          },
         },
       });
       await prisma.workspace.deleteMany({
-        where: { id: { in: [result1.clonedWorkspaceId, result2.clonedWorkspaceId] } },
+        where: {
+          id: { in: [result1.clonedWorkspaceId, result2.clonedWorkspaceId] },
+        },
       });
       await prisma.payment.deleteMany({
         where: { id: { in: [payment1.id, payment2.id] } },
@@ -1182,7 +1194,9 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       await prisma.workspaceClone.deleteMany({
         where: { clonedWorkspaceId: result.clonedWorkspaceId },
       });
-      await prisma.workspace.delete({ where: { id: result.clonedWorkspaceId } });
+      await prisma.workspace.delete({
+        where: { id: result.clonedWorkspaceId },
+      });
       await prisma.payment.delete({ where: { id: newPayment.id } });
 
       // Prevent afterEach from trying to delete again
