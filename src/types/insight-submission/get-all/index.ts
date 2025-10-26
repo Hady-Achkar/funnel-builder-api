@@ -94,6 +94,8 @@ export const insightSubmissionData = z.object({
   completedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  answerCount: z.number(), // Number of unique sessions that answered this insight
+  totalSessions: z.number(), // Total number of unique sessions in the funnel
 });
 
 export type InsightSubmissionData = z.infer<typeof insightSubmissionData>;

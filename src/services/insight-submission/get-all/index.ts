@@ -92,6 +92,13 @@ export const getAllInsightSubmissions = async (
     const totalPages = Math.ceil(totalCount / validatedRequest.limit);
     const skip = (validatedRequest.page - 1) * validatedRequest.limit;
 
+    // Get total number of unique sessions in this funnel
+    const totalSessions = await prisma.session.count({
+      where: {
+        funnelId: validatedRequest.funnelId,
+      },
+    });
+
     // Get paginated insight submissions with filters
     const submissions = await prisma.insightSubmission.findMany({
       where: whereClause,
@@ -117,7 +124,34 @@ export const getAllInsightSubmissions = async (
       take: validatedRequest.limit,
     });
 
-    // Transform the data to include insight details
+    // Get unique insight IDs from current page to calculate answer counts
+    const uniqueInsightIds = [...new Set(submissions.map((s) => s.insightId))];
+
+    // Calculate answer count for each insight (number of unique sessions that answered)
+    const insightAnswerCounts = await Promise.all(
+      uniqueInsightIds.map(async (insightId) => {
+        const count = await prisma.insightSubmission.groupBy({
+          by: ["sessionId"],
+          where: {
+            insightId: insightId,
+            insight: {
+              funnelId: validatedRequest.funnelId,
+            },
+          },
+        });
+        return {
+          insightId,
+          answerCount: count.length,
+        };
+      })
+    );
+
+    // Create a map for quick lookup
+    const answerCountMap = new Map(
+      insightAnswerCounts.map((item) => [item.insightId, item.answerCount])
+    );
+
+    // Transform the data to include insight details and answer counts
     const formattedSubmissions = submissions.map((submission) => ({
       id: submission.id,
       insightId: submission.insightId,
@@ -128,6 +162,8 @@ export const getAllInsightSubmissions = async (
       completedAt: submission.completedAt,
       createdAt: submission.createdAt,
       updatedAt: submission.updatedAt,
+      answerCount: answerCountMap.get(submission.insightId) || 0,
+      totalSessions: totalSessions,
     }));
 
     const response = {
