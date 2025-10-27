@@ -36,7 +36,7 @@ describe("Get DNS Instructions Tests", () => {
       getConfig: () => ({
         cfZoneId: "test-zone-id",
         cfApiToken: "test-token",
-        cfDomain: "mydigitalsite.io",
+        cfDomain: "digitalsite.app",
       }),
     } as any);
   });
@@ -54,7 +54,7 @@ describe("Get DNS Instructions Tests", () => {
   const mockDnsInstructions = {
     type: "CNAME",
     name: "www",
-    value: "fallback.mydigitalsite.io",
+    value: "fallback.digitalsite.app",
     purpose: "Live Traffic",
   };
 
@@ -272,19 +272,21 @@ describe("Get DNS Instructions Tests", () => {
         cloudflareError
       );
 
-      // Based on service code line 52, it returns the error
+      // Service now continues without SSL validation records if Cloudflare fails
       const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
         id: domainId,
       });
 
-      expect(result).toBe(cloudflareError);
+      // Should return DNS instructions even if Cloudflare fetch fails
+      expect(result).toHaveProperty("dnsRecords");
+      expect(result).toHaveProperty("domain");
     });
 
     it("should handle domains without cloudflareHostnameId (subdomains)", async () => {
       const subdomain = {
         ...mockPendingDomain,
         type: $Enums.DomainType.SUBDOMAIN,
-        hostname: "test.mydigitalsite.io",
+        hostname: "test.digitalsite.app",
         cloudflareHostnameId: null,
         ownershipVerification: null,
         sslValidationRecords: null,
@@ -471,13 +473,14 @@ describe("Get DNS Instructions Tests", () => {
       (timeoutError as any).code = "ETIMEDOUT";
       vi.mocked(cloudflareCustomHostname.getCustomHostnameDetails).mockRejectedValue(timeoutError);
 
-      // Should return error (check actual implementation)
+      // Service continues without SSL records even on timeout
       const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
         id: domainId,
       });
 
-      // Based on the service code at line 52, it returns the error
-      expect(result).toBeInstanceOf(Error);
+      // Should return DNS instructions even if Cloudflare times out
+      expect(result).toHaveProperty("dnsRecords");
+      expect(result).toHaveProperty("domain");
     });
 
     it("should handle Cloudflare rate limit", async () => {
@@ -499,7 +502,9 @@ describe("Get DNS Instructions Tests", () => {
         id: domainId,
       });
 
-      expect(result).toBeInstanceOf(Error);
+      // Should return DNS instructions even if Cloudflare rate limits
+      expect(result).toHaveProperty("dnsRecords");
+      expect(result).toHaveProperty("domain");
     });
   });
 

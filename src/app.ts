@@ -44,14 +44,12 @@ export function createServer(): Express {
   // CORS Configuration
   const allowedOrigins = [
     process.env.FRONTEND_URL,                      // Main frontend
-    /^https:\/\/.*\.digitalsite\.io$/,             // All digitalsite.io subdomains
-    /^https:\/\/.*\.digitalsite\.com$/,            // All digitalsite.com subdomains
-    /^https:\/\/.*\.digitalsite\.ai$/,             // All digitalsite.ai subdomains
-    /^https:\/\/.*\.digitalsite\.us$/,             // All digitalsite.us subdomains
+    /^https:\/\/.*\.digitalsite\.io$/,             // All digitalsite.io subdomains (workspaces, funnels)
     /^https:\/\/digitalsite\.io$/,                 // Main digitalsite.io domain
+    /^https:\/\/.*\.digitalsite\.app$/,            // All digitalsite.app subdomains (custom domains)
+    /^https:\/\/digitalsite\.app$/,                // Main digitalsite.app domain
+    /^https:\/\/.*\.digitalsite\.com$/,            // All digitalsite.com subdomains
     /^https:\/\/digitalsite\.com$/,                // Main digitalsite.com domain
-    /^https:\/\/digitalsite\.ai$/,                 // Main digitalsite.ai domain
-    /^https:\/\/digitalsite\.us$/,                 // Main digitalsite.us domain
     /^https:\/\/.*\.azurecontainerapps\.io$/,      // Azure Container Apps
     /^https:\/\/.*\.azurefd\.net$/,                // Azure Front Door
     /^https:\/\/.*\.vercel\.app$/,                 // Vercel deployments

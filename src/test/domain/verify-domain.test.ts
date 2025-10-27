@@ -37,7 +37,7 @@ describe("Verify Domain Tests", () => {
       getConfig: () => ({
         cfZoneId: "test-zone-id",
         cfApiToken: "test-token",
-        cfDomain: "mydigitalsite.io",
+        cfDomain: "digitalsite.app",
       }),
     } as any);
   });

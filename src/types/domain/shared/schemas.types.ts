@@ -6,6 +6,7 @@ export const CloudFlareConfigSchema = z.object({
   cfVerificationDomain: z.string().optional(),
   cfDomain: z.string().min(1, "CloudFlare domain is required"),
   cfZoneId: z.string().min(1, "CloudFlare Zone ID is required"),
+  cfCustomHostnameZoneId: z.string().optional(), // Zone for custom hostnames (digitalsite.app)
 });
 
 export type CloudFlareConfig = z.infer<typeof CloudFlareConfigSchema>;

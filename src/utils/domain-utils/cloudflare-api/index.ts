@@ -24,6 +24,7 @@ class CloudFlareAPIHelper {
       cfVerificationDomain: process.env.CF_VERIFICATION_DOMAIN,
       cfDomain: process.env.CF_DOMAIN,
       cfZoneId: process.env.CF_ZONE_ID,
+      cfCustomHostnameZoneId: process.env.CF_CUSTOM_HOSTNAME_ZONE_ID,
     });
 
     this.cf = axios.create({

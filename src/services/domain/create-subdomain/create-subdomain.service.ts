@@ -99,8 +99,8 @@ export class CreateSubdomainService {
         );
       }
 
-      // Use provided domain config or default to mydigitalsite.io
-      const baseDomain = domainConfig?.baseDomain || "mydigitalsite.io";
+      // Use provided domain config or default to environment variable
+      const baseDomain = domainConfig?.baseDomain || process.env.CF_DOMAIN || "digitalsite.app";
       const fullHostname = `${subdomain}.${baseDomain}`;
 
       const existingDomain = await getPrisma().domain.findUnique({

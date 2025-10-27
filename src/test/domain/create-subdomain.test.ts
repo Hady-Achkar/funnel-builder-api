@@ -39,7 +39,7 @@ describe("Create Subdomain Tests", () => {
       getConfig: () => ({
         cfZoneId: "test-zone-id",
         cfApiToken: "test-token",
-        cfDomain: "mydigitalsite.io",
+        cfDomain: "digitalsite.app",
       }),
     } as any);
   });
@@ -75,7 +75,7 @@ describe("Create Subdomain Tests", () => {
 
   const mockCreatedDomain = {
     id: 1,
-    hostname: `${subdomain}.mydigitalsite.io`,
+    hostname: `${subdomain}.digitalsite.app`,
     type: $Enums.DomainType.SUBDOMAIN,
     status: $Enums.DomainStatus.ACTIVE,
     sslStatus: $Enums.SslStatus.ACTIVE,
@@ -217,7 +217,7 @@ describe("Create Subdomain Tests", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.domain.hostname).toBe(`${subdomain}.mydigitalsite.io`);
+      expect(result.domain.hostname).toBe(`${subdomain}.digitalsite.app`);
     });
 
     it("should respect EXTRA_SUBDOMAIN add-ons for increased limits", async () => {
@@ -301,7 +301,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: 999,
-        hostname: `${subdomain}.mydigitalsite.io`,
+        hostname: `${subdomain}.digitalsite.app`,
       }); // Subdomain already exists
 
       await expect(
@@ -328,7 +328,7 @@ describe("Create Subdomain Tests", () => {
       expect(mockPrisma.domain.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            hostname: "my-test.mydigitalsite.io",
+            hostname: "my-test.digitalsite.app",
             type: $Enums.DomainType.SUBDOMAIN,
             status: $Enums.DomainStatus.ACTIVE,
             sslStatus: $Enums.SslStatus.ACTIVE,
@@ -449,7 +449,7 @@ describe("Create Subdomain Tests", () => {
       expect(result.message).toContain("successfully");
       expect(result.domain).toBeDefined();
       expect(result.domain.id).toBe(1);
-      expect(result.domain.hostname).toBe(`${subdomain}.mydigitalsite.io`);
+      expect(result.domain.hostname).toBe(`${subdomain}.digitalsite.app`);
       expect(result.domain.type).toBe($Enums.DomainType.SUBDOMAIN);
       expect(result.domain.status).toBe($Enums.DomainStatus.ACTIVE);
       expect(result.domain.sslStatus).toBe($Enums.SslStatus.ACTIVE);
@@ -494,7 +494,7 @@ describe("Create Subdomain Tests", () => {
       expect(mockPrisma.domain.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            hostname: `${subdomain}.mydigitalsite.io`,
+            hostname: `${subdomain}.digitalsite.app`,
             type: $Enums.DomainType.SUBDOMAIN,
             status: $Enums.DomainStatus.ACTIVE,
             sslStatus: $Enums.SslStatus.ACTIVE,

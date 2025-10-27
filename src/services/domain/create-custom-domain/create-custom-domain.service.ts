@@ -123,35 +123,73 @@ export class CreateCustomDomainService {
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();
-      const zoneId = config.cfZoneId;
+      // Use custom hostname zone (digitalsite.app) for custom domains
+      const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
 
       let initialHostname: any, detailedHostname: any;
       try {
+        console.log('[Domain Create] Creating custom hostname in Cloudflare...');
+        console.log('[Domain Create] Hostname:', validatedHostname);
+        console.log('[Domain Create] Zone ID:', zoneId);
+
         initialHostname = await addCustomHostname(validatedHostname, zoneId);
+        console.log('[Domain Create] Initial hostname created:', initialHostname.id);
 
         detailedHostname = await getCustomHostnameDetails(
           initialHostname.id,
           zoneId
         );
+        console.log('[Domain Create] Got detailed hostname:', detailedHostname.id);
+
+        // SSL validation records may not be immediately available
+        // Retry up to 3 times with increasing delays
+        let retries = 0;
+        const maxRetries = 3;
+        while (
+          (!detailedHostname.ssl?.validation_records || detailedHostname.ssl.validation_records.length === 0) &&
+          retries < maxRetries
+        ) {
+          retries++;
+          const delay = retries * 2000; // 2s, 4s, 6s
+          console.log(`[Domain Create] SSL validation records not ready, waiting ${delay}ms... (attempt ${retries}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+
+          detailedHostname = await getCustomHostnameDetails(
+            initialHostname.id,
+            zoneId
+          );
+
+          if (detailedHostname.ssl?.validation_records && detailedHostname.ssl.validation_records.length > 0) {
+            console.log('[Domain Create] SSL validation records now available!');
+            break;
+          }
+        }
+
+        if (!detailedHostname.ssl?.validation_records || detailedHostname.ssl.validation_records.length === 0) {
+          console.warn('[Domain Create] SSL validation records still not ready after retries. Customer can get them via verify endpoint.');
+        }
       } catch (error: any) {
         const errMsg =
           error.response?.data?.errors?.[0]?.message || error.message;
-        console.error(`[Domain Create] CloudFlare API Error: ${errMsg}`, {
-          stack: error.stack,
-        });
+        console.error(`[Domain Create] CloudFlare API Error: ${errMsg}`);
+        console.error('[Domain Create] Error response:', JSON.stringify(error.response?.data, null, 2));
+        console.error('[Domain Create] Error stack:', error.stack);
         throw new BadGatewayError(
           "External service error. Please try again later."
         );
       }
 
       const { id, ssl } = detailedHostname;
+      console.log('[Domain Create] SSL object:', JSON.stringify(ssl, null, 2));
+      console.log('[Domain Create] SSL validation_records:', ssl?.validation_records);
+
       const ownershipVerificationRecord =
         initialHostname.ownership_verification;
 
       const cnameInstructions = {
         type: "CNAME",
         name: parsedDomain.subdomain,
-        value: `fallback.${config.cfDomain}`,
+        value: `origin.${config.cfVerificationDomain}`,
         purpose: "Live Traffic",
       };
 
@@ -177,21 +215,48 @@ export class CreateCustomDomainService {
 
       const splittedOwnerVerificationName =
         ownershipVerificationRecord.name.split(".");
+
+      // Build records array starting with ownership verification and CNAME
+      const dnsRecords: DNSSetupRecord[] = [
+        {
+          type: "TXT" as const,
+          name: splittedOwnerVerificationName[0],
+          value: ownershipVerificationRecord.value,
+          purpose: "Domain Ownership Verification",
+        },
+        {
+          type: "CNAME" as const,
+          name: parsedDomain.subdomain,
+          value: `origin.${config.cfVerificationDomain}`,
+          purpose: "Live Traffic",
+        },
+      ];
+
+      // Add SSL validation TXT records if available
+      if (ssl?.validation_records && Array.isArray(ssl.validation_records)) {
+        ssl.validation_records.forEach((record: any) => {
+          if (record.txt_name && record.txt_value) {
+            // Most DNS providers want just the subdomain part (Host field)
+            // Example: "_acme-challenge.www" (NOT the full "_acme-challenge.www.digitalsite.digital")
+            // The DNS provider will automatically append ".digitalsite.digital"
+            const fullDomain = `${parsedDomain.domain}.${parsedDomain.tld}`;
+            const txtNameShort = record.txt_name.endsWith(`.${fullDomain}`)
+              ? record.txt_name.slice(0, -(fullDomain.length + 1))
+              : record.txt_name;
+
+            dnsRecords.push({
+              type: "TXT" as const,
+              name: txtNameShort,
+              value: record.txt_value,
+              purpose: "SSL Certificate Validation",
+              fullName: record.txt_name, // Include full name for reference
+            } as any);
+          }
+        });
+      }
+
       const setupInstructions = {
-        records: [
-          {
-            type: "TXT" as const,
-            name: splittedOwnerVerificationName[0],
-            value: ownershipVerificationRecord.value,
-            purpose: "Domain Ownership Verification",
-          },
-          {
-            type: "CNAME" as const,
-            name: parsedDomain.subdomain,
-            value: `fallback.${config.cfDomain}`,
-            purpose: "Live Traffic",
-          },
-        ] as DNSSetupRecord[],
+        records: dnsRecords,
       };
 
       const response: CreateCustomDomainResponse = {

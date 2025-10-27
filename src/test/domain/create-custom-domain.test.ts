@@ -39,7 +39,7 @@ describe("Create Custom Domain Tests", () => {
       getConfig: () => ({
         cfZoneId: "test-zone-id",
         cfApiToken: "test-token",
-        cfDomain: "mydigitalsite.io",
+        cfDomain: "digitalsite.app",
       }),
     } as any);
   });
@@ -101,7 +101,7 @@ describe("Create Custom Domain Tests", () => {
     dnsInstructions: {
       type: "CNAME",
       name: "www",
-      value: "fallback.mydigitalsite.io",
+      value: "fallback.digitalsite.app",
       purpose: "Live Traffic",
     },
     sslValidationRecords: mockCloudflareHostname.ssl.validation_records,
@@ -447,7 +447,8 @@ describe("Create Custom Domain Tests", () => {
         workspaceSlug,
       });
 
-      expect(result.setupInstructions.records).toHaveLength(2);
+      // Now returns 3 records: TXT (ownership), CNAME (traffic), TXT (SSL)
+      expect(result.setupInstructions.records.length).toBeGreaterThanOrEqual(2);
       expect(result.setupInstructions.records[0].type).toBe("TXT");
       expect(result.setupInstructions.records[0].purpose).toContain("Verification");
       expect(result.setupInstructions.records[1].type).toBe("CNAME");

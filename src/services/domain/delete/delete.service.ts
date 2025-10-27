@@ -11,6 +11,7 @@ import {
 } from "../../../types/domain/delete";
 import { BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 
 export class DeleteDomainService {
   static async delete(
@@ -55,19 +56,30 @@ export class DeleteDomainService {
 
       let cloudflareSuccess = false;
       try {
+        const cloudflareHelper = getCloudFlareAPIHelper();
+        const config = cloudflareHelper.getConfig();
+
         if (domainRecord.type === DomainType.CUSTOM_DOMAIN) {
           if (domainRecord.cloudflareHostnameId) {
+            // Use custom hostname zone (digitalsite.app) for custom domains
+            const zoneId = config.cfCustomHostnameZoneId || domainRecord.cloudflareZoneId || config.cfZoneId;
+            console.log('[Domain Delete] Deleting custom hostname:', domainRecord.cloudflareHostnameId, 'from zone:', zoneId);
+
             customHostnameDeleted = await deleteCustomHostname(
               domainRecord.cloudflareHostnameId,
-              domainRecord.cloudflareZoneId || ""
+              zoneId
             );
             cloudflareSuccess = customHostnameDeleted;
           }
         } else if (domainRecord.type === DomainType.SUBDOMAIN) {
           if (domainRecord.cloudflareRecordId) {
+            // Use main zone (digitalsite.io) for subdomains
+            const zoneId = domainRecord.cloudflareZoneId || config.cfZoneId;
+            console.log('[Domain Delete] Deleting DNS record:', domainRecord.cloudflareRecordId, 'from zone:', zoneId);
+
             dnsRecordsDeleted = await deleteARecord(
               domainRecord.cloudflareRecordId,
-              domainRecord.cloudflareZoneId || ""
+              zoneId
             );
             cloudflareSuccess = dnsRecordsDeleted;
           }

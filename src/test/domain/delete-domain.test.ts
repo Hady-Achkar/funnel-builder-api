@@ -6,6 +6,15 @@ import * as cloudflareCleanup from "../../services/domain/delete/utils/cloudflar
 
 vi.mock("../../lib/prisma");
 vi.mock("../../services/domain/delete/utils/cloudflare-cleanup");
+vi.mock("../../utils/domain-utils/cloudflare-api", () => ({
+  getCloudFlareAPIHelper: () => ({
+    getConfig: () => ({
+      cfZoneId: "test-zone-id",
+      cfCustomHostnameZoneId: "test-custom-hostname-zone-id",
+      cfVerificationDomain: "digitalsite.app",
+    }),
+  }),
+}));
 
 describe("Delete Domain Tests", () => {
   let mockPrisma: any;
@@ -43,7 +52,7 @@ describe("Delete Domain Tests", () => {
 
   const mockSubdomain = {
     id: domainId,
-    hostname: "test.mydigitalsite.io",
+    hostname: "test.digitalsite.app",
     type: $Enums.DomainType.SUBDOMAIN,
     status: $Enums.DomainStatus.ACTIVE,
     workspaceId: 1,
@@ -237,9 +246,10 @@ describe("Delete Domain Tests", () => {
 
       await DeleteDomainService.delete(userId, { id: domainId.toString() });
 
+      // Now uses custom hostname zone ID from config
       expect(vi.mocked(cloudflareCleanup.deleteCustomHostname)).toHaveBeenCalledWith(
         mockCustomDomain.cloudflareHostnameId,
-        mockCustomDomain.cloudflareZoneId
+        "test-custom-hostname-zone-id" // Uses cfCustomHostnameZoneId from mock config
       );
     });
 

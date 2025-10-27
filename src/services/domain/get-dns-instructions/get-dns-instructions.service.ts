@@ -43,16 +43,20 @@ export class GetDNSInstructionsService {
         try {
           const cloudflareHelper = getCloudFlareAPIHelper();
           const config = cloudflareHelper.getConfig();
+          // Use custom hostname zone (digitalsite.app) for custom domains
+          const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
+
           const cfHostname = await getCustomHostnameDetails(
             domainRecord.cloudflareHostnameId,
-            config.cfZoneId
+            zoneId
           );
 
           if (cfHostname.ssl?.validation_records) {
             currentSslValidationRecords = cfHostname.ssl.validation_records;
           }
-        } catch (error) {
-          return error as any;
+        } catch (error: any) {
+          console.error('[DNS Instructions] Failed to fetch SSL validation records:', error.message);
+          // Continue without SSL validation records - they might not be ready yet
         }
       }
 

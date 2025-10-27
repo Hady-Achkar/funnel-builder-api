@@ -74,7 +74,9 @@ export class VerifyDomainService {
 
       const cloudflareHelper = getCloudFlareAPIHelper();
       const config = cloudflareHelper.getConfig();
-      const cfHostname = await getCustomHostnameDetails(customHostnameId, config.cfZoneId);
+      // Use custom hostname zone (digitalsite.app) for custom domains
+      const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
+      const cfHostname = await getCustomHostnameDetails(customHostnameId, zoneId);
 
       console.log('[Verify Domain] Cloudflare response:', JSON.stringify(cfHostname, null, 2));
 

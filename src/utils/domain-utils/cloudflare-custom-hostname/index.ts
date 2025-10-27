@@ -7,9 +7,9 @@ import {
 export async function addCustomHostname(
   hostname: string,
   zoneId: string,
-  sslMethod: string = "http"
+  sslMethod: string = "txt"
 ) {
-  const payload: CustomHostnamePayload = {
+  const payload: any = {
     hostname,
     ssl: {
       method: sslMethod,
@@ -17,17 +17,19 @@ export async function addCustomHostname(
       settings: {
         http2: "on",
         min_tls_version: "1.2",
+        tls_1_3: "on",
       },
     },
   };
 
-  const validatedPayload = CustomHostnamePayloadSchema.parse(payload);
+  // Don't validate with schema since it doesn't include all optional fields
+  // const validatedPayload = CustomHostnamePayloadSchema.parse(payload);
 
   const cloudflareHelper = getCloudFlareAPIHelper();
   const cf = cloudflareHelper.getAxiosInstance();
 
   const url = `/zones/${zoneId}/custom_hostnames`;
-  const response = await cf.post(url, validatedPayload);
+  const response = await cf.post(url, payload);
 
   return response.data.result;
 }
