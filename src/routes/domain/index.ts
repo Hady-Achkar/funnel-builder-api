@@ -4,6 +4,7 @@ import { CreateCustomDomainController } from "../../controllers/domain/create-cu
 import { CreateSubdomainController } from "../../controllers/domain/create-subdomain";
 import { DeleteDomainController } from "../../controllers/domain/delete";
 import { VerifyDomainController } from "../../controllers/domain/verify";
+import { AssociateDomainController } from "../../controllers/domain/associate";
 import { GetDNSInstructionsController } from "../../controllers/domain/get-dns-instructions";
 import { GetAllDomainsController } from "../../controllers/domain/get-all-domains";
 import { GetWorkspaceDomainsSummaryController } from "../../controllers/domain/get-workspace-summary";
@@ -23,6 +24,7 @@ router.post(
 );
 router.delete("/:id", authenticateToken, DeleteDomainController.delete);
 router.post("/verify/:id", authenticateToken, VerifyDomainController.verify);
+router.post("/:id/associate", authenticateToken, AssociateDomainController.associate);
 router.get(
   "/dns-instructions/:id",
   authenticateToken,

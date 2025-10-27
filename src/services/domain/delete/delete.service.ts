@@ -78,8 +78,8 @@ export class DeleteDomainService {
       const message = domainRecord.type === DomainType.SUBDOMAIN
         ? "Subdomain deleted successfully"
         : azureDeleted
-        ? "Domain deleted successfully from both database and Azure Front Door"
-        : "Domain removed from database. Azure deletion may have failed (check logs).";
+        ? "Domain deleted successfully"
+        : "Domain removed successfully. Some cleanup tasks may still be in progress.";
 
       const response: DeleteDomainResponse = {
         message,

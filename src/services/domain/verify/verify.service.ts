@@ -65,7 +65,7 @@ export class VerifyDomainService {
 
       const azureCustomDomainName = domainRecord.azureCustomDomainName;
       if (!azureCustomDomainName) {
-        throw new BadRequestError('Domain is not configured correctly');
+        throw new BadRequestError('Domain configuration is incomplete. Please contact support.');
       }
 
       return await this.verifyAzureFrontDoorDomain(domainRecord);
@@ -98,7 +98,7 @@ export class VerifyDomainService {
       let sslStatus = domainRecord.sslStatus;
       let message = "Domain verification in progress.";
       let isFullyActive = false;
-      let nextStep: string | null = "Please wait for Azure to validate your DNS records.";
+      let nextStep: string | null = "Please wait while we validate your DNS records. This usually takes 5-10 minutes.";
 
       // Update status based on Azure validation state
       if (domainValidationState === "Approved") {
@@ -121,7 +121,7 @@ export class VerifyDomainService {
             // Continue even if association fails - can be retried later
           }
         } else {
-          nextStep = "Waiting for SSL certificate to be issued by Azure.";
+          nextStep = "Waiting for your free SSL certificate to be issued. This can take up to 24 hours.";
         }
       } else if (domainValidationState === "Rejected") {
         status = "FAILED";
@@ -162,9 +162,23 @@ export class VerifyDomainService {
 
       return VerifyDomainResponseSchema.parse(response);
     } catch (error: any) {
-      console.error("[Verify Azure Domain] Error:", error);
+      console.error("[Verify Domain] Error:", error);
+
+      // Provide helpful error messages based on the error type
+      if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
+        throw new BadRequestError(
+          "Domain verification is not ready yet. Please ensure you've added the required DNS records and wait 5-10 minutes before trying again."
+        );
+      }
+
+      if (error.message?.includes('authentication') || error.message?.includes('credential')) {
+        throw new BadGatewayError(
+          "Unable to connect to our domain verification service. Please try again in a few minutes or contact support if the issue persists."
+        );
+      }
+
       throw new BadGatewayError(
-        "Failed to verify domain with Azure Front Door. Please try again later."
+        "We couldn't verify your domain at this time. Please make sure your DNS records are correctly configured and try again in a few minutes."
       );
     }
   }

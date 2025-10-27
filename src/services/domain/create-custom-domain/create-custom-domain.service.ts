@@ -137,7 +137,7 @@ export class CreateCustomDomainService {
           stack: error.stack,
         });
         throw new BadGatewayError(
-          "External service error. Please try again later."
+          "We couldn't register your domain at this time. Please try again in a few minutes or contact support if the issue persists."
         );
       }
 
@@ -191,7 +191,7 @@ export class CreateCustomDomainService {
 
       const response: CreateCustomDomainResponse = {
         message:
-          "Domain registered with Azure Front Door. Please add ALL of the following DNS records at your domain provider.",
+          "Domain registered successfully! Please add ALL of the following DNS records at your domain provider (GoDaddy, Namecheap, Cloudflare, etc.).",
         domain: {
           id: newDomain.id,
           hostname: newDomain.hostname,
