@@ -1,8 +1,6 @@
 import { getPrisma } from "../../../lib/prisma";
-import { DomainType } from "../../../generated/prisma-client";
-import {
-  getAzureFrontDoorCustomDomainDetails,
-} from "../../../utils/domain-utils/azure-frontdoor-custom-domain";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
+import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
 import {
   PermissionManager,
   PermissionAction,
@@ -40,47 +38,28 @@ export class GetDNSInstructionsService {
         action: PermissionAction.MANAGE_DOMAIN,
       });
 
-      // For subdomains (*.digitalsite.io), no DNS setup required
-      if (domainRecord.type === DomainType.SUBDOMAIN) {
-        const response: GetDNSInstructionsResponse = {
-          domain: {
-            id: domainRecord.id,
-            hostname: domainRecord.hostname,
-            type: domainRecord.type,
-            status: domainRecord.status,
-            sslStatus: domainRecord.sslStatus,
-            isVerified: true,
-            isActive: true,
-            createdAt: domainRecord.createdAt,
-          },
-          dnsRecords: [],
-          instructions: "This subdomain is automatically configured. No DNS setup required!",
-          totalRecords: 0,
-          completedRecords: 0,
-          progress: 100,
-        };
-
-        return GetDNSInstructionsResponseSchema.parse(response);
-      }
-
-      // For custom domains, get latest Azure validation status
-      let currentAzureStatus = null;
-      if (domainRecord.azureCustomDomainName) {
+      let currentSslValidationRecords = null;
+      if (domainRecord.cloudflareHostnameId) {
         try {
-          currentAzureStatus = await getAzureFrontDoorCustomDomainDetails(
-            domainRecord.azureCustomDomainName
+          const cloudflareHelper = getCloudFlareAPIHelper();
+          const config = cloudflareHelper.getConfig();
+          const cfHostname = await getCustomHostnameDetails(
+            domainRecord.cloudflareHostnameId,
+            config.cfZoneId
           );
+
+          if (cfHostname.ssl?.validation_records) {
+            currentSslValidationRecords = cfHostname.ssl.validation_records;
+          }
         } catch (error) {
-          console.error("[Get DNS Instructions] Failed to get Azure status:", error);
-          // Continue with stored data if Azure call fails
+          return error as any;
         }
       }
 
       const dnsRecords = prepareDNSRecords(
         domainRecord,
-        currentAzureStatus
+        currentSslValidationRecords
       );
-
       const { totalRecords, completedRecords, progress } = calculateProgress(
         domainRecord,
         dnsRecords
@@ -99,7 +78,7 @@ export class GetDNSInstructionsService {
         },
         dnsRecords,
         instructions:
-          "Add these DNS records at your domain registrar (GoDaddy, Namecheap, CloudFlare, etc.). DNS changes can take up to 48 hours to propagate, but usually complete within 5-10 minutes.",
+          "Add these DNS records at your domain registrar (GoDaddy, Namecheap, CloudFlare, etc.). DNS changes can take up to 48 hours to propagate.",
         totalRecords,
         completedRecords,
         progress,

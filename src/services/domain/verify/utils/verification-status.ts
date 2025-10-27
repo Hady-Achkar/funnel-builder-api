@@ -1,11 +1,20 @@
 import { DomainStatus, SslStatus } from "../../../../generated/prisma-client";
 
+export interface SslValidationRecord {
+  txt_name?: string;
+  txt_value?: string;
+  http_url?: string;
+  http_body?: string;
+  cname_target?: string;
+  cname_name?: string;
+}
+
 export interface VerificationStatusResult {
   message: string;
   shouldUpdateVerified: boolean;
   shouldUpdateActive: boolean;
   isFullyActive: boolean;
-  nextStep: string | null;
+  nextStep: SslValidationRecord | null;
 }
 
 export type CloudFlareHostnameStatus = string;
@@ -16,13 +25,33 @@ export function determineVerificationStatus(
   sslStatus: CloudFlareSslStatus,
   validationRecords?: any
 ): VerificationStatusResult {
-  // Azure-based verification logic
+  // Cloudflare-based verification logic
+  const isHostnameActive = hostnameStatus === "active";
+  const isSslActive = sslStatus === "active";
+
+  let message = "Verification in progress";
+  let nextStep: SslValidationRecord | null = null;
+
+  if (!isHostnameActive) {
+    message = "Waiting for DNS propagation. This usually takes 5-10 minutes.";
+  } else if (!isSslActive && validationRecords) {
+    message = "DNS verified! SSL certificate is being issued.";
+    // Cloudflare returns validation_records as an array, take the first one
+    if (Array.isArray(validationRecords) && validationRecords.length > 0) {
+      nextStep = validationRecords[0];
+    } else if (typeof validationRecords === 'object' && !Array.isArray(validationRecords)) {
+      nextStep = validationRecords;
+    }
+  } else if (isSslActive) {
+    message = "Domain fully verified and active with SSL!";
+  }
+
   return {
-    message: "Verification in progress",
-    shouldUpdateVerified: hostnameStatus === "Approved",
-    shouldUpdateActive: hostnameStatus === "Approved" && sslStatus === "active",
-    isFullyActive: hostnameStatus === "Approved" && sslStatus === "active",
-    nextStep: "Add DNS records and wait for validation",
+    message,
+    shouldUpdateVerified: isHostnameActive,
+    shouldUpdateActive: isHostnameActive && isSslActive,
+    isFullyActive: isHostnameActive && isSslActive,
+    nextStep,
   };
 }
 

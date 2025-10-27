@@ -4,33 +4,38 @@ import {
   SslStatus,
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { validateSubdomainName } from "./utils/subdomain-validation";
-import {
-  getAzureFrontDoorConfig,
-  sanitizeHostnameForAzure,
-} from "../../../utils/domain-utils/azure-frontdoor-api";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 import {
   PermissionManager,
   PermissionAction,
 } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { WorkspaceSubdomainAllocations } from "../../../utils/allocations/workspace-subdomain-allocations";
+import { createARecord } from "./utils/create-a-record";
 import {
   CreateSubdomainResponse,
-  CreateSubdomainRequestSchema,
-  CreateSubdomainResponseSchema,
+  createSubdomainRequest,
+  createSubdomainResponse,
 } from "../../../types/domain/create-subdomain";
-import { BadRequestError } from "../../../errors/http-errors";
+import { DomainConfig } from "../../../types/domain/shared/domain.types";
+import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 
 export class CreateSubdomainService {
   static async create(
     userId: number,
-    requestData: unknown
+    requestData: unknown,
+    domainConfig?: DomainConfig
   ): Promise<CreateSubdomainResponse> {
     try {
-      const validatedData = CreateSubdomainRequestSchema.parse(requestData);
+      console.log('[Subdomain Service] Received request data:', requestData);
+      console.log('[Subdomain Service] Request data type:', typeof requestData);
+
+      const validatedData = createSubdomainRequest.parse(requestData);
+      console.log('[Subdomain Service] Validated data:', validatedData);
+
       const { subdomain, workspaceSlug } = validatedData;
 
+      // Get workspace by slug
       const workspace = await getPrisma().workspace.findUnique({
         where: { slug: workspaceSlug },
         include: {
@@ -64,6 +69,7 @@ export class CreateSubdomainService {
         action: PermissionAction.CREATE_SUBDOMAIN,
       });
 
+      // Check subdomain limit using centralized allocation utility
       const currentSubdomainCount = await getPrisma().domain.count({
         where: {
           workspaceId: workspace.id,
@@ -93,11 +99,9 @@ export class CreateSubdomainService {
         );
       }
 
-      const validatedSubdomain = validateSubdomainName(subdomain);
-
-      // Build full hostname for subdomain on digitalsite.io
-      const subdomainBase = process.env.WORKSPACE_DOMAIN || "digitalsite.io";
-      const fullHostname = `${validatedSubdomain}.${subdomainBase}`;
+      // Use provided domain config or default to mydigitalsite.io
+      const baseDomain = domainConfig?.baseDomain || "mydigitalsite.io";
+      const fullHostname = `${subdomain}.${baseDomain}`;
 
       const existingDomain = await getPrisma().domain.findUnique({
         where: { hostname: fullHostname },
@@ -109,44 +113,63 @@ export class CreateSubdomainService {
         );
       }
 
-      const azureConfig = getAzureFrontDoorConfig();
-      const azureCustomDomainName = sanitizeHostnameForAzure(fullHostname);
 
-      // For subdomains under *.digitalsite.io, we rely on the wildcard certificate
-      // No need to create individual custom domains in Azure - the wildcard covers them
-      // Just create the database record
+      const cloudflareHelper = getCloudFlareAPIHelper();
+      const config = cloudflareHelper.getConfig();
+
+      // Use provided config or default values
+      const zoneId = domainConfig?.zoneId || config.cfZoneId;
+      const targetIp = domainConfig?.targetIp || "74.234.194.84";
+
+      let aRecord: any;
+      try {
+        aRecord = await createARecord(
+          subdomain,
+          zoneId,
+          targetIp
+        );
+      } catch (error: any) {
+        const errMsg =
+          error.response?.data?.errors?.[0]?.message || error.message;
+        console.error(`[Subdomain Create] CloudFlare API Error: ${errMsg}`, {
+          stack: error.stack,
+        });
+        throw new BadGatewayError(
+          "External service error. Please try again later."
+        );
+      }
+
       const newDomain = await getPrisma().domain.create({
         data: {
           hostname: fullHostname,
           type: DomainType.SUBDOMAIN,
-          status: DomainStatus.ACTIVE, // Immediately active due to wildcard
-          sslStatus: SslStatus.ACTIVE, // SSL covered by wildcard certificate
+          status: DomainStatus.ACTIVE,
+          sslStatus: SslStatus.ACTIVE,
           workspaceId: workspace.id,
           createdBy: userId,
-          azureCustomDomainName: azureCustomDomainName,
-          azureDomainStatus: "Approved", // Wildcard domain is pre-approved
-          azureCertStatus: "ManagedCertificate", // Covered by wildcard cert
+          cloudflareRecordId: aRecord.id,
+          cloudflareZoneId: zoneId,
           lastVerifiedAt: new Date(),
         },
       });
 
       const response: CreateSubdomainResponse = {
-        message: "Subdomain created and activated successfully. It's ready to use immediately!",
+        message: "Subdomain created and activated successfully.",
         domain: {
           id: newDomain.id,
           hostname: newDomain.hostname,
           type: newDomain.type,
           status: newDomain.status,
           sslStatus: newDomain.sslStatus,
-          isVerified: true,
-          isActive: true,
-          azureCustomDomainName: newDomain.azureCustomDomainName,
+          isVerified: newDomain.status !== DomainStatus.PENDING,
+          isActive: newDomain.status === DomainStatus.ACTIVE,
+          cloudflareRecordId: newDomain.cloudflareRecordId,
           createdAt: newDomain.createdAt,
           updatedAt: newDomain.updatedAt,
         },
       };
 
-      return CreateSubdomainResponseSchema.parse(response);
+      return createSubdomainResponse.parse(response);
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         console.error('[Subdomain Service] Zod validation error:', error.issues);
@@ -155,6 +178,7 @@ export class CreateSubdomainService {
         const message = `${fieldPath}: ${firstIssue?.message || "Invalid request data"}`;
         throw new BadRequestError(message);
       }
+      console.error('[Subdomain Service] Unexpected error:', error);
       throw error;
     }
   }

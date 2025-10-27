@@ -5,15 +5,11 @@ import {
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
 import { validateHostname, parseDomain } from "./utils/domain-validation";
+import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 import {
-  getAzureFrontDoorAPIHelper,
-  getAzureFrontDoorConfig,
-  sanitizeHostnameForAzure,
-} from "../../../utils/domain-utils/azure-frontdoor-api";
-import {
-  createAzureFrontDoorCustomDomain,
-  getAzureFrontDoorCustomDomainDetails,
-} from "../../../utils/domain-utils/azure-frontdoor-custom-domain";
+  addCustomHostname,
+  getCustomHostnameDetails,
+} from "../../../utils/domain-utils/cloudflare-custom-hostname";
 import {
   PermissionManager,
   PermissionAction,
@@ -106,8 +102,14 @@ export class CreateCustomDomainService {
       const validatedHostname = validateHostname(hostname);
       const parsedDomain = parseDomain(validatedHostname);
 
-      // Azure Front Door supports both apex and subdomain
-      // No need to enforce subdomain requirement
+      if (!parsedDomain.subdomain) {
+        console.warn(
+          "[Domain Create] Apex domain detected; a subdomain is required"
+        );
+        throw new BadRequestError(
+          "Please provide a subdomain (e.g. www.example.com)"
+        );
+      }
 
       const existingDomain = await getPrisma().domain.findUnique({
         where: { hostname: validatedHostname },
@@ -119,35 +121,37 @@ export class CreateCustomDomainService {
         );
       }
 
-      const azureConfig = getAzureFrontDoorConfig();
-      const azureCustomDomainName = sanitizeHostnameForAzure(validatedHostname);
+      const cloudflareHelper = getCloudFlareAPIHelper();
+      const config = cloudflareHelper.getConfig();
+      const zoneId = config.cfZoneId;
 
-      let customDomain: any;
+      let initialHostname: any, detailedHostname: any;
       try {
-        // Create custom domain in Azure Front Door
-        customDomain = await createAzureFrontDoorCustomDomain(validatedHostname);
+        initialHostname = await addCustomHostname(validatedHostname, zoneId);
 
-        console.log("[Domain Create] Azure Front Door custom domain created:", {
-          hostname: validatedHostname,
-          azureName: azureCustomDomainName,
-          validationToken: customDomain.validationProperties.validationToken,
-        });
+        detailedHostname = await getCustomHostnameDetails(
+          initialHostname.id,
+          zoneId
+        );
       } catch (error: any) {
-        console.error(`[Domain Create] Azure Front Door API Error: ${error.message}`, {
+        const errMsg =
+          error.response?.data?.errors?.[0]?.message || error.message;
+        console.error(`[Domain Create] CloudFlare API Error: ${errMsg}`, {
           stack: error.stack,
         });
         throw new BadGatewayError(
-          "We couldn't register your domain at this time. Please try again in a few minutes or contact support if the issue persists."
+          "External service error. Please try again later."
         );
       }
 
-      const { validationProperties, domainValidationState, tlsSettings } = customDomain;
+      const { id, ssl } = detailedHostname;
+      const ownershipVerificationRecord =
+        initialHostname.ownership_verification;
 
-      // DNS instructions for Azure Front Door
       const cnameInstructions = {
         type: "CNAME",
-        name: parsedDomain.subdomain || "@",
-        value: azureConfig.frontDoorEndpointUrl,
+        name: parsedDomain.subdomain,
+        value: `fallback.${config.cfDomain}`,
         purpose: "Live Traffic",
       };
 
@@ -156,34 +160,35 @@ export class CreateCustomDomainService {
           hostname: validatedHostname,
           type: DomainType.CUSTOM_DOMAIN,
           status: DomainStatus.PENDING,
-          sslStatus: SslStatus.PENDING,
+          sslStatus:
+            ssl?.status === "active" ? SslStatus.ACTIVE : SslStatus.PENDING,
           workspaceId: workspace.id,
           createdBy: userId,
-          azureCustomDomainName: azureCustomDomainName,
-          azureDomainStatus: domainValidationState,
-          azureCertStatus: tlsSettings?.certificateType || "Pending",
-          verificationToken: validationProperties.validationToken,
-          ownershipVerification: {
-            name: `_dnsauth.${validatedHostname}`,
-            value: validationProperties.validationToken,
-            type: "TXT",
-          },
+          cloudflareHostnameId: id,
+          cloudflareZoneId: zoneId,
+          verificationToken: ownershipVerificationRecord.value,
+          ownershipVerification: ownershipVerificationRecord,
           dnsInstructions: cnameInstructions,
+          sslValidationRecords: ssl?.validation_records
+            ? JSON.parse(JSON.stringify(ssl.validation_records))
+            : null,
         },
       });
 
+      const splittedOwnerVerificationName =
+        ownershipVerificationRecord.name.split(".");
       const setupInstructions = {
         records: [
           {
             type: "TXT" as const,
-            name: "_dnsauth",
-            value: validationProperties.validationToken,
+            name: splittedOwnerVerificationName[0],
+            value: ownershipVerificationRecord.value,
             purpose: "Domain Ownership Verification",
           },
           {
             type: "CNAME" as const,
-            name: parsedDomain.subdomain || "@",
-            value: azureConfig.frontDoorEndpointUrl,
+            name: parsedDomain.subdomain,
+            value: `fallback.${config.cfDomain}`,
             purpose: "Live Traffic",
           },
         ] as DNSSetupRecord[],
@@ -191,7 +196,7 @@ export class CreateCustomDomainService {
 
       const response: CreateCustomDomainResponse = {
         message:
-          "Domain registered successfully! Please add ALL of the following DNS records at your domain provider (GoDaddy, Namecheap, Cloudflare, etc.).",
+          "Domain registered. Please add ALL of the following DNS records at your domain provider.",
         domain: {
           id: newDomain.id,
           hostname: newDomain.hostname,
@@ -201,7 +206,7 @@ export class CreateCustomDomainService {
           isVerified: false,
           isActive: false,
           verificationToken: newDomain.verificationToken,
-          customHostnameId: newDomain.azureCustomDomainName,
+          customHostnameId: newDomain.cloudflareHostnameId,
           ownershipVerification: newDomain.ownershipVerification,
           cnameVerificationInstructions: newDomain.dnsInstructions,
           createdAt: newDomain.createdAt,

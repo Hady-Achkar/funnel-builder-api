@@ -5,8 +5,7 @@ import {
   SslStatus,
 } from "../../../generated/prisma-client";
 
-// Request schema
-export const CreateSubdomainRequestSchema = z.object({
+export const createSubdomainRequest = z.object({
   subdomain: z
     .string()
     .min(1, "Subdomain is required")
@@ -21,10 +20,9 @@ export const CreateSubdomainRequestSchema = z.object({
   workspaceSlug: z.string().min(1, "Workspace slug is required"),
 });
 
-export type CreateSubdomainRequest = z.infer<typeof CreateSubdomainRequestSchema>;
+export type CreateSubdomainRequest = z.infer<typeof createSubdomainRequest>;
 
-// Subdomain data schema
-export const SubdomainDataSchema = z.object({
+export const subdomainData = z.object({
   id: z.number({ message: "Domain ID must be a number" }),
   hostname: z.string({ message: "Hostname must be a string" }),
   type: z.enum(DomainType, {
@@ -44,22 +42,16 @@ export const SubdomainDataSchema = z.object({
   }),
   isVerified: z.boolean({ message: "Is verified must be a boolean" }),
   isActive: z.boolean({ message: "Is active must be a boolean" }),
-  azureCustomDomainName: z.string().nullable(),
+  cloudflareRecordId: z.string().nullable(),
   createdAt: z.date({ message: "Created at must be a date" }),
   updatedAt: z.date({ message: "Updated at must be a date" }),
 });
 
-export type SubdomainData = z.infer<typeof SubdomainDataSchema>;
+export type SubdomainData = z.infer<typeof subdomainData>;
 
-// Response schema
-export const CreateSubdomainResponseSchema = z.object({
+export const createSubdomainResponse = z.object({
   message: z.string({ message: "Message must be a string" }),
-  domain: SubdomainDataSchema,
+  domain: subdomainData,
 });
 
-export type CreateSubdomainResponse = z.infer<typeof CreateSubdomainResponseSchema>;
-
-// Backward compatibility exports
-export const createSubdomainRequest = CreateSubdomainRequestSchema;
-export const subdomainData = SubdomainDataSchema;
-export const createSubdomainResponse = CreateSubdomainResponseSchema;
+export type CreateSubdomainResponse = z.infer<typeof createSubdomainResponse>;

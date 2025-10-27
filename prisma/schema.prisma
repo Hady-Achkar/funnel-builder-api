@@ -241,19 +241,17 @@ model Domain {
   sslStatus             SslStatus      @default(PENDING)
   workspaceId           Int?
   createdBy             Int
-
-  // Azure Front Door fields (all domains use Azure now)
-  azureCustomDomainName String?        @unique // Sanitized name for Azure (e.g., 'example-com' or 'mysite-digitalsite-io')
-  azureDomainStatus     String?        // Azure validation state (Pending, Approved, Rejected)
-  azureCertStatus       String?        // Azure certificate status (Pending, Issued, Expired)
-
-  // Domain verification and DNS
-  verificationToken     String?        // Validation token for domain ownership
-  ownershipVerification Json?          // Ownership verification details
-  dnsInstructions       Json?          // DNS setup instructions for user
-  lastVerifiedAt        DateTime?      // Last time domain was verified
-  expiresAt             DateTime?      // Domain expiration (if applicable)
-  notes                 String?        // Additional notes
+  cloudflareHostnameId  String?        @unique
+  cloudflareZoneId      String?
+  cloudflareRecordId    String?
+  verificationToken     String?
+  ownershipVerification Json?
+  dnsInstructions       Json?
+  sslCertificateId      String?
+  sslValidationRecords  Json?
+  lastVerifiedAt        DateTime?
+  expiresAt             DateTime?
+  notes                 String?
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
   creator               User           @relation("DomainCreator", fields: [createdBy], references: [id])
@@ -264,7 +262,6 @@ model Domain {
   @@index([createdBy])
   @@index([status])
   @@index([type])
-  @@index([azureCustomDomainName])
   @@map("domains")
 }
 
