@@ -7,7 +7,9 @@ import {
 export async function addCustomHostname(
   hostname: string,
   zoneId: string,
-  sslMethod: string = "txt"
+  sslMethod: string = "txt",
+  customOriginServer?: string,
+  customOriginSni?: string
 ) {
   const payload: any = {
     hostname,
@@ -21,6 +23,14 @@ export async function addCustomHostname(
       },
     },
   };
+
+  // Add custom origin server and SNI if provided
+  if (customOriginServer) {
+    payload.custom_origin_server = customOriginServer;
+  }
+  if (customOriginSni) {
+    payload.custom_origin_sni = customOriginSni;
+  }
 
   // Don't validate with schema since it doesn't include all optional fields
   // const validatedPayload = CustomHostnamePayloadSchema.parse(payload);
