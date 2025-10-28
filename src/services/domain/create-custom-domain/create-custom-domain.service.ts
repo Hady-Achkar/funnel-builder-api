@@ -25,7 +25,6 @@ import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 
 const ORIGIN_SERVER = 'origin.digitalsite.app';
-const ORIGIN_SNI = 'digitalsite.io';
 
 export class CreateCustomDomainService {
   static async create(
@@ -141,8 +140,7 @@ export class CreateCustomDomainService {
           validatedHostname,
           zoneId,
           "txt",
-          ORIGIN_SERVER,
-          ORIGIN_SNI
+          ORIGIN_SERVER
         );
         console.log(
           "[Domain Create] Initial hostname created:",
