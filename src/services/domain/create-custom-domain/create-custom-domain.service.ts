@@ -24,7 +24,7 @@ import {
 import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 
-const ORIGIN_SERVER = 'origin.digitalsite.app';
+const ORIGIN_SERVER = "132.164.127.184";
 
 export class CreateCustomDomainService {
   static async create(
