@@ -17,6 +17,7 @@ import { cacheService } from "../../cache/cache.service";
 import { determineWorkspacePlanType } from "./utils/workspace-plan";
 import { isSlugReserved } from "./utils/reserved-slugs";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
+import { createWorkspaceSubdomain } from "./utils/create-workspace-subdomain";
 export class CreateWorkspaceService {
   static async create(
     userId: number,
@@ -200,7 +201,23 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 11. INVALIDATE USER'S WORKSPACES CACHE
+      // 11. CREATE WORKSPACE SUBDOMAIN ON workspace.digitalsite.io
+      try {
+        await createWorkspaceSubdomain(
+          result.id,
+          result.slug,
+          userId
+        );
+        console.log(`[Workspace Create] Created workspace subdomain: ${result.slug}.workspace.digitalsite.io`);
+      } catch (subdomainError) {
+        console.error(
+          "[Workspace Create] Failed to create workspace subdomain:",
+          subdomainError
+        );
+        // Don't throw - workspace was created successfully, subdomain creation is not critical
+      }
+
+      // 12. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {
