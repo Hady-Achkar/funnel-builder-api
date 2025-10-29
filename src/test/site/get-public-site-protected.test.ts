@@ -4,12 +4,17 @@ import { checkFunnelAccess } from "../../middleware/funnelAccess";
 import { getPrisma } from "../../lib/prisma";
 import { getFunnelAccessFromCookies } from "../../lib/jwt";
 
+// Extend Request interface to include funnelId
+interface ExtendedRequest extends Request {
+  funnelId?: number;
+}
+
 vi.mock("../../lib/prisma");
 vi.mock("../../lib/jwt");
 
 describe("Get Public Site - Password Protection Tests", () => {
   let mockPrisma: any;
-  let mockRequest: Partial<Request>;
+  let mockRequest: Partial<ExtendedRequest>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
   let statusMock: any;
@@ -54,7 +59,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     };
 
     (getPrisma as any).mockReturnValue(mockPrisma);
-    (getFunnelAccessFromCookies).mockReturnValue(false);
+    vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -329,7 +334,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      (getFunnelAccessFromCookies).mockReturnValue(false);
+      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
 
       await checkFunnelAccess(
         mockRequest as Request,
@@ -373,7 +378,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      (getFunnelAccessFromCookies).mockReturnValue(true);
+      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(true);
 
       await checkFunnelAccess(
         mockRequest as Request,
@@ -409,7 +414,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      (getFunnelAccessFromCookies).mockReturnValue(false);
+      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
 
       await checkFunnelAccess(
         mockRequest as Request,
@@ -502,7 +507,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      (getFunnelAccessFromCookies).mockReturnValue(false);
+      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
 
       await checkFunnelAccess(
         mockRequest as Request,
