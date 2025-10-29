@@ -24,8 +24,6 @@ import {
 import { BadRequestError, BadGatewayError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
 
-const ORIGIN_SERVER = "132.164.127.184";
-
 export class CreateCustomDomainService {
   static async create(
     userId: number,
@@ -139,8 +137,9 @@ export class CreateCustomDomainService {
         initialHostname = await addCustomHostname(
           validatedHostname,
           zoneId,
-          "txt",
-          ORIGIN_SERVER
+          "txt"
+          // Don't pass ORIGIN_SERVER - Cloudflare doesn't accept IP addresses for custom_origin_server
+          // Traffic will be routed via the CNAME record to origin.cfVerificationDomain
         );
         console.log(
           "[Domain Create] Initial hostname created:",
