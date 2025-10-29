@@ -9,20 +9,20 @@ export const verifyPasswordController = async (
   next: NextFunction
 ) => {
   try {
-    const funnelId = parseInt(req.params.funnelId);
+    const funnelSlug = req.params.funnelSlug;
 
-    if (!funnelId || isNaN(funnelId)) {
-      throw new Error("Invalid funnel ID");
+    if (!funnelSlug) {
+      throw new Error("Funnel slug is required");
     }
 
     const result = await verifyFunnelPassword({
       ...req.body,
-      funnelId
+      funnelSlug
     });
 
     // Set session cookie if password is valid
-    if (result.valid) {
-      setFunnelAccessSessionCookie(res, funnelId);
+    if (result.valid && result.funnelId) {
+      setFunnelAccessSessionCookie(res, funnelSlug, result.funnelId);
     }
 
     return res.status(200).json(result);

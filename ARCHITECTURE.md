@@ -274,18 +274,27 @@ describe("Create Workspace", () => {
 | PUT    | `/api/funnel/:id`                             | updateFunnelController        | ❌ TODO |
 | DELETE | `/api/funnel/:id`                             | deleteFunnelController        | ✅ DONE |
 
-### Page Routes (8 routes)
+### Page Routes (9 routes)
 
-| Method | Path                                              | Controller                   | Status  |
-| ------ | ------------------------------------------------- | ---------------------------- | ------- |
-| POST   | `/api/page/funnels/:funnelId`                     | createPageController         | ❌ TODO |
-| PUT    | `/api/page/funnels/:funnelId/reorder`             | updatePageOrderController    | ❌ TODO |
-| GET    | `/api/page/:id`                                   | getPageController            | ❌ TODO |
-| PUT    | `/api/page/:id`                                   | updatePageController         | ❌ TODO |
-| DELETE | `/api/page/:id`                                   | deletePageController         | ❌ TODO |
-| POST   | `/api/page/:pageId/duplicate`                     | duplicatePageController      | ❌ TODO |
-| GET    | `/api/page/funnel/:funnelId/page-by-link/:linkId` | getPageByLinkingIdController | ❌ TODO |
-| POST   | `/api/page/:pageId/visit`                         | createPageVisitController    | ❌ TODO |
+| Method | Path                                              | Controller                          | Status  | Middleware         |
+| ------ | ------------------------------------------------- | ----------------------------------- | ------- | ------------------ |
+| POST   | `/api/page/funnels/:funnelId`                     | createPageController                | ❌ TODO |                    |
+| PUT    | `/api/page/funnels/:funnelId/reorder`             | updatePageOrderController           | ❌ TODO |                    |
+| GET    | `/api/page/:id`                                   | getPageController                   | ❌ TODO |                    |
+| PUT    | `/api/page/:id`                                   | updatePageController                | ❌ TODO |                    |
+| DELETE | `/api/page/:id`                                   | deletePageController                | ❌ TODO |                    |
+| POST   | `/api/page/:pageId/duplicate`                     | duplicatePageController             | ❌ TODO |                    |
+| GET    | `/api/page/funnel/:funnelId/page-by-link/:linkId` | getPageByLinkingIdController        | ❌ TODO |                    |
+| GET    | `/api/page/funnel/:funnelSlug/page/:linkingId`    | getPublicPageController             | ✅ DONE | checkFunnelAccess  |
+| POST   | `/api/page/:pageId/visit`                         | createPageVisitController           | ❌ TODO |                    |
+
+### Site Routes (1 route)
+
+| Method | Path                | Controller                        | Status  | Middleware         |
+| ------ | ------------------- | --------------------------------- | ------- | ------------------ |
+| GET    | `/api/sites/public` | GetPublicSiteController.getPublicSite | ✅ DONE | checkFunnelAccess  |
+
+**Note**: The `/api/sites/public?hostname=X` endpoint uses the `checkFunnelAccess` middleware to enforce password protection. When a funnel is password-protected, visitors must verify the password via `/api/funnel-settings/verify-password/:funnelId` before accessing the site data.
 
 ### Domain Routes (7 routes)
 
@@ -418,13 +427,13 @@ describe("Create Workspace", () => {
 
 ## 📊 Progress Summary
 
-**Total Routes**: 89
+**Total Routes**: 91
 
 - ❌ TODO: 76
-- ✅ DONE: 13
+- ✅ DONE: 15
 - 🚧 WIP: 0
 
-**Completion**: 14.61%
+**Completion**: 16.48%
 
 ---
 

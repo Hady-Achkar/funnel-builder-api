@@ -17,23 +17,37 @@ export const verifyFunnelPassword = async (
 
     const prisma = getPrisma();
 
-    const funnelSettings = await prisma.funnelSettings.findUnique({
-      where: { funnelId: validatedRequest.funnelId },
+    // First, find the funnel by slug (using findFirst since slug is not unique alone)
+    const funnel = await prisma.funnel.findFirst({
+      where: { slug: validatedRequest.funnelSlug },
       select: {
-        isPasswordProtected: true,
-        passwordHash: true,
+        id: true,
+        slug: true,
+        settings: {
+          select: {
+            isPasswordProtected: true,
+            passwordHash: true,
+          },
+        },
       },
     });
 
-    if (!funnelSettings) {
+    if (!funnel) {
+      throw new NotFoundError('Funnel not found');
+    }
+
+    if (!funnel.settings) {
       throw new NotFoundError('Funnel settings not found');
     }
+
+    const funnelSettings = funnel.settings;
 
     // If funnel is not password protected, allow access
     if (!funnelSettings.isPasswordProtected || !funnelSettings.passwordHash) {
       const response = {
         valid: true,
         message: 'Funnel is not password protected',
+        funnelId: funnel.id,
       };
       return verifyPasswordResponse.parse(response);
     }
@@ -44,6 +58,7 @@ export const verifyFunnelPassword = async (
     const response = {
       valid: isValidPassword,
       message: isValidPassword ? 'Password is correct' : 'Invalid password',
+      funnelId: funnel.id,
     };
 
     return verifyPasswordResponse.parse(response);

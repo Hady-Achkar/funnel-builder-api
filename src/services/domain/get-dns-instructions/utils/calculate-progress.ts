@@ -24,12 +24,11 @@ export const calculateProgress = (
     }
   }
 
+  // Count all SSL records, not just required ones
+  // This gives users visibility of all DNS records they'll eventually need
   if (dnsRecords.ssl && dnsRecords.ssl.length > 0) {
-    const requiredSslRecords = dnsRecords.ssl.filter(
-      (record) => record.required
-    );
-    totalRecords += requiredSslRecords.length;
-    completedRecords += requiredSslRecords.filter(
+    totalRecords += dnsRecords.ssl.length;
+    completedRecords += dnsRecords.ssl.filter(
       (record) => record.status === "active"
     ).length;
   }

@@ -413,14 +413,13 @@ describe("Get DNS Instructions Tests", () => {
         id: domainId,
       });
 
-      // totalRecords only counts required records
-      // For PENDING domain: ownership (required) + traffic (required) = 2
-      // SSL records are not required until domain is VERIFIED
+      // totalRecords now counts ALL records (ownership + traffic + all SSL records)
+      // This gives users visibility of all DNS records they'll need to configure
       let expectedCount = 0;
-      if (result.dnsRecords.ownership?.required) expectedCount++;
-      if (result.dnsRecords.traffic?.required) expectedCount++;
+      if (result.dnsRecords.ownership) expectedCount++;
+      if (result.dnsRecords.traffic) expectedCount++;
       if (result.dnsRecords.ssl) {
-        expectedCount += result.dnsRecords.ssl.filter(r => r.required).length;
+        expectedCount += result.dnsRecords.ssl.length; // Count all SSL records
       }
 
       expect(result.totalRecords).toBe(expectedCount);

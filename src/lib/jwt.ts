@@ -5,13 +5,18 @@ const JWT_SECRET =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 export interface FunnelAccessTokenPayload {
+  funnelSlug: string;
   funnelId: number;
   hasAccess: boolean;
   type: "funnel_access";
 }
 
-export const generateFunnelAccessToken = (funnelId: number): string => {
+export const generateFunnelAccessToken = (
+  funnelSlug: string,
+  funnelId: number
+): string => {
   const payload: FunnelAccessTokenPayload = {
+    funnelSlug,
     funnelId,
     hasAccess: true,
     type: "funnel_access",
@@ -35,10 +40,12 @@ export const verifyFunnelAccessToken = (
 
 export const setFunnelAccessSessionCookie = (
   res: Response,
-  funnelId: number
+  funnelSlug: string,
+  funnelId?: number
 ): void => {
-  const token = generateFunnelAccessToken(funnelId);
-  const cookieName = `funnel_access_${funnelId}`;
+  // funnelId is optional for backward compatibility, but not used in cookie name anymore
+  const token = generateFunnelAccessToken(funnelSlug, funnelId || 0);
+  const cookieName = `funnel_access_${funnelSlug}`;
   res.cookie(cookieName, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -49,9 +56,9 @@ export const setFunnelAccessSessionCookie = (
 
 export const clearFunnelAccessCookie = (
   res: Response,
-  funnelId: number
+  funnelSlug: string
 ): void => {
-  const cookieName = `funnel_access_${funnelId}`;
+  const cookieName = `funnel_access_${funnelSlug}`;
   res.clearCookie(cookieName, {
     path: "/",
     httpOnly: true,
@@ -62,9 +69,9 @@ export const clearFunnelAccessCookie = (
 
 export const getFunnelAccessFromCookies = (
   cookies: any,
-  funnelId: number
+  funnelSlug: string
 ): boolean => {
-  const cookieName = `funnel_access_${funnelId}`;
+  const cookieName = `funnel_access_${funnelSlug}`;
   const token = cookies[cookieName];
 
   if (!token) {
@@ -72,5 +79,5 @@ export const getFunnelAccessFromCookies = (
   }
 
   const decoded = verifyFunnelAccessToken(token);
-  return decoded !== null && decoded.funnelId === funnelId && decoded.hasAccess;
+  return decoded !== null && decoded.funnelSlug === funnelSlug && decoded.hasAccess;
 };

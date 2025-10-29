@@ -11,7 +11,7 @@ const router = Router();
 
 // Public endpoints - no authentication required
 router.get("/:funnelId", getFunnelSettingsController);
-router.post("/verify-password/:funnelId", verifyPasswordController);
+router.post("/verify-password/:funnelSlug", verifyPasswordController);
 
 // Protected endpoints - requires authentication
 router.put("/:id", authenticateToken, updateFunnelSettingsController);

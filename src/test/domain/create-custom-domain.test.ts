@@ -424,7 +424,9 @@ describe("Create Custom Domain Tests", () => {
 
       expect(vi.mocked(cloudflareCustomHostname.addCustomHostname)).toHaveBeenCalledWith(
         "www.example.com",
-        "test-zone-id"
+        "test-zone-id",
+        "txt",
+        "132.164.127.184"
       );
     });
 
@@ -619,7 +621,9 @@ describe("Create Custom Domain Tests", () => {
 
       expect(vi.mocked(cloudflareCustomHostname.addCustomHostname)).toHaveBeenCalledWith(
         hostname,
-        "test-zone-id"
+        "test-zone-id",
+        "txt",
+        "132.164.127.184"
       );
       expect(vi.mocked(cloudflareCustomHostname.getCustomHostnameDetails)).toHaveBeenCalledWith(
         mockCloudflareHostname.id,
