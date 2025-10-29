@@ -117,8 +117,8 @@ export const checkFunnelAccess = async (
       return next(); // User has valid access
     }
 
-    // No access - return 403 with password requirement info (now includes funnelSlug)
-    return res.status(403).json({
+    // No access - return 200 with password requirement info (now includes funnelSlug)
+    return res.status(200).json({
       error: 'Password required',
       message: 'This funnel is password protected. Please provide the correct password.',
       requiresPassword: true,

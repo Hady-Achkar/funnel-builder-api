@@ -315,7 +315,7 @@ describe("Get Public Site - Password Protection Tests", () => {
   });
 
   describe("Password Protected Site", () => {
-    it("should return 403 with requiresPassword when site is password protected and no valid cookie", async () => {
+    it("should return 200 with requiresPassword when site is password protected and no valid cookie", async () => {
       mockRequest.query = { hostname: testHostname };
       mockRequest.cookies = {};
 
@@ -346,7 +346,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         mockRequest.cookies,
         testFunnelSlug
       );
-      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
@@ -422,7 +422,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         mockNext
       );
 
-      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
@@ -515,7 +515,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         mockNext
       );
 
-      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
