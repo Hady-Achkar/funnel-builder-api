@@ -70,7 +70,6 @@ export const CustomHostnamePayloadSchema = z.object({
       tls_1_3: z.string(),
     }),
   }),
-  custom_origin_server: z.string().optional(),
   custom_origin_sni: z.string().optional(),
 });
 
@@ -97,7 +96,6 @@ export const CustomHostnameResultSchema = z.object({
       value: z.string(),
     })
     .optional(),
-  custom_origin_server: z.string().optional(),
   custom_origin_sni: z.string().optional(),
 });
 
@@ -201,18 +199,34 @@ export type CloudflareAPIResponse<T = any> = {
 };
 
 // Verification Status Types
-export type VerificationStatusResult = z.infer<typeof VerificationStatusResultSchema>;
+export type VerificationStatusResult = z.infer<
+  typeof VerificationStatusResultSchema
+>;
 export type StatusUpdateData = z.infer<typeof StatusUpdateDataSchema>;
 
 // Status Enums
-export type CloudflareHostnameStatus = "active" | "pending" | "moved" | "deleted" | string;
-export type CloudflareSslStatus = "active" | "pending_validation" | "pending_issuance" | "pending_deployment" | string;
+export type CloudflareHostnameStatus =
+  | "active"
+  | "pending"
+  | "moved"
+  | "deleted"
+  | string;
+export type CloudflareSslStatus =
+  | "active"
+  | "pending_validation"
+  | "pending_issuance"
+  | "pending_deployment"
+  | string;
 
 // Operation Result Types
 export type CreateRecordResult = z.infer<typeof CreateRecordResultSchema>;
 export type DeleteRecordResult = z.infer<typeof DeleteRecordResultSchema>;
-export type CreateCustomHostnameResult = z.infer<typeof CreateCustomHostnameResultSchema>;
-export type DeleteCustomHostnameResult = z.infer<typeof DeleteCustomHostnameResultSchema>;
+export type CreateCustomHostnameResult = z.infer<
+  typeof CreateCustomHostnameResultSchema
+>;
+export type DeleteCustomHostnameResult = z.infer<
+  typeof DeleteCustomHostnameResultSchema
+>;
 
 // Zone Query Types
 export type ZoneListResult = z.infer<typeof ZoneListResultSchema>;

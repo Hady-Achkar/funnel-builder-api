@@ -48,11 +48,6 @@ export async function addCustomHostname(
     },
   };
 
-  // Add custom origin server if provided
-  if (options?.customOriginServer) {
-    payload.custom_origin_server = options.customOriginServer;
-  }
-
   // Add custom origin SNI if provided (requires Cloudflare Enterprise)
   if (options?.customOriginSni) {
     payload.custom_origin_sni = options.customOriginSni;

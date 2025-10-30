@@ -144,8 +144,6 @@ export class CreateCustomDomainService {
           config,
           {
             sslMethod: "txt",
-            // Don't pass customOriginServer - Cloudflare doesn't accept IP addresses for custom_origin_server
-            // Traffic will be routed via the CNAME record to origin.{verificationDomain}
           }
         );
         console.log(
