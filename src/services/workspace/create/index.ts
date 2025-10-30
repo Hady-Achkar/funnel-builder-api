@@ -11,13 +11,15 @@ import {
   WorkspacePermission,
   WorkspaceStatus,
   UserPlan,
+  DomainType,
+  DomainStatus,
+  SslStatus,
 } from "../../../generated/prisma-client";
 import { rolePermissionPresets } from "../../../types/workspace/update";
 import { cacheService } from "../../cache/cache.service";
 import { determineWorkspacePlanType } from "./utils/workspace-plan";
 import { isSlugReserved } from "./utils/reserved-slugs";
 import { UserWorkspaceAllocations } from "../../../utils/allocations/user-workspace-allocations";
-import { createWorkspaceSubdomain } from "./utils/create-workspace-subdomain";
 export class CreateWorkspaceService {
   static async create(
     userId: number,
@@ -132,6 +134,20 @@ export class CreateWorkspaceService {
 
       // 10. CREATE WORKSPACE IN TRANSACTION
       const result = await prisma.$transaction(async (tx) => {
+        // Check if workspace subdomain already exists
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const fullHostname = `${data.slug}.${domain}`;
+
+        const existingDomain = await tx.domain.findUnique({
+          where: { hostname: fullHostname },
+        });
+
+        if (existingDomain) {
+          throw new BadRequestError(
+            `The subdomain "${data.slug}.${domain}" is already taken. Please choose a different workspace name.`
+          );
+        }
+
         // Create workspace with planType and status
         const workspaceData: {
           name: string;
@@ -158,6 +174,25 @@ export class CreateWorkspaceService {
         const workspace = await tx.workspace.create({
           data: workspaceData,
         });
+
+        // Create workspace subdomain record in database
+        await tx.domain.create({
+          data: {
+            hostname: fullHostname,
+            type: DomainType.WORKSPACE_SUBDOMAIN,
+            status: DomainStatus.ACTIVE,
+            sslStatus: SslStatus.ACTIVE,
+            workspaceId: null, // Not associated with any workspace
+            createdBy: userId,
+            cloudflareHostnameId: null,
+            cloudflareZoneId: null,
+            cloudflareRecordId: null,
+          },
+        });
+
+        console.log(
+          `[Workspace Create] Created workspace subdomain record: ${fullHostname}`
+        );
 
         // Create owner membership with all permissions
         await tx.workspaceMember.create({
@@ -201,23 +236,7 @@ export class CreateWorkspaceService {
         return workspace;
       });
 
-      // 11. CREATE WORKSPACE SUBDOMAIN ON workspace.digitalsite.io
-      try {
-        await createWorkspaceSubdomain(
-          result.id,
-          result.slug,
-          userId
-        );
-        console.log(`[Workspace Create] Created workspace subdomain: ${result.slug}.workspace.digitalsite.io`);
-      } catch (subdomainError) {
-        console.error(
-          "[Workspace Create] Failed to create workspace subdomain:",
-          subdomainError
-        );
-        // Don't throw - workspace was created successfully, subdomain creation is not critical
-      }
-
-      // 12. INVALIDATE USER'S WORKSPACES CACHE
+      // 11. INVALIDATE USER'S WORKSPACES CACHE
       try {
         await cacheService.invalidateUserWorkspacesCache(userId);
       } catch (cacheError) {

@@ -4,13 +4,12 @@ import {
   SslStatus,
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 import {
   PermissionManager,
   PermissionAction,
 } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { WorkspaceSubdomainAllocations } from "../../../utils/allocations/workspace-subdomain-allocations";
-import { createARecord } from "./utils/create-a-record";
+import { createARecord } from "../../../../api/cloudflare";
 import {
   CreateSubdomainResponse,
   createSubdomainRequest,
@@ -27,11 +26,11 @@ export class CreateSubdomainService {
     domainConfig?: DomainConfig
   ): Promise<CreateSubdomainResponse> {
     try {
-      console.log('[Subdomain Service] Received request data:', requestData);
-      console.log('[Subdomain Service] Request data type:', typeof requestData);
+      console.log("[Subdomain Service] Received request data:", requestData);
+      console.log("[Subdomain Service] Request data type:", typeof requestData);
 
       const validatedData = createSubdomainRequest.parse(requestData);
-      console.log('[Subdomain Service] Validated data:', validatedData);
+      console.log("[Subdomain Service] Validated data:", validatedData);
 
       const { subdomain, workspaceSlug } = validatedData;
 
@@ -99,43 +98,52 @@ export class CreateSubdomainService {
         );
       }
 
-      // Use provided domain config or default to environment variable
-      const baseDomain = domainConfig?.baseDomain || process.env.CF_DOMAIN || "digitalsite.app";
+      // Use provided domain config or default to environment variable for digitalsite.app
+      const baseDomain =
+        domainConfig?.baseDomain ||
+        process.env.CF_SUBDOMAIN ||
+        "digitalsite.app";
       const fullHostname = `${subdomain}.${baseDomain}`;
 
+      // Check if subdomain already exists in database
       const existingDomain = await getPrisma().domain.findUnique({
         where: { hostname: fullHostname },
       });
 
       if (existingDomain) {
         throw new BadRequestError(
-          "This subdomain is already taken. Please choose another one."
+          `The subdomain "${subdomain}" is already in use. Please try a different name.`
         );
       }
 
+      // Read Cloudflare configuration from environment variables
+      const config = {
+        apiToken: process.env.CF_API_TOKEN!,
+        accountId: process.env.CF_ACCOUNT_ID,
+      };
 
-      const cloudflareHelper = getCloudFlareAPIHelper();
-      const config = cloudflareHelper.getConfig();
-
-      // Use provided config or default values
-      const zoneId = domainConfig?.zoneId || config.cfZoneId;
-      const targetIp = domainConfig?.targetIp || "74.234.194.84";
+      // Use provided config or default values from environment
+      const zoneId = domainConfig?.zoneId || process.env.CF_ZONE_ID!;
+      const targetIp = domainConfig?.targetIp || process.env.CF_IP!;
 
       let aRecord: any;
       try {
+        // Use Cloudflare API function directly
         aRecord = await createARecord(
           subdomain,
           zoneId,
-          targetIp
+          targetIp,
+          config,
+          { ttl: 3600, proxied: true }
         );
       } catch (error: any) {
         const errMsg =
           error.response?.data?.errors?.[0]?.message || error.message;
-        console.error(`[Subdomain Create] CloudFlare API Error: ${errMsg}`, {
+        console.error(`[Subdomain Create] Cloudflare API Error: ${errMsg}`, {
           stack: error.stack,
         });
         throw new BadGatewayError(
-          "External service error. Please try again later."
+          "We couldn't create your subdomain at this time. Please try again later or contact support if the problem persists."
         );
       }
 
@@ -172,13 +180,18 @@ export class CreateSubdomainService {
       return createSubdomainResponse.parse(response);
     } catch (error: unknown) {
       if (error instanceof ZodError) {
-        console.error('[Subdomain Service] Zod validation error:', error.issues);
+        console.error(
+          "[Subdomain Service] Zod validation error:",
+          error.issues
+        );
         const firstIssue = error.issues[0];
-        const fieldPath = firstIssue?.path?.join('.') || 'unknown field';
-        const message = `${fieldPath}: ${firstIssue?.message || "Invalid request data"}`;
+        const fieldPath = firstIssue?.path?.join(".") || "unknown field";
+        const message = `${fieldPath}: ${
+          firstIssue?.message || "Invalid request data"
+        }`;
         throw new BadRequestError(message);
       }
-      console.error('[Subdomain Service] Unexpected error:', error);
+      console.error("[Subdomain Service] Unexpected error:", error);
       throw error;
     }
   }

@@ -73,6 +73,36 @@ export class DeleteWorkspaceService {
         });
       });
 
+      // Delete workspace subdomain record from database
+      try {
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const fullHostname = `${workspace.slug}.${domain}`;
+
+        const deletedDomain = await prisma.domain.deleteMany({
+          where: {
+            hostname: fullHostname,
+            type: "WORKSPACE_SUBDOMAIN",
+          },
+        });
+
+        if (deletedDomain.count > 0) {
+          console.log(
+            `[Workspace Delete] Deleted workspace subdomain record: ${fullHostname}`
+          );
+        } else {
+          console.log(
+            `[Workspace Delete] No subdomain record found for: ${fullHostname}`
+          );
+        }
+      } catch (subdomainError) {
+        console.error(
+          "[Workspace Delete] Failed to delete workspace subdomain record:",
+          subdomainError
+        );
+        // Don't fail the delete operation if subdomain cleanup fails
+        // The workspace has already been deleted from the database
+      }
+
       // Invalidate all caches related to this workspace
       try {
         // Invalidate workspace cache by ID

@@ -109,8 +109,8 @@ az containerapp update \
     "REDIS_TLS=$REDIS_TLS" \
     "CF_API_TOKEN=secretref:cf-api-token" \
     "CF_ACCOUNT_ID=$CF_ACCOUNT_ID" \
-    "CF_VERIFICATION_DOMAIN=$CF_VERIFICATION_DOMAIN" \
-    "CF_DOMAIN=$CF_DOMAIN" \
+    "CF_SUBDOMAIN=$CF_SUBDOMAIN" \
+    "CF_SUBDOMAIN=$CF_SUBDOMAIN" \
     "CF_ZONE_ID=$CF_ZONE_ID" \
     "STORAGE_URL=$STORAGE_URL" \
     "AZURE_STORAGE_CONNECTION_STRING=secretref:azure-storage-connection-string" \

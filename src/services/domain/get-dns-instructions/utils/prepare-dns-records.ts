@@ -1,4 +1,3 @@
-import { getCloudFlareAPIHelper } from "../../../../utils/domain-utils/cloudflare-api";
 import { DNSRecords, DNSRecordStatus } from "../../../../types/domain/get-dns-instructions";
 
 export const prepareDNSRecords = (
@@ -23,12 +22,11 @@ export const prepareDNSRecords = (
 
   if (domainRecord.dnsInstructions) {
     const trafficStatus = getRecordStatus(domainRecord.status, "traffic");
-    const cloudflareHelper = getCloudFlareAPIHelper();
-    const config = cloudflareHelper.getConfig();
+    const verificationDomain = process.env.CF_SUBDOMAIN || "digitalsite.app";
     dnsRecords.traffic = {
       type: domainRecord.dnsInstructions.type || "CNAME",
       name: domainRecord.dnsInstructions.name,
-      value: `origin.${config.cfVerificationDomain}`,
+      value: `origin.${verificationDomain}`,
       purpose: domainRecord.dnsInstructions.purpose || "Live Traffic",
       status: trafficStatus,
       required: true,

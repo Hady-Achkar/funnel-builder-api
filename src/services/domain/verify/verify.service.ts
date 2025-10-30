@@ -1,6 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
-import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import { getCustomHostnameDetails } from "../../../../api/cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -72,11 +71,14 @@ export class VerifyDomainService {
         throw new BadRequestError('Domain is not configured correctly');
       }
 
-      const cloudflareHelper = getCloudFlareAPIHelper();
-      const config = cloudflareHelper.getConfig();
+      // Read Cloudflare configuration from environment variables
+      const config = {
+        apiToken: process.env.CF_API_TOKEN!,
+        accountId: process.env.CF_ACCOUNT_ID,
+      };
       // Use custom hostname zone (digitalsite.app) for custom domains
-      const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
-      const cfHostname = await getCustomHostnameDetails(customHostnameId, zoneId);
+      const zoneId = process.env.CF_ZONE_ID!;
+      const cfHostname = await getCustomHostnameDetails(customHostnameId, zoneId, config);
 
       console.log('[Verify Domain] Cloudflare response:', JSON.stringify(cfHostname, null, 2));
 

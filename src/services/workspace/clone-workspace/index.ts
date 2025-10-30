@@ -11,6 +11,9 @@ import {
 import {
   $Enums,
   UserPlan,
+  DomainType,
+  DomainStatus,
+  SslStatus,
 } from "../../../generated/prisma-client";
 export class CloneWorkspaceService {
   static async cloneWorkspace(
@@ -268,31 +271,66 @@ export class CloneWorkspaceService {
           },
         });
 
-        // 6.4. Create Domain record in database (NOT associated with workspace to avoid consuming allocation slot)
-        const workspaceDomain = process.env.WORKSPACE_DOMAIN || "digitalsite.com";
-        const workspaceHostname = `${clonedWorkspace.slug}.${workspaceDomain}`;
-
-        await tx.domain.create({
-          data: {
-            hostname: workspaceHostname,
-            type: $Enums.DomainType.SUBDOMAIN,
-            status: $Enums.DomainStatus.ACTIVE,
-            sslStatus: $Enums.SslStatus.ACTIVE,
-            creator: {
-              connect: { id: data.newOwnerId },
-            },
-            lastVerifiedAt: new Date(),
-            // workspaceId intentionally omitted - defaults to null to avoid consuming allocation
-          },
-        });
-
-        console.log(`✅ Cloned workspace subdomain created: ${workspaceHostname}`);
-
         return {
           clonedWorkspace,
           cloneRecord,
         };
       });
+
+      // 6. CREATE WORKSPACE SUBDOMAIN RECORD IN DATABASE (WITH CONFLICT RESOLUTION)
+      // This creates database record for: {username}.digitalsite.io
+      const domain = process.env.WORKSPACE_DOMAIN!;
+      let subdomainSlug = result.clonedWorkspace.slug;
+      let finalHostname = `${subdomainSlug}.${domain}`;
+      let subdomainCounter = 2;
+      let domainCreated = false;
+
+      // Find available subdomain with incremental naming
+      while (subdomainCounter <= 99) {
+        const existingDomain = await prisma.domain.findUnique({
+          where: { hostname: finalHostname },
+        });
+
+        if (!existingDomain) {
+          // Hostname available, create record
+          await prisma.domain.create({
+            data: {
+              hostname: finalHostname,
+              type: DomainType.WORKSPACE_SUBDOMAIN,
+              status: DomainStatus.ACTIVE,
+              sslStatus: SslStatus.ACTIVE,
+              workspaceId: null, // Not associated with any workspace
+              createdBy: result.clonedWorkspace.ownerId,
+              cloudflareHostnameId: null,
+              cloudflareZoneId: null,
+              cloudflareRecordId: null,
+            },
+          });
+
+          console.log(
+            `[Workspace Clone] Created workspace subdomain record: ${finalHostname}`
+          );
+          domainCreated = true;
+          break;
+        } else {
+          // Hostname taken, try next increment
+          console.log(
+            `[Workspace Clone] Subdomain already exists: ${finalHostname}, trying next increment`
+          );
+          subdomainSlug = `${result.clonedWorkspace.slug}-${subdomainCounter}`;
+          finalHostname = `${subdomainSlug}.${domain}`;
+          subdomainCounter++;
+        }
+      }
+
+      if (!domainCreated) {
+        console.error(
+          `[Workspace Clone] Unable to find available subdomain after ${
+            subdomainCounter - 1
+          } attempts`
+        );
+        // Non-critical error, workspace is still created
+      }
 
       // 7. RETURN RESPONSE
       return {

@@ -5,11 +5,10 @@ import {
 } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
 import { validateHostname, parseDomain } from "./utils/domain-validation";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 import {
   addCustomHostname,
   getCustomHostnameDetails,
-} from "../../../utils/domain-utils/cloudflare-custom-hostname";
+} from "../../../../api/cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -121,10 +120,15 @@ export class CreateCustomDomainService {
         );
       }
 
-      const cloudflareHelper = getCloudFlareAPIHelper();
-      const config = cloudflareHelper.getConfig();
+      // Read Cloudflare configuration from environment variables
+      const config = {
+        apiToken: process.env.CF_API_TOKEN!,
+        accountId: process.env.CF_ACCOUNT_ID,
+      };
+
       // Use custom hostname zone (digitalsite.app) for custom domains
-      const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
+      const zoneId = process.env.CF_ZONE_ID!;
+      const verificationDomain = process.env.CF_SUBDOMAIN;
 
       let initialHostname: any, detailedHostname: any;
       try {
@@ -137,9 +141,12 @@ export class CreateCustomDomainService {
         initialHostname = await addCustomHostname(
           validatedHostname,
           zoneId,
-          "txt"
-          // Don't pass ORIGIN_SERVER - Cloudflare doesn't accept IP addresses for custom_origin_server
-          // Traffic will be routed via the CNAME record to origin.cfVerificationDomain
+          config,
+          {
+            sslMethod: "txt",
+            // Don't pass customOriginServer - Cloudflare doesn't accept IP addresses for custom_origin_server
+            // Traffic will be routed via the CNAME record to origin.{verificationDomain}
+          }
         );
         console.log(
           "[Domain Create] Initial hostname created:",
@@ -148,7 +155,8 @@ export class CreateCustomDomainService {
 
         detailedHostname = await getCustomHostnameDetails(
           initialHostname.id,
-          zoneId
+          zoneId,
+          config
         );
         console.log(
           "[Domain Create] Got detailed hostname:",
@@ -173,7 +181,8 @@ export class CreateCustomDomainService {
 
           detailedHostname = await getCustomHostnameDetails(
             initialHostname.id,
-            zoneId
+            zoneId,
+            config
           );
 
           if (
@@ -222,7 +231,7 @@ export class CreateCustomDomainService {
       const cnameInstructions = {
         type: "CNAME",
         name: parsedDomain.subdomain,
-        value: `origin.${config.cfVerificationDomain}`,
+        value: `origin.${verificationDomain}`,
         purpose: "Live Traffic",
       };
 
@@ -260,7 +269,7 @@ export class CreateCustomDomainService {
         {
           type: "CNAME" as const,
           name: parsedDomain.subdomain,
-          value: `origin.${config.cfVerificationDomain}`,
+          value: `origin.${verificationDomain}`,
           purpose: "Live Traffic",
         },
       ];

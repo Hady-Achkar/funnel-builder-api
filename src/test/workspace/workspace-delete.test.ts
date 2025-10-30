@@ -10,6 +10,14 @@ import { FunnelStatus, DomainStatus } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
 
+// Mock the Cloudflare API functions - pure API layer, no environment variables
+vi.mock("../../../api/cloudflare", () => ({
+  deleteWorkspaceSubdomain: vi.fn().mockResolvedValue({
+    success: true,
+    deleted: ["mock-dns-record-id"],
+  }),
+}));
+
 describe("Workspace Deletion Tests", () => {
   let mockPrisma: any;
 
@@ -25,6 +33,9 @@ describe("Workspace Deletion Tests", () => {
         deleteMany: vi.fn(),
       },
       workspaceRolePermTemplate: {
+        deleteMany: vi.fn(),
+      },
+      domain: {
         deleteMany: vi.fn(),
       },
       $transaction: vi.fn(),
@@ -260,6 +271,91 @@ describe("Workspace Deletion Tests", () => {
       await expect(
         DeleteWorkspaceService.deleteBySlug(userId, slug)
       ).rejects.toThrow("Database error");
+    });
+
+    it("should delete workspace subdomain record from database after deletion", async () => {
+      const userId = 1;
+      const slug = "test-workspace";
+      const mockWorkspace = {
+        id: 1,
+        name: "Test Workspace",
+        slug: slug,
+        owner: { id: userId },
+        members: [],
+        funnels: [],
+        domains: [],
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback({
+          workspaceRolePermTemplate: {
+            deleteMany: vi.fn().mockResolvedValue({}),
+          },
+          workspaceMember: {
+            deleteMany: vi.fn().mockResolvedValue({}),
+          },
+          workspace: {
+            delete: vi.fn().mockResolvedValue(mockWorkspace),
+          },
+        });
+      });
+
+      mockPrisma.domain.deleteMany.mockResolvedValue({ count: 1 });
+
+      await DeleteWorkspaceService.deleteBySlug(userId, slug);
+
+      expect(mockPrisma.domain.deleteMany).toHaveBeenCalledWith({
+        where: {
+          hostname: `${slug}.${process.env.WORKSPACE_DOMAIN}`,
+          type: "WORKSPACE_SUBDOMAIN",
+        },
+      });
+    });
+
+    it("should not fail workspace deletion if DNS cleanup fails", async () => {
+      const userId = 1;
+      const slug = "test-workspace";
+      const mockWorkspace = {
+        id: 1,
+        name: "Test Workspace",
+        slug: slug,
+        owner: { id: userId },
+        members: [],
+        funnels: [],
+        domains: [],
+      };
+
+      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback({
+          workspaceRolePermTemplate: {
+            deleteMany: vi.fn().mockResolvedValue({}),
+          },
+          workspaceMember: {
+            deleteMany: vi.fn().mockResolvedValue({}),
+          },
+          workspace: {
+            delete: vi.fn().mockResolvedValue(mockWorkspace),
+          },
+        });
+      });
+
+      // Mock DNS deletion failure
+      const { deleteWorkspaceSubdomain } = await import("../../../api/cloudflare");
+      (deleteWorkspaceSubdomain as any).mockResolvedValueOnce({
+        success: false,
+        deleted: [],
+        error: "DNS record not found",
+      });
+
+      // Should not throw even if DNS cleanup fails
+      const result = await DeleteWorkspaceService.deleteBySlug(userId, slug);
+
+      expect(result).toEqual({
+        success: true,
+        message: "Workspace has been deleted successfully",
+      });
     });
   });
 });
