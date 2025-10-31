@@ -123,6 +123,9 @@ service-principal.json
 # Environment files
 .env*
 !.env.example
+!.env.test.example
+.env
+.env.test
 .env.local
 .env.staging
 .env.production

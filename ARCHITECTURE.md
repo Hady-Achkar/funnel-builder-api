@@ -186,36 +186,177 @@ export class CreateWorkspaceController {
 
 **Location**: `src/test/{modelName}/{functionName}.test.ts`
 
-**Requirements**:
+**CRITICAL: Testing Standards & Safety**
 
-- Test the actual controller and service (not mocks)
-- Cover all edge cases
-- Test validation failures
-- Test authorization scenarios
-- Test success scenarios
-- Use descriptive test names
+See [TESTING.md](TESTING.md) for comprehensive testing documentation.
+
+#### 4.1 Testing Approach: Unit Tests with Mocked Prisma (REQUIRED)
+
+**REQUIRED PATTERN**: All tests MUST mock Prisma. Integration tests with real databases are discouraged.
+
+**Why Mock Prisma?**
+
+- ✅ Fast execution (no I/O)
+- ✅ No database setup required
+- ✅ Complete isolation
+- ✅ Zero production data risk
+- ✅ Tests business logic, not database functionality
 
 **Example**:
 
 ```typescript
-// src/test/workspace/create-workspace.test.ts
-describe("Create Workspace", () => {
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { getPrisma } from "../../lib/prisma";
+import { MyController } from "../../controllers/my-controller";
+
+// REQUIRED: Mock Prisma module
+vi.mock("../../lib/prisma");
+
+describe("MyController", () => {
+  let mockPrisma: any;
+
+  beforeEach(() => {
+    // Create mock Prisma client
+    mockPrisma = {
+      user: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
+      workspace: {
+        findMany: vi.fn(),
+      },
+    };
+
+    // Make getPrisma() return our mock
+    (getPrisma as any).mockReturnValue(mockPrisma);
+  });
+
   describe("Validation", () => {
-    it("should reject invalid slug format", async () => {});
-    it("should reject empty name", async () => {});
+    it("should reject invalid slug format", async () => {
+      // Test validation logic with mocked responses
+    });
   });
 
   describe("Authorization", () => {
-    it("should reject unauthenticated requests", async () => {});
-    it("should reject when workspace limit reached", async () => {});
+    it("should reject unauthenticated requests", async () => {
+      // Test auth logic with mocked responses
+    });
   });
 
   describe("Success Cases", () => {
-    it("should create workspace with valid data", async () => {});
-    it("should generate unique slug", async () => {});
+    it("should create workspace with valid data", async () => {
+      // Arrange: Setup mock responses
+      mockPrisma.workspace.create.mockResolvedValue({
+        id: 1,
+        name: "Test",
+      });
+
+      // Act: Call controller
+      const result = await controller.create(mockReq, mockRes, mockNext);
+
+      // Assert: Verify behavior
+      expect(mockPrisma.workspace.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ name: "Test" }),
+      });
+    });
   });
 });
 ```
+
+#### 4.2 Test Coverage Requirements
+
+- Test all validation rules (Zod schema edge cases)
+- Test authorization/authentication scenarios
+- Test success cases with various inputs
+- Test error handling paths
+- Use descriptive test names that explain the scenario
+- Group related tests with `describe()` blocks
+
+#### 4.3 Production Data Safety
+
+**CRITICAL PROTECTION MECHANISMS**:
+
+1. **Automatic Database Validation**: [src/test/test-safety-guard.ts](src/test/test-safety-guard.ts)
+
+   - Validates database name contains "test"
+   - Blocks production database names (ds-dev, ds-prod, funnel_builder)
+   - Runs automatically before EVERY test execution
+
+2. **Environment Isolation**: [vitest.config.ts](vitest.config.ts)
+
+   - Loads `.env.test` with `override: true`
+   - Runs safety checks at config level
+   - Forces NODE_ENV=test
+
+3. **Prisma Protection**: [src/lib/prisma.ts](src/lib/prisma.ts)
+
+   - Throws error if `getPrisma()` called in test mode without setup
+   - Forces explicit mock or `setPrismaClient()` call
+
+4. **Pre-Test Checks**: [package.json](package.json)
+   - Verifies `.env.test` exists before running tests
+   - Fails fast if configuration is missing
+
+**Result**: Multiple layers of protection ensure tests NEVER connect to production databases.
+
+#### 4.4 Integration Tests (Use Only If Absolutely Necessary)
+
+**Discouraged**: Only use for complex workflows that genuinely require real database.
+
+**If you must use integration tests**:
+
+```typescript
+import { PrismaClient } from "../../generated/prisma-client";
+import { getPrisma, setPrismaClient } from "../../lib/prisma";
+
+describe("Complex Integration Test", () => {
+  const prismaClient = new PrismaClient();
+  setPrismaClient(prismaClient);
+  const prisma = getPrisma();
+
+  beforeAll(async () => {
+    // Safety check - log which database is being used
+    const dbUrl = process.env.DATABASE_URL || "";
+    const dbName = dbUrl.split("/").pop()?.split("?")[0];
+    console.log(`🧪 Running tests against database: ${dbName}`);
+  });
+
+  beforeEach(async () => {
+    // Clean up test data before each test
+    await prisma.payment.deleteMany({});
+    await prisma.user.deleteMany({});
+  });
+
+  afterAll(async () => {
+    // Final cleanup and disconnect
+    await prisma.$disconnect();
+  });
+
+  it("should perform complex workflow", async () => {
+    // Test with real database
+  });
+});
+```
+
+**Note**: Integration tests are automatically protected by safety guards but are slower and require database setup.
+
+#### 4.5 External Service Mocking
+
+**ALWAYS mock external APIs**:
+
+```typescript
+// Mock Cloudflare API
+vi.mock("../../../api/cloudflare");
+
+// Mock SendGrid
+vi.mock("@sendgrid/mail");
+
+// Mock Axios for payment providers
+vi.mock("axios");
+```
+
+**Never make real API calls in tests** - they're slow, unreliable, and may have side effects.
 
 ---
 
@@ -276,23 +417,23 @@ describe("Create Workspace", () => {
 
 ### Page Routes (9 routes)
 
-| Method | Path                                              | Controller                          | Status  | Middleware         |
-| ------ | ------------------------------------------------- | ----------------------------------- | ------- | ------------------ |
-| POST   | `/api/page/funnels/:funnelId`                     | createPageController                | ❌ TODO |                    |
-| PUT    | `/api/page/funnels/:funnelId/reorder`             | updatePageOrderController           | ❌ TODO |                    |
-| GET    | `/api/page/:id`                                   | getPageController                   | ❌ TODO |                    |
-| PUT    | `/api/page/:id`                                   | updatePageController                | ❌ TODO |                    |
-| DELETE | `/api/page/:id`                                   | deletePageController                | ❌ TODO |                    |
-| POST   | `/api/page/:pageId/duplicate`                     | duplicatePageController             | ❌ TODO |                    |
-| GET    | `/api/page/funnel/:funnelId/page-by-link/:linkId` | getPageByLinkingIdController        | ❌ TODO |                    |
-| GET    | `/api/page/funnel/:funnelSlug/page/:linkingId`    | getPublicPageController             | ✅ DONE | checkFunnelAccess  |
-| POST   | `/api/page/:pageId/visit`                         | createPageVisitController           | ❌ TODO |                    |
+| Method | Path                                              | Controller                   | Status  | Middleware        |
+| ------ | ------------------------------------------------- | ---------------------------- | ------- | ----------------- |
+| POST   | `/api/page/funnels/:funnelId`                     | createPageController         | ❌ TODO |                   |
+| PUT    | `/api/page/funnels/:funnelId/reorder`             | updatePageOrderController    | ❌ TODO |                   |
+| GET    | `/api/page/:id`                                   | getPageController            | ❌ TODO |                   |
+| PUT    | `/api/page/:id`                                   | updatePageController         | ❌ TODO |                   |
+| DELETE | `/api/page/:id`                                   | deletePageController         | ❌ TODO |                   |
+| POST   | `/api/page/:pageId/duplicate`                     | duplicatePageController      | ❌ TODO |                   |
+| GET    | `/api/page/funnel/:funnelId/page-by-link/:linkId` | getPageByLinkingIdController | ❌ TODO |                   |
+| GET    | `/api/page/funnel/:funnelSlug/page/:linkingId`    | getPublicPageController      | ✅ DONE | checkFunnelAccess |
+| POST   | `/api/page/:pageId/visit`                         | createPageVisitController    | ❌ TODO |                   |
 
 ### Site Routes (1 route)
 
-| Method | Path                | Controller                        | Status  | Middleware         |
-| ------ | ------------------- | --------------------------------- | ------- | ------------------ |
-| GET    | `/api/sites/public` | GetPublicSiteController.getPublicSite | ✅ DONE | checkFunnelAccess  |
+| Method | Path                | Controller                            | Status  | Middleware        |
+| ------ | ------------------- | ------------------------------------- | ------- | ----------------- |
+| GET    | `/api/sites/public` | GetPublicSiteController.getPublicSite | ✅ DONE | checkFunnelAccess |
 
 **Note**: The `/api/sites/public?hostname=X` endpoint uses the `checkFunnelAccess` middleware to enforce password protection. When a funnel is password-protected, visitors must verify the password via `/api/funnel-settings/verify-password/:funnelId` before accessing the site data.
 
@@ -360,14 +501,14 @@ describe("Create Workspace", () => {
 
 ### Funnel Settings Routes (6 routes)
 
-| Method | Path                                                | Controller                     | Status  |
-| ------ | --------------------------------------------------- | ------------------------------ | ------- |
-| GET    | `/api/funnel-settings/:funnelId`                    | getFunnelSettingsController    | ❌ TODO |
-| POST   | `/api/funnel-settings/verify-password/:funnelId`    | verifyPasswordController       | ❌ TODO |
-| PUT    | `/api/funnel-settings/:id`                          | updateFunnelSettingsController | ❌ TODO |
-| POST   | `/api/funnel-settings/lock-funnel/:funnelId`        | lockFunnelController           | ❌ TODO |
-| POST   | `/api/funnel-settings/unlock-funnel/:funnelId`      | unlockFunnelController         | ❌ TODO |
-| POST   | `/api/funnel-settings/update-password/:funnelId`    | updatePasswordController       | ✅ DONE |
+| Method | Path                                             | Controller                     | Status  |
+| ------ | ------------------------------------------------ | ------------------------------ | ------- |
+| GET    | `/api/funnel-settings/:funnelId`                 | getFunnelSettingsController    | ❌ TODO |
+| POST   | `/api/funnel-settings/verify-password/:funnelId` | verifyPasswordController       | ❌ TODO |
+| PUT    | `/api/funnel-settings/:id`                       | updateFunnelSettingsController | ❌ TODO |
+| POST   | `/api/funnel-settings/lock-funnel/:funnelId`     | lockFunnelController           | ❌ TODO |
+| POST   | `/api/funnel-settings/unlock-funnel/:funnelId`   | unlockFunnelController         | ❌ TODO |
+| POST   | `/api/funnel-settings/update-password/:funnelId` | updatePasswordController       | ✅ DONE |
 
 ### Theme Routes (1 route)
 
@@ -406,10 +547,10 @@ describe("Create Workspace", () => {
 
 ### Payment Routes (2 routes)
 
-| Method | Path                                    | Controller                                          | Status  |
-| ------ | --------------------------------------- | --------------------------------------------------- | ------- |
-| POST   | `/api/payment/create-payment-link`      | CreatePaymentLinkController.createPaymentLink       | ✅ DONE |
-| POST   | `/api/payment/create-addon-payment-link`| CreateAddonPaymentLinkController.createAddonPaymentLink | ✅ DONE |
+| Method | Path                                     | Controller                                              | Status  |
+| ------ | ---------------------------------------- | ------------------------------------------------------- | ------- |
+| POST   | `/api/payment/create-payment-link`       | CreatePaymentLinkController.createPaymentLink           | ✅ DONE |
+| POST   | `/api/payment/create-addon-payment-link` | CreateAddonPaymentLinkController.createAddonPaymentLink | ✅ DONE |
 
 ### Subscription Routes (1 route)
 
@@ -419,9 +560,9 @@ describe("Create Workspace", () => {
 
 ### Payout Routes (1 route)
 
-| Method | Path                        | Controller                     | Status  |
-| ------ | --------------------------- | ------------------------------ | ------- |
-| POST   | `/api/payout/request`       | RequestPayoutController.create | ✅ DONE |
+| Method | Path                  | Controller                     | Status  |
+| ------ | --------------------- | ------------------------------ | ------- |
+| POST   | `/api/payout/request` | RequestPayoutController.create | ✅ DONE |
 
 ---
 

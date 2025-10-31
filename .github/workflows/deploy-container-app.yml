@@ -92,13 +92,27 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
 
+      - name: Create .env.test file
+        run: |
+          cat > .env.test << 'EOF'
+          NODE_ENV=test
+          PORT=3001
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+          JWT_SECRET=test-secret-key
+          REDIS_URL=redis://localhost:6379
+          REDIS_DB=1
+          CLOUDFLARE_API_TOKEN=test-token
+          CLOUDFLARE_ACCOUNT_ID=test-account
+          CLOUDFLARE_ZONE_ID=test-zone
+          SENDGRID_API_KEY=test-sendgrid-key
+          SENDGRID_FROM_EMAIL=test@example.com
+          MAMOPAY_API_URL=https://sandbox.dev.business.mamopay.com
+          MAMOPAY_API_KEY=test-mamopay-key
+          FRONTEND_URL=https://testsite.com
+          EOF
+
       - name: Run tests
         run: pnpm test run
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
-          NODE_ENV: test
 
       - name: Build application
         run: pnpm run build

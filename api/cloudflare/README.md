@@ -8,7 +8,7 @@ This module provides a clean, typed interface to all Cloudflare operations used 
 
 ## Structure
 
-```
+```tree
 src/api/cloudflare/
 ├── index.ts                           # Main exports
 ├── types/index.ts                     # Type definitions and Zod schemas
