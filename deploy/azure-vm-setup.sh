@@ -138,9 +138,9 @@ REDIS_URL=redis://localhost:6379
 JWT_SECRET=your-super-secure-jwt-secret-here
 
 # CloudFlare Configuration
-CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
-CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
-CLOUDFLARE_ZONE_ID=your-cloudflare-zone-id
+CF_API_TOKEN=your-cloudflare-api-token
+CF_ACCOUNT_ID=your-cloudflare-account-id
+CF_ZONE_ID=your-cloudflare-zone-id
 CLOUDFLARE_SAAS_TARGET=fallback.yourdomain.com
 PLATFORM_MAIN_DOMAIN=yourdomain.com
 EOF

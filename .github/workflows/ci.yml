@@ -137,9 +137,9 @@ jobs:
         JWT_SECRET=test-secret-key
         REDIS_URL=redis://localhost:6379
         REDIS_DB=1
-        CLOUDFLARE_API_TOKEN=test-token
-        CLOUDFLARE_ACCOUNT_ID=test-account
-        CLOUDFLARE_ZONE_ID=test-zone
+        CF_API_TOKEN=test-token
+        CF_ACCOUNT_ID=test-account
+        CF_ZONE_ID=test-zone
         SENDGRID_API_KEY=test-sendgrid-key
         SENDGRID_FROM_EMAIL=test@example.com
         MAMOPAY_API_URL=https://sandbox.dev.business.mamopay.com
