@@ -509,8 +509,9 @@ All routes require `authenticateToken` middleware for user authentication.
 
 | Variable                    | Required | Description                      |
 | --------------------------- | -------- | -------------------------------- |
-| `CLOUDFLARE_API_TOKEN`      | Yes      | Cloudflare API token with DNS permissions |
-| `CLOUDFLARE_ZONE_ID`        | Yes      | Zone ID for mydigitalsite.io     |
+| `CF_API_TOKEN`              | Yes      | Cloudflare API token with DNS permissions |
+| `CF_ACCOUNT_ID`             | Yes      | Cloudflare account ID            |
+| `CF_ZONE_ID`                | Yes      | Zone ID for mydigitalsite.io     |
 | `CLOUDFLARE_DOMAIN`         | Yes      | Base domain (mydigitalsite.io)   |
 | `DATABASE_URL`              | Yes      | PostgreSQL connection string     |
 | `JWT_SECRET`                | Yes      | JWT signing secret               |

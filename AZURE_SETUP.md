@@ -21,6 +21,7 @@ az ad sp create-for-rbac \
 ```
 
 This will output JSON like:
+
 ```json
 {
   "appId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -88,6 +89,7 @@ cd scripts
 ```
 
 This will create:
+
 - Resource Group: `digitalsite-container-apps-rg`
 - Container Registry: `digitalsiteacr`
 - Container App Environments (staging and production)
@@ -133,25 +135,30 @@ gh run watch
 ## Troubleshooting
 
 ### Azure Login Fails
+
 - Ensure AZURE_CREDENTIALS contains valid clientId and clientSecret
 - Verify the service principal has contributor role on the subscription
 
 ### Container Registry Access
+
 - Ensure the service principal has AcrPush role on the container registry
 - Verify the registry name is correct (`digitalsiteacr`)
 
 ### Database Connection
+
 - Ensure the database password is correct
 - Verify the database server allows connections from Azure services
 - Check that `digitalsite_production_v2` database exists
 
 ### Resource Not Found
+
 - Run the setup script first to create all required Azure resources
 - Verify resource names match in the workflow file
 
 ## URLs
 
 After successful deployment:
+
 - **Staging**: https://digitalsite-api-staging.azurecontainerapps.io
 - **Production**: https://digitalsite-api-prod.azurecontainerapps.io
 
@@ -171,8 +178,8 @@ All required secrets that must be configured in GitHub:
 - `FRONTEND_URL` - Frontend application URL
 - `CF_API_TOKEN` - Cloudflare API token
 - `CF_ACCOUNT_ID` - Cloudflare account ID
-- `CF_VERIFICATION_DOMAIN` - Cloudflare verification domain
-- `CF_DOMAIN` - Main domain
+- `CF_SUBDOMAIN` - Cloudflare verification domain
+- `CF_SUBDOMAIN` - Main domain
 - `CF_ZONE_ID` - Cloudflare zone ID
 - `WORKSPACE_DOMAIN` - Workspace domain
 - `WORKSPACE_ZONE_ID` - Workspace zone ID

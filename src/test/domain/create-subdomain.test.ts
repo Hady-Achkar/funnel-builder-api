@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { CreateSubdomainService } from "../../services/domain/create-subdomain/create-subdomain.service";
 import { getPrisma } from "../../lib/prisma";
 import { $Enums, UserPlan, AddOnType } from "../../generated/prisma-client";
-import * as cloudflareApi from "../../utils/domain-utils/cloudflare-api";
-import * as createARecord from "../../services/domain/create-subdomain/utils/create-a-record";
 
 vi.mock("../../lib/prisma");
-vi.mock("../../utils/domain-utils/cloudflare-api");
-vi.mock("../../services/domain/create-subdomain/utils/create-a-record");
+vi.mock("../../../api/cloudflare");
+
+// Test constants
+const TEST_TARGET_IP = process.env.CF_IP!;
 
 describe("Create Subdomain Tests", () => {
   let mockPrisma: any;
@@ -15,8 +15,21 @@ describe("Create Subdomain Tests", () => {
   const workspaceSlug = "test-workspace";
   const subdomain = "test-subdomain";
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Setup Cloudflare API mock
+    const { createARecord } = await import("../../../api/cloudflare");
+    vi.mocked(createARecord).mockResolvedValue({
+      id: "cloudflare-record-id-123",
+      type: "A",
+      name: "test-subdomain",
+      content: TEST_TARGET_IP,
+      proxied: true,
+      ttl: 3600,
+      created_on: new Date().toISOString(),
+      modified_on: new Date().toISOString(),
+    });
 
     mockPrisma = {
       workspace: {
@@ -33,15 +46,6 @@ describe("Create Subdomain Tests", () => {
     };
 
     (getPrisma as any).mockReturnValue(mockPrisma);
-
-    // Mock cloudflare helper
-    vi.spyOn(cloudflareApi, "getCloudFlareAPIHelper").mockReturnValue({
-      getConfig: () => ({
-        cfZoneId: "test-zone-id",
-        cfApiToken: "test-token",
-        cfDomain: "digitalsite.app",
-      }),
-    } as any);
   });
 
   afterEach(() => {
@@ -70,7 +74,7 @@ describe("Create Subdomain Tests", () => {
     id: "cloudflare-record-id-123",
     type: "A",
     name: subdomain,
-    content: "74.234.194.84",
+    content: TEST_TARGET_IP,
   };
 
   const mockCreatedDomain = {
@@ -82,7 +86,7 @@ describe("Create Subdomain Tests", () => {
     workspaceId: 1,
     createdBy: userId,
     cloudflareRecordId: mockARecord.id,
-    cloudflareZoneId: "test-zone-id",
+    cloudflareZoneId: process.env.CF_ZONE_ID!,
     lastVerifiedAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -209,7 +213,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0); // No subdomains yet
       mockPrisma.domain.findUnique.mockResolvedValue(null); // Not taken
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       const result = await CreateSubdomainService.create(userId, {
         subdomain,
@@ -236,7 +240,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(2); // Has 2 subdomains (base 1 + 2 add-ons = 3 total)
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       const result = await CreateSubdomainService.create(userId, {
         subdomain,
@@ -309,7 +313,7 @@ describe("Create Subdomain Tests", () => {
           subdomain,
           workspaceSlug,
         })
-      ).rejects.toThrow(/already taken/);
+      ).rejects.toThrow(/already in use/);
     });
 
     it("should create subdomain with correct hostname format", async () => {
@@ -318,7 +322,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       await CreateSubdomainService.create(userId, {
         subdomain: "my-test",
@@ -346,7 +350,7 @@ describe("Create Subdomain Tests", () => {
         ...mockCreatedDomain,
         hostname: `${subdomain}.custom-domain.com`,
       });
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       const customConfig = {
         baseDomain: "custom-domain.com",
@@ -363,10 +367,18 @@ describe("Create Subdomain Tests", () => {
         customConfig
       );
 
-      expect(vi.mocked(createARecord.createARecord)).toHaveBeenCalledWith(
+      const { createARecord } = await import("../../../api/cloudflare");
+      expect(vi.mocked(createARecord)).toHaveBeenCalledWith(
         subdomain,
         "custom-zone-id",
-        "1.2.3.4"
+        "1.2.3.4",
+        expect.objectContaining({
+          apiToken: expect.any(String),
+        }),
+        expect.objectContaining({
+          ttl: 3600,
+          proxied: true,
+        })
       );
     });
   });
@@ -379,7 +391,8 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       // Mock Cloudflare API error
-      vi.mocked(createARecord.createARecord).mockRejectedValue(
+      const { createARecord } = await import("../../../api/cloudflare");
+      vi.mocked(createARecord).mockRejectedValue(
         new Error("Cloudflare API error")
       );
 
@@ -388,7 +401,7 @@ describe("Create Subdomain Tests", () => {
           subdomain,
           workspaceSlug,
         })
-      ).rejects.toThrow(/External service error/);
+      ).rejects.toThrow(/couldn't create your subdomain/);
     });
 
     it("should handle Cloudflare timeout error", async () => {
@@ -399,14 +412,15 @@ describe("Create Subdomain Tests", () => {
 
       const timeoutError = new Error("timeout");
       (timeoutError as any).code = "ETIMEDOUT";
-      vi.mocked(createARecord.createARecord).mockRejectedValue(timeoutError);
+      const { createARecord } = await import("../../../api/cloudflare");
+      vi.mocked(createARecord).mockRejectedValue(timeoutError);
 
       await expect(
         CreateSubdomainService.create(userId, {
           subdomain,
           workspaceSlug,
         })
-      ).rejects.toThrow(/External service error/);
+      ).rejects.toThrow(/couldn't create your subdomain/);
     });
 
     it("should handle Cloudflare rate limit error", async () => {
@@ -421,14 +435,15 @@ describe("Create Subdomain Tests", () => {
           errors: [{ message: "Rate limit exceeded" }],
         },
       };
-      vi.mocked(createARecord.createARecord).mockRejectedValue(rateLimitError);
+      const { createARecord } = await import("../../../api/cloudflare");
+      vi.mocked(createARecord).mockRejectedValue(rateLimitError);
 
       await expect(
         CreateSubdomainService.create(userId, {
           subdomain,
           workspaceSlug,
         })
-      ).rejects.toThrow(/External service error/);
+      ).rejects.toThrow(/couldn't create your subdomain/);
     });
   });
 
@@ -439,7 +454,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       const result = await CreateSubdomainService.create(userId, {
         subdomain,
@@ -464,17 +479,25 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       await CreateSubdomainService.create(userId, {
         subdomain,
         workspaceSlug,
       });
 
-      expect(vi.mocked(createARecord.createARecord)).toHaveBeenCalledWith(
+      const { createARecord } = await import("../../../api/cloudflare");
+      expect(vi.mocked(createARecord)).toHaveBeenCalledWith(
         subdomain,
-        "test-zone-id",
-        "74.234.194.84"
+        process.env.CF_ZONE_ID,
+        TEST_TARGET_IP,
+        expect.objectContaining({
+          apiToken: expect.any(String),
+        }),
+        expect.objectContaining({
+          ttl: 3600,
+          proxied: true,
+        })
       );
     });
 
@@ -484,7 +507,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
-      vi.mocked(createARecord.createARecord).mockResolvedValue(mockARecord as any);
+      // createARecord is already mocked at the module level
 
       await CreateSubdomainService.create(userId, {
         subdomain,
@@ -501,7 +524,7 @@ describe("Create Subdomain Tests", () => {
             workspaceId: mockWorkspace.id,
             createdBy: userId,
             cloudflareRecordId: mockARecord.id,
-            cloudflareZoneId: "test-zone-id",
+            cloudflareZoneId: process.env.CF_ZONE_ID,
             lastVerifiedAt: expect.any(Date),
           }),
         })

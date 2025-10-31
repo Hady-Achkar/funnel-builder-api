@@ -1,6 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
-import { getCustomHostnameDetails } from "../../../utils/domain-utils/cloudflare-custom-hostname";
+import { getCustomHostnameDetails } from "../../../../api/cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -41,14 +40,18 @@ export class GetDNSInstructionsService {
       let currentSslValidationRecords = null;
       if (domainRecord.cloudflareHostnameId) {
         try {
-          const cloudflareHelper = getCloudFlareAPIHelper();
-          const config = cloudflareHelper.getConfig();
+          // Read Cloudflare configuration from environment variables
+          const config = {
+            apiToken: process.env.CF_API_TOKEN!,
+            accountId: process.env.CF_ACCOUNT_ID,
+          };
           // Use custom hostname zone (digitalsite.app) for custom domains
-          const zoneId = config.cfCustomHostnameZoneId || config.cfZoneId;
+          const zoneId = process.env.CF_ZONE_ID!;
 
           const cfHostname = await getCustomHostnameDetails(
             domainRecord.cloudflareHostnameId,
-            zoneId
+            zoneId,
+            config
           );
 
           if (cfHostname.ssl?.validation_records) {

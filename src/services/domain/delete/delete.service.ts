@@ -1,6 +1,9 @@
 import { DomainType } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import { deleteCustomHostname, deleteARecord } from "./utils/cloudflare-cleanup";
+import {
+  deleteCustomHostname,
+  deleteARecord,
+} from "../../../../api/cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -11,7 +14,6 @@ import {
 } from "../../../types/domain/delete";
 import { BadRequestError } from "../../../errors/http-errors";
 import { ZodError } from "zod";
-import { getCloudFlareAPIHelper } from "../../../utils/domain-utils/cloudflare-api";
 
 export class DeleteDomainService {
   static async delete(
@@ -56,30 +58,38 @@ export class DeleteDomainService {
 
       let cloudflareSuccess = false;
       try {
-        const cloudflareHelper = getCloudFlareAPIHelper();
-        const config = cloudflareHelper.getConfig();
+        // Read Cloudflare configuration from environment variables
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+        };
 
         if (domainRecord.type === DomainType.CUSTOM_DOMAIN) {
           if (domainRecord.cloudflareHostnameId) {
             // Use custom hostname zone (digitalsite.app) for custom domains
-            const zoneId = config.cfCustomHostnameZoneId || domainRecord.cloudflareZoneId || config.cfZoneId;
+            const zoneId = domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
             console.log('[Domain Delete] Deleting custom hostname:', domainRecord.cloudflareHostnameId, 'from zone:', zoneId);
 
             customHostnameDeleted = await deleteCustomHostname(
               domainRecord.cloudflareHostnameId,
-              zoneId
+              zoneId,
+              config
             );
             cloudflareSuccess = customHostnameDeleted;
           }
-        } else if (domainRecord.type === DomainType.SUBDOMAIN) {
+        } else if (
+          domainRecord.type === DomainType.SUBDOMAIN ||
+          domainRecord.type === DomainType.WORKSPACE_SUBDOMAIN
+        ) {
           if (domainRecord.cloudflareRecordId) {
-            // Use main zone (digitalsite.io) for subdomains
-            const zoneId = domainRecord.cloudflareZoneId || config.cfZoneId;
+            // Use zone from database or environment variable
+            const zoneId = domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
             console.log('[Domain Delete] Deleting DNS record:', domainRecord.cloudflareRecordId, 'from zone:', zoneId);
 
             dnsRecordsDeleted = await deleteARecord(
               domainRecord.cloudflareRecordId,
-              zoneId
+              zoneId,
+              config
             );
             cloudflareSuccess = dnsRecordsDeleted;
           }

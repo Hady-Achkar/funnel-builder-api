@@ -746,6 +746,7 @@ enum PageType {
 enum DomainType {
   CUSTOM_DOMAIN
   SUBDOMAIN
+  WORKSPACE_SUBDOMAIN
 }
 
 enum DomainStatus {

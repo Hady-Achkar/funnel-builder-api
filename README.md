@@ -61,9 +61,9 @@ NODE_ENV=development
 JWT_SECRET=your-super-secret-jwt-key
 
 # CloudFlare Configuration
-CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
-CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
-CLOUDFLARE_ZONE_ID=your-cloudflare-zone-id
+CF_API_TOKEN=your-cloudflare-api-token
+CF_ACCOUNT_ID=your-cloudflare-account-id
+CF_ZONE_ID=your-cloudflare-zone-id
 CLOUDFLARE_SAAS_TARGET=fallback.digitalsite.ai
 PLATFORM_MAIN_DOMAIN=digitalsite.ai
 ```

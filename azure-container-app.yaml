@@ -54,9 +54,9 @@ properties:
       - name: cf-account-id
         value: "${CF_ACCOUNT_ID}"
       - name: cf-verification-domain
-        value: "${CF_VERIFICATION_DOMAIN}"
+        value: "${CF_SUBDOMAIN}"
       - name: cf-domain
-        value: "${CF_DOMAIN}"
+        value: "${CF_SUBDOMAIN}"
       - name: cf-zone-id
         value: "${CF_ZONE_ID}"
       - name: workspace-domain
@@ -106,9 +106,9 @@ properties:
             secretRef: cf-api-token
           - name: CF_ACCOUNT_ID
             secretRef: cf-account-id
-          - name: CF_VERIFICATION_DOMAIN
+          - name: CF_SUBDOMAIN
             secretRef: cf-verification-domain
-          - name: CF_DOMAIN
+          - name: CF_SUBDOMAIN
             secretRef: cf-domain
           - name: CF_ZONE_ID
             secretRef: cf-zone-id

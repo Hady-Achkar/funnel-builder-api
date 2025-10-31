@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { CreateWorkspaceService } from "../../services/workspace/create";
 import { getPrisma } from "../../lib/prisma";
-import { BadRequestError, ForbiddenError } from "../../errors/http-errors";
+import { ForbiddenError } from "../../errors/http-errors";
 import { UserPlan, AddOnStatus } from "../../generated/prisma-client";
 
 // Mock the prisma client
@@ -9,9 +9,11 @@ vi.mock("../../lib/prisma");
 
 describe("Workspace Creation Tests", () => {
   let mockPrisma: any;
+  const createdWorkspaces: string[] = [];
 
   beforeEach(() => {
     vi.clearAllMocks();
+    createdWorkspaces.length = 0; // Clear the array
 
     mockPrisma = {
       workspace: {
@@ -34,10 +36,19 @@ describe("Workspace Creation Tests", () => {
       addOn: {
         findMany: vi.fn(),
       },
+      domain: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        deleteMany: vi.fn(),
+      },
       $transaction: vi.fn(),
     };
 
     (getPrisma as any).mockReturnValue(mockPrisma);
+  });
+
+  afterEach(async () => {
+    // Cleanup is handled by mockPrisma - no real database or DNS operations
   });
 
   describe("Plan-based workspace limits (NEW ARCHITECTURE)", () => {
@@ -60,13 +71,26 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
-          workspace: {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null), // No existing subdomain
             create: vi.fn().mockResolvedValue({
               id: 1,
-              name: workspaceData.name,
-              slug: workspaceData.slug,
-              ownerId: userId,
-              planType: UserPlan.FREE,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+              sslStatus: "ACTIVE",
+            }),
+          },
+          workspace: {
+            create: vi.fn().mockImplementation(({ data }: any) => {
+              createdWorkspaces.push(data.slug);
+              return Promise.resolve({
+                id: 1,
+                name: data.name,
+                slug: data.slug,
+                ownerId: userId,
+                planType: UserPlan.FREE,
+              });
             }),
           },
           workspaceMember: {
@@ -128,6 +152,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockResolvedValue({
               id: 1,
@@ -171,6 +204,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 3,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockResolvedValue({
               id: 3,
@@ -226,6 +268,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 2,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockResolvedValue({
               id: 2,
@@ -279,6 +330,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 5,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockResolvedValue({
               id: 5,
@@ -362,6 +422,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation(({ data }: any) => {
               createdWorkspaceData = data;
@@ -408,6 +477,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation(({ data }: any) => {
               createdWorkspaceData = data;
@@ -454,6 +532,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation(({ data }: any) => {
               createdWorkspaceData = data;
@@ -625,6 +712,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation((data: any) => {
               createdWorkspaceStatus = data.data.status;
@@ -674,6 +770,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation((data: any) => {
               createdWorkspaceStatus = data.data.status;
@@ -723,6 +828,15 @@ describe("Workspace Creation Tests", () => {
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const txMock = {
+          domain: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: 1,
+              hostname: `${workspaceData.slug}.${process.env.WORKSPACE_DOMAIN}`,
+              type: "WORKSPACE_SUBDOMAIN",
+              status: "ACTIVE",
+            }),
+          },
           workspace: {
             create: vi.fn().mockImplementation((data: any) => {
               createdWorkspaceStatus = data.data.status;

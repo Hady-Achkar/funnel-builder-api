@@ -11,6 +11,8 @@ import { getPrisma, setPrismaClient } from "../../lib/prisma";
 import { PrismaClient } from "../../generated/prisma-client";
 import { CloneWorkspaceService } from "../../services/workspace/clone-workspace";
 
+// No Cloudflare mocks needed - using database-only approach
+
 /**
  * Integration tests for Clone Workspace Service
  * Tests the complete workspace cloning flow with real database
@@ -234,6 +236,37 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
   });
 
   afterAll(async () => {
+    // Delete DNS records for all cloned workspaces created by buyer
+    const buyerWorkspaces = await prisma.workspace.findMany({
+      where: { ownerId: buyerUserId },
+    });
+
+    for (const workspace of buyerWorkspaces) {
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(workspace.slug, zoneId, domain, config);
+        console.log(
+          `[Test Cleanup] Deleted DNS record for ${workspace.slug}.${domain}`
+        );
+      } catch (error) {
+        console.error(
+          `[Test Cleanup] Failed to delete DNS for ${workspace.slug}:`,
+          error
+        );
+        // Continue cleanup even if DNS deletion fails
+      }
+    }
+
     // Clean up all test data
     await prisma.workspaceClone.deleteMany({
       where: {
@@ -425,7 +458,29 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       clonedWorkspaceId = result.clonedWorkspaceId;
 
-      // Clean up
+      // Clean up - Delete DNS record
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(
+          result.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+      } catch (error) {
+        console.error("[Test Cleanup] Failed to delete DNS:", error);
+      }
+
       await prisma.workspaceClone.deleteMany({
         where: { clonedWorkspaceId: clonedWorkspaceId },
       });
@@ -475,7 +530,29 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       clonedWorkspaceId = result.clonedWorkspaceId;
 
-      // Clean up
+      // Clean up - Delete DNS record
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(
+          result.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+      } catch (error) {
+        console.error("[Test Cleanup] Failed to delete DNS:", error);
+      }
+
       await prisma.workspaceClone.deleteMany({
         where: { clonedWorkspaceId: clonedWorkspaceId },
       });
@@ -534,7 +611,35 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       // Second clone should have incremental number (-2, -3, etc.)
       expect(result2.clonedWorkspace.slug).toMatch(/-\d+$/); // Should end with -2, -3, etc.
 
-      // Clean up
+      // Clean up - Delete DNS records
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(
+          result1.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+        await deleteWorkspaceSubdomain(
+          result2.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+      } catch (error) {
+        console.error("[Test Cleanup] Failed to delete DNS:", error);
+      }
+
       await prisma.workspaceClone.deleteMany({
         where: {
           clonedWorkspaceId: {
@@ -585,6 +690,42 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
     afterEach(async () => {
       // Clean up after each test
       if (clonedWorkspaceId) {
+        // Delete DNS record from Cloudflare
+        const workspace = await prisma.workspace.findUnique({
+          where: { id: clonedWorkspaceId },
+        });
+
+        if (workspace) {
+          try {
+            const { deleteWorkspaceSubdomain } = await import(
+              "../../../api/cloudflare"
+            );
+            const config = {
+              apiToken: process.env.CF_API_TOKEN!,
+              accountId: process.env.CF_ACCOUNT_ID,
+              zoneId: process.env.WORKSPACE_ZONE_ID,
+            };
+            const domain = process.env.WORKSPACE_DOMAIN!;
+            const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+            await deleteWorkspaceSubdomain(
+              workspace.slug,
+              zoneId,
+              domain,
+              config
+            );
+            console.log(
+              `[Test Cleanup] Deleted DNS record for ${workspace.slug}.${domain}`
+            );
+          } catch (error) {
+            console.error(
+              `[Test Cleanup] Failed to delete DNS for ${workspace.slug}:`,
+              error
+            );
+            // Continue cleanup even if DNS deletion fails
+          }
+        }
+
         await prisma.workspaceClone.deleteMany({
           where: { clonedWorkspaceId },
         });
@@ -737,7 +878,29 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       expect(salesFunnel!.settings!.isPasswordProtected).toBe(true);
       expect(salesFunnel!.settings!.passwordHash).toBe("should-not-be-copied");
 
-      // Clean up manually (this test uses different payment)
+      // Clean up manually (this test uses different payment) - Delete DNS record
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(
+          result.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+      } catch (error) {
+        console.error("[Test Cleanup] Failed to delete DNS:", error);
+      }
+
       await prisma.workspaceClone.deleteMany({
         where: { clonedWorkspaceId },
       });
@@ -960,6 +1123,42 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
     afterEach(async () => {
       if (clonedWorkspaceId) {
+        // Delete DNS record from Cloudflare
+        const workspace = await prisma.workspace.findUnique({
+          where: { id: clonedWorkspaceId },
+        });
+
+        if (workspace) {
+          try {
+            const { deleteWorkspaceSubdomain } = await import(
+              "../../../api/cloudflare"
+            );
+            const config = {
+              apiToken: process.env.CF_API_TOKEN!,
+              accountId: process.env.CF_ACCOUNT_ID,
+              zoneId: process.env.WORKSPACE_ZONE_ID,
+            };
+            const domain = process.env.WORKSPACE_DOMAIN!;
+            const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+            await deleteWorkspaceSubdomain(
+              workspace.slug,
+              zoneId,
+              domain,
+              config
+            );
+            console.log(
+              `[Test Cleanup] Deleted DNS record for ${workspace.slug}.${domain}`
+            );
+          } catch (error) {
+            console.error(
+              `[Test Cleanup] Failed to delete DNS for ${workspace.slug}:`,
+              error
+            );
+            // Continue cleanup even if DNS deletion fails
+          }
+        }
+
         await prisma.workspaceClone.deleteMany({
           where: { clonedWorkspaceId },
         });
@@ -1023,6 +1222,42 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
     afterEach(async () => {
       if (clonedWorkspaceId) {
+        // Delete DNS record from Cloudflare
+        const workspace = await prisma.workspace.findUnique({
+          where: { id: clonedWorkspaceId },
+        });
+
+        if (workspace) {
+          try {
+            const { deleteWorkspaceSubdomain } = await import(
+              "../../../api/cloudflare"
+            );
+            const config = {
+              apiToken: process.env.CF_API_TOKEN!,
+              accountId: process.env.CF_ACCOUNT_ID,
+              zoneId: process.env.WORKSPACE_ZONE_ID,
+            };
+            const domain = process.env.WORKSPACE_DOMAIN!;
+            const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+            await deleteWorkspaceSubdomain(
+              workspace.slug,
+              zoneId,
+              domain,
+              config
+            );
+            console.log(
+              `[Test Cleanup] Deleted DNS record for ${workspace.slug}.${domain}`
+            );
+          } catch (error) {
+            console.error(
+              `[Test Cleanup] Failed to delete DNS for ${workspace.slug}:`,
+              error
+            );
+            // Continue cleanup even if DNS deletion fails
+          }
+        }
+
         await prisma.workspaceClone.deleteMany({
           where: { clonedWorkspaceId },
         });
@@ -1085,6 +1320,42 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
     afterEach(async () => {
       if (clonedWorkspaceId) {
+        // Delete DNS record from Cloudflare
+        const workspace = await prisma.workspace.findUnique({
+          where: { id: clonedWorkspaceId },
+        });
+
+        if (workspace) {
+          try {
+            const { deleteWorkspaceSubdomain } = await import(
+              "../../../api/cloudflare"
+            );
+            const config = {
+              apiToken: process.env.CF_API_TOKEN!,
+              accountId: process.env.CF_ACCOUNT_ID,
+              zoneId: process.env.WORKSPACE_ZONE_ID,
+            };
+            const domain = process.env.WORKSPACE_DOMAIN!;
+            const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+            await deleteWorkspaceSubdomain(
+              workspace.slug,
+              zoneId,
+              domain,
+              config
+            );
+            console.log(
+              `[Test Cleanup] Deleted DNS record for ${workspace.slug}.${domain}`
+            );
+          } catch (error) {
+            console.error(
+              `[Test Cleanup] Failed to delete DNS for ${workspace.slug}:`,
+              error
+            );
+            // Continue cleanup even if DNS deletion fails
+          }
+        }
+
         await prisma.workspaceClone.deleteMany({
           where: { clonedWorkspaceId },
         });
@@ -1187,7 +1458,29 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
       expect(workspaceMember!.permissions).toContain("DELETE_DOMAINS");
       expect(workspaceMember!.permissions).toContain("CONNECT_DOMAINS");
 
-      // Clean up
+      // Clean up - Delete DNS record
+      try {
+        const { deleteWorkspaceSubdomain } = await import(
+          "../../../api/cloudflare"
+        );
+        const config = {
+          apiToken: process.env.CF_API_TOKEN!,
+          accountId: process.env.CF_ACCOUNT_ID,
+          zoneId: process.env.WORKSPACE_ZONE_ID,
+        };
+        const domain = process.env.WORKSPACE_DOMAIN!;
+        const zoneId = process.env.WORKSPACE_ZONE_ID!;
+
+        await deleteWorkspaceSubdomain(
+          result.clonedWorkspace.slug,
+          zoneId,
+          domain,
+          config
+        );
+      } catch (error) {
+        console.error("[Test Cleanup] Failed to delete DNS:", error);
+      }
+
       await prisma.workspaceMember.deleteMany({
         where: { workspaceId: result.clonedWorkspaceId },
       });
