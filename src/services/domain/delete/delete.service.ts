@@ -1,9 +1,6 @@
 import { DomainType } from "../../../generated/prisma-client";
 import { getPrisma } from "../../../lib/prisma";
-import {
-  deleteCustomHostname,
-  deleteARecord,
-} from "../../../../api/cloudflare";
+import { deleteCustomHostname, deleteARecord } from "../../../cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -67,8 +64,14 @@ export class DeleteDomainService {
         if (domainRecord.type === DomainType.CUSTOM_DOMAIN) {
           if (domainRecord.cloudflareHostnameId) {
             // Use custom hostname zone (digitalsite.app) for custom domains
-            const zoneId = domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
-            console.log('[Domain Delete] Deleting custom hostname:', domainRecord.cloudflareHostnameId, 'from zone:', zoneId);
+            const zoneId =
+              domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
+            console.log(
+              "[Domain Delete] Deleting custom hostname:",
+              domainRecord.cloudflareHostnameId,
+              "from zone:",
+              zoneId
+            );
 
             customHostnameDeleted = await deleteCustomHostname(
               domainRecord.cloudflareHostnameId,
@@ -83,8 +86,14 @@ export class DeleteDomainService {
         ) {
           if (domainRecord.cloudflareRecordId) {
             // Use zone from database or environment variable
-            const zoneId = domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
-            console.log('[Domain Delete] Deleting DNS record:', domainRecord.cloudflareRecordId, 'from zone:', zoneId);
+            const zoneId =
+              domainRecord.cloudflareZoneId || process.env.CF_ZONE_ID!;
+            console.log(
+              "[Domain Delete] Deleting DNS record:",
+              domainRecord.cloudflareRecordId,
+              "from zone:",
+              zoneId
+            );
 
             dnsRecordsDeleted = await deleteARecord(
               domainRecord.cloudflareRecordId,

@@ -4,7 +4,7 @@ import { getPrisma } from "../../lib/prisma";
 import { $Enums } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
-vi.mock("../../../api/cloudflare");
+vi.mock("../../cloudflare");
 
 describe("Get DNS Instructions Tests", () => {
   let mockPrisma: any;
@@ -29,7 +29,7 @@ describe("Get DNS Instructions Tests", () => {
     (getPrisma as any).mockReturnValue(mockPrisma);
 
     // Mock api/cloudflare functions
-    const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+    const { getCustomHostnameDetails } = await import("../../cloudflare");
     vi.mocked(getCustomHostnameDetails).mockResolvedValue({
       id: "cloudflare-hostname-id-123",
       status: "pending",
@@ -143,7 +143,9 @@ describe("Get DNS Instructions Tests", () => {
 
     it("should throw error when user is not a member of workspace", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockPendingDomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspaceOtherOwner);
+      mockPrisma.workspace.findUnique.mockResolvedValue(
+        mockWorkspaceOtherOwner
+      );
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
       await expect(
@@ -153,7 +155,9 @@ describe("Get DNS Instructions Tests", () => {
 
     it("should throw error when user does not have MANAGE_DOMAINS permission", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockPendingDomain);
-      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspaceOtherOwner);
+      mockPrisma.workspace.findUnique.mockResolvedValue(
+        mockWorkspaceOtherOwner
+      );
       mockPrisma.workspaceMember.findUnique.mockResolvedValue({
         ...mockMember,
         role: "VIEWER",
@@ -173,7 +177,7 @@ describe("Get DNS Instructions Tests", () => {
         permissions: [$Enums.WorkspacePermission.CREATE_DOMAINS],
       });
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -183,9 +187,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result).toBeDefined();
     });
@@ -197,7 +204,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -212,9 +219,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.dnsRecords).toBeDefined();
 
@@ -234,7 +244,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -249,9 +259,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       // Check SSL validation records
       expect(result.dnsRecords.ssl).toBeDefined();
@@ -269,14 +282,17 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
       // Mock Cloudflare to throw error
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const cloudflareError = new Error("Cloudflare API error");
       vi.mocked(getCustomHostnameDetails).mockRejectedValue(cloudflareError);
 
       // Service now continues without SSL validation records if Cloudflare fails
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       // Should return DNS instructions even if Cloudflare fetch fails
       expect(result).toHaveProperty("dnsRecords");
@@ -297,9 +313,12 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result).toBeDefined();
       expect(result.dnsRecords).toBeDefined();
@@ -313,7 +332,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -323,9 +342,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.progress).toBeDefined();
       expect(result.progress.percentage).toBe(0);
@@ -339,7 +361,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -349,9 +371,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.progress.percentage).toBe(100);
       expect(result.progress.nextStep).toBeUndefined();
@@ -369,7 +394,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -384,9 +409,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.progress.percentage).toBeGreaterThan(0);
       expect(result.progress.percentage).toBeLessThan(100);
@@ -399,7 +427,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -414,9 +442,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       // totalRecords now counts ALL records (ownership + traffic + all SSL records)
       // This gives users visibility of all DNS records they'll need to configure
@@ -444,7 +475,7 @@ describe("Get DNS Instructions Tests", () => {
         },
       ];
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -454,9 +485,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(vi.mocked(getCustomHostnameDetails)).toHaveBeenCalledWith(
         mockPendingDomain.cloudflareHostnameId,
@@ -468,7 +502,9 @@ describe("Get DNS Instructions Tests", () => {
 
       // Check SSL records contain the updated token
       expect(result.dnsRecords.ssl).toBeDefined();
-      const sslRecord = result.dnsRecords.ssl?.find(r => r.value === "updated-ssl-token");
+      const sslRecord = result.dnsRecords.ssl?.find(
+        (r) => r.value === "updated-ssl-token"
+      );
       expect(sslRecord).toBeDefined();
     });
 
@@ -477,15 +513,18 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const timeoutError = new Error("timeout");
       (timeoutError as any).code = "ETIMEDOUT";
       vi.mocked(getCustomHostnameDetails).mockRejectedValue(timeoutError);
 
       // Service continues without SSL records even on timeout
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       // Should return DNS instructions even if Cloudflare times out
       expect(result).toHaveProperty("dnsRecords");
@@ -497,7 +536,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const rateLimitError: any = new Error("Rate limit");
       rateLimitError.response = {
         data: {
@@ -506,9 +545,12 @@ describe("Get DNS Instructions Tests", () => {
       };
       vi.mocked(getCustomHostnameDetails).mockRejectedValue(rateLimitError);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       // Should return DNS instructions even if Cloudflare rate limits
       expect(result).toHaveProperty("dnsRecords");
@@ -522,7 +564,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -532,9 +574,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result).toBeDefined();
       expect(result.domain).toBeDefined();
@@ -557,7 +602,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -567,9 +612,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.instructions).toContain("DNS records");
       expect(result.instructions).toContain("domain registrar");
@@ -580,7 +628,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -590,9 +638,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.domain.isVerified).toBe(true);
       expect(result.domain.isActive).toBe(true);
@@ -603,7 +654,7 @@ describe("Get DNS Instructions Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -613,9 +664,12 @@ describe("Get DNS Instructions Tests", () => {
         },
       } as any);
 
-      const result = await GetDNSInstructionsService.getDNSInstructions(userId, {
-        id: domainId,
-      });
+      const result = await GetDNSInstructionsService.getDNSInstructions(
+        userId,
+        {
+          id: domainId,
+        }
+      );
 
       expect(result.domain.isVerified).toBe(false);
       expect(result.domain.isActive).toBe(false);

@@ -4,7 +4,7 @@ import { getPrisma } from "../../lib/prisma";
 import { $Enums, UserPlan, AddOnType } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
-vi.mock("../../../api/cloudflare");
+vi.mock("../../cloudflare");
 
 describe("Create Custom Domain Tests", () => {
   let mockPrisma: any;
@@ -32,7 +32,9 @@ describe("Create Custom Domain Tests", () => {
     (getPrisma as any).mockReturnValue(mockPrisma);
 
     // Setup Cloudflare API mocks
-    const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+    const { addCustomHostname, getCustomHostnameDetails } = await import(
+      "../../cloudflare"
+    );
 
     vi.mocked(addCustomHostname).mockResolvedValue({
       id: "cloudflare-hostname-id-123",
@@ -287,7 +289,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null); // Not taken
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -321,7 +325,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -378,7 +384,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -443,7 +451,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -475,7 +485,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -491,9 +503,13 @@ describe("Create Custom Domain Tests", () => {
       // Now returns 3 records: TXT (ownership), CNAME (traffic), TXT (SSL)
       expect(result.setupInstructions.records.length).toBeGreaterThanOrEqual(2);
       expect(result.setupInstructions.records[0].type).toBe("TXT");
-      expect(result.setupInstructions.records[0].purpose).toContain("Verification");
+      expect(result.setupInstructions.records[0].purpose).toContain(
+        "Verification"
+      );
       expect(result.setupInstructions.records[1].type).toBe("CNAME");
-      expect(result.setupInstructions.records[1].purpose).toContain("Live Traffic");
+      expect(result.setupInstructions.records[1].purpose).toContain(
+        "Live Traffic"
+      );
     });
 
     it("should store SSL validation records when provided", async () => {
@@ -503,7 +519,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -533,7 +551,7 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
-      const { addCustomHostname } = await import("../../../api/cloudflare");
+      const { addCustomHostname } = await import("../../cloudflare");
       vi.mocked(addCustomHostname).mockRejectedValue(
         new Error("Cloudflare API error")
       );
@@ -552,7 +570,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.count.mockResolvedValue(0);
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -580,7 +600,7 @@ describe("Create Custom Domain Tests", () => {
           errors: [{ message: "Rate limit exceeded" }],
         },
       };
-      const { addCustomHostname } = await import("../../../api/cloudflare");
+      const { addCustomHostname } = await import("../../cloudflare");
       vi.mocked(addCustomHostname).mockRejectedValue(rateLimitError);
 
       await expect(
@@ -599,7 +619,7 @@ describe("Create Custom Domain Tests", () => {
 
       const timeoutError = new Error("timeout");
       (timeoutError as any).code = "ETIMEDOUT";
-      const { addCustomHostname } = await import("../../../api/cloudflare");
+      const { addCustomHostname } = await import("../../cloudflare");
       vi.mocked(addCustomHostname).mockRejectedValue(timeoutError);
 
       await expect(
@@ -619,7 +639,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -652,7 +674,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -691,7 +715,9 @@ describe("Create Custom Domain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
       mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
 
-      const { addCustomHostname, getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
       vi.mocked(addCustomHostname).mockResolvedValue(
         mockCloudflareHostname as any
       );
@@ -715,7 +741,8 @@ describe("Create Custom Domain Tests", () => {
             createdBy: userId,
             cloudflareHostnameId: mockCloudflareHostname.id,
             cloudflareZoneId: process.env.CF_ZONE_ID,
-            verificationToken: mockCloudflareHostname.ownership_verification.value,
+            verificationToken:
+              mockCloudflareHostname.ownership_verification.value,
           }),
         })
       );

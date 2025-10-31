@@ -1,4 +1,4 @@
-import { DomainStatus, SslStatus } from "../../../src/generated/prisma-client";
+import { DomainStatus, SslStatus } from "../../generated/prisma-client";
 import {
   CloudflareHostnameStatus,
   CloudflareSslStatus,

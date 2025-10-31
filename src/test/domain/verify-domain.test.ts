@@ -4,7 +4,7 @@ import { getPrisma } from "../../lib/prisma";
 import { $Enums } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
-vi.mock("../../../api/cloudflare");
+vi.mock("../../cloudflare");
 
 describe("Verify Domain Tests", () => {
   let mockPrisma: any;
@@ -30,7 +30,7 @@ describe("Verify Domain Tests", () => {
     (getPrisma as any).mockReturnValue(mockPrisma);
 
     // Mock api/cloudflare functions
-    const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+    const { getCustomHostnameDetails } = await import("../../cloudflare");
     vi.mocked(getCustomHostnameDetails).mockResolvedValue({
       id: "cloudflare-hostname-id-123",
       status: "pending",
@@ -202,7 +202,7 @@ describe("Verify Domain Tests", () => {
         sslStatus: $Enums.SslStatus.ACTIVE,
       });
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -235,7 +235,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.update.mockResolvedValue(mockPendingDomain);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -258,7 +258,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.update.mockResolvedValue(mockPendingDomain);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending_validation",
@@ -285,7 +285,7 @@ describe("Verify Domain Tests", () => {
         sslStatus: $Enums.SslStatus.PENDING,
       });
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -315,7 +315,7 @@ describe("Verify Domain Tests", () => {
         status: $Enums.DomainStatus.ACTIVE,
       });
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -346,7 +346,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockRejectedValue(
         new Error("Cloudflare API error")
       );
@@ -361,7 +361,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const timeoutError = new Error("timeout");
       (timeoutError as any).code = "ETIMEDOUT";
       vi.mocked(getCustomHostnameDetails).mockRejectedValue(timeoutError);
@@ -376,7 +376,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const rateLimitError: any = new Error("Rate limit");
       rateLimitError.response = {
         data: {
@@ -395,7 +395,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       const notFoundError: any = new Error("Not found");
       notFoundError.response = {
         status: 404,
@@ -422,7 +422,7 @@ describe("Verify Domain Tests", () => {
         sslStatus: $Enums.SslStatus.ACTIVE,
       });
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "active",
@@ -444,7 +444,9 @@ describe("Verify Domain Tests", () => {
       expect(result.domain.sslStatus).toBe($Enums.SslStatus.ACTIVE);
       expect(result.domain.isVerified).toBe(true);
       expect(result.domain.isActive).toBe(true);
-      expect(result.domain.customHostnameId).toBe(mockPendingDomain.cloudflareHostnameId);
+      expect(result.domain.customHostnameId).toBe(
+        mockPendingDomain.cloudflareHostnameId
+      );
       expect(result.isFullyActive).toBe(true);
       expect(result.nextStep).toBeNull();
     });
@@ -455,7 +457,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.update.mockResolvedValue(mockPendingDomain);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -482,7 +484,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.update.mockResolvedValue(mockPendingDomain);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending",
@@ -508,7 +510,7 @@ describe("Verify Domain Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.domain.update.mockResolvedValue(mockPendingDomain);
 
-      const { getCustomHostnameDetails } = await import("../../../api/cloudflare");
+      const { getCustomHostnameDetails } = await import("../../cloudflare");
       vi.mocked(getCustomHostnameDetails).mockResolvedValue({
         id: "cloudflare-hostname-id-123",
         status: "pending_validation",

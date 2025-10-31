@@ -243,9 +243,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
     for (const workspace of buyerWorkspaces) {
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,
@@ -460,9 +458,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       // Clean up - Delete DNS record
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,
@@ -532,9 +528,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       // Clean up - Delete DNS record
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,
@@ -613,9 +607,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       // Clean up - Delete DNS records
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,
@@ -698,7 +690,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
         if (workspace) {
           try {
             const { deleteWorkspaceSubdomain } = await import(
-              "../../../api/cloudflare"
+              "../../cloudflare"
             );
             const config = {
               apiToken: process.env.CF_API_TOKEN!,
@@ -880,9 +872,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       // Clean up manually (this test uses different payment) - Delete DNS record
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,
@@ -1131,7 +1121,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
         if (workspace) {
           try {
             const { deleteWorkspaceSubdomain } = await import(
-              "../../../api/cloudflare"
+              "../../cloudflare"
             );
             const config = {
               apiToken: process.env.CF_API_TOKEN!,
@@ -1230,7 +1220,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
         if (workspace) {
           try {
             const { deleteWorkspaceSubdomain } = await import(
-              "../../../api/cloudflare"
+              "../../cloudflare"
             );
             const config = {
               apiToken: process.env.CF_API_TOKEN!,
@@ -1328,7 +1318,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
         if (workspace) {
           try {
             const { deleteWorkspaceSubdomain } = await import(
-              "../../../api/cloudflare"
+              "../../cloudflare"
             );
             const config = {
               apiToken: process.env.CF_API_TOKEN!,
@@ -1460,9 +1450,7 @@ describe.skip("CloneWorkspaceService.cloneWorkspace - Integration Tests", () => 
 
       // Clean up - Delete DNS record
       try {
-        const { deleteWorkspaceSubdomain } = await import(
-          "../../../api/cloudflare"
-        );
+        const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
         const config = {
           apiToken: process.env.CF_API_TOKEN!,
           accountId: process.env.CF_ACCOUNT_ID,

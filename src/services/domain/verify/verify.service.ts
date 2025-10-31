@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCustomHostnameDetails } from "../../../../api/cloudflare";
+import { getCustomHostnameDetails } from "../../../cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -11,7 +11,7 @@ import {
   VerifyDomainRequestSchema,
   VerifyDomainResponseSchema,
   CloudFlareHostnameStatus,
-  CloudFlareSslStatus
+  CloudFlareSslStatus,
 } from "../../../types/domain/verify";
 import {
   determineVerificationStatus,
@@ -42,9 +42,9 @@ export class VerifyDomainService {
         action: PermissionAction.VERIFY_DOMAIN,
       });
 
-      if (domainRecord.status === 'ACTIVE') {
+      if (domainRecord.status === "ACTIVE") {
         const response: VerifyDomainResponse = {
-          message: 'Domain is already active.',
+          message: "Domain is already active.",
           domain: {
             id: domainRecord.id,
             hostname: domainRecord.hostname,
@@ -68,7 +68,7 @@ export class VerifyDomainService {
 
       const customHostnameId = domainRecord.cloudflareHostnameId;
       if (!customHostnameId) {
-        throw new BadRequestError('Domain is not configured correctly');
+        throw new BadRequestError("Domain is not configured correctly");
       }
 
       // Read Cloudflare configuration from environment variables
@@ -78,24 +78,44 @@ export class VerifyDomainService {
       };
       // Use custom hostname zone (digitalsite.app) for custom domains
       const zoneId = process.env.CF_ZONE_ID!;
-      const cfHostname = await getCustomHostnameDetails(customHostnameId, zoneId, config);
+      const cfHostname = await getCustomHostnameDetails(
+        customHostnameId,
+        zoneId,
+        config
+      );
 
-      console.log('[Verify Domain] Cloudflare response:', JSON.stringify(cfHostname, null, 2));
+      console.log(
+        "[Verify Domain] Cloudflare response:",
+        JSON.stringify(cfHostname, null, 2)
+      );
 
       const { status, ssl } = cfHostname;
       const hostnameStatus = status as CloudFlareHostnameStatus;
       const sslStatus = ssl?.status as CloudFlareSslStatus;
 
-      console.log('[Verify Domain] SSL validation_records type:', Array.isArray(ssl?.validation_records) ? 'array' : typeof ssl?.validation_records);
-      console.log('[Verify Domain] SSL validation_records:', JSON.stringify(ssl?.validation_records, null, 2));
-
-      const verificationResult: VerificationStatusResult = determineVerificationStatus(
-        hostnameStatus,
-        sslStatus,
-        ssl?.validation_records
+      console.log(
+        "[Verify Domain] SSL validation_records type:",
+        Array.isArray(ssl?.validation_records)
+          ? "array"
+          : typeof ssl?.validation_records
+      );
+      console.log(
+        "[Verify Domain] SSL validation_records:",
+        JSON.stringify(ssl?.validation_records, null, 2)
       );
 
-      const updateData = getStatusUpdateData(hostnameStatus, sslStatus, verificationResult);
+      const verificationResult: VerificationStatusResult =
+        determineVerificationStatus(
+          hostnameStatus,
+          sslStatus,
+          ssl?.validation_records
+        );
+
+      const updateData = getStatusUpdateData(
+        hostnameStatus,
+        sslStatus,
+        verificationResult
+      );
 
       const updatedDomain = await getPrisma().domain.update({
         where: { id: domainRecord.id },
@@ -110,8 +130,12 @@ export class VerifyDomainService {
           type: updatedDomain.type,
           status: updatedDomain.status,
           sslStatus: updatedDomain.sslStatus,
-          isVerified: verificationResult.shouldUpdateVerified || updatedDomain.status !== 'PENDING',
-          isActive: verificationResult.shouldUpdateActive || updatedDomain.status === 'ACTIVE',
+          isVerified:
+            verificationResult.shouldUpdateVerified ||
+            updatedDomain.status !== "PENDING",
+          isActive:
+            verificationResult.shouldUpdateActive ||
+            updatedDomain.status === "ACTIVE",
           verificationToken: updatedDomain.verificationToken,
           customHostnameId: updatedDomain.cloudflareHostnameId,
           overallStatus: hostnameStatus,
@@ -122,13 +146,22 @@ export class VerifyDomainService {
         nextStep: verificationResult.nextStep,
       };
 
-      console.log('[Verify Domain] Response before Zod validation:', JSON.stringify(response, null, 2));
-      console.log('[Verify Domain] nextStep type:', Array.isArray(response.nextStep) ? 'array' : typeof response.nextStep);
+      console.log(
+        "[Verify Domain] Response before Zod validation:",
+        JSON.stringify(response, null, 2)
+      );
+      console.log(
+        "[Verify Domain] nextStep type:",
+        Array.isArray(response.nextStep) ? "array" : typeof response.nextStep
+      );
 
       return VerifyDomainResponseSchema.parse(response);
     } catch (error: unknown) {
       if (error instanceof ZodError) {
-        console.error('[Verify Domain] Zod validation error:', JSON.stringify(error.issues, null, 2));
+        console.error(
+          "[Verify Domain] Zod validation error:",
+          JSON.stringify(error.issues, null, 2)
+        );
         throw new BadRequestError(
           error.issues[0]?.message || "Invalid request data"
         );

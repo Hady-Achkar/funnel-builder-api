@@ -9,7 +9,7 @@ import {
   PermissionAction,
 } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { WorkspaceSubdomainAllocations } from "../../../utils/allocations/workspace-subdomain-allocations";
-import { createARecord } from "../../../../api/cloudflare";
+import { createARecord } from "../../../cloudflare";
 import {
   CreateSubdomainResponse,
   createSubdomainRequest,
@@ -129,13 +129,10 @@ export class CreateSubdomainService {
       let aRecord: any;
       try {
         // Use Cloudflare API function directly
-        aRecord = await createARecord(
-          subdomain,
-          zoneId,
-          targetIp,
-          config,
-          { ttl: 3600, proxied: true }
-        );
+        aRecord = await createARecord(subdomain, zoneId, targetIp, config, {
+          ttl: 3600,
+          proxied: true,
+        });
       } catch (error: any) {
         const errMsg =
           error.response?.data?.errors?.[0]?.message || error.message;

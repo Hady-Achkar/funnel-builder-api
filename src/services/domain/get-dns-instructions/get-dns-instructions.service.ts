@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import { getCustomHostnameDetails } from "../../../../api/cloudflare";
+import { getCustomHostnameDetails } from "../../../cloudflare";
 import {
   PermissionManager,
   PermissionAction,
@@ -58,7 +58,10 @@ export class GetDNSInstructionsService {
             currentSslValidationRecords = cfHostname.ssl.validation_records;
           }
         } catch (error: any) {
-          console.error('[DNS Instructions] Failed to fetch SSL validation records:', error.message);
+          console.error(
+            "[DNS Instructions] Failed to fetch SSL validation records:",
+            error.message
+          );
           // Continue without SSL validation records - they might not be ready yet
         }
       }

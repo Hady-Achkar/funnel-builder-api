@@ -4,7 +4,7 @@ import { getPrisma } from "../../lib/prisma";
 import { $Enums, UserPlan, AddOnType } from "../../generated/prisma-client";
 
 vi.mock("../../lib/prisma");
-vi.mock("../../../api/cloudflare");
+vi.mock("../../cloudflare");
 
 // Test constants
 const TEST_TARGET_IP = process.env.CF_IP!;
@@ -19,7 +19,7 @@ describe("Create Subdomain Tests", () => {
     vi.clearAllMocks();
 
     // Setup Cloudflare API mock
-    const { createARecord } = await import("../../../api/cloudflare");
+    const { createARecord } = await import("../../cloudflare");
     vi.mocked(createARecord).mockResolvedValue({
       id: "cloudflare-record-id-123",
       type: "A",
@@ -367,7 +367,7 @@ describe("Create Subdomain Tests", () => {
         customConfig
       );
 
-      const { createARecord } = await import("../../../api/cloudflare");
+      const { createARecord } = await import("../../cloudflare");
       expect(vi.mocked(createARecord)).toHaveBeenCalledWith(
         subdomain,
         "custom-zone-id",
@@ -391,7 +391,7 @@ describe("Create Subdomain Tests", () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       // Mock Cloudflare API error
-      const { createARecord } = await import("../../../api/cloudflare");
+      const { createARecord } = await import("../../cloudflare");
       vi.mocked(createARecord).mockRejectedValue(
         new Error("Cloudflare API error")
       );
@@ -412,7 +412,7 @@ describe("Create Subdomain Tests", () => {
 
       const timeoutError = new Error("timeout");
       (timeoutError as any).code = "ETIMEDOUT";
-      const { createARecord } = await import("../../../api/cloudflare");
+      const { createARecord } = await import("../../cloudflare");
       vi.mocked(createARecord).mockRejectedValue(timeoutError);
 
       await expect(
@@ -435,7 +435,7 @@ describe("Create Subdomain Tests", () => {
           errors: [{ message: "Rate limit exceeded" }],
         },
       };
-      const { createARecord } = await import("../../../api/cloudflare");
+      const { createARecord } = await import("../../cloudflare");
       vi.mocked(createARecord).mockRejectedValue(rateLimitError);
 
       await expect(
@@ -486,7 +486,7 @@ describe("Create Subdomain Tests", () => {
         workspaceSlug,
       });
 
-      const { createARecord } = await import("../../../api/cloudflare");
+      const { createARecord } = await import("../../cloudflare");
       expect(vi.mocked(createARecord)).toHaveBeenCalledWith(
         subdomain,
         process.env.CF_ZONE_ID,

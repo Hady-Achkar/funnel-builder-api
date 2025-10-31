@@ -8,7 +8,7 @@ import { validateHostname, parseDomain } from "./utils/domain-validation";
 import {
   addCustomHostname,
   getCustomHostnameDetails,
-} from "../../../../api/cloudflare";
+} from "../../../cloudflare";
 import {
   PermissionManager,
   PermissionAction,

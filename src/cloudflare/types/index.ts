@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DomainStatus, SslStatus } from "../../../src/generated/prisma-client";
+import { DomainStatus, SslStatus } from "../../generated/prisma-client";
 
 /**
  * Cloudflare API Types

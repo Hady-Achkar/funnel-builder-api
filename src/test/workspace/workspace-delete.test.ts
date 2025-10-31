@@ -11,7 +11,7 @@ import { FunnelStatus, DomainStatus } from "../../generated/prisma-client";
 vi.mock("../../lib/prisma");
 
 // Mock the Cloudflare API functions - pure API layer, no environment variables
-vi.mock("../../../api/cloudflare", () => ({
+vi.mock("../../cloudflare", () => ({
   deleteWorkspaceSubdomain: vi.fn().mockResolvedValue({
     success: true,
     deleted: ["mock-dns-record-id"],
@@ -342,7 +342,7 @@ describe("Workspace Deletion Tests", () => {
       });
 
       // Mock DNS deletion failure
-      const { deleteWorkspaceSubdomain } = await import("../../../api/cloudflare");
+      const { deleteWorkspaceSubdomain } = await import("../../cloudflare");
       (deleteWorkspaceSubdomain as any).mockResolvedValueOnce({
         success: false,
         deleted: [],
