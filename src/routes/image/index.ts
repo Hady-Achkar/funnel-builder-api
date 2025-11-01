@@ -12,6 +12,9 @@ const router: Router = express.Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB in bytes
+  },
 });
 
 router.use(authenticateToken);
@@ -32,7 +35,11 @@ router.delete("/:imageId", deleteImageController);
 
 router.delete("/bulk", bulkDeleteImagesController);
 
-router.put("/:imageId", upload.fields([{ name: "image", maxCount: 1 }]), updateImageController);
+router.put(
+  "/:imageId",
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  updateImageController
+);
 
 router.patch("/:imageId/move", moveImageController);
 
