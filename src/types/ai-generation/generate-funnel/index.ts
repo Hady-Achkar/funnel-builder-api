@@ -17,7 +17,6 @@ export const generateFunnelRequestSchema = z.object({
   funnelType: z.string().optional(),
   maxPages: z.number().int().positive().optional().default(3),
   maxElementsPerPage: z.number().int().positive().max(20).optional().default(8),
-  createFunnel: z.boolean().optional().default(true),
   primaryColor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, {
@@ -33,8 +32,8 @@ export const generateFunnelRequestSchema = z.object({
   preferDarkBackground: z.boolean().optional(),
   userPrompt: z
     .string()
-    .max(1000, {
-      message: "User prompt must not exceed 1000 characters",
+    .max(5000, {
+      message: "User prompt must not exceed 5000 characters",
     })
     .optional(),
 });
@@ -42,38 +41,34 @@ export const generateFunnelRequestSchema = z.object({
 export const generateFunnelResponseSchema = z.object({
   message: z.string(),
   funnel: z.object({
-    id: z.number().int().positive().optional(),
+    id: z.number().int().positive(),
     name: z.string(),
     pages: z.array(
       z.object({
-        id: z.number().int().positive().optional(),
+        id: z.number().int().positive(),
         name: z.string(),
         type: z.enum(["PAGE", "RESULT"]),
-        order: z.number().int().nonnegative().optional(),
+        order: z.number().int().nonnegative(),
       })
     ),
-    theme: z
-      .object({
-        id: z.number().int().positive().optional(),
-        name: z.string(),
-        backgroundColor: z.string(),
-        textColor: z.string(),
-        buttonColor: z.string(),
-        buttonTextColor: z.string(),
-        borderColor: z.string(),
-        optionColor: z.string(),
-        fontFamily: z.string(),
-        borderRadius: z.string(),
-      })
-      .optional(),
-    seoSettings: z
-      .object({
-        id: z.number().int().positive().optional(),
-        defaultSeoTitle: z.string().nullable(),
-        defaultSeoDescription: z.string().nullable(),
-        defaultSeoKeywords: z.array(z.string()), // API returns array format for frontend
-      })
-      .optional(),
+    theme: z.object({
+      id: z.number().int().positive(),
+      name: z.string(),
+      backgroundColor: z.string(),
+      textColor: z.string(),
+      buttonColor: z.string(),
+      buttonTextColor: z.string(),
+      borderColor: z.string(),
+      optionColor: z.string(),
+      fontFamily: z.string(),
+      borderRadius: z.string(),
+    }),
+    seoSettings: z.object({
+      id: z.number().int().positive(),
+      defaultSeoTitle: z.string().nullable(),
+      defaultSeoDescription: z.string().nullable(),
+      defaultSeoKeywords: z.array(z.string()), // API returns array format for frontend
+    }),
   }),
   tokensUsed: z.number().int().nonnegative(),
   remainingTokens: z.number().int().nullable(), // Can be negative when user exceeds limit
@@ -151,13 +146,10 @@ export const generateFunnelRequestSchemaV2 = z.object({
 
   userPrompt: z
     .string()
-    .max(1000, {
-      message: "User prompt must not exceed 1000 characters",
+    .max(5000, {
+      message: "User prompt must not exceed 5000 characters",
     })
     .optional(),
-
-  // SYSTEM FLAGS
-  createFunnel: z.boolean().optional().default(true),
 });
 
 // V2 Response Schema (extends V1 with refinement info)

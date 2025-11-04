@@ -817,8 +817,8 @@ async function generateFunnelBatch(
       industry: request.industry,
     });
 
-    // Create funnel in database if requested
-    let funnelId: number | undefined;
+    // Create funnel in database (always after allocation checks pass)
+    let funnelId: number;
     let createdPages: Array<{
       id: number;
       name: string;
@@ -827,10 +827,10 @@ async function generateFunnelBatch(
       content: string;
       elements: any[];
     }> = [];
-    let createdTheme: any = undefined;
-    let createdSeoSettings: any = undefined;
+    let createdTheme: any;
+    let createdSeoSettings: any;
 
-    if (request.createFunnel) {
+    {
       // Pre-generate linkingIds for all pages to enable cross-page linking
       const timestamp = Date.now();
       const pageNameToLinkingId = new Map<string, string>();
@@ -1071,62 +1071,39 @@ async function generateFunnelBatch(
 
     // Build response
     const response = {
-      message: request.createFunnel
-        ? "Funnel generated and saved successfully"
-        : "Funnel generated successfully (not saved)",
+      message: "Funnel generated and saved successfully",
       funnel: {
         id: funnelId,
         name: generatedFunnel.funnelName,
-        pages: request.createFunnel
-          ? createdPages.map((page) => ({
-              id: page.id,
-              name: page.name,
-              type:
-                page.type === PageType.RESULT
-                  ? ("RESULT" as const)
-                  : ("PAGE" as const),
-              order: page.order,
-            }))
-          : generatedFunnel.pages.map((page, index) => ({
-              name: page.name,
-              type: page.type,
-              order: index + 1,
-            })),
-        theme: createdTheme
-          ? {
-              id: createdTheme.id,
-              name: createdTheme.name,
-              backgroundColor: createdTheme.backgroundColor,
-              textColor: createdTheme.textColor,
-              buttonColor: createdTheme.buttonColor,
-              buttonTextColor: createdTheme.buttonTextColor,
-              borderColor: createdTheme.borderColor,
-              optionColor: createdTheme.optionColor,
-              fontFamily: createdTheme.fontFamily,
-              borderRadius: createdTheme.borderRadius,
-            }
-          : {
-              name: "AI Generated Theme",
-              backgroundColor: themeColors.backgroundColor,
-              textColor: themeColors.textColor,
-              buttonColor: themeColors.buttonColor,
-              buttonTextColor: themeColors.buttonTextColor,
-              borderColor: themeColors.borderColor,
-              optionColor: themeColors.optionColor,
-              fontFamily: "Inter, sans-serif",
-              borderRadius: BorderRadius.SOFT,
-            },
-        seoSettings:
-          request.createFunnel && createdSeoSettings
-            ? {
-                id: createdSeoSettings.id,
-                defaultSeoTitle: createdSeoSettings.defaultSeoTitle,
-                defaultSeoDescription: createdSeoSettings.defaultSeoDescription,
-                defaultSeoKeywords: convertSeoKeywordsToArray(
-                  createdSeoSettings.defaultSeoKeywords
-                ),
-              }
-            : undefined,
+        pages: createdPages.map((page) => ({
+          id: page.id,
+          name: page.name,
+          type:
+            page.type === PageType.RESULT
+              ? ("RESULT" as const)
+              : ("PAGE" as const),
+          order: page.order,
+        })),
+        theme: {
+          id: createdTheme.id,
+          name: createdTheme.name,
+          backgroundColor: createdTheme.backgroundColor,
+          textColor: createdTheme.textColor,
+          buttonColor: createdTheme.buttonColor,
+          buttonTextColor: createdTheme.buttonTextColor,
+          borderColor: createdTheme.borderColor,
+          optionColor: createdTheme.optionColor,
+          fontFamily: createdTheme.fontFamily,
+          borderRadius: createdTheme.borderRadius,
+        },
+        seoSettings: {
+          id: createdSeoSettings.id,
+          defaultSeoTitle: createdSeoSettings.defaultSeoTitle,
+          defaultSeoDescription: createdSeoSettings.defaultSeoDescription,
+          defaultSeoKeywords: convertSeoKeywordsToArray(
+            createdSeoSettings.defaultSeoKeywords
+          ),
+        },
       },
       tokensUsed: actualTokensUsed,
       remainingTokens: tokenResult.remainingTokens,
@@ -1278,7 +1255,6 @@ export async function generateFunnel(
     preferDarkBackground:
       refinedOutput.themeRecommendation.preferDarkBackground,
     userPrompt: undefined,
-    createFunnel: request.createFunnel,
   };
 
   const batchResult = await generateFunnelBatch(userId, batchRequest);

@@ -289,20 +289,26 @@ export function autoFixMissingFields(elements: any[]): any[] {
       // Fix content object
       if (!fixedElement.content || typeof fixedElement.content !== "object") {
         fixedElement.content = {
-          src: "",
-          type: "iframe",
+          embedCode:
+            "<div style='padding:20px;background:#f5f5f5;text-align:center;'>Embed content placeholder</div>",
         };
       } else {
-        if (!fixedElement.content.src) {
-          fixedElement.content.src = "";
-        }
-        if (!fixedElement.content.type) {
-          fixedElement.content.type = "iframe";
+        if (!fixedElement.content.embedCode) {
+          console.warn(
+            `[Auto-fix] Embed element ${fixedElement.id} missing embedCode. Setting placeholder.`
+          );
+          fixedElement.content.embedCode =
+            "<div style='padding:20px;background:#f5f5f5;text-align:center;'>Embed content placeholder</div>";
         }
       }
 
       // Add missing props
-      if (!fixedElement.props.height) fixedElement.props.height = "400px";
+      if (typeof fixedElement.props.showPreview !== "boolean") {
+        console.warn(
+          `[Auto-fix] Embed element ${fixedElement.id} missing showPreview. Setting to false.`
+        );
+        fixedElement.props.showPreview = false;
+      }
     }
 
     // FORM-INPUT ELEMENT
@@ -335,6 +341,24 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.withIcon !== "boolean")
         fixedElement.props.withIcon = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props that don't belong to form-input
+      // Valid props: size, mandatory, withIcon
+      const validProps = ["size", "mandatory", "withIcon"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-input ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-input elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM-SELECT ELEMENT
@@ -362,6 +386,24 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.mandatory !== "boolean")
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory
+      const validProps = ["size", "mandatory"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-select ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-select elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM-CHECKBOX ELEMENT
@@ -381,6 +423,23 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.mandatory !== "boolean")
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory, checkboxShape
+      const validProps = ["size", "mandatory", "checkboxShape"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-checkbox ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-checkbox elements (not needed - link is handled separately)
     }
 
     // FORM-NUMBER ELEMENT
@@ -410,6 +469,24 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.mandatory !== "boolean")
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory
+      const validProps = ["size", "mandatory"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-number ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-number elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM-PHONENUMBER ELEMENT
@@ -434,6 +511,26 @@ export function autoFixMissingFields(elements: any[]): any[] {
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
 
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory, showCountryFlag, limitToOneCountry
+      const validProps = [
+        "size",
+        "mandatory",
+        "showCountryFlag",
+        "limitToOneCountry",
+      ];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-phonenumber ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
       // Ensure selectedCountry exists
       if (
         !fixedElement.selectedCountry ||
@@ -446,6 +543,9 @@ export function autoFixMissingFields(elements: any[]): any[] {
           dialCode: "+1",
         };
       }
+
+      // Remove link for form-phonenumber elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM-DATEPICKER ELEMENT
@@ -469,6 +569,24 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.mandatory !== "boolean")
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory
+      const validProps = ["size", "mandatory"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-datepicker ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-datepicker elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM-MESSAGE ELEMENT
@@ -492,6 +610,24 @@ export function autoFixMissingFields(elements: any[]): any[] {
       if (typeof fixedElement.props.mandatory !== "boolean")
         fixedElement.props.mandatory = false;
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+
+      // CRITICAL FIX: Remove invalid props
+      // Valid props: size, mandatory
+      const validProps = ["size", "mandatory"];
+      const invalidProps = Object.keys(fixedElement.props).filter(
+        (key) => !validProps.includes(key)
+      );
+      if (invalidProps.length > 0) {
+        console.warn(
+          `[Auto-fix] form-message ${fixedElement.id} has invalid props: ${invalidProps.join(
+            ", "
+          )}. Removing them.`
+        );
+        invalidProps.forEach((key) => delete fixedElement.props[key]);
+      }
+
+      // Remove link for form-message elements (not needed)
+      delete fixedElement.link;
     }
 
     // FORM ELEMENT (Container)
@@ -520,6 +656,16 @@ export function autoFixMissingFields(elements: any[]): any[] {
           fixedElement.integration.webhookEnabled = false;
         if (!fixedElement.integration.webhookUrl)
           fixedElement.integration.webhookUrl = "";
+      }
+
+      // CRITICAL FIX: Remove ALL invalid props from form container
+      // Form elements should have empty props object
+      const invalidPropsFound = Object.keys(fixedElement.props).length > 0;
+      if (invalidPropsFound) {
+        console.warn(
+          `[Auto-fix] Form element ${fixedElement.id} has invalid props. Removing all props (forms should have empty props).`
+        );
+        fixedElement.props = {};
       }
 
       // Remove link for form elements (not needed)

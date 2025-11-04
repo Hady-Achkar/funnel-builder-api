@@ -4,6 +4,7 @@
  */
 
 import { getAllElementDefinitions, ElementDefinition } from "../ui-elements";
+import { REFINED_AI_INSTRUCTIONS, REFINED_AI_INSTRUCTIONS_COMPACT } from "./refined-instructions";
 
 /**
  * Reusable element type validation section for ALL prompts
@@ -137,12 +138,20 @@ You are an expert funnel builder that generates complete, conversion-optimized s
 2. **BUTTON STYLES**: NEVER set padding or fontSize in styles object - these are controlled by the size prop
    ❌ WRONG: styles: {padding: "15px 35px", fontSize: "20px"}
    ✅ CORRECT: styles: {backgroundColor: "#FF4500", color: "#FFFFFF"}
-3. borderRadius: MUST BE UPPERCASE → "NONE", "SOFT", "ROUNDED" (NOT "none", "soft", "rounded")
-4. size: MUST BE lowercase → "sm", "md", "lg", "xl" (NOT "SM", "MD", "LG", "XL")
-5. align: MUST BE lowercase → "left", "center", "right" (NOT "LEFT", "CENTER", "RIGHT")
-6. borderStyle: MUST BE lowercase → "solid", "dashed", "dotted", "none"
-7. target: MUST BE lowercase → "_self", "_blank"
-8. type: MUST BE lowercase → "internal", "external"
+3. **EMBED ELEMENTS**: MUST include embedCode (string) AND showPreview (boolean) - NEVER leave undefined
+   ❌ WRONG: content: {}, props: {}
+   ✅ CORRECT: content: {embedCode: "<iframe...></iframe>"}, props: {showPreview: true}
+4. **FORM ELEMENTS**: NEVER add borderRadius, align, borderStyle, mediaType, or shape to form/form-field elements
+   ❌ WRONG: form props: {borderRadius: "SOFT", align: "left", mediaType: "image"}
+   ✅ CORRECT: form props: {}
+   ❌ WRONG: form-input props: {size: "md", mandatory: true, borderRadius: "SOFT", align: "left"}
+   ✅ CORRECT: form-input props: {size: "md", mandatory: true, withIcon: false}
+5. borderRadius: MUST BE UPPERCASE → "NONE", "SOFT", "ROUNDED" (NOT "none", "soft", "rounded")
+6. size: MUST BE lowercase → "sm", "md", "lg", "xl" (NOT "SM", "MD", "LG", "XL")
+7. align: MUST BE lowercase → "left", "center", "right" (NOT "LEFT", "CENTER", "RIGHT")
+8. borderStyle: MUST BE lowercase → "solid", "dashed", "dotted", "none"
+9. target: MUST BE lowercase → "_self", "_blank"
+10. type: MUST BE lowercase → "internal", "external"
 
 EXAMPLE borderRadius CORRECT vs WRONG:
 ❌ WRONG: props: {borderRadius: "soft"}
@@ -157,6 +166,21 @@ EXAMPLE image src CORRECT vs WRONG:
 ❌ WRONG: content: {src: "https://placehold.co/800x800"}
 ❌ WRONG: content: {src: "placeholder.jpg"}
 ✅ CORRECT: content: {src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23e5e7eb'/%3E%3C/svg%3E"}
+
+EXAMPLE embed element CORRECT vs WRONG:
+❌ WRONG: {type: "embed", content: {}, props: {}}
+❌ WRONG: {type: "embed", content: {embedCode: undefined}, props: {showPreview: undefined}}
+✅ CORRECT: {type: "embed", content: {embedCode: "<iframe src='https://www.youtube.com/embed/VIDEO_ID' width='560' height='315'></iframe>"}, props: {showPreview: true}}
+
+EXAMPLE form elements CORRECT vs WRONG:
+❌ WRONG: {type: "form", props: {borderRadius: "SOFT", align: "left", size: "md"}}
+✅ CORRECT: {type: "form", props: {}, serverId: null, integration: {webhookEnabled: false, webhookUrl: ""}}
+
+❌ WRONG: {type: "form-input", props: {size: "md", mandatory: true, borderRadius: "SOFT", align: "left", mediaType: "image"}}
+✅ CORRECT: {type: "form-input", props: {size: "md", mandatory: true, withIcon: false}, content: {inputType: "email", label: "Email", placeholder: "your@email.com"}}
+
+❌ WRONG: {type: "form-select", props: {size: "md", mandatory: false, borderStyle: "solid", shape: "auto"}}
+✅ CORRECT: {type: "form-select", props: {size: "md", mandatory: false}, content: {label: "Select", placeholder: "Choose", options: []}}
 
 ## CRITICAL: ALL elements MUST include these required fields:
 1. id (string): "type-timestamp-random" format
@@ -193,6 +217,13 @@ DIVIDER elements MUST have:
 - props: {borderStyle: "solid"|"dashed"|"dotted"|"none"}
 - styles: {borderColor: "#e0e0e0", borderWidth: "1px", margin: "20px 0"}
 
+EMBED elements MUST have:
+- content: {embedCode: "string"} (iframe/script/HTML code)
+- props: {showPreview: true|false}
+- styles: {margin: "16px 0"}
+⚠️ CRITICAL: embedCode MUST be valid HTML (iframe for videos, script for widgets)
+⚠️ CRITICAL: showPreview MUST be boolean (true for iframes, false for scripts)
+
 QUIZ elements MUST have:
 - serverId: null
 - children: [text element, then 3-5 answer elements]
@@ -223,23 +254,27 @@ FORM elements MUST have:
 - serverId: null
 - integration: {webhookEnabled: false, webhookUrl: ""}
 - children: [text (title), form-input/select/checkbox fields, button (submit)]
-- props: {}
+- props: {} (MUST be empty object - NO borderRadius, align, size, etc.)
 - styles: {padding: "24px"}
+⚠️ CRITICAL: Form container props MUST be empty {}. Do NOT add any props to form elements.
 
 FORM-INPUT elements (inside form) MUST have:
 - content: {inputType: "email"|"fullname"|"company", label: "Label", placeholder: "hint"}
 - props: {mandatory: true, size: "md", withIcon: false}
 - styles: {}
+⚠️ CRITICAL: Form-input can ONLY have props: mandatory, size, withIcon. NO borderRadius, align, borderStyle, mediaType, shape!
 
 FORM-SELECT elements (inside form) MUST have:
 - content: {label: "Label", placeholder: "Choose", options: [{id: "1", label: "Option"}]}
 - props: {mandatory: false, size: "md"}
 - styles: {}
+⚠️ CRITICAL: Form-select can ONLY have props: mandatory, size. NO other props!
 
 FORM-CHECKBOX elements (inside form) MUST have:
 - content: {label: "I agree"}
 - props: {mandatory: false, size: "md"}
 - styles: {}
+⚠️ CRITICAL: Form-checkbox can ONLY have props: mandatory, size, checkboxShape. NO other props!
 
 COMPARISON-CHART MUST have (COMPLEX - PAY ATTENTION):
 - content: {
@@ -306,7 +341,17 @@ Each keyword phrase MUST be a SEPARATE array element (keywords can be multi-word
 ❌ WRONG: "ecommerce leads, sales funnel, online store growth" (string with commas)
 ❌ WRONG: ["ecommerce leads, sales funnel, online store growth"] (one string with commas inside)
 
-Generate production-ready funnels with ALL required fields!`;
+Generate production-ready funnels with ALL required fields!
+
+---
+
+## ENHANCED AI INSTRUCTIONS (CRITICAL VALIDATION RULES)
+
+${REFINED_AI_INSTRUCTIONS_COMPACT}
+
+---
+
+Generate your response now following ALL rules above.`;
 
   return prompt;
 }
@@ -637,7 +682,17 @@ Generate comprehensive SEO metadata for optimal search engine visibility:
 - Don't artificially limit elements - use the full allocation when appropriate
 - Balance element quantity with page purpose and user experience
 
-Remember: Generate complete, production-ready funnels that convert!`;
+Remember: Generate complete, production-ready funnels that convert!
+
+---
+
+## ENHANCED AI INSTRUCTIONS (COMPREHENSIVE ELEMENT GUIDANCE)
+
+${REFINED_AI_INSTRUCTIONS}
+
+---
+
+Generate your response now following ALL rules above.`;
 
   return prompt;
 }
@@ -740,7 +795,7 @@ export function buildUserPrompt(
   userPrompt?: string
 ): string {
   // Extract a few words from business description for examples
-  const businessPreview = businessDescription.split(' ').slice(0, 5).join(' ');
+  const businessPreview = businessDescription.split(" ").slice(0, 5).join(" ");
 
   let prompt = `🚨 REMINDER: Use REAL content specific to this business, NOT placeholders!
 
@@ -753,7 +808,9 @@ Generate COMPELLING, SPECIFIC content for this ${industry || "business"}.
 
 Example: Don't say "Button" - say "Get My ${funnelType || "Offer"} Now"
 Example: Don't say "Text" - say "${businessPreview}..."
-Example: Don't say "Email" - say "Where Should We Send Your ${industry || "Business"} Updates?"
+Example: Don't say "Email" - say "Where Should We Send Your ${
+    industry || "Business"
+  } Updates?"
 
 Create a conversion-optimized funnel with multiple pages that guides visitors through a logical journey. Include compelling copy, appropriate visual elements, and clear calls-to-action.`;
 
@@ -1109,8 +1166,12 @@ ${pageList}
 
 ## GENERATION REQUIREMENTS:
 
-1. **Structure:** Generate EXACTLY ${input.maxPages} pages with ~${input.maxElementsPerPage} elements each (±20% variance OK)
-2. **Content:** All content must be SPECIFIC to "${input.businessDescription}" - NO generic placeholders
+1. **Structure:** Generate EXACTLY ${input.maxPages} pages with ~${
+    input.maxElementsPerPage
+  } elements each (±20% variance OK)
+2. **Content:** All content must be SPECIFIC to "${
+    input.businessDescription
+  }" - NO generic placeholders
 3. **Messaging:** Use the key messaging consistently across all pages to maintain brand voice
 4. **Journey:** Each element should advance the user toward conversion
 
