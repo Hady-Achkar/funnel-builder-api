@@ -28,6 +28,7 @@ import cronRoutes from "./routes/cron";
 import payoutRoutes from "./routes/payout";
 import siteRoutes from "./routes/site";
 import sessionRoutes from "./routes/session";
+import aiGenerationRoutes from "./routes/ai-generation";
 
 export function createServer(): Express {
   const app = express();
@@ -125,6 +126,7 @@ export function createServer(): Express {
   app.use("/api/payout", payoutRoutes);
   app.use("/api/sites", siteRoutes);
   app.use("/api/sessions", sessionRoutes);
+  app.use("/api/ai-generation", aiGenerationRoutes);
 
   // Health check endpoint
   app.get("/health", async (_req, res) => {

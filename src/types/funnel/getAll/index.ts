@@ -32,7 +32,7 @@ export const getAllFunnelsResponse = z.object({
           funnelId: z.number(),
           defaultSeoTitle: z.string().nullable(),
           defaultSeoDescription: z.string().nullable(),
-          defaultSeoKeywords: z.string().nullable(),
+          defaultSeoKeywords: z.array(z.string()), // API returns array format for frontend
           favicon: z.string().nullable(),
           ogImage: z.string().nullable(),
           googleAnalyticsId: z.string().nullable(),

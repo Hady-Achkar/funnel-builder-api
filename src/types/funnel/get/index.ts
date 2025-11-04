@@ -39,7 +39,7 @@ export const getFunnelResponse = z.object({
       linkingId: z.string().nullable(),
       seoTitle: z.string().nullable(),
       seoDescription: z.string().nullable(),
-      seoKeywords: z.string().nullable(),
+      seoKeywords: z.array(z.string()), // API returns array format for frontend
       visits: z.number().default(0),
     })
   ),

@@ -10,6 +10,30 @@ import {
   GetFunnelResponse,
 } from "../../../types/funnel/get";
 
+/**
+ * Convert SEO keywords from database string to array format for frontend
+ * Database stores JSON string arrays like '["keyword1", "keyword2"]'
+ */
+function convertSeoKeywordsToArray(keywords: string | null): string[] {
+  if (!keywords) return [];
+
+  // Try parsing as JSON first
+  try {
+    const parsed = JSON.parse(keywords);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Fall back to comma-separated parsing for backward compatibility with old data
+    return keywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+  }
+
+  return [];
+}
+
 export const getFunnel = async (
   funnelId: number,
   userId: number
@@ -52,7 +76,7 @@ export const getFunnel = async (
     if (!permissionCheck.allowed) {
       throw new Error(
         permissionCheck.reason ||
-        `You don't have permission to view this funnel. Please contact your workspace admin.`
+          `You don't have permission to view this funnel. Please contact your workspace admin.`
       );
     }
 
@@ -101,6 +125,7 @@ export const getFunnel = async (
         pages: funnelFromDb.pages.map((page) => ({
           ...page,
           visits: page.visits ?? 0,
+          seoKeywords: convertSeoKeywordsToArray(page.seoKeywords),
         })),
       };
 
@@ -112,12 +137,15 @@ export const getFunnel = async (
       }
     }
 
-    // Ensure all pages have the visits field (for backward compatibility with old cache)
+    // Ensure all pages have the visits field and convert SEO keywords (for backward compatibility with old cache)
     const funnelWithVisits = {
       ...funnel,
       pages: funnel.pages.map((page: any) => ({
         ...page,
         visits: page.visits ?? 0,
+        seoKeywords: Array.isArray(page.seoKeywords)
+          ? page.seoKeywords
+          : convertSeoKeywordsToArray(page.seoKeywords),
       })),
     };
 

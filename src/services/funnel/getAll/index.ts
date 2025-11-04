@@ -12,6 +12,30 @@ import {
   GetAllFunnelsResponse,
 } from "../../../types/funnel/getAll";
 
+/**
+ * Convert SEO keywords from database string to array format for frontend
+ * Database stores JSON string arrays like '["keyword1", "keyword2"]'
+ */
+function convertSeoKeywordsToArray(keywords: string | null): string[] {
+  if (!keywords) return [];
+
+  // Try parsing as JSON first
+  try {
+    const parsed = JSON.parse(keywords);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Fall back to comma-separated parsing for backward compatibility with old data
+    return keywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+  }
+
+  return [];
+}
+
 export const getAllFunnels = async (
   workspaceSlug: string,
   userId: number,
@@ -32,7 +56,9 @@ export const getAllFunnels = async (
       sortOrder: query?.sortOrder,
       status: query?.status,
       search: query?.search ? String(query.search) : undefined,
-      createdBy: query?.createdBy ? parseInt(String(query.createdBy), 10) : undefined,
+      createdBy: query?.createdBy
+        ? parseInt(String(query.createdBy), 10)
+        : undefined,
     };
 
     validatedQuery = getAllFunnelsRequest.parse(parsedQuery);
@@ -62,7 +88,7 @@ export const getAllFunnels = async (
     if (!permissionCheck.allowed) {
       throw new Error(
         permissionCheck.reason ||
-        `You don't have permission to view funnels in this workspace. Please contact your workspace admin.`
+          `You don't have permission to view funnels in this workspace. Please contact your workspace admin.`
       );
     }
 
@@ -95,6 +121,9 @@ export const getAllFunnels = async (
                 : funnel.settings.customTrackingScripts
                 ? [funnel.settings.customTrackingScripts]
                 : [],
+              defaultSeoKeywords: convertSeoKeywordsToArray(
+                funnel.settings.defaultSeoKeywords
+              ),
             }
           : null,
         createdAt: funnel.createdAt,
@@ -149,8 +178,23 @@ export const getAllFunnels = async (
       skip + validatedQuery.limit
     );
 
+    // Ensure SEO keywords are arrays (for backward compatibility with old cache)
+    const funnelsWithArrayKeywords = paginatedFunnels.map((funnel: any) => ({
+      ...funnel,
+      settings: funnel.settings
+        ? {
+            ...funnel.settings,
+            defaultSeoKeywords: Array.isArray(
+              funnel.settings.defaultSeoKeywords
+            )
+              ? funnel.settings.defaultSeoKeywords
+              : convertSeoKeywordsToArray(funnel.settings.defaultSeoKeywords),
+          }
+        : null,
+    }));
+
     const response = {
-      funnels: paginatedFunnels,
+      funnels: funnelsWithArrayKeywords,
       pagination: {
         page: validatedQuery.page,
         limit: validatedQuery.limit,

@@ -36,6 +36,9 @@ model User {
   totalSales                 Int                  @default(0)
   commissionPercentage       Float                @default(5)
   addOns                     AddOn[]              @relation("UserAddOns")
+  aiTokenBalance             AITokenBalance?
+  aiTokenHistory             AITokenHistory[]
+  aiGenerationLogs           AIGenerationLog[]
   affiliateLinks             AffiliateLink[]      @relation("AffiliateOwner")
   balanceTransactions        BalanceTransaction[]
   createdDomains             Domain[]             @relation("DomainCreator")
@@ -155,6 +158,7 @@ model Workspace {
   planType          UserPlan                    @default(FREE)
   addOns            AddOn[]                     @relation("WorkspaceAddOns")
   affiliateLinks    AffiliateLink[]
+  aiGenerationLogs  AIGenerationLog[]
   domains           Domain[]
   funnels           Funnel[]
   members           WorkspaceMember[]
@@ -220,6 +224,7 @@ model Funnel {
   activeTheme       Theme?          @relation("ActiveTheme", fields: [activeThemeId], references: [id])
   creator           User            @relation("FunnelCreator", fields: [createdBy], references: [id])
   workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  aiGenerationLogs  AIGenerationLog[]
   insights          Insight[]
   pages             Page[]
   customTheme       Theme?          @relation("CustomTheme")
@@ -663,6 +668,71 @@ model Payout {
   @@index([method])
   @@index([createdAt])
   @@map("payouts")
+}
+
+model AIGenerationLog {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  workspaceId     Int
+  funnelId        Int?
+
+  prompt          String    @db.Text
+  tokensUsed      Int
+  pagesGenerated  Int
+  model           String    @default("claude-3-5-sonnet-20240620")
+
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id])
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  funnel          Funnel?   @relation(fields: [funnelId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([createdAt])
+  @@map("ai_generation_logs")
+}
+
+model AITokenBalance {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  tokensUsed      Int      @default(0)
+  tokensLimit     Int?     // null = unlimited
+  lastResetAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_token_balances")
+}
+
+model AITokenHistory {
+  id              Int                @id @default(autoincrement())
+  userId          Int
+  tokensUsed      Int
+  operation       AITokenOperation
+  generationLogId Int?               // Link to specific generation
+  description     String?            @db.Text
+  balanceBefore   Int
+  balanceAfter    Int
+  createdAt       DateTime           @default(now())
+
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([operation])
+  @@map("ai_token_history")
+}
+
+enum AITokenOperation {
+  GENERATION
+  DEDUCTION
+  RESET
+  ADJUSTMENT
+  REFUND
 }
 
 enum UserPlan {
