@@ -155,7 +155,11 @@ export function autoFixMissingFields(elements: any[]): any[] {
           alt: "Image",
         };
       } else {
-        if (!fixedElement.content.src) {
+        // CRITICAL FIX: Check for empty string OR missing src (empty string is invalid URL)
+        if (!fixedElement.content.src || fixedElement.content.src.trim() === "") {
+          console.warn(
+            `[Auto-fix] Image element ${fixedElement.id} missing or empty src. Setting placeholder.`
+          );
           fixedElement.content.src =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23e5e7eb'/%3E%3C/svg%3E";
         }
@@ -176,20 +180,39 @@ export function autoFixMissingFields(elements: any[]): any[] {
         fixedElement.content = {
           src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23374151'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23ffffff' font-size='24'%3EVideo%3C/text%3E%3C/svg%3E",
           alt: "Video",
+          type: "url",
         };
       } else {
-        if (!fixedElement.content.src) {
+        // CRITICAL FIX: Check for empty string OR missing src (empty string is invalid URL)
+        if (!fixedElement.content.src || fixedElement.content.src.trim() === "") {
+          console.warn(
+            `[Auto-fix] Video element ${fixedElement.id} missing or empty src. Setting placeholder.`
+          );
           fixedElement.content.src =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23374151'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23ffffff' font-size='24'%3EVideo%3C/text%3E%3C/svg%3E";
         }
         if (!fixedElement.content.alt) {
           fixedElement.content.alt = "Video";
         }
+        // CRITICAL FIX: Add missing content.type field (required by schema)
+        if (!fixedElement.content.type) {
+          console.warn(
+            `[Auto-fix] Video element ${fixedElement.id} missing content.type. Setting to "url".`
+          );
+          fixedElement.content.type = "url";
+        }
       }
 
       // Add missing props
       if (!fixedElement.props.shape) fixedElement.props.shape = "auto";
       if (!fixedElement.props.size) fixedElement.props.size = "md";
+      // CRITICAL FIX: Add missing props.autoplay field (required by schema)
+      if (typeof fixedElement.props.autoplay !== "boolean") {
+        console.warn(
+          `[Auto-fix] Video element ${fixedElement.id} missing props.autoplay. Setting to false.`
+        );
+        fixedElement.props.autoplay = false;
+      }
     }
 
     // MEDIA ELEMENT
@@ -201,7 +224,9 @@ export function autoFixMissingFields(elements: any[]): any[] {
           alt: "Media",
         };
       } else {
-        if (!fixedElement.content.src) {
+        // CRITICAL FIX: Check for empty string OR missing src (empty string is invalid URL)
+        if (!fixedElement.content.src || fixedElement.content.src.trim() === "") {
+          console.warn(`[Auto-fix] Media element ${fixedElement.id} missing or empty src. Setting placeholder.`);
           fixedElement.content.src =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23e5e7eb'/%3E%3C/svg%3E";
         }
@@ -228,7 +253,9 @@ export function autoFixMissingFields(elements: any[]): any[] {
           description: "Description",
         };
       } else {
-        if (!fixedElement.content.src) {
+        // CRITICAL FIX: Check for empty string OR missing src (empty string is invalid URL)
+        if (!fixedElement.content.src || fixedElement.content.src.trim() === "") {
+          console.warn(`[Auto-fix] Media-with-text element ${fixedElement.id} missing or empty src. Setting placeholder.`);
           fixedElement.content.src =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23e5e7eb'/%3E%3C/svg%3E";
         }
@@ -764,6 +791,14 @@ export function autoFixMissingFields(elements: any[]): any[] {
       // Ensure children array exists (should contain faq-item elements)
       if (!Array.isArray(fixedElement.children)) {
         fixedElement.children = [];
+      }
+
+      // CRITICAL FIX: Ensure serverId exists (required by schema)
+      if (fixedElement.serverId === undefined) {
+        console.warn(
+          `[Auto-fix] FAQ element ${fixedElement.id} missing serverId. Setting to null.`
+        );
+        fixedElement.serverId = null;
       }
 
       // Add missing props
