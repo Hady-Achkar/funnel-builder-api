@@ -12,11 +12,11 @@ export const checkFunnelAccess = async (
   next: NextFunction
 ) => {
   try {
-    const { funnelSlug } = req.params;
-    const { hostname } = req.query;
+    const { funnelSlug: paramSlug } = req.params;
+    const { hostname, funnelSlug: querySlug } = req.query;
 
     // Must have either funnelSlug (from params) or hostname (from query)
-    if (!funnelSlug && !hostname) {
+    if (!paramSlug && !hostname) {
       return res.status(400).json({ error: 'Funnel slug or hostname is required' });
     }
 
@@ -25,10 +25,10 @@ export const checkFunnelAccess = async (
     let funnel;
 
     // Option 1: Lookup by funnelSlug (existing behavior for /page endpoints)
-    if (funnelSlug) {
+    if (paramSlug) {
       funnel = await prisma.funnel.findFirst({
         where: {
-          slug: funnelSlug as string,
+          slug: paramSlug as string,
           status: 'LIVE'
         },
         select: {
@@ -42,8 +42,13 @@ export const checkFunnelAccess = async (
         }
       });
     }
-    // Option 2: Lookup by hostname (new behavior for /sites/public endpoint)
+    // Option 2: Lookup by hostname + funnelSlug (for /sites/public endpoint)
     else if (hostname) {
+      // For /sites/public endpoint, funnelSlug query parameter is required
+      if (!querySlug) {
+        return res.status(400).json({ error: 'Funnel slug parameter is required' });
+      }
+
       // First find the domain by hostname
       const domain = await prisma.domain.findUnique({
         where: { hostname: hostname as string },
@@ -61,11 +66,14 @@ export const checkFunnelAccess = async (
         });
       }
 
-      // Find the active funnel connected to this domain
+      // Find the active funnel connected to this domain that ALSO matches the slug
       const funnelDomain = await prisma.funnelDomain.findFirst({
         where: {
           domainId: domain.id,
-          isActive: true
+          isActive: true,
+          funnel: {
+            slug: querySlug as string  // Must match the provided slug
+          }
         },
         select: {
           funnel: {
@@ -84,7 +92,10 @@ export const checkFunnelAccess = async (
       });
 
       if (!funnelDomain?.funnel) {
-        return res.status(404).json({ error: 'No active funnel found for this domain' });
+        return res.status(404).json({
+          error: 'Funnel not found or not connected to this domain',
+          message: 'The requested funnel is not associated with this domain'
+        });
       }
 
       // Check funnel status (allow LIVE and SHARED for public sites)

@@ -1,8 +1,8 @@
 import {
   Funnel,
-  Page,
   FunnelSettings,
   Theme,
+  PageType,
 } from "../../../../generated/prisma-client";
 import {
   GetPublicSiteResponse,
@@ -11,8 +11,17 @@ import {
   PublicSiteTheme,
 } from "../../../../types/site/get-public-site";
 
+// Partial page type without content and SEO fields
+interface PublicPageData {
+  id: number;
+  name: string;
+  linkingId: string | null;
+  order: number;
+  type: PageType;
+}
+
 interface FunnelWithRelations extends Funnel {
-  pages: Page[];
+  pages: PublicPageData[];
   settings: FunnelSettings | null;
   activeTheme: Theme;
 }
@@ -26,12 +35,9 @@ export function formatSiteResponse(
       id: page.id,
       name: page.name,
       linkingId: page.linkingId,
-      content: page.content,
       order: page.order,
       type: page.type,
-      seoTitle: page.seoTitle,
-      seoDescription: page.seoDescription,
-      seoKeywords: page.seoKeywords,
+      // content, seoTitle, seoDescription, seoKeywords excluded
     }));
 
   const settings: PublicSiteSettings = funnel.settings

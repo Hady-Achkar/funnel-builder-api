@@ -84,8 +84,24 @@ describe("Get Public Site - Password Protection Tests", () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("should return 404 if domain not found", async () => {
+    it("should return 400 if hostname provided without funnelSlug", async () => {
       mockRequest.query = { hostname: testHostname };
+
+      await checkFunnelAccess(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Funnel slug parameter is required",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should return 404 if domain not found", async () => {
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       await checkFunnelAccess(
@@ -106,7 +122,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should return 403 if domain status is not ACTIVE", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "PENDING",
@@ -127,7 +143,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should return 404 if no active funnel found for domain", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -144,6 +160,9 @@ describe("Get Public Site - Password Protection Tests", () => {
         where: {
           domainId: testDomainId,
           isActive: true,
+          funnel: {
+            slug: testFunnelSlug,
+          },
         },
         select: {
           funnel: {
@@ -162,13 +181,14 @@ describe("Get Public Site - Password Protection Tests", () => {
       });
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({
-        error: "No active funnel found for this domain",
+        error: "Funnel not found or not connected to this domain",
+        message: "The requested funnel is not associated with this domain",
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
     it("should return 403 if funnel status is DRAFT", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -199,7 +219,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should return 403 if funnel status is ARCHIVED", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -232,7 +252,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
   describe("Non-Password Protected Site", () => {
     it("should allow access to LIVE funnel without password protection", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -260,7 +280,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should allow access to SHARED funnel without password protection", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -288,7 +308,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should set funnelId in request for controller access", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -316,7 +336,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
   describe("Password Protected Site", () => {
     it("should return 200 with requiresPassword when site is password protected and no valid cookie", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockRequest.cookies = {};
 
       mockPrisma.domain.findUnique.mockResolvedValue({
@@ -358,7 +378,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should allow access when site is password protected and valid cookie exists", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockRequest.cookies = {
         [`funnel_access_${testFunnelSlug}`]: "valid-jwt-token",
       };
@@ -396,7 +416,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should check password protection even for SHARED funnels", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockRequest.cookies = {};
 
       mockPrisma.domain.findUnique.mockResolvedValue({
@@ -528,7 +548,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
   describe("Error Handling", () => {
     it("should return 500 on database error during domain lookup", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockRejectedValue(
         new Error("Database connection failed")
       );
@@ -547,7 +567,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     });
 
     it("should return 500 on unexpected error during funnel lookup", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -571,7 +591,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
   describe("Edge Cases", () => {
     it("should handle null settings gracefully", async () => {
-      mockRequest.query = { hostname: testHostname };
+      mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -598,7 +618,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
     it("should handle hostname with special characters", async () => {
       const specialHostname = "test-site_123.example.com";
-      mockRequest.query = { hostname: specialHostname };
+      mockRequest.query = { hostname: specialHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
         status: "ACTIVE",
@@ -629,7 +649,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
     it("should handle case-sensitive hostnames correctly", async () => {
       const uppercaseHostname = "WWW.DIGITALSITE.LLC";
-      mockRequest.query = { hostname: uppercaseHostname };
+      mockRequest.query = { hostname: uppercaseHostname, funnelSlug: testFunnelSlug };
       mockPrisma.domain.findUnique.mockResolvedValue(null);
 
       await checkFunnelAccess(
@@ -643,6 +663,9 @@ describe("Get Public Site - Password Protection Tests", () => {
         select: { id: true, status: true },
       });
       expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Domain not found",
+      });
     });
   });
 });

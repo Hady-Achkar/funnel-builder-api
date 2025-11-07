@@ -7,6 +7,10 @@ import {
   ForbiddenError,
 } from "../../../errors";
 import { ZodError } from "zod";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const deleteForm = async (
   userId: number,
@@ -42,14 +46,19 @@ export const deleteForm = async (
     if (existingForm.funnelId) {
       const funnel = await prisma.funnel.findUnique({
         where: { id: existingForm.funnelId },
-        select: { createdBy: true },
+        select: { workspaceId: true },
       });
 
-      if (funnel && funnel.createdBy !== userId) {
-        throw new ForbiddenError(
-          "You can only delete forms for your own funnels"
-        );
+      if (!funnel) {
+        throw new NotFoundError("Funnel not found");
       }
+
+      // Use existing permission system: users who can delete funnels can delete forms
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: funnel.workspaceId,
+        action: PermissionAction.DELETE_FUNNEL,
+      });
     }
 
     // Delete the form - submissions will be cascade deleted automatically

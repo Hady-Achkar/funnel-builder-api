@@ -196,6 +196,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result).toBeDefined();
@@ -214,6 +215,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.pages).toHaveLength(3);
@@ -231,6 +233,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.settings).toBeDefined();
@@ -258,6 +261,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.theme).toBeDefined();
@@ -275,6 +279,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.pages[0].order).toBe(0);
@@ -292,6 +297,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.theme).toBeNull();
@@ -307,6 +313,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.settings).toBeDefined();
@@ -323,12 +330,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "nonexistent.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "nonexistent.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain not found");
     });
@@ -340,12 +349,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain is not active");
     });
@@ -357,12 +368,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain is not active");
     });
@@ -374,12 +387,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain is not active");
     });
@@ -391,12 +406,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain SSL certificate is not active");
     });
@@ -408,12 +425,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain SSL certificate is not active");
     });
@@ -425,12 +444,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain SSL certificate is not active");
     });
@@ -444,12 +465,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("No site is connected to this domain");
     });
@@ -464,12 +487,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Site not found");
     });
@@ -487,12 +512,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(ForbiddenError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Site is not published");
     });
@@ -508,12 +535,14 @@ describe("Get Public Site Tests", () => {
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow(ForbiddenError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Site has been archived");
     });
@@ -530,6 +559,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.pages).toHaveLength(0);
@@ -545,6 +575,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.status).toBe(FunnelStatus.SHARED);
@@ -564,6 +595,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "www.example.com",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result).toBeDefined();
@@ -587,6 +619,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.theme).toBeDefined();
@@ -606,6 +639,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.theme).toBeDefined();
@@ -632,6 +666,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       // Should return the global theme (active), not custom theme
@@ -655,6 +690,7 @@ describe("Get Public Site Tests", () => {
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
       });
 
       expect(result.site.theme).toBeNull();

@@ -21,7 +21,7 @@ export const createInsightSubmission = async (
 
     const insight = await prisma.insight.findUnique({
       where: { id: validatedRequest.insightId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, type: true },
     });
 
     if (!insight) {
@@ -91,17 +91,25 @@ export const createInsightSubmission = async (
     >;
     const insightSubmissions = currentInteractions.insight_submissions || [];
 
+    // Map InsightType to submission type string
+    const submissionTypeMap = {
+      QUIZ: "quiz_submission",
+      SINGLE_CHOICE: "single_choice_submission",
+      MULTIPLE_CHOICE: "multiple_choice_submission",
+    } as const;
+
     const newInsightSubmission = {
       submissionId: submission.id,
-      type: "quiz_submission",
-      quizId: validatedRequest.insightId,
-      quizName: insight.name,
+      type: submissionTypeMap[insight.type],
+      insightId: validatedRequest.insightId,
+      insightName: insight.name,
+      insightType: insight.type,
       timestamp: new Date().toISOString(),
       answers: validatedRequest.answers,
     };
 
     const existingIndex = insightSubmissions.findIndex(
-      (sub: any) => sub.quizId === validatedRequest.insightId
+      (sub: any) => sub.insightId === validatedRequest.insightId
     );
 
     if (existingIndex !== -1) {

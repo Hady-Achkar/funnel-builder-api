@@ -23,7 +23,7 @@ model User {
   isAdmin                    Boolean              @default(false)
   plan                       UserPlan             @default(NO_PLAN)
   registrationSource         RegistrationSource?  @default(DIRECT)
-  registrationToken          String?              // Stores affiliateToken or workspaceInvitationToken used during registration
+  registrationToken          String?              
   referralLinkUsedId         Int?
   balance                    Float                @default(0)
   pendingBalance             Float                @default(0)
@@ -321,12 +321,12 @@ model Session {
 model Theme {
   id              Int          @id @default(autoincrement())
   name            String       @default("Default Theme")
-  backgroundColor String       @default("#0e1e12")
-  textColor       String       @default("#d4ecd0")
-  buttonColor     String       @default("#387e3d")
-  buttonTextColor String       @default("#e8f5e9")
-  borderColor     String       @default("#214228")
-  optionColor     String       @default("#16331b")
+  backgroundColor String       @default("#FFFFFF")
+  textColor       String       @default("#0d1911")
+  buttonColor     String       @default("#3c724b")
+  buttonTextColor String       @default("#FFFFFF")
+  borderColor     String       @default("#f0f0f0")
+  optionColor     String       @default("#EFFFF3")
   fontFamily      String       @default("Inter, sans-serif")
   borderRadius    BorderRadius @default(SOFT)
   type            ThemeType    @default(CUSTOM)

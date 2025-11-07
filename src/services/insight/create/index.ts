@@ -11,7 +11,10 @@ import {
   NotFoundError,
 } from "../../../errors";
 import { ZodError } from "zod";
-import { checkInsightCreatePermission } from "../../../helpers/insight/create";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const createInsight = async (
   userId: number,
@@ -33,8 +36,22 @@ export const createInsight = async (
       throw new NotFoundError("User not found");
     }
 
-    // Check permissions using helper
-    await checkInsightCreatePermission(userId, validatedRequest.funnelId);
+    // Fetch funnel to get workspaceId and check permissions
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: validatedRequest.funnelId },
+      select: { id: true, workspaceId: true },
+    });
+
+    if (!funnel) {
+      throw new NotFoundError("Funnel not found");
+    }
+
+    // Use existing permission system: users who can edit funnels can create insights
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.EDIT_FUNNEL,
+    });
 
     const insight = await prisma.insight.create({
       data: {

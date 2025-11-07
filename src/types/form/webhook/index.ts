@@ -41,6 +41,16 @@ export const webhookPayload = z.object({
     userAgent: z.string().optional(),
     ipAddress: z.string().optional(),
   }),
+  sessionInteractions: z.any().optional(),
+  visitedPages: z
+    .array(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        order: z.number(),
+      })
+    )
+    .optional(),
 });
 
 export type WebhookPayload = z.infer<typeof webhookPayload>;
