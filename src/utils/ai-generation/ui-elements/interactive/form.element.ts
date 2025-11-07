@@ -120,27 +120,275 @@ export const FormElementDefinition: ElementDefinition = {
   ],
 
   aiInstructions: `
-When generating a form element:
-- ALWAYS include these children in order:
-  1. First: TextElement as form title/heading
-  2. Middle: Form field elements (form-input, form-message, form-select, etc.)
-  3. Last: ButtonElement as submit button
-- Common form fields to include:
-  - form-input with inputType 'fullname' for names
-  - form-input with inputType 'email' for emails
-  - form-message for multi-line text
-  - form-phonenumber for phone numbers
-  - form-checkbox for agreements/consents
-  - form-select for dropdown options
-- Set serverId to null (will be assigned by backend)
-- Set webhookEnabled to false by default
-- Leave webhookUrl empty by default
-- Add padding and backgroundColor in styles for form container
-- Keep form fields organized and in logical order
-- Mark important fields as mandatory: true
-- Use appropriate field sizes (md is standard)
-- Make submit button prominent (lg size, bold, contrasting colors)
-- Use center alignment for title and submit button
+# Form Element AI Instructions
+
+## Overview
+- **Type**: 'form'
+- **Purpose**: Container for collecting user input with form fields and submit button
+- **Has Link**: No
+- **Has Children**: Yes (MUST have TextElement as first child, form fields in middle, ButtonElement as last child)
+
+## REQUIRED FIELDS (MUST always be present)
+
+Every form element MUST include ALL of these fields:
+
+1. **id** - Format: 'form-{timestamp}-{random}' (e.g., 'form-1234567890-abc')
+2. **type** - Literal 'form'
+3. **serverId** - Either null or a number (default: null)
+4. **integration** - Object with 'webhookEnabled' and 'webhookUrl'
+5. **props** - Empty object {}
+6. **styles** - Object with at least 'backgroundColor'
+7. **children** - Array that MUST start with TextElement (title), end with ButtonElement (submit)
+
+**CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+## DEFAULT VALUES
+
+| Property | Default |
+|----------|---------|
+| serverId | null |
+| integration.webhookEnabled | false |
+| integration.webhookUrl | '' |
+| props | {} |
+| styles.backgroundColor | 'transparent' |
+| children | [TextElement, ...fields, ButtonElement] |
+
+## CHILDREN ARRAY STRUCTURE
+
+The children array MUST follow this order:
+
+1. **First child**: TextElement (form title) - **REQUIRED**
+   - Type: 'text'
+   - Purpose: Display form heading
+   - Default content: "Contact Form"
+   - **MANDATORY**: Every form MUST start with a TextElement
+
+2. **Middle children**: Form field elements (variable count)
+   - Types: 'form-input', 'form-message', 'form-checkbox', 'form-phonenumber', 'form-select', 'form-datepicker', 'form-number'
+   - Purpose: Collect user input
+   - Each field has its own structure
+   - At least one form field recommended but not required
+
+3. **Last child**: ButtonElement (submit button) - **REQUIRED**
+   - Type: 'button'
+   - Purpose: Submit form data
+   - Default label: "Submit"
+   - **MANDATORY**: Every form MUST end with a ButtonElement
+
+**IMPORTANT**: The first child MUST always be a TextElement and the last child MUST always be a ButtonElement. This structure is non-negotiable.
+
+## COMMON MISTAKES
+
+❌ **WRONG**: Missing integration object
+{
+  "type": "form",
+  "props": {},
+  "styles": {}
+}
+
+✅ **CORRECT**: Always include integration
+{
+  "type": "form",
+  "integration": { "webhookEnabled": false, "webhookUrl": "" },
+  "props": {},
+  "styles": {}
+}
+
+---
+
+❌ **WRONG**: Props is not an empty object
+"props": { "someProp": "value" }
+
+✅ **CORRECT**: Props must be empty
+"props": {}
+
+---
+
+❌ **WRONG**: Missing children array
+{
+  "type": "form",
+  "props": {},
+  "styles": {}
+}
+
+✅ **CORRECT**: Always include children
+{
+  "type": "form",
+  "props": {},
+  "styles": {},
+  "children": [...]
+}
+
+---
+
+❌ **WRONG**: Missing TextElement at start
+"children": [
+  { "type": "form-input", ... },
+  { "type": "button", ... }
+]
+
+❌ **WRONG**: Missing ButtonElement at end
+"children": [
+  { "type": "text", ... },
+  { "type": "form-input", ... }
+]
+
+❌ **WRONG**: ButtonElement not at the end
+"children": [
+  { "type": "text", ... },
+  { "type": "button", ... },
+  { "type": "form-input", ... }
+]
+
+❌ **WRONG**: TextElement not at the start
+"children": [
+  { "type": "form-input", ... },
+  { "type": "text", ... },
+  { "type": "button", ... }
+]
+
+✅ **CORRECT**: TextElement first, form fields middle, ButtonElement last
+"children": [
+  { "type": "text", "content": { "label": "Form Title" }, ... },
+  { "type": "form-input", ... },
+  { "type": "button", "content": { "label": "Submit" }, ... }
+]
+
+## STYLES OBJECT
+
+The styles object accepts **ANY valid CSS property**:
+- **Colors**: backgroundColor, color, borderColor, etc.
+- **Spacing**: margin, marginTop, marginBottom, padding, paddingLeft, etc.
+- **Borders**: borderWidth, borderColor, borderStyle, borderRadius
+- **Effects**: boxShadow, opacity, transform, etc.
+
+**CRITICAL**: All spacing values MUST have units:
+- ✅ Correct: '16px', '1rem', '2em', '100%'
+- ❌ Wrong: 16, 1, 2, 100
+
+**Colors can be**:
+- Theme properties: 'backgroundColor', 'textColor', 'borderColor' (resolved from theme)
+- Hex codes: '#FFFFFF', '#000000'
+- RGB/RGBA: 'rgba(0, 0, 0, 0.5)'
+
+## USE CASE EXAMPLES
+
+### Example 1: Contact Form
+{
+  "id": "form-1234567890-abc",
+  "type": "form",
+  "serverId": null,
+  "integration": {
+    "webhookEnabled": false,
+    "webhookUrl": ""
+  },
+  "props": {},
+  "styles": {
+    "backgroundColor": "transparent"
+  },
+  "children": [
+    {
+      "id": "text-1234567891-def",
+      "type": "text",
+      "content": { "label": "Get in Touch" },
+      "props": {
+        "size": "lg",
+        "align": "center",
+        "format": { "bold": true, "italic": false, "underline": false, "strikethrough": false }
+      },
+      "styles": { "color": "#0D1911" }
+    },
+    {
+      "id": "input-1234567892-ghi",
+      "type": "input",
+      "content": { "label": "Full Name", "placeholder": "Enter your full name" },
+      "props": { "required": true, "inputType": "text" },
+      "styles": {}
+    },
+    {
+      "id": "input-1234567893-jkl",
+      "type": "input",
+      "content": { "label": "Email", "placeholder": "your@email.com" },
+      "props": { "required": true, "inputType": "email" },
+      "styles": {}
+    },
+    {
+      "id": "button-1234567894-mno",
+      "type": "button",
+      "content": { "label": "Send Message" },
+      "props": {
+        "size": "md",
+        "align": "center",
+        "borderRadius": "SOFT",
+        "format": { "bold": false, "italic": false, "underline": false, "strikethrough": false }
+      },
+      "styles": { "color": "buttonTextColor", "backgroundColor": "buttonColor" },
+      "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+    }
+  ]
+}
+
+### Example 2: Newsletter Signup
+{
+  "id": "form-1234567896-stu",
+  "type": "form",
+  "serverId": null,
+  "integration": {
+    "webhookEnabled": true,
+    "webhookUrl": "https://example.com/webhook"
+  },
+  "props": {},
+  "styles": {
+    "backgroundColor": "#f5f5f5",
+    "padding": "24px",
+    "borderRadius": "8px"
+  },
+  "children": [
+    {
+      "id": "text-1234567897-vwx",
+      "type": "text",
+      "content": { "label": "Subscribe to Newsletter" },
+      "props": {
+        "size": "md",
+        "align": "center",
+        "format": { "bold": true, "italic": false, "underline": false, "strikethrough": false }
+      },
+      "styles": { "color": "#0D1911" }
+    },
+    {
+      "id": "input-1234567898-yz1",
+      "type": "input",
+      "content": { "label": "Email", "placeholder": "your@email.com" },
+      "props": { "required": true, "inputType": "email" },
+      "styles": {}
+    },
+    {
+      "id": "button-1234567899-234",
+      "type": "button",
+      "content": { "label": "Subscribe" },
+      "props": {
+        "size": "md",
+        "align": "center",
+        "borderRadius": "SOFT",
+        "format": { "bold": false, "italic": false, "underline": false, "strikethrough": false }
+      },
+      "styles": { "color": "buttonTextColor", "backgroundColor": "buttonColor" },
+      "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+    }
+  ]
+}
+
+## NOTES
+
+- ID format: 'form-{timestamp}-{random}' (auto-generated)
+- **MANDATORY**: First child MUST be TextElement (title), last child MUST be ButtonElement (submit)
+- Children array structure is non-negotiable: TextElement → form fields → ButtonElement
+- Form fields in middle can be any combination of input types: 'form-input', 'form-message', 'form-checkbox', 'form-phonenumber', 'form-select', 'form-datepicker', 'form-number'
+- The props object is always empty {}
+- The serverId is used to link form to backend storage (null by default)
+- Webhook integration allows sending form data to external services
+- Deep merge supported: can override nested properties
+- Spacing: Always use strings with units ('16px', '1rem', etc.)
   `,
 
   createDefault: (overrides = {}) => ({

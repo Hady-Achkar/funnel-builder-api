@@ -80,17 +80,158 @@ export const FormMessageElementDefinition: ElementDefinition = {
   ],
 
   aiInstructions: `
-When generating a form-message element:
-- Use for collecting longer, detailed text responses
-- Provide clear labels indicating what information is needed
-- Use helpful placeholders that guide the user
-- Common use cases: comments, feedback, detailed questions, additional information
-- Set mandatory based on whether the field is required
-- Use 'lg' size for more prominent message fields
-- Use 'md' or 'sm' for compact forms
-- Add marginBottom in styles for spacing
-- Label examples: "Message", "Comments", "Additional Details", "Your Question"
-- Placeholder should encourage detailed responses
+# Form Message Element AI Instructions
+
+## Overview
+- **Parent**: Form (this element should ONLY be used as a child inside Form element)
+- **Type**: 'form-message'
+- **Purpose**: Multi-line text input for messages, comments, and longer text
+- **Has Link**: No
+- **Has Children**: No
+
+## REQUIRED FIELDS (MUST always be present)
+
+Every textarea/message element MUST include ALL of these fields:
+
+1. **id** - Format: 'form-message-{timestamp}-{random}' (e.g., 'form-message-1234567890-abc')
+2. **type** - Literal 'form-message'
+3. **name** - String identifier (default: 'Form Field')
+4. **content** - Object with 'label', 'placeholder'
+5. **props** - Object with 'size', 'mandatory'
+6. **styles** - Object (can be empty {})
+
+**CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+**IMPORTANT**: All form fields MUST include a 'name' property (default: 'Form Field')
+
+## DEFAULT VALUES
+
+| Property | Default |
+|----------|---------|
+| name | 'Form Field' |
+| content.label | 'Message' |
+| content.placeholder | 'Enter your message' |
+| props.size | 'lg' |
+| props.mandatory | false |
+| styles | {} |
+
+## STYLES OBJECT
+
+The styles object is flexible and powerful:
+- **Accepts ANY valid CSS property**: backgroundColor, color, borderRadius, boxShadow, opacity, transform, etc.
+- **All spacing must have units**: '16px', '1rem', '2em' (not plain numbers)
+- **Colors can be**:
+  - Theme properties: 'textColor', 'borderColor', etc. (resolved from theme)
+  - Hex codes: '#3b82f6', '#FFFFFF', '#000000'
+  - RGB/RGBA: 'rgb(59, 130, 246)', 'rgba(0, 0, 0, 0.5)'
+- **Theme properties work for ANY color**, not just backgroundColor/color (e.g., borderColor: 'borderColor' is valid)
+
+## COMMON MISTAKES
+
+❌ **WRONG**: Missing content properties
+"content": { "label": "Message" }
+
+✅ **CORRECT**: All content properties
+"content": { "label": "Message", "placeholder": "Enter your message" }
+
+---
+
+❌ **WRONG**: Missing props properties
+"props": { "size": "lg" }
+
+✅ **CORRECT**: All props properties
+"props": { "size": "lg", "mandatory": false }
+
+---
+
+❌ **WRONG**: Adding unsupported properties
+"props": { "size": "lg", "mandatory": false, "withIcon": true }
+
+✅ **CORRECT**: Only size and mandatory
+"props": { "size": "lg", "mandatory": false }
+
+---
+
+❌ **WRONG**: Missing styles object
+{ "id": "...", "type": "form-message", "content": {...}, "props": {...} }
+
+✅ **CORRECT**: Include styles object
+{ "id": "...", "type": "form-message", "content": {...}, "props": {...}, "styles": {} }
+
+## USE CASE EXAMPLES
+
+### Example 1: Standard Message Field
+{
+  "id": "form-message-1234567890-abc",
+  "type": "form-message",
+  "name": "Form Field",
+  "content": {
+    "label": "Message",
+    "placeholder": "Enter your message"
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+### Example 2: Comments Field
+{
+  "id": "form-message-1234567891-def",
+  "type": "form-message",
+  "name": "Form Field",
+  "content": {
+    "label": "Comments",
+    "placeholder": "Share your thoughts..."
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+### Example 3: Mandatory Feedback
+{
+  "id": "form-message-1234567892-ghi",
+  "type": "form-message",
+  "name": "Form Field",
+  "content": {
+    "label": "Feedback",
+    "placeholder": "Please provide your feedback"
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": true
+  },
+  "styles": {}
+}
+
+### Example 4: Description Field (Medium)
+{
+  "id": "form-message-1234567893-jkl",
+  "type": "form-message",
+  "name": "Form Field",
+  "content": {
+    "label": "Description",
+    "placeholder": "Describe your requirements"
+  },
+  "props": {
+    "size": "md",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+## NOTES
+
+- ID format: 'form-message-{timestamp}-{random}' (auto-generated)
+- Simplified design - no icon support (clean textarea)
+- Multi-line input automatically expands as user types
+- Deep merge supported: can override nested properties
+- Spacing: Always use strings with units ('16px', '1rem', etc.)
+- Colors can use theme properties or hex/rgb values
   `,
 
   createDefault: (overrides = {}) => ({

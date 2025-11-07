@@ -112,16 +112,189 @@ export const IconElementDefinition: ElementDefinition = {
   ],
 
   aiInstructions: `
-When generating an icon element:
-- For emoji type: use appropriate emoji characters (e.g., 🚀, ✨, 💡, ✅)
-- For icon type: use icon URLs from icon APIs or local icon files
-- Choose size based on visual hierarchy (xl for hero sections, lg for features, md for inline)
-- Use emojis for casual, friendly designs
-- Use SVG icons for professional, branded designs
-- Add appropriate margin for spacing
-- Consider using backgroundColor in styles for circular icon backgrounds
-- Set color in styles for icon tint (works with SVG icons)
-- Only enable link if the icon should be clickable
+# Icon Element AI Instructions
+
+## Overview
+- **Type**: 'icon'
+- **Purpose**: Display emojis with link support
+- **Has Link**: Yes
+- **Has Children**: No
+
+## REQUIRED FIELDS (MUST always be present)
+
+Every icon element MUST include ALL of these fields:
+
+1. **id** - Format: 'icon-{timestamp}-{random}'
+2. **type** - Literal 'icon'
+3. **content** - Object with 'type' and 'value'
+4. **content.type** - MUST be 'emoji' (see EMOJI-ONLY RESTRICTION below)
+5. **content.value** - Emoji character (e.g., '😀', '🚀', '✨')
+6. **props** - Object with 'size'
+7. **styles** - Object with 'backgroundColor' (minimum required)
+8. **link** - Object with ALL 4 properties: 'enabled', 'href', 'target', 'type'
+
+**CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+## DEFAULT VALUES
+
+| Property | Default |
+|----------|---------|
+| content.type | 'emoji' |
+| content.value | '😀' |
+| props.size | 'md' |
+| styles.backgroundColor | 'transparent' |
+| link.enabled | false |
+| link.href | '' |
+| link.target | '_self' |
+| link.type | 'internal' |
+
+## EMOJI-ONLY RESTRICTION (CRITICAL)
+
+**MANDATORY**: The Icon element ONLY supports emojis - DO NOT use icon URLs.
+
+### What to Use:
+- ✅ content.type: 'emoji'
+- ✅ content.value: Emoji character ('🚀', '✨', '💡', '🎯', '⭐', '🔥')
+
+### What NOT to Use:
+- ❌ content.type: 'icon'
+- ❌ content.value: Icon URLs or icon names
+- ❌ SVG icon paths
+- ❌ Icon API URLs
+
+### Why Emoji Only?
+The frontend Icon component is specifically designed for emoji display. For other icon types, use the Image element with Unsplash URLs instead.
+
+## COMMON MISTAKES
+
+❌ **WRONG**: Missing content.type
+{
+  "content": { "value": "😀" }
+}
+
+✅ **CORRECT**: Include both type and value
+{
+  "content": { "type": "emoji", "value": "😀" }
+}
+
+---
+
+❌ **WRONG**: Using 'icon' type (NOT SUPPORTED)
+{
+  "content": { "type": "icon", "value": "https://api.example.com/icon.svg" }
+}
+
+✅ **CORRECT**: Only use 'emoji' type
+{
+  "content": { "type": "emoji", "value": "🎨" }
+}
+
+---
+
+❌ **WRONG**: Spacing without units
+{
+  "styles": { "marginTop": 16 }
+}
+
+✅ **CORRECT**: Spacing with units
+{
+  "styles": { "marginTop": "16px" }
+}
+
+---
+
+❌ **WRONG**: Omitting link object
+{
+  "content": {...},
+  "props": {...},
+  "styles": {...}
+}
+
+✅ **CORRECT**: Link object always included
+{
+  "content": {...},
+  "props": {...},
+  "styles": {...},
+  "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+}
+
+## SIZE GUIDELINES
+
+- **xl** (64px): Hero icons, primary visual elements
+- **lg** (48px): Section icons, feature highlights
+- **md** (32px): Inline icons, standard features
+- **sm** (24px): Small inline icons, subtle indicators
+
+## EMOJI SELECTION
+
+**Popular Emojis**:
+- Success: ✅ ⭐ 🏆 🎯 💯
+- Tech: 🚀 💡 ⚡ 🔧 🛠️
+- Communication: 💬 📧 📞 🔔 📢
+- Business: 💰 💳 📈 📊 💼
+- Positive: ❤️ 🎉 🌟 ✨ 🔥
+- Arrows: ➡️ ⬅️ ⬆️ ⬇️ 🔄
+
+## USE CASE EXAMPLES
+
+### Example 1: Simple Inline Emoji
+{
+  "id": "icon-1234567890-abc",
+  "type": "icon",
+  "content": { "type": "emoji", "value": "😀" },
+  "props": { "size": "md" },
+  "styles": { "backgroundColor": "transparent" },
+  "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+}
+
+### Example 2: Large Feature Icon with Background
+{
+  "id": "icon-1234567891-def",
+  "type": "icon",
+  "content": { "type": "emoji", "value": "🚀" },
+  "props": { "size": "lg" },
+  "styles": {
+    "backgroundColor": "backgroundColor",
+    "borderRadius": "50%",
+    "padding": "20px"
+  },
+  "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+}
+
+### Example 3: Linked Icon Button
+{
+  "id": "icon-1234567892-ghi",
+  "type": "icon",
+  "content": { "type": "emoji", "value": "🔗" },
+  "props": { "size": "md" },
+  "styles": { "backgroundColor": "transparent" },
+  "link": { "enabled": true, "href": "/contact", "target": "_self", "type": "internal" }
+}
+
+### Example 4: Styled Icon with Shadow
+{
+  "id": "icon-1234567893-jkl",
+  "type": "icon",
+  "content": { "type": "emoji", "value": "⭐" },
+  "props": { "size": "xl" },
+  "styles": {
+    "backgroundColor": "backgroundColor",
+    "borderRadius": "16px",
+    "padding": "24px",
+    "boxShadow": "0 4px 12px rgba(0, 0, 0, 0.15)"
+  },
+  "link": { "enabled": false, "href": "", "target": "_self", "type": "internal" }
+}
+
+## NOTES
+
+- ID format: 'icon-{timestamp}-{random}' (auto-generated)
+- **MANDATORY**: content.type MUST be 'emoji' (NOT 'icon')
+- **MANDATORY**: content.value is emoji character, NOT URL
+- Use emojis for casual, friendly, approachable designs
+- Link object always required even if link.enabled is false
+- Consider adding backgroundColor and borderRadius for button-like icons
+- Spacing values must include units ('16px' not 16)
   `,
 
   createDefault: (overrides = {}) => ({

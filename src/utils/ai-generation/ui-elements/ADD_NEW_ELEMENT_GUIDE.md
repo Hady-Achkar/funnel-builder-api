@@ -166,6 +166,246 @@ export const [elementName]Element: ElementDefinition = {
 
 ---
 
+### Step 1.5: Import Frontend AI Instructions (If Available)
+
+**NEW**: If a corresponding `.instructions.md` file exists in the frontend repository, you should import those AI-specific instructions to ensure consistency and comprehensive AI guidance.
+
+#### Check for Frontend Instructions
+
+Look for: `/digitalsite-custom-builder-frontend/src/components/figma-ui/{ElementName}/{element}.instructions.md`
+
+**Available frontend instruction files** (as of 2025-01):
+- `Button/button.instructions.md` ✅
+- `Text/text.instructions.md` ✅
+- `Image/image.instructions.md` ✅
+- `Icon/icon.instructions.md` ✅
+- `Divider/divider.instructions.md` ✅
+- `Video/video.instructions.md` ✅
+
+#### Extract and Adapt Instructions
+
+When a frontend instruction file exists, follow these steps:
+
+1. **Read the frontend file** and identify these key sections:
+   - **Overview**: Type, purpose, has link, has children
+   - **AI JSON Structure**: Complete example with all required fields
+   - **Properties Table**: Property, type, options, default values
+   - **AI Generation Rules**: Required fields list
+   - **Common Mistakes**: Wrong ❌ vs Correct ✅ examples
+   - **Common Use Cases**: 3-5 complete JSON examples
+   - **Notes**: Additional context
+
+2. **Adapt for backend AI consumption**:
+   - ✅ **Keep**: All AI-focused guidance, rules, examples, and mistakes
+   - ❌ **Remove**: React/component implementation details, TypeScript interfaces, file import paths
+   - ✅ **Keep**: Default values, theme properties, styles guidance
+   - ❌ **Remove**: Frontend-specific notes about Tiptap, Next.js Image, component props
+
+3. **Convert to inline markdown** in the `aiInstructions` field:
+
+```typescript
+export const [elementName]Element: ElementDefinition = {
+  type: "[element-type]",
+  description: "[description]",
+
+  // ... schema definition ...
+
+  aiInstructions: `
+# {Element} Element AI Instructions
+
+## Overview
+- **Type**: '{type}'
+- **Purpose**: [description]
+- **Has Link**: [Yes/No]
+- **Has Children**: [Yes/No]
+
+## REQUIRED FIELDS (MUST always be present)
+
+Every {element} element MUST include ALL of these fields:
+
+1. **id** - Format: '{type}-{timestamp}-{random}'
+2. **type** - Literal '{type}'
+3. **content** - Object with [list required content fields]
+4. **props** - Object with [list required props]
+5. **styles** - Object with [minimum required styles]
+6. **link** - Object with ALL 4 properties: 'enabled', 'href', 'target', 'type' (if element supports links)
+
+**CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+## DEFAULT VALUES
+
+| Property | Default |
+|----------|---------|
+| props.{prop1} | {default1} |
+| props.{prop2} | {default2} |
+| ... | ... |
+
+(Copy the full properties table from frontend instructions)
+
+## COMMON MISTAKES
+
+❌ **WRONG**: [Description of mistake 1]
+{
+  // wrong example
+}
+
+✅ **CORRECT**: [Description of fix]
+{
+  // correct example
+}
+
+---
+
+❌ **WRONG**: [Description of mistake 2]
+{
+  // wrong example
+}
+
+✅ **CORRECT**: [Description of fix]
+{
+  // correct example
+}
+
+(Include 3-5 common mistakes from frontend instructions)
+
+## THEME PROPERTIES
+
+Colors can be specified in two ways:
+
+1. **Theme Properties** (preferred for consistency):
+   - List theme color names: 'buttonColor', 'textColor', 'borderColor', etc.
+   - Resolved at render time from theme
+   - Example: { "backgroundColor": "buttonColor" }
+
+2. **Direct Colors**:
+   - Hex: '#3b82f6', '#FFFFFF', '#000000'
+   - RGB/RGBA: 'rgb(59, 130, 246)', 'rgba(0, 0, 0, 0.5)'
+   - Example: { "backgroundColor": "#3b82f6" }
+
+**Note**: Theme properties work for ANY color property, not just backgroundColor/color.
+
+## STYLES OBJECT
+
+The styles object accepts **ANY valid CSS property**:
+- **Colors**: backgroundColor, color, borderColor, etc.
+- **Spacing**: margin, marginTop, marginBottom, padding, paddingLeft, etc.
+- **Borders**: borderWidth, borderColor, borderStyle, borderRadius
+- **Effects**: boxShadow, opacity, transform, etc.
+
+**CRITICAL**: All spacing values MUST have units:
+- ✅ Correct: '16px', '1rem', '2em', '100%'
+- ❌ Wrong: 16, 1, 2, 100
+
+## [ELEMENT-SPECIFIC GUIDELINES]
+
+(Add any element-specific guidance from frontend instructions)
+- For Button: Content guidelines, size guidelines
+- For Text: HTML content support, text hierarchy
+- For Image: Accessibility requirements, shape usage
+- For Icon: Dual mode (icon vs emoji)
+- For Video: Content type (local vs url), autoplay rules
+- For Divider: Border style options
+
+## USE CASE EXAMPLES
+
+### Example 1: [Scenario 1]
+{
+  "id": "{type}-1234567890-abc",
+  "type": "{type}",
+  // ... complete JSON from frontend instructions
+}
+
+### Example 2: [Scenario 2]
+{
+  // ... complete JSON from frontend instructions
+}
+
+### Example 3: [Scenario 3]
+{
+  // ... complete JSON from frontend instructions
+}
+
+### Example 4: [Scenario 4]
+{
+  // ... complete JSON from frontend instructions
+}
+
+(Include all 3-5 use case examples from frontend instructions)
+
+## NOTES
+
+- ID format: '{type}-{timestamp}-{random}' (auto-generated)
+- [Additional notes from frontend instructions]
+  `,
+
+  createDefault: (overrides = {}) => ({
+    // ... default implementation
+  }),
+};
+```
+
+#### Key Sections to Include
+
+Based on analysis of existing frontend instructions, **EVERY element must include these 7 sections**:
+
+1. **Overview** (4 properties)
+   - Type
+   - Purpose
+   - Has Link (Yes/No)
+   - Has Children (Yes/No)
+
+2. **REQUIRED FIELDS** (Critical!)
+   - List ALL required fields with numbering
+   - Emphasize field completeness
+   - Include the "CRITICAL" note about default values
+
+3. **DEFAULT VALUES** (Table format)
+   - Complete property-to-default mapping
+   - Use markdown table format
+   - Include ALL props, not just common ones
+
+4. **COMMON MISTAKES** (3-5 examples)
+   - Use ❌ and ✅ symbols
+   - Show wrong vs correct code examples
+   - Separate with `---` horizontal rules
+
+5. **THEME PROPERTIES** (Color guidance)
+   - Explain theme property names
+   - Show when to use theme vs hex
+   - Note that theme works for ANY color property
+
+6. **STYLES OBJECT** (CSS flexibility)
+   - State "accepts ANY valid CSS property"
+   - Emphasize units requirement
+   - List common style categories
+
+7. **USE CASE EXAMPLES** (4+ examples)
+   - Complete, valid JSON for each
+   - Cover different scenarios
+   - Use real-world contexts
+
+#### Benefits of This Approach
+
+✅ **Consistency**: Frontend and backend use same AI instructions
+✅ **Completeness**: No missing fields or partial objects
+✅ **Error Prevention**: Common mistakes section prevents issues proactively
+✅ **Quality**: AI generates better, more realistic elements
+✅ **Maintenance**: Single source of truth (frontend) drives backend
+
+#### Example: Button Element
+
+See `/src/utils/ai-generation/ui-elements/essentials/button.element.ts` for a complete example of imported frontend instructions. The button element now has:
+- 200+ lines of comprehensive AI instructions (vs 10 lines before)
+- 7 required field definitions
+- 4 common mistakes with wrong/correct examples
+- Complete default values table
+- Theme properties guidance
+- 4 use case examples (Primary CTA, Secondary, Internal Link, External Link)
+
+**Result**: Dramatic improvement in AI generation quality and significant reduction in validation errors.
+
+---
+
 ### Step 2: Register Element in Registry
 
 Open: `src/utils/ai-generation/ui-elements/registry.ts`
@@ -850,6 +1090,16 @@ Provide the complete TypeScript code for the element definition.
 Before considering your new element complete:
 
 - [ ] Element definition file created in `definitions/`
+- [ ] **Checked for frontend instructions file** (Step 1.5)
+- [ ] **Imported comprehensive AI instructions** from frontend (if available)
+- [ ] **All 7 required sections included** in aiInstructions:
+  - [ ] Overview (Type, Purpose, Has Link, Has Children)
+  - [ ] REQUIRED FIELDS (numbered list with CRITICAL note)
+  - [ ] DEFAULT VALUES (complete table)
+  - [ ] COMMON MISTAKES (3-5 wrong/correct pairs with ❌ ✅)
+  - [ ] THEME PROPERTIES (color guidance)
+  - [ ] STYLES OBJECT (CSS flexibility + units requirement)
+  - [ ] USE CASE EXAMPLES (4+ complete JSON examples)
 - [ ] Element registered in `registry.ts`
 - [ ] Element type added to `ELEMENT_TYPE_VALIDATION` in prompt-builder
 - [ ] Element category listed (Essentials, Media, Forms, etc.)

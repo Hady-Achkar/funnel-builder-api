@@ -77,21 +77,153 @@ export const FormDatePickerElementDefinition: ElementDefinition = {
   ],
 
   aiInstructions: `
-When generating a form-datepicker element:
-- Use for collecting date information
-- Provide clear labels indicating what date is needed
-- Common use cases:
-  - "Appointment Date"
-  - "Birth Date"
-  - "Event Date"
-  - "Preferred Date"
-  - "Start Date"
-  - "Expiration Date"
-- Set mandatory based on whether the date is required
-- Use 'md' size for standard forms
-- Add marginBottom in styles for spacing between fields
-- Keep labels concise and clear
-- Consider the context when setting mandatory (e.g., booking forms typically require dates)
+# Form DatePicker Element AI Instructions
+
+## Overview
+- **Parent**: Form (this element should ONLY be used as a child inside Form element)
+- **Type**: 'form-datepicker'
+- **Purpose**: Date selection input field with calendar picker
+- **Has Link**: No
+- **Has Children**: No
+
+## REQUIRED FIELDS (MUST always be present)
+
+Every datepicker element MUST include ALL of these fields:
+
+1. **id** - Format: 'form-datepicker-{timestamp}-{random}' (e.g., 'form-datepicker-1234567890-abc')
+2. **type** - Literal 'form-datepicker'
+3. **name** - String identifier (default: 'Form Field')
+4. **content** - Object with 'label'
+5. **props** - Object with 'size', 'mandatory'
+6. **styles** - Object (can be empty {})
+
+**CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+**IMPORTANT**: All form fields MUST include a 'name' property (default: 'Form Field')
+
+## DEFAULT VALUES
+
+| Property | Default |
+|----------|---------|
+| name | 'Form Field' |
+| content.label | 'Date' |
+| props.size | 'lg' |
+| props.mandatory | false |
+| styles | {} |
+
+## STYLES OBJECT
+
+The styles object is flexible and powerful:
+- **Accepts ANY valid CSS property**: backgroundColor, color, borderRadius, boxShadow, opacity, transform, etc.
+- **All spacing must have units**: '16px', '1rem', '2em' (not plain numbers)
+- **Colors can be**:
+  - Theme properties: 'textColor', 'borderColor', etc. (resolved from theme)
+  - Hex codes: '#3b82f6', '#FFFFFF', '#000000'
+  - RGB/RGBA: 'rgb(59, 130, 246)', 'rgba(0, 0, 0, 0.5)'
+- **Theme properties work for ANY color**, not just backgroundColor/color (e.g., borderColor: 'borderColor' is valid)
+
+## COMMON MISTAKES
+
+❌ **WRONG**: Missing content properties
+"content": {}
+
+✅ **CORRECT**: Label must be present
+"content": { "label": "Date" }
+
+---
+
+❌ **WRONG**: Missing props properties
+"props": { "size": "lg" }
+
+✅ **CORRECT**: All props properties
+"props": { "size": "lg", "mandatory": false }
+
+---
+
+❌ **WRONG**: Adding unsupported properties
+"props": { "size": "lg", "mandatory": false, "withIcon": true }
+
+✅ **CORRECT**: Only size and mandatory
+"props": { "size": "lg", "mandatory": false }
+
+---
+
+❌ **WRONG**: Missing styles object
+{ "id": "...", "type": "form-datepicker", "content": {...}, "props": {...} }
+
+✅ **CORRECT**: Include styles object
+{ "id": "...", "type": "form-datepicker", "content": {...}, "props": {...}, "styles": {} }
+
+## USE CASE EXAMPLES
+
+### Example 1: Standard Date Field
+{
+  "id": "form-datepicker-1234567890-abc",
+  "type": "form-datepicker",
+  "name": "Form Field",
+  "content": {
+    "label": "Date"
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+### Example 2: Birth Date
+{
+  "id": "form-datepicker-1234567891-def",
+  "type": "form-datepicker",
+  "name": "Form Field",
+  "content": {
+    "label": "Date of Birth"
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+### Example 3: Mandatory Appointment Date
+{
+  "id": "form-datepicker-1234567892-ghi",
+  "type": "form-datepicker",
+  "name": "Form Field",
+  "content": {
+    "label": "Appointment Date"
+  },
+  "props": {
+    "size": "lg",
+    "mandatory": true
+  },
+  "styles": {}
+}
+
+### Example 4: Event Date (Medium)
+{
+  "id": "form-datepicker-1234567893-jkl",
+  "type": "form-datepicker",
+  "name": "Form Field",
+  "content": {
+    "label": "Event Date"
+  },
+  "props": {
+    "size": "md",
+    "mandatory": false
+  },
+  "styles": {}
+}
+
+## NOTES
+
+- ID format: 'form-datepicker-{timestamp}-{random}' (auto-generated)
+- Simplified design - no placeholder or icon support
+- Calendar picker automatically appears on field interaction
+- Deep merge supported: can override nested properties
+- Spacing: Always use strings with units ('16px', '1rem', etc.)
+- Colors can use theme properties or hex/rgb values
   `,
 
   createDefault: (overrides = {}) => ({

@@ -182,7 +182,68 @@ EXAMPLE form elements CORRECT vs WRONG:
 ❌ WRONG: {type: "form-select", props: {size: "md", mandatory: false, borderStyle: "solid", shape: "auto"}}
 ✅ CORRECT: {type: "form-select", props: {size: "md", mandatory: false}, content: {label: "Select", placeholder: "Choose", options: []}}
 
-## CRITICAL: ALL elements MUST include these required fields:
+## 🎯 UNIVERSAL ELEMENT GENERATION RULES (APPLIES TO ALL ELEMENTS):
+
+### Field Completeness (CRITICAL):
+**EVERY element MUST have ALL required fields present, even if not being used.**
+- ❌ WRONG: Partial objects with missing properties
+- ✅ CORRECT: Complete objects with all properties (use defaults if not used)
+
+**Examples**:
+- format object: MUST have ALL 4 booleans → {bold: false, italic: false, underline: false, strikethrough: false}
+- link object: MUST have ALL 4 properties → {enabled: false, href: "", target: "_self", type: "internal"}
+
+### Spacing Units (CRITICAL):
+**ALL spacing values MUST have units - NEVER plain numbers**
+- ❌ WRONG: marginTop: 16, padding: 20
+- ✅ CORRECT: marginTop: "16px", padding: "20px"
+
+### Border Widths (CRITICAL):
+**Border widths MUST be strings with units**
+- ❌ WRONG: borderWidth: 1, borderWidth: 2
+- ✅ CORRECT: borderWidth: "1px", borderWidth: "2px"
+
+### Theme Properties:
+**Use theme property names for colors when possible for consistency**
+- Theme colors: 'buttonColor', 'textColor', 'backgroundColor', 'borderColor'
+- Direct colors: '#3b82f6', 'rgb(59, 130, 246)', 'rgba(0, 0, 0, 0.5)'
+- Theme properties work for ANY color property (not just specific ones)
+
+### HTML Content:
+**Text elements support HTML in label field**
+- ✅ Wrap content in HTML tags: "<p>Text</p>" NOT just "Text"
+- ✅ Use semantic tags: <h1> for headlines, <p> for paragraphs
+- ✅ For inline formatting: Use <strong>, <em>, <u> within HTML
+
+### Image Sources (CRITICAL):
+**Image element ONLY accepts Unsplash URLs**
+- ✅ CORRECT: "https://images.unsplash.com/photo-1234567890"
+- ❌ WRONG: Placeholder services, example.com URLs, data URIs, local paths
+
+### Icon Element (CRITICAL):
+**Icon element ONLY supports emojis - NOT icon URLs**
+- ✅ CORRECT: content.type: "emoji", content.value: "🚀"
+- ❌ WRONG: content.type: "icon", icon URLs, SVG paths
+
+### Video Element (CRITICAL):
+**Keep src EMPTY unless user provides explicit URL**
+- ✅ CORRECT: content.src: "" (empty string by default)
+- ❌ WRONG: Generating fake YouTube/Vimeo URLs
+- Only use content.type: "url" for AI generation
+
+### Parent-Child Relationships:
+**Some elements require specific parents or children**
+- Media element: ONLY inside MediaWithText parent
+- MediaWithText: EXACTLY 2 children (one Media + one Text, in that order)
+- FAQ: Contains faq-item children
+- Quiz: Contains answer children
+- Form: Contains form-field children (form-input, form-select, etc.)
+
+### ID Format:
+**All element IDs follow the pattern**: "{type}-{timestamp}-{random}"
+- Example: "button-1234567890-abc", "text-1234567891-def"
+
+## CRITICAL: ALL elements MUST include these base required fields:
 1. id (string): "type-timestamp-random" format
 2. type (string): element type
 3. props (object): NEVER undefined, at minimum {}
