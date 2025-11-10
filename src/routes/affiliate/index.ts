@@ -11,6 +11,6 @@ router.post("/generate-link", authenticateToken, AffiliateLinkController.generat
 router.get("/", authenticateToken, GetAllAffiliateLinksController.getAllAffiliateLinks);
 
 // Public affiliate click tracking route (no auth required, rejects authenticated users)
-router.post("/click", AffiliateLinkClickController.trackClick);
+router.get("/click/:token/:sessionId", AffiliateLinkClickController.trackClick);
 
 export default router;

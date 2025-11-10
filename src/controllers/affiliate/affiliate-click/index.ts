@@ -27,7 +27,7 @@ export class AffiliateLinkClickController {
         }
       }
 
-      const result = await AffiliateLinkClickService.trackClick(req.body);
+      const result = await AffiliateLinkClickService.trackClick(req.params);
 
       res.status(200).json(result);
     } catch (error) {
