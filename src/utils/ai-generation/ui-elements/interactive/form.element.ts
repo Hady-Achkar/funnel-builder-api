@@ -93,6 +93,13 @@ export const FormElementDefinition: ElementDefinition = {
           styles: {},
         },
         {
+          id: 'form-input-3',
+          type: 'form-message',
+          content: { label: 'Message', placeholder: 'Your message here...' },
+          props: { size: 'md', mandatory: false, withIcon: false },
+          styles: {},
+        },
+        {
           id: 'button-submit-1',
           type: 'button',
           content: { label: 'Submit' },
@@ -163,11 +170,11 @@ The children array MUST follow this order:
    - Default content: "Contact Form"
    - **MANDATORY**: Every form MUST start with a TextElement
 
-2. **Middle children**: Form field elements (variable count)
+2. **Middle children**: Form field elements (MINIMUM 3 REQUIRED)
    - Types: 'form-input', 'form-message', 'form-checkbox', 'form-phonenumber', 'form-select', 'form-datepicker', 'form-number'
    - Purpose: Collect user input
    - Each field has its own structure
-   - At least one form field recommended but not required
+   - **MANDATORY**: MINIMUM 3 form fields REQUIRED - choose appropriate fields based on funnel type
 
 3. **Last child**: ButtonElement (submit button) - **REQUIRED**
    - Type: 'button'
@@ -176,6 +183,41 @@ The children array MUST follow this order:
    - **MANDATORY**: Every form MUST end with a ButtonElement
 
 **IMPORTANT**: The first child MUST always be a TextElement and the last child MUST always be a ButtonElement. This structure is non-negotiable.
+
+### ⚠️ CRITICAL: Minimum Form Fields Requirement
+
+**Every form MUST have at LEAST 3 form fields between the TextElement and ButtonElement!**
+
+❌ **NEVER DO THIS** (empty form - CRITICAL ERROR!):
+"children": [
+  { "type": "text", "content": { "label": "Contact Us" }, ... },
+  { "type": "button", "content": { "label": "Submit" }, ... }
+]
+
+❌ **NEVER DO THIS** (only 1-2 fields - insufficient!):
+"children": [
+  { "type": "text", "content": { "label": "Contact Us" }, ... },
+  { "type": "form-input", ... },
+  { "type": "button", "content": { "label": "Submit" }, ... }
+]
+
+✅ **ALWAYS DO THIS** (minimum 3 form fields):
+"children": [
+  { "type": "text", "content": { "label": "Contact Us" }, ... },
+  { "type": "form-input", ... },
+  { "type": "form-input", ... },
+  { "type": "form-input", ... },
+  { "type": "button", "content": { "label": "Submit" }, ... }
+]
+
+**This is a CRITICAL requirement. Forms without at least 3 fields are useless and will break the user experience!**
+
+Choose appropriate form fields based on the funnel type:
+- Lead generation: name, email, phone
+- Contact form: name, email, message
+- Newsletter: email, name, preferences
+- Registration: fullname, email, password
+- Survey: question1, question2, question3
 
 ## COMMON MISTAKES
 
@@ -218,6 +260,32 @@ The children array MUST follow this order:
   "styles": {},
   "children": [...]
 }
+
+---
+
+❌ **WRONG**: Empty form with no form fields (CRITICAL ERROR!)
+"children": [
+  { "type": "text", "content": { "label": "Sign Up" }, ... },
+  { "type": "button", "content": { "label": "Submit" }, ... }
+]
+
+❌ **WRONG**: Form with only 1-2 fields (insufficient!)
+"children": [
+  { "type": "text", "content": { "label": "Contact Us" }, ... },
+  { "type": "form-input", "content": { "inputType": "email", "label": "Email" }, ... },
+  { "type": "button", "content": { "label": "Send" }, ... }
+]
+
+✅ **CORRECT**: Form with MINIMUM 3 form fields
+"children": [
+  { "type": "text", "content": { "label": "Contact Us" }, ... },
+  { "type": "form-input", "content": { "inputType": "fullname", "label": "Name" }, ... },
+  { "type": "form-input", "content": { "inputType": "email", "label": "Email" }, ... },
+  { "type": "form-message", "content": { "label": "Message", "placeholder": "Your message" }, ... },
+  { "type": "button", "content": { "label": "Send" }, ... }
+]
+
+**CRITICAL**: Every form MUST have at least 3 form fields. Forms without sufficient fields are useless!
 
 ---
 
@@ -300,20 +368,27 @@ The styles object accepts **ANY valid CSS property**:
     },
     {
       "id": "input-1234567892-ghi",
-      "type": "input",
-      "content": { "label": "Full Name", "placeholder": "Enter your full name" },
-      "props": { "required": true, "inputType": "text" },
+      "type": "form-input",
+      "content": { "inputType": "fullname", "label": "Full Name", "placeholder": "Enter your full name" },
+      "props": { "size": "md", "mandatory": true, "withIcon": false },
       "styles": {}
     },
     {
       "id": "input-1234567893-jkl",
-      "type": "input",
-      "content": { "label": "Email", "placeholder": "your@email.com" },
-      "props": { "required": true, "inputType": "email" },
+      "type": "form-input",
+      "content": { "inputType": "email", "label": "Email", "placeholder": "your@email.com" },
+      "props": { "size": "md", "mandatory": true, "withIcon": false },
       "styles": {}
     },
     {
-      "id": "button-1234567894-mno",
+      "id": "message-1234567894-mno",
+      "type": "form-message",
+      "content": { "label": "Message", "placeholder": "How can we help you?" },
+      "props": { "size": "md", "mandatory": true, "withIcon": false },
+      "styles": {}
+    },
+    {
+      "id": "button-1234567895-pqr",
       "type": "button",
       "content": { "label": "Send Message" },
       "props": {
@@ -357,13 +432,28 @@ The styles object accepts **ANY valid CSS property**:
     },
     {
       "id": "input-1234567898-yz1",
-      "type": "input",
-      "content": { "label": "Email", "placeholder": "your@email.com" },
-      "props": { "required": true, "inputType": "email" },
+      "type": "form-input",
+      "content": { "inputType": "fullname", "label": "Name", "placeholder": "Your name" },
+      "props": { "size": "md", "mandatory": true, "withIcon": false },
       "styles": {}
     },
     {
-      "id": "button-1234567899-234",
+      "id": "input-1234567899-234",
+      "type": "form-input",
+      "content": { "inputType": "email", "label": "Email", "placeholder": "your@email.com" },
+      "props": { "size": "md", "mandatory": true, "withIcon": false },
+      "styles": {}
+    },
+    {
+      "id": "select-1234567900-567",
+      "type": "form-select",
+      "content": { "label": "Interests", "placeholder": "Select your interests", "options": ["Technology", "Business", "Design", "Marketing"] },
+      "props": { "size": "md", "mandatory": false, "withIcon": true },
+      "iconContent": { "type": "icon", "value": "ListBulletsIcon" },
+      "styles": {}
+    },
+    {
+      "id": "button-1234567901-890",
       "type": "button",
       "content": { "label": "Subscribe" },
       "props": {
@@ -382,8 +472,11 @@ The styles object accepts **ANY valid CSS property**:
 
 - ID format: 'form-{timestamp}-{random}' (auto-generated)
 - **MANDATORY**: First child MUST be TextElement (title), last child MUST be ButtonElement (submit)
-- Children array structure is non-negotiable: TextElement → form fields → ButtonElement
+- **MANDATORY**: MINIMUM 3 form fields REQUIRED between TextElement and ButtonElement
+- Children array structure is non-negotiable: TextElement → minimum 3 form fields → ButtonElement
 - Form fields in middle can be any combination of input types: 'form-input', 'form-message', 'form-checkbox', 'form-phonenumber', 'form-select', 'form-datepicker', 'form-number'
+- Choose appropriate fields based on funnel type and purpose
+- Empty forms or forms with less than 3 fields are NOT acceptable
 - The props object is always empty {}
 - The serverId is used to link form to backend storage (null by default)
 - Webhook integration allows sending form data to external services
@@ -409,7 +502,28 @@ The styles object accepts **ANY valid CSS property**:
         link: { enabled: false, href: '', target: '_self', type: 'external' },
       },
       {
-        id: `button-${Date.now()}-${Math.random().toString(36).substr(2, 7)}`,
+        id: `form-input-${Date.now()}-${Math.random().toString(36).substr(2, 7)}`,
+        type: 'form-input',
+        content: { inputType: 'fullname', label: 'Name', placeholder: 'Enter your name' },
+        props: { size: 'md', mandatory: true, withIcon: false },
+        styles: {},
+      },
+      {
+        id: `form-input-${Date.now() + 1}-${Math.random().toString(36).substr(2, 7)}`,
+        type: 'form-input',
+        content: { inputType: 'email', label: 'Email', placeholder: 'your@email.com' },
+        props: { size: 'md', mandatory: true, withIcon: false },
+        styles: {},
+      },
+      {
+        id: `form-message-${Date.now() + 2}-${Math.random().toString(36).substr(2, 7)}`,
+        type: 'form-message',
+        content: { label: 'Message', placeholder: 'Your message here...' },
+        props: { size: 'md', mandatory: false, withIcon: false },
+        styles: {},
+      },
+      {
+        id: `button-${Date.now() + 3}-${Math.random().toString(36).substr(2, 7)}`,
         type: 'button',
         content: { label: 'Submit' },
         props: {

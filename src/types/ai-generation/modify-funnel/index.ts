@@ -39,31 +39,11 @@ export const modifyFunnelRequestSchema = z.object({
     .describe(
       "If true, AI can generate new pages in addition to modifying existing ones. If false, AI can only modify selected pages."
     ),
-
-  maxNewPages: z
-    .number()
-    .int()
-    .positive()
-    .max(10)
-    .optional()
-    .default(3)
-    .describe(
-      "Maximum number of new pages AI can generate (only applies if allowGenerateNewPages is true)"
-    ),
-
-  maxElementsPerPage: z
-    .number()
-    .int()
-    .positive()
-    .max(20)
-    .optional()
-    .default(8)
-    .describe("Maximum elements per page for modified/new pages"),
 });
 
 /**
  * Modify Funnel Response Schema
- * Returns modified funnel with token usage and generation metadata
+ * Returns modified funnel with prompt usage and generation metadata
  */
 export const modifyFunnelResponseSchema = z.object({
   message: z.string(),
@@ -89,8 +69,8 @@ export const modifyFunnelResponseSchema = z.object({
     ),
   }),
 
-  tokensUsed: z.number().int().nonnegative(),
-  remainingTokens: z.number().int().nullable(),
+  promptsUsed: z.number().int().nonnegative(),
+  remainingPrompts: z.number().int().nullable(),
   generationLogId: z.number().int().positive(),
 
   modificationSummary: z.object({

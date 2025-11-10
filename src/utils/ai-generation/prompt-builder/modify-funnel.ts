@@ -43,8 +43,6 @@ interface BuildModifyPromptOptions {
   }>;
   userPrompt: string;
   allowGenerateNewPages: boolean;
-  maxNewPages?: number;
-  maxElementsPerPage?: number;
   businessContext?: {
     industry?: string;
     targetAudience?: string;
@@ -63,8 +61,6 @@ export function buildModifyFunnelSystemPrompt(
     existingPages,
     userPrompt,
     allowGenerateNewPages,
-    maxNewPages = 3,
-    maxElementsPerPage = 8,
     businessContext = {},
   } = options;
 
@@ -117,10 +113,9 @@ ${existingPagesContext}
 
 - **Allow New Pages:** ${
     allowGenerateNewPages
-      ? `YES (max ${maxNewPages} new pages)`
+      ? `YES - generate as many new pages as needed`
       : "NO - only modify existing pages"
   }
-- **Max Elements Per Page:** ${maxElementsPerPage}
 ${businessContext.industry ? `- **Industry:** ${businessContext.industry}` : ""}
 ${
   businessContext.targetAudience
@@ -206,17 +201,16 @@ You MUST respond with a valid JSON object in this exact format:
 
 1. ❌ Returning pages not requested for modification
 2. ❌ Creating new pages when allowGenerateNewPages is false
-3. ❌ Exceeding maxNewPages or maxElementsPerPage limits
-4. ❌ Using placeholder text like "Button", "Text", "Image"
-5. ❌ Changing page IDs of existing pages
-6. ❌ Breaking element schema requirements (missing required fields)
-7. ❌ Using invalid element types not in the 25 allowed types
+3. ❌ Using placeholder text like "Button", "Text", "Image"
+4. ❌ Changing page IDs of existing pages
+5. ❌ Breaking element schema requirements (missing required fields)
+6. ❌ Using invalid element types not in the 25 allowed types
 
 ## ✅ FINAL CHECKLIST BEFORE RESPONDING:
 
 - [ ] Did I read and understand the existing funnel structure?
 - [ ] Did I follow the user's modification instructions?
-- [ ] Did I respect the constraints (allowGenerateNewPages, maxNewPages, maxElementsPerPage)?
+- [ ] Did I respect the allowGenerateNewPages constraint?
 - [ ] Are all element types valid (from the 25 allowed types)?
 - [ ] Did I avoid placeholder text like "Button", "Text", "Email"?
 - [ ] Did I preserve existing page IDs for modified pages?

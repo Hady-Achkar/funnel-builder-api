@@ -5,6 +5,7 @@
 
 import { getAllElementDefinitions, ElementDefinition } from "../ui-elements";
 import { REFINED_AI_INSTRUCTIONS, REFINED_AI_INSTRUCTIONS_COMPACT } from "./refined-instructions";
+import { getRelevantExamples, formatExamplesForPrompt } from "../funnel-examples";
 
 /**
  * Reusable element type validation section for ALL prompts
@@ -874,6 +875,18 @@ Example: Don't say "Email" - say "Where Should We Send Your ${
   } Updates?"
 
 Create a conversion-optimized funnel with multiple pages that guides visitors through a logical journey. Include compelling copy, appropriate visual elements, and clear calls-to-action.`;
+
+  // Inject relevant funnel examples for inspiration
+  const examples = getRelevantExamples({
+    industry,
+    funnelType,
+    targetAudience,
+    maxExamples: 2, // Keep it concise to save tokens
+  });
+
+  if (examples.length > 0) {
+    prompt += formatExamplesForPrompt(examples);
+  }
 
   // Append custom user instructions with highest priority
   if (userPrompt) {

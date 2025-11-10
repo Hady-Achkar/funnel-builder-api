@@ -133,6 +133,21 @@ Every select element MUST include ALL of these fields:
 
 **IMPORTANT**: All form fields MUST include a 'name' property (default: 'Form Field')
 
+### ⚠️ CRITICAL: Options Array Format
+
+**The content.options array MUST be an array of plain strings ONLY!**
+
+❌ **NEVER DO THIS** (will break frontend):
+"options": [
+  { "id": "1", "label": "Option 1" },
+  { "id": "2", "label": "Option 2" }
+]
+
+✅ **ALWAYS DO THIS**:
+"options": ["Option 1", "Option 2", "Option 3"]
+
+**This is the #1 most common error with form-select elements. The options MUST be strings, NOT objects!**
+
 ## DEFAULT VALUES
 
 | Property | Default |
@@ -181,6 +196,27 @@ The styles object is flexible and powerful:
 
 ✅ **CORRECT**: At least one option
 "content": { "label": "Dropdown Menu", "placeholder": "Choose an option", "options": ["Option 1", "Option 2", "Option 3"] }
+
+---
+
+❌ **WRONG**: Options as objects (CRITICAL ERROR - WILL BREAK FRONTEND!)
+"content": {
+  "label": "Dropdown Menu",
+  "placeholder": "Choose an option",
+  "options": [
+    { "id": "1", "label": "Option 1" },
+    { "id": "2", "label": "Option 2" }
+  ]
+}
+
+✅ **CORRECT**: Options as array of strings ONLY
+"content": {
+  "label": "Dropdown Menu",
+  "placeholder": "Choose an option",
+  "options": ["Option 1", "Option 2", "Option 3"]
+}
+
+**CRITICAL**: The options array MUST ONLY contain plain strings, NOT objects. Never use {id, label} or {value, label} format!
 
 ---
 

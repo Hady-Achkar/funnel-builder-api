@@ -36,8 +36,8 @@ model User {
   totalSales                 Int                  @default(0)
   commissionPercentage       Float                @default(5)
   addOns                     AddOn[]              @relation("UserAddOns")
-  aiTokenBalance             AITokenBalance?
-  aiTokenHistory             AITokenHistory[]
+  aiPromptBalance            AIPromptBalance?
+  aiPromptHistory            AIPromptHistory[]
   aiGenerationLogs           AIGenerationLog[]
   affiliateLinks             AffiliateLink[]      @relation("AffiliateOwner")
   balanceTransactions        BalanceTransaction[]
@@ -677,7 +677,8 @@ model AIGenerationLog {
   funnelId        Int?
 
   prompt          String    @db.Text
-  tokensUsed      Int
+  promptsUsed     Int       @default(1)
+  actualTokensUsed Int      // Track actual API token usage for analytics
   pagesGenerated  Int
   model           String    @default("claude-3-5-sonnet-20240620")
 
@@ -693,11 +694,11 @@ model AIGenerationLog {
   @@map("ai_generation_logs")
 }
 
-model AITokenBalance {
+model AIPromptBalance {
   id              Int      @id @default(autoincrement())
   userId          Int      @unique
-  tokensUsed      Int      @default(0)
-  tokensLimit     Int?     // null = unlimited
+  promptsUsed     Int      @default(0)
+  promptsLimit    Int?     // null = unlimited
   lastResetAt     DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -705,14 +706,14 @@ model AITokenBalance {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("ai_token_balances")
+  @@map("ai_prompt_balances")
 }
 
-model AITokenHistory {
+model AIPromptHistory {
   id              Int                @id @default(autoincrement())
   userId          Int
-  tokensUsed      Int
-  operation       AITokenOperation
+  promptsUsed     Int
+  operation       AIPromptOperation
   generationLogId Int?               // Link to specific generation
   description     String?            @db.Text
   balanceBefore   Int
@@ -724,15 +725,16 @@ model AITokenHistory {
   @@index([userId])
   @@index([createdAt])
   @@index([operation])
-  @@map("ai_token_history")
+  @@map("ai_prompt_history")
 }
 
-enum AITokenOperation {
+enum AIPromptOperation {
   GENERATION
   DEDUCTION
   RESET
   ADJUSTMENT
   REFUND
+  PURCHASE
 }
 
 enum UserPlan {

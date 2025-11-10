@@ -20,11 +20,10 @@ import {
   buildLimitedPrompt,
 } from "../../../utils/ai-generation/prompt-builder";
 import {
-  hasEnoughTokens,
-  deductTokens,
+  hasEnoughPrompts,
+  deductPrompts,
   logGeneration,
-  estimateTokensForGeneration,
-} from "../../../utils/ai-generation/token-tracker";
+} from "../../../utils/ai-generation/prompt-tracker";
 import {
   validateFunnel,
   sanitizeElements,
@@ -142,7 +141,6 @@ function buildRefinementPrompt(request: {
   industry: string;
   targetAudience: string;
   userPrompt?: string;
-  maxAllowedPages: number;
 }): string {
   return `You are an expert funnel strategist with deep knowledge of conversion optimization, user psychology, and industry best practices.
 
@@ -212,10 +210,8 @@ A comprehensive, 300-800 word English description that includes:
 This prompt will be given to another AI to generate the actual funnel, so be EXTREMELY detailed and specific within the word limit.
 
 ### 2. funnelStrategy
-- **recommendedPages:** Number between 5 and ${
-    request.maxAllowedPages
-  } (CRITICAL LIMIT)
-- **recommendedElementsPerPage:** Number between 8 and 15
+- **recommendedPages:** Optimal number of pages for this funnel type
+- **recommendedElementsPerPage:** Optimal number of elements per page
 - **reasoning:** Why these numbers are optimal for this specific funnel
 
 ### 3. pageStructure
@@ -240,26 +236,18 @@ Brief description of the overall conversion strategy and how the funnel guides u
 
 ## Strategic Guidelines:
 
-### Page Count Strategy (OPTIMIZED FOR PERFORMANCE):
-⚠️ **CRITICAL: Total elements (pages × elements/page) must NOT exceed 70 for reliable generation.**
+### Page Count Strategy:
+- **Lead Generation:** 5-7 pages (landing → benefits → quiz → form → thank you)
+- **Sales Funnel:** 6-8 pages (landing → product → testimonials → pricing → checkout → thank you)
+- **Webinar Funnel:** 5-6 pages (landing → registration → confirmation → reminder → replay)
+- **Application Funnel:** 6-8 pages (landing → benefits → qualification → form → review → thank you)
 
-- **Lead Generation:** 5-7 pages with 8-10 elements/page (landing → benefits → quiz → form → thank you)
-- **Sales Funnel:** 6-8 pages with 8-10 elements/page (landing → product → testimonials → pricing → checkout → thank you)
-- **Webinar Funnel:** 5-6 pages with 8-10 elements/page (landing → registration → confirmation → reminder → replay)
-- **Application Funnel:** 6-8 pages with 8-10 elements/page (landing → benefits → qualification → form → review → thank you)
-
-### Element Count Strategy (CONSERVATIVE):
-- **Landing Pages:** 8-10 elements (hero, benefits, social proof, CTA)
-- **Content Pages:** 7-9 elements (headlines, text, images, dividers)
-- **Quiz Pages:** 5-7 elements (quiz questions + intro/outro)
-- **Form Pages:** 6-8 elements (form with 3-5 fields + context)
-- **Result Pages:** 5-7 elements (success message, next steps, resources)
-
-**Safe Combinations (total ≤ 70 elements):**
-- 7 pages × 10 elements = 70 ✓
-- 6 pages × 11 elements = 66 ✓
-- 8 pages × 8 elements = 64 ✓
-- 5 pages × 12 elements = 60 ✓
+### Element Count Strategy:
+- **Landing Pages:** 8-12 elements (hero, benefits, social proof, CTA)
+- **Content Pages:** 7-10 elements (headlines, text, images, dividers)
+- **Quiz Pages:** 5-8 elements (quiz questions + intro/outro)
+- **Form Pages:** 6-9 elements (form with 3-5 fields + context)
+- **Result Pages:** 5-8 elements (success message, next steps, resources)
 
 ### Funnel Flow Best Practices:
 1. Start with compelling landing page (AIDA: Attention, Interest, Desire, Action)
@@ -277,43 +265,23 @@ Brief description of the overall conversion strategy and how the funnel guides u
 - **Healthcare:** Focus on credentials, patient outcomes, ease of access
 
 ## Critical Rules:
-1. **MAXIMUM CAPACITY:** Total elements (recommendedPages × recommendedElementsPerPage) must NOT exceed 70
-2. **Page Count:** Recommend 5-8 pages (up to ${
-    request.maxAllowedPages
-  } if lower than 8)
-3. **Elements Per Page:** Recommend 8-10 elements per page (never more than 12)
-4. **refinedPrompt Quality:** MUST be 300-800 words with specific, actionable details
-5. **Industry Alignment:** Theme colors and strategy MUST match the industry
-6. **Conversion Focus:** Every decision should optimize for user action
-7. **User Journey:** Clear progression from awareness → interest → action → confirmation
-
-⚠️ **BEFORE RETURNING:** Calculate (recommendedPages × recommendedElementsPerPage). If > 70, reduce pages or elements to stay under 70.
+1. **refinedPrompt Quality:** MUST be 300-800 words with specific, actionable details
+2. **Industry Alignment:** Theme colors and strategy MUST match the industry
+3. **Conversion Focus:** Every decision should optimize for user action
+4. **User Journey:** Clear progression from awareness → interest → action → confirmation
+5. **Flexibility:** Generate as many pages and elements as needed for optimal funnel performance
 
 Generate the comprehensive strategy now.`;
 }
 
 /**
- * Estimate tokens needed for prompt refinement (Step 1) without executing AI
+ * Estimate prompts needed for prompt refinement (Step 1)
+ * Note: In the new prompt-based model, each AI call = 1 prompt regardless of size
  * @internal
  */
-function estimateRefinePromptTokens(input: RefinementInput): number {
-  const maxAllowedPages = FunnelPageAllocations.calculateTotalAllocation({
-    workspacePlanType: input.workspacePlanType,
-    addOns: input.addOns,
-  });
-
-  const prompt = buildRefinementPrompt({
-    funnelType: input.funnelType,
-    businessDescription: input.businessDescription,
-    industry: input.industry,
-    targetAudience: input.targetAudience,
-    userPrompt: input.userPrompt,
-    maxAllowedPages,
-  });
-
-  const inputTokens = Math.ceil(prompt.length / 4);
-  const estimatedOutputTokens = 2500;
-  return inputTokens + estimatedOutputTokens;
+function estimateRefinePromptPrompts(input: RefinementInput): number {
+  // Step 1 (refinement) = 1 prompt
+  return 1;
 }
 
 /**
@@ -323,13 +291,7 @@ function estimateRefinePromptTokens(input: RefinementInput): number {
 async function refinePrompt(
   input: RefinementInput
 ): Promise<RefinedPromptOutput> {
-  // Calculate user's max allowed pages
-  const maxAllowedPages = FunnelPageAllocations.calculateTotalAllocation({
-    workspacePlanType: input.workspacePlanType,
-    addOns: input.addOns,
-  });
-
-  console.log(`[Refine Prompt] Max allowed pages for user: ${maxAllowedPages}`);
+  console.log(`[Refine Prompt] Generating refinement strategy...`);
 
   // Build refinement prompt
   const prompt = buildRefinementPrompt({
@@ -338,7 +300,6 @@ async function refinePrompt(
     industry: input.industry,
     targetAudience: input.targetAudience,
     userPrompt: input.userPrompt,
-    maxAllowedPages,
   });
 
   // Call Gemini Pro for analysis
@@ -374,59 +335,12 @@ async function refinePrompt(
       throw new BadRequestError("AI failed to generate page structure");
     }
 
-    // Enforce page limit
-    if (parsed.funnelStrategy.recommendedPages > maxAllowedPages) {
-      console.warn(
-        `[Refine Prompt] AI recommended ${parsed.funnelStrategy.recommendedPages} pages, but user limit is ${maxAllowedPages}. Capping to limit.`
-      );
-      parsed.funnelStrategy.recommendedPages = maxAllowedPages;
-
-      // Also trim page structure if needed
-      if (parsed.pageStructure.length > maxAllowedPages) {
-        parsed.pageStructure = parsed.pageStructure.slice(0, maxAllowedPages);
-      }
-    }
-
     // Ensure minimum pages
     if (parsed.funnelStrategy.recommendedPages < 3) {
       console.warn(
         `[Refine Prompt] AI recommended only ${parsed.funnelStrategy.recommendedPages} pages. Setting minimum to 3.`
       );
       parsed.funnelStrategy.recommendedPages = 3;
-    }
-
-    // Enforce 70-element capacity limit (for Gemini Pro with refined prompts at 400 tokens/element)
-    const totalElements =
-      parsed.funnelStrategy.recommendedPages *
-      parsed.funnelStrategy.recommendedElementsPerPage;
-
-    if (totalElements > 70) {
-      console.warn(
-        `[Refine Prompt] AI recommended ${totalElements} total elements (${parsed.funnelStrategy.recommendedPages} pages × ${parsed.funnelStrategy.recommendedElementsPerPage} elements), which exceeds 70-element limit. Adjusting...`
-      );
-
-      // Prioritize keeping more pages with fewer elements (better UX)
-      if (parsed.funnelStrategy.recommendedPages > 7) {
-        // Too many pages - reduce pages to 7
-        parsed.funnelStrategy.recommendedPages = 7;
-        parsed.funnelStrategy.recommendedElementsPerPage = 10;
-      } else {
-        // Reduce elements per page to fit under 70
-        parsed.funnelStrategy.recommendedElementsPerPage = Math.floor(
-          70 / parsed.funnelStrategy.recommendedPages
-        );
-      }
-
-      console.warn(
-        `[Refine Prompt] Adjusted to ${
-          parsed.funnelStrategy.recommendedPages
-        } pages × ${
-          parsed.funnelStrategy.recommendedElementsPerPage
-        } elements = ${
-          parsed.funnelStrategy.recommendedPages *
-          parsed.funnelStrategy.recommendedElementsPerPage
-        } total elements`
-      );
     }
 
     // Use user-provided colors if available, otherwise use AI recommendations
@@ -539,126 +453,42 @@ async function generateFunnelBatch(
       );
     }
 
-    // Validate requested page count doesn't exceed the allowed limit per funnel
-    if (request.maxPages) {
-      const maxAllowedPages = FunnelPageAllocations.calculateTotalAllocation({
-        workspacePlanType: workspace.owner.plan,
-        addOns: workspace.owner.addOns,
-      });
-
-      if (request.maxPages > maxAllowedPages) {
-        throw new BadRequestError(
-          `You've requested ${request.maxPages} ${
-            request.maxPages === 1 ? "page" : "pages"
-          }, but your plan allows up to ${maxAllowedPages} ${
-            maxAllowedPages === 1 ? "page" : "pages"
-          } per funnel. ` + `Please try with ${maxAllowedPages} or fewer pages.`
-        );
-      }
-    }
-
-    // Calculate estimated output tokens BEFORE generating to prevent wasted API calls
-    const totalElements =
-      (request.maxPages || 3) * (request.maxElementsPerPage || 8);
-    const isLargeGeneration = totalElements > 40; // More than 40 elements needs optimization
-
-    // Estimate output tokens needed (VERY conservative with data URI placeholders)
-    // Real-world data shows WITH data URIs:
-    // - Data URI placeholder adds ~35 tokens per image/video element
-    // - Complex elements (forms, quizzes with images, FAQs) = 300-500 tokens
-    // - Medium elements (text, buttons, media-with-text with images) = 200-300 tokens
-    // - Simple elements (text, buttons, icons without images) = 100-150 tokens
-    // - AI generates MUCH more detailed content when given short/vague descriptions
-    // Average VERY conservatively at 300 tokens per element (accounts for rich content + data URIs)
-    // Plus page structure, SEO metadata, funnel wrapper (~3000 tokens for safety)
-
-    // REFINED PROMPT DETECTION: When businessDescription is a refined prompt (300-800 words),
-    // the AI generates much richer, more detailed content. This can DOUBLE the output size.
     // Detect refined prompts by length (>500 chars = likely from refinement step)
     const isRefinedPrompt = request.businessDescription.length > 500;
-    const tokensPerElement = isRefinedPrompt ? 400 : 300; // Refined uses 400, direct uses 300
-    const baseOverhead = isRefinedPrompt ? 4000 : 3000; // Refined has richer structure
+    const isLargeGeneration = isRefinedPrompt; // Refined prompts are more complex
 
-    const estimatedOutputTokens =
-      totalElements * tokensPerElement + baseOverhead;
-
-    // Select appropriate model based on complexity, size, and token requirements
-    const selectedModel = selectGeminiModel(estimatedOutputTokens, {
-      totalElements,
-      promptLength: request.businessDescription.length,
-    });
+    // Select appropriate model (always use Pro for best quality)
+    const selectedModel = MODELS.PRO;
     const MAX_OUTPUT_TOKENS = selectedModel.maxOutputTokens;
 
     // Log model selection for debugging
     console.log(
-      `[AI Generation - Batch] Using Gemini Pro model for ${totalElements} elements (estimated ${estimatedOutputTokens} output tokens, prompt length: ${
+      `[AI Generation - Batch] Using ${selectedModel.name} (prompt length: ${
         request.businessDescription.length
       } chars)${
         isRefinedPrompt
-          ? ` [Refined Context - Using ${tokensPerElement} tokens/element]`
-          : ` [Direct - Using ${tokensPerElement} tokens/element]`
+          ? ` [Refined Context]`
+          : ` [Direct]`
       }`
     );
-
-    // Pre-validate: Check if generation will exceed even Pro's output token limit
-    if (estimatedOutputTokens > MODELS.PRO.maxOutputTokens) {
-      // Calculate maximum safe values using actual tokensPerElement estimate
-      const maxSafeElements = Math.floor(
-        (MODELS.PRO.maxOutputTokens - baseOverhead) / tokensPerElement
-      );
-      const suggestedMaxPages = Math.floor(
-        maxSafeElements / (request.maxElementsPerPage || 8)
-      );
-      const suggestedMaxElements = Math.floor(
-        maxSafeElements / (request.maxPages || 3)
-      );
-
-      throw new BadRequestError(
-        `This generation requires approximately ${estimatedOutputTokens} output tokens, which exceeds even our largest model's capacity (${MODELS.PRO.maxOutputTokens} tokens). ` +
-          `Maximum capacity: ~${maxSafeElements} elements (e.g., ${Math.floor(
-            maxSafeElements / 10
-          )} pages × 10 elements). ` +
-          `Try one of these options:\n` +
-          `• Reduce pages to ${suggestedMaxPages} or fewer (keeping ${request.maxElementsPerPage} elements per page)\n` +
-          `• Reduce elements per page to ${suggestedMaxElements} or fewer (keeping ${request.maxPages} pages)\n` +
-          `• Recommended: ${Math.min(
-            24,
-            suggestedMaxPages
-          )} pages with ${Math.min(10, suggestedMaxElements)} elements each`
-      );
-    }
 
     // Build prompts
     const systemPrompt = isLargeGeneration
       ? buildCompactSystemPrompt()
       : buildSystemPrompt();
-    const userPrompt = request.maxPages
-      ? buildLimitedPrompt(
-          request.businessDescription,
-          request.maxPages,
-          request.maxElementsPerPage || 8,
-          request.userPrompt
-        )
-      : buildUserPrompt(
-          request.businessDescription,
-          request.industry,
-          request.targetAudience,
-          request.funnelType,
-          request.userPrompt
-        );
-
-    // Estimate input token usage
-    const estimatedInputTokens = estimateTokensForGeneration(
-      systemPrompt.length + userPrompt.length,
-      request.maxPages || 3
+    const userPrompt = buildUserPrompt(
+      request.businessDescription,
+      request.industry,
+      request.targetAudience,
+      request.funnelType,
+      request.userPrompt
     );
 
-    // Check if user has enough tokens (input + estimated output)
-    const totalEstimatedTokens = estimatedInputTokens + estimatedOutputTokens;
-    const canGenerate = await hasEnoughTokens(userId, totalEstimatedTokens);
+    // Check if user has enough prompts (1 prompt per generation)
+    const canGenerate = await hasEnoughPrompts(userId, 1);
     if (!canGenerate) {
       throw new BadRequestError(
-        `Insufficient AI tokens. Estimated ${totalEstimatedTokens} tokens needed for this generation (${estimatedInputTokens} input + ${estimatedOutputTokens} output).`
+        `Insufficient AI prompts. This generation requires 1 prompt.`
       );
     }
 
@@ -691,21 +521,10 @@ async function generateFunnelBatch(
         response.outputTokens >= MAX_OUTPUT_TOKENS * 0.95;
 
       if (isLikelyTruncated) {
-        // Calculate safe suggestions using actual tokensPerElement estimate
-        const maxSafeElements = Math.floor(
-          (MAX_OUTPUT_TOKENS - baseOverhead) / tokensPerElement
-        );
-        const suggestedPages = Math.floor(
-          maxSafeElements / (request.maxElementsPerPage || 8)
-        );
-        const suggestedElements = Math.floor(
-          maxSafeElements / (request.maxPages || 3)
-        );
-
         // Return error with token usage info (but DON'T deduct tokens - user shouldn't pay for failed generation)
         const error: any = new BadRequestError(
           `Generation may be truncated at Gemini Pro token limit (${MAX_OUTPUT_TOKENS}). Used ${actualTokensUsed} tokens (not charged). ` +
-            `Try: ${suggestedPages} pages × ${request.maxElementsPerPage} elements, or ${request.maxPages} pages × ${suggestedElements} elements.`
+            `Please try simplifying your request or reducing the funnel complexity.`
         );
         error.tokensWasted = actualTokensUsed;
         error.metadata = {
@@ -1050,21 +869,22 @@ async function generateFunnelBatch(
       );
     }
 
-    // Log the generation
+    // Log the generation (track actual tokens for analytics, prompts for billing)
     const generationLogId = await logGeneration(
       userId,
       workspace.id,
       funnelId || null,
       request.businessDescription,
-      actualTokensUsed,
+      actualTokensUsed, // Track actual API token usage for analytics
+      1, // promptsUsed = 1 for this generation
       generatedFunnel.pages.length,
       selectedModel.name
     );
 
-    // Deduct tokens from user's balance
-    const tokenResult = await deductTokens(
+    // Deduct prompts from user's balance (always 1 prompt per generation)
+    const promptResult = await deductPrompts(
       userId,
-      actualTokensUsed,
+      1, // Always deduct 1 prompt
       generationLogId,
       `Generated funnel: ${generatedFunnel.funnelName}`
     );
@@ -1105,8 +925,8 @@ async function generateFunnelBatch(
           ),
         },
       },
-      tokensUsed: actualTokensUsed,
-      remainingTokens: tokenResult.remainingTokens,
+      promptsUsed: 1, // Always 1 prompt per generation
+      remainingPrompts: promptResult.remainingPrompts,
       generationLogId,
       generationMode: "batch" as const,
     };
@@ -1179,40 +999,22 @@ export async function generateFunnel(
     );
   }
 
-  // 4. Estimate total token cost BEFORE any AI execution
-  console.log("[AI Funnel Generation] Checking token availability...");
+  // 4. Check prompt availability (2-step process = 1 prompt total for user)
+  console.log("[AI Funnel Generation] Checking prompt availability...");
 
-  const estimatedStep1Tokens = estimateRefinePromptTokens({
-    funnelType: request.funnelType,
-    businessDescription: request.businessDescription,
-    industry: request.industry,
-    targetAudience: request.targetAudience,
-    userPrompt: request.userPrompt,
-    primaryColor: request.primaryColor,
-    secondaryColor: request.secondaryColor,
-    preferDarkBackground: request.preferDarkBackground,
-    workspacePlanType: workspace.owner.plan,
-    addOns: workspace.owner.addOns,
-  });
+  // In the new prompt-based model: 2-step refined generation = 1 prompt (transparent to user)
+  const totalPromptsNeeded = 1;
 
-  const typicalPages = 6;
-  const typicalElementsPerPage = 10;
-  const totalElements = typicalPages * typicalElementsPerPage;
-  const tokensPerElement = 400;
-  const baseOverhead = 4000;
-  const estimatedStep2Tokens = totalElements * tokensPerElement + baseOverhead;
-  const totalEstimatedTokens = estimatedStep1Tokens + estimatedStep2Tokens;
-
-  // 5. Check token availability
-  const canGenerate = await hasEnoughTokens(userId, totalEstimatedTokens);
+  // 5. Check prompt availability
+  const canGenerate = await hasEnoughPrompts(userId, totalPromptsNeeded);
   if (!canGenerate) {
     throw new BadRequestError(
-      "Insufficient AI tokens to generate this funnel. Please add more tokens to your account."
+      "Insufficient AI prompts to generate this funnel. Please add more prompts to your account."
     );
   }
 
   console.log(
-    "[AI Funnel Generation] Token check passed. Starting generation..."
+    "[AI Funnel Generation] Prompt check passed. Starting generation..."
   );
 
   // 6. STEP 1: Refine Prompt
@@ -1248,8 +1050,6 @@ export async function generateFunnel(
     businessDescription: refinedOutput.refinedPrompt,
     industry: request.industry,
     targetAudience: request.targetAudience,
-    maxPages: refinedOutput.funnelStrategy.recommendedPages,
-    maxElementsPerPage: refinedOutput.funnelStrategy.recommendedElementsPerPage,
     primaryColor: refinedOutput.themeRecommendation.suggestedPrimaryColor,
     secondaryColor: refinedOutput.themeRecommendation.suggestedSecondaryColor,
     preferDarkBackground:
@@ -1260,22 +1060,24 @@ export async function generateFunnel(
   const batchResult = await generateFunnelBatch(userId, batchRequest);
 
   console.log(
-    `[AI Funnel Generation] Step 2 Complete - ${batchResult.tokensUsed} tokens used`
+    `[AI Funnel Generation] Step 2 Complete - ${batchResult.promptsUsed} prompt used`
   );
 
-  // 8. Calculate total tokens
-  const totalTokensUsed = refinedOutput.tokensUsed + batchResult.tokensUsed;
+  // 8. Calculate total tokens (for analytics) and prompts (for billing)
+  const totalTokensUsed = refinedOutput.tokensUsed + (batchResult as any).actualTokensUsed || 0;
+  const totalPromptsUsed = 1; // 2-step refinement = 1 prompt total
 
   console.log(
-    `[AI Funnel Generation] Total tokens used: ${totalTokensUsed} (Step 1: ${refinedOutput.tokensUsed}, Step 2: ${batchResult.tokensUsed})`
+    `[AI Funnel Generation] Total: ${totalPromptsUsed} prompt used (${totalTokensUsed} API tokens for analytics)`
   );
 
-  // 9. Update generation log
+  // 9. Update generation log with complete information
   if (batchResult.generationLogId) {
     await prisma.aIGenerationLog.update({
       where: { id: batchResult.generationLogId },
       data: {
-        tokensUsed: totalTokensUsed,
+        actualTokensUsed: totalTokensUsed,
+        promptsUsed: totalPromptsUsed,
         model: "gemini-2.5-pro (2-step-refined)",
       },
     });
@@ -1287,11 +1089,11 @@ export async function generateFunnel(
     generationMode: "2-step-refined",
     refinementSummary: {
       step1Tokens: refinedOutput.tokensUsed,
-      step2Tokens: batchResult.tokensUsed,
+      step2Tokens: (batchResult as any).actualTokensUsed || 0,
       recommendedPages: refinedOutput.funnelStrategy.recommendedPages,
       recommendedElementsPerPage:
         refinedOutput.funnelStrategy.recommendedElementsPerPage,
     },
-    tokensUsed: totalTokensUsed,
+    promptsUsed: totalPromptsUsed,
   };
 }

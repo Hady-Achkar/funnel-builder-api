@@ -1,17 +1,17 @@
 /**
- * Estimate Tokens Controller
- * Handles HTTP requests for token estimation operations
+ * Estimate Prompts Controller
+ * Handles HTTP requests for prompt estimation operations
  */
 
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../../middleware/auth";
-import { estimateGenerationTokens } from "../../../services/ai-generation/estimate-tokens";
+import { estimateGenerationPrompts } from "../../../services/ai-generation/estimate-prompts";
 import { UnauthorizedError } from "../../../errors";
 
 /**
- * Estimate tokens for a generation request
+ * Estimate prompts for a generation request
  */
-export const estimateTokensController = async (
+export const estimatePromptsController = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -23,7 +23,7 @@ export const estimateTokensController = async (
     }
 
     // Service will validate the request body
-    const result = await estimateGenerationTokens(userId, req.body);
+    const result = await estimateGenerationPrompts(userId, req.body);
 
     return res.status(200).json(result);
   } catch (error) {

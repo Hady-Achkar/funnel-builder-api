@@ -10,7 +10,7 @@ export const getGenerationHistoryResponseSchema = z.object({
     z.object({
       id: z.number().int().positive(),
       prompt: z.string(),
-      tokensUsed: z.number().int().nonnegative(),
+      promptsUsed: z.number().int().nonnegative(),
       pagesGenerated: z.number().int().nonnegative(),
       model: z.string(),
       createdAt: z.date(),
@@ -29,7 +29,7 @@ export const getGenerationHistoryResponseSchema = z.object({
   stats: z.object({
     totalGenerations: z.number().int().nonnegative(),
     totalPagesGenerated: z.number().int().nonnegative(),
-    totalTokensUsed: z.number().int().nonnegative(),
+    totalPromptsUsed: z.number().int().nonnegative(),
     generationsLast30Days: z.number().int().nonnegative(),
   }),
 });

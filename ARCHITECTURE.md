@@ -71,6 +71,11 @@ export const createWorkspaceRequest = createWorkspaceRequestSchema;
 - Try-catch blocks for error handling
 - Prisma calls ONLY at service level
 
+**AI Generation Services** (Special Case):
+- Use prompt-based billing (1 prompt per generation)
+- Track actual API tokens for analytics
+- Deduct prompts from user balance after successful generation
+
 **Utils**: Place helper functions in `src/services/{modelName}/{functionName}/utils/{utilName}.ts`
 
 - NO Prisma calls in utils

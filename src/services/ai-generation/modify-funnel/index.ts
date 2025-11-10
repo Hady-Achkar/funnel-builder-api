@@ -16,11 +16,10 @@ import {
   buildModifyFunnelUserPrompt,
 } from "../../../utils/ai-generation/prompt-builder/modify-funnel";
 import {
-  hasEnoughTokens,
-  deductTokens,
+  hasEnoughPrompts,
+  deductPrompts,
   logGeneration,
-  estimateTokensForGeneration,
-} from "../../../utils/ai-generation/token-tracker";
+} from "../../../utils/ai-generation/prompt-tracker";
 import {
   validateFunnel,
   sanitizeElements,
@@ -154,32 +153,8 @@ export async function modifyFunnel(
       );
     }
 
-    // Check 2: If generating new pages, validate it won't exceed allocation
-    if (request.allowGenerateNewPages) {
-      const potentialNewPages = request.maxNewPages || 3;
-      const totalPagesAfterModification = currentPageCount + potentialNewPages;
-
-      if (totalPagesAfterModification > maxAllowedPages) {
-        throw new BadRequestError(
-          `Creating ${potentialNewPages} new ${
-            potentialNewPages === 1 ? "page" : "pages"
-          } would exceed your plan's limit of ${maxAllowedPages} ${
-            maxAllowedPages === 1 ? "page" : "pages"
-          } per funnel. ` +
-            `Current pages: ${currentPageCount}. You can create up to ${
-              maxAllowedPages - currentPageCount
-            } more ${
-              maxAllowedPages - currentPageCount === 1 ? "page" : "pages"
-            }. ` +
-            `Try reducing maxNewPages to ${
-              maxAllowedPages - currentPageCount
-            } or fewer.`
-        );
-      }
-    }
-
     console.log(
-      `[AI Funnel Modification] Page allocation check passed: ${currentPageCount}/${maxAllowedPages} pages`
+      `[AI Funnel Modification] Current page count: ${currentPageCount}, Max allowed: ${maxAllowedPages}`
     );
 
     // Filter pages to modify (if pageIds specified, only those pages; otherwise all pages)
@@ -204,69 +179,28 @@ export async function modifyFunnel(
       seoDescription: page.seoDescription,
     }));
 
-    // Calculate estimated output tokens
-    // For modifications, estimate based on number of pages being modified + potential new pages
-    const totalPagesToGenerate =
-      pagesToModify.length +
-      (request.allowGenerateNewPages ? request.maxNewPages || 3 : 0);
-    const totalElements =
-      totalPagesToGenerate * (request.maxElementsPerPage || 8);
-    const tokensPerElement = 350; // Slightly higher for modifications (more context)
-    const baseOverhead = 4000;
-    const estimatedOutputTokens =
-      totalElements * tokensPerElement + baseOverhead;
-
-    // Select appropriate model
-    const selectedModel = selectGeminiModel(estimatedOutputTokens, {
-      totalElements,
-      promptLength: request.userPrompt.length,
-    });
+    // Select appropriate model (always use Pro for best quality)
+    const selectedModel = MODELS.PRO;
     const MAX_OUTPUT_TOKENS = selectedModel.maxOutputTokens;
 
     console.log(
-      `[AI Funnel Modification] Using ${selectedModel.name} for ${totalElements} elements (estimated ${estimatedOutputTokens} output tokens)`
+      `[AI Funnel Modification] Using ${selectedModel.name} for ${pagesToModify.length} pages`
     );
-
-    // Pre-validate: Check if generation will exceed model's output token limit
-    if (estimatedOutputTokens > MODELS.PRO.maxOutputTokens) {
-      const maxSafeElements = Math.floor(
-        (MODELS.PRO.maxOutputTokens - baseOverhead) / tokensPerElement
-      );
-      const suggestedMaxPages = Math.floor(
-        maxSafeElements / (request.maxElementsPerPage || 8)
-      );
-
-      throw new BadRequestError(
-        `This modification requires approximately ${estimatedOutputTokens} output tokens, which exceeds model capacity (${MODELS.PRO.maxOutputTokens} tokens). ` +
-          `Try reducing the scope: modify fewer pages or reduce maxElementsPerPage to ${Math.floor(
-            maxSafeElements / pagesToModify.length
-          )} or fewer.`
-      );
-    }
 
     // Build prompts
     const systemPrompt = buildModifyFunnelSystemPrompt({
       existingPages: existingPagesContext,
       userPrompt: request.userPrompt,
       allowGenerateNewPages: request.allowGenerateNewPages || false,
-      maxNewPages: request.maxNewPages,
-      maxElementsPerPage: request.maxElementsPerPage,
     });
 
     const userPrompt = buildModifyFunnelUserPrompt(request.userPrompt);
 
-    // Estimate input token usage
-    const estimatedInputTokens = estimateTokensForGeneration(
-      systemPrompt.length + userPrompt.length,
-      totalPagesToGenerate
-    );
-
-    // Check if user has enough tokens (input + estimated output)
-    const totalEstimatedTokens = estimatedInputTokens + estimatedOutputTokens;
-    const canGenerate = await hasEnoughTokens(userId, totalEstimatedTokens);
+    // Check if user has enough prompts (1 prompt per modification)
+    const canGenerate = await hasEnoughPrompts(userId, 1);
     if (!canGenerate) {
       throw new BadRequestError(
-        `Insufficient AI tokens. Estimated ${totalEstimatedTokens} tokens needed for this modification (${estimatedInputTokens} input + ${estimatedOutputTokens} output).`
+        `Insufficient AI prompts. This modification requires 1 prompt.`
       );
     }
 
@@ -290,7 +224,7 @@ export async function modifyFunnel(
       if (isLikelyTruncated) {
         const error: any = new BadRequestError(
           `Modification may be truncated at token limit (${MAX_OUTPUT_TOKENS}). Used ${actualTokensUsed} tokens (not charged). ` +
-            `Try reducing the scope: modify fewer pages or reduce maxElementsPerPage.`
+            `Try simplifying your modification request or modifying fewer pages.`
         );
         error.tokensWasted = actualTokensUsed;
         throw error;
@@ -391,15 +325,6 @@ export async function modifyFunnel(
     console.log(
       `[AI Funnel Modification] Modified ${modifiedPages.length} pages, created ${newPages.length} new pages`
     );
-
-    // Validate new page count doesn't exceed limits
-    if (newPages.length > (request.maxNewPages || 3)) {
-      throw new BadRequestError(
-        `AI generated ${newPages.length} new pages, but maxNewPages is ${
-          request.maxNewPages || 3
-        }. This shouldn't happen - please try again.`
-      );
-    }
 
     // CRITICAL: Post-generation validation - ensure total pages don't exceed allocation
     // This is a safety check in case AI ignores constraints or user has edge case data
@@ -646,21 +571,22 @@ export async function modifyFunnel(
     await cacheService.del(`workspace:${workspace.id}:funnels:list`);
     await cacheService.del(`user:${userId}:workspace:${workspace.id}:funnels`);
 
-    // Log the generation
+    // Log the generation (track actual tokens for analytics, prompts for billing)
     const generationLogId = await logGeneration(
       userId,
       workspace.id,
       funnel.id,
       `MODIFY: ${request.userPrompt}`,
-      actualTokensUsed,
+      actualTokensUsed, // Track actual API token usage for analytics
+      1, // promptsUsed = 1 for this modification
       modifiedPages.length + newPages.length,
       selectedModel.name
     );
 
-    // Deduct tokens from user's balance
-    const tokenResult = await deductTokens(
+    // Deduct prompts from user's balance (always 1 prompt per modification)
+    const promptResult = await deductPrompts(
       userId,
-      actualTokensUsed,
+      1, // Always deduct 1 prompt
       generationLogId,
       `Modified funnel: ${funnel.name}`
     );
@@ -693,8 +619,8 @@ export async function modifyFunnel(
           wasModified: page.wasModified,
         })),
       },
-      tokensUsed: actualTokensUsed,
-      remainingTokens: tokenResult.remainingTokens,
+      promptsUsed: 1, // Always 1 prompt per modification
+      remainingPrompts: promptResult.remainingPrompts,
       generationLogId,
       modificationSummary: {
         pagesModified: modifiedPages.length,
@@ -704,7 +630,7 @@ export async function modifyFunnel(
       },
     };
 
-    console.log(`[AI Funnel Modification] Successfully completed. Tokens used: ${actualTokensUsed}`);
+    console.log(`[AI Funnel Modification] Successfully completed. Prompts used: 1`);
 
     return modifyFunnelResponseSchema.parse(response);
   } catch (error: unknown) {

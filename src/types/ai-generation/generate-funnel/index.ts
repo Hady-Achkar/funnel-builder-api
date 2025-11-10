@@ -15,8 +15,6 @@ export const generateFunnelRequestSchema = z.object({
   industry: z.string().optional(),
   targetAudience: z.string().optional(),
   funnelType: z.string().optional(),
-  maxPages: z.number().int().positive().optional().default(3),
-  maxElementsPerPage: z.number().int().positive().max(20).optional().default(8),
   primaryColor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, {
@@ -70,8 +68,8 @@ export const generateFunnelResponseSchema = z.object({
       defaultSeoKeywords: z.array(z.string()), // API returns array format for frontend
     }),
   }),
-  tokensUsed: z.number().int().nonnegative(),
-  remainingTokens: z.number().int().nullable(), // Can be negative when user exceeds limit
+  promptsUsed: z.number().int().nonnegative(),
+  remainingPrompts: z.number().int().nullable(), // Can be negative when user exceeds limit
   generationLogId: z.number().int().positive(),
   generationMode: z.literal("batch").optional(),
 });

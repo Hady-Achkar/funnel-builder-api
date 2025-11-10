@@ -117,6 +117,25 @@ export const TextElementDefinition: ElementDefinition = {
   aiInstructions: `
 # Text Element AI Instructions
 
+## 🚨 CRITICAL ALERT - READ FIRST! 🚨
+
+**THE CONTENT OBJECT HAS ONLY ONE PROPERTY: 'label'**
+
+DO NOT add 'text', 'value', 'html', or ANY other properties to the content object!
+
+❌ NEVER DO THIS:
+"content": {
+  "text": "some content here",
+  "label": "Text"
+}
+
+✅ ALWAYS DO THIS:
+"content": {
+  "label": "some content here"
+}
+
+**ALL HTML content, ALL text content, EVERYTHING goes ONLY in 'label' property!**
+
 ## Overview
 - **Type**: 'text'
 - **Purpose**: Rich text content with HTML support and formatting options
@@ -129,14 +148,31 @@ Every text element MUST include ALL of these fields:
 
 1. **id** - Format: 'text-{timestamp}-{random}' (e.g., 'text-1234567890-abc')
 2. **type** - Literal 'text'
-3. **content** - Object with 'label'
-4. **content.label** - Text or HTML content
+3. **content** - Object with ONLY 'label' property (NO 'text', 'value', or other properties!)
+4. **content.label** - Text or HTML content (this is where ALL content goes - NOT in 'text' property!)
 5. **props** - Object with 'size', 'align', 'borderRadius', 'format'
 6. **props.format** - Object with ALL 4 booleans: 'bold', 'italic', 'underline', 'strikethrough'
 7. **styles** - Object with 'color' (minimum required)
 8. **link** - Object with ALL 4 properties: 'enabled', 'href', 'target', 'type'
 
 **CRITICAL**: Even if a property is not being used, it MUST still be present with its default value.
+
+### ⚠️ CRITICAL: Content Object Structure
+
+**The content object has ONLY ONE property: 'label'**
+
+❌ **WRONG**: Adding extra properties like 'text'
+"content": {
+  "text": "<h3>A Note From Our Founder</h3><p>Content here</p>",
+  "label": "Text"
+}
+
+✅ **CORRECT**: ONLY 'label' property with HTML content
+"content": {
+  "label": "<h3>A Note From Our Founder</h3><p>Content here</p>"
+}
+
+**DO NOT add a 'text' property - only 'label' exists in the content object!**
 
 ## DEFAULT VALUES
 
@@ -219,6 +255,25 @@ Every text element MUST include ALL of these fields:
 {
   "content": { "label": "<p>Hello World</p>" }
 }
+
+---
+
+❌ **WRONG**: Adding 'text' property (CRITICAL ERROR!)
+{
+  "content": {
+    "text": "<h3>A Note From Our Founder</h3><p>Content here</p>",
+    "label": "Text"
+  }
+}
+
+✅ **CORRECT**: ONLY 'label' property with actual content
+{
+  "content": {
+    "label": "<h3>A Note From Our Founder</h3><p>Content here</p>"
+  }
+}
+
+**The content object has ONLY ONE property: 'label'. Do NOT add 'text', 'value', or any other properties!**
 
 ## HTML CONTENT SUPPORT (CRITICAL)
 

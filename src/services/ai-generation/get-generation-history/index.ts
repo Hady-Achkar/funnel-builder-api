@@ -1,7 +1,7 @@
 import {
   getGenerationLogs,
   getGenerationStats,
-} from "../../../utils/ai-generation/token-tracker";
+} from "../../../utils/ai-generation/prompt-tracker";
 import {
   GetGenerationHistoryResponse,
   getGenerationHistoryResponseSchema,
@@ -29,7 +29,7 @@ export async function getUserGenerationHistory(
       history: logs.map((log) => ({
         id: log.id,
         prompt: log.prompt,
-        tokensUsed: log.tokensUsed,
+        promptsUsed: log.promptsUsed,
         pagesGenerated: log.pagesGenerated,
         model: log.model,
         createdAt: log.createdAt,
@@ -39,7 +39,7 @@ export async function getUserGenerationHistory(
       stats: {
         totalGenerations: stats.totalGenerations,
         totalPagesGenerated: stats.totalPagesGenerated,
-        totalTokensUsed: stats.totalTokensUsed,
+        totalPromptsUsed: stats.totalPromptsUsed,
         generationsLast30Days: stats.generationsLast30Days,
       },
     };
