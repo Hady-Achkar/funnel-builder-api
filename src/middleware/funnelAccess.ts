@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { getPrisma } from '../lib/prisma';
-import { getFunnelAccessFromCookies } from '../lib/jwt';
+import { verifyFunnelAccessToken } from '../lib/jwt';
 
 interface FunnelAccessRequest extends Request {
   funnelId?: number;
@@ -121,20 +121,56 @@ export const checkFunnelAccess = async (
       return next();
     }
 
-    // Check if user has valid access cookie (now using funnelSlug)
-    const hasAccess = getFunnelAccessFromCookies(req.cookies, funnel.slug);
+    // Check for access token in Authorization header or query parameter
+    let token: string | undefined;
 
-    if (hasAccess) {
-      return next(); // User has valid access
+    // Try to get token from Authorization header (Bearer token)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
     }
 
-    // No access - return 200 with password requirement info (now includes funnelSlug)
-    return res.status(200).json({
-      error: 'Password required',
-      message: 'This funnel is password protected. Please provide the correct password.',
-      requiresPassword: true,
-      funnelSlug: funnel.slug
-    });
+    // Fallback to query parameter
+    if (!token && req.query.token) {
+      token = req.query.token as string;
+    }
+
+    // If no token provided, request password
+    if (!token) {
+      return res.status(200).json({
+        error: 'Password required',
+        message: 'This content is password protected. Please enter the password to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug
+      });
+    }
+
+    // Verify the token
+    const decoded = verifyFunnelAccessToken(token);
+
+    // Token is invalid or expired
+    if (!decoded) {
+      return res.status(200).json({
+        error: 'Access expired',
+        message: 'Your access has expired. Please enter the password again to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug,
+        expired: true
+      });
+    }
+
+    // Verify token is for this specific funnel
+    if (decoded.funnelSlug !== funnel.slug) {
+      return res.status(200).json({
+        error: 'Invalid access',
+        message: 'This content is password protected. Please enter the password to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug
+      });
+    }
+
+    // Token is valid, allow access
+    return next();
 
   } catch (error) {
     console.error('Funnel access middleware error:', error);

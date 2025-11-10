@@ -1,8 +1,8 @@
 import { getPrisma } from "../../../../lib/prisma";
 
 /**
- * Generates a unique funnel name by appending -1, -2, -3, etc. if name already exists
- * Similar to how we handle unique slugs
+ * Generates a unique funnel name by appending 2, 3, 4, etc. if name already exists
+ * Format: "New Site", "New Site 2", "New Site 3", etc.
  */
 export const generateUniqueName = async (
   baseName: string,
@@ -25,8 +25,8 @@ export const generateUniqueName = async (
   }
 
   // Name exists, find the next available number
-  let counter = 1;
-  let uniqueName = `${baseName}-${counter}`;
+  let counter = 2;
+  let uniqueName = `${baseName} ${counter}`;
 
   while (true) {
     const exists = await prisma.funnel.findFirst({
@@ -42,7 +42,7 @@ export const generateUniqueName = async (
     }
 
     counter++;
-    uniqueName = `${baseName}-${counter}`;
+    uniqueName = `${baseName} ${counter}`;
 
     // Safety check to prevent infinite loops
     if (counter > 1000) {
