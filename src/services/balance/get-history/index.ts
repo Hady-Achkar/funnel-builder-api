@@ -7,7 +7,6 @@ import {
 import { buildPayoutFilters } from "./utils/build-filters";
 import { buildPayoutSorting } from "./utils/build-sorting";
 import { calculatePagination } from "../../../utils/pagination";
-import { PayoutStatus } from "../../../generated/prisma-client";
 
 export class GetBalanceHistoryService {
   static async getHistory(
@@ -32,15 +31,8 @@ export class GetBalanceHistoryService {
       // Calculate pagination offset
       const skip = (request.page - 1) * request.limit;
 
-      // Fetch user and payouts in parallel
-      const [user, payouts, totalPayouts, allPayoutsSum] = await Promise.all([
-        prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            balance: true,
-            pendingBalance: true,
-          },
-        }),
+      // Fetch payouts and total count in parallel
+      const [payouts, totalPayouts] = await Promise.all([
         prisma.payout.findMany({
           where,
           orderBy,
@@ -62,25 +54,7 @@ export class GetBalanceHistoryService {
           },
         }),
         prisma.payout.count({ where }),
-        // Get sum of COMPLETED payouts only (actually withdrawn amount)
-        prisma.payout.aggregate({
-          where: {
-            userId,
-            status: PayoutStatus.COMPLETED,
-          },
-          _sum: { amount: true },
-        }),
       ]);
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // Balance calculations based on user fields
-      const available = user.balance;
-      const pending = user.pendingBalance;
-      const totalWithdrawn = allPayoutsSum._sum.amount || 0;
-      const total = available + pending + totalWithdrawn;
 
       // Calculate pagination metadata
       const pagination = calculatePagination(
@@ -114,12 +88,6 @@ export class GetBalanceHistoryService {
       };
 
       return {
-        balance: {
-          available,
-          pending,
-          total,
-          totalWithdrawn,
-        },
         payouts: formattedPayouts,
         pagination,
         filters,

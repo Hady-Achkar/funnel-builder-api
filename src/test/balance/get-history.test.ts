@@ -20,13 +20,9 @@ describe("GetBalanceHistoryController", () => {
   beforeEach(() => {
     // Create mock Prisma client
     mockPrisma = {
-      user: {
-        findUnique: vi.fn(),
-      },
       payout: {
         findMany: vi.fn(),
         count: vi.fn(),
-        aggregate: vi.fn(),
       },
     };
 
@@ -170,11 +166,6 @@ describe("GetBalanceHistoryController", () => {
   describe("Success Cases - Basic Retrieval", () => {
     beforeEach(() => {
       // Setup default successful responses
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000, // Available
-        pendingBalance: 50, // Pending
-      });
-
       mockPrisma.payout.findMany.mockResolvedValue([
         {
           id: 1,
@@ -193,11 +184,6 @@ describe("GetBalanceHistoryController", () => {
       ]);
 
       mockPrisma.payout.count.mockResolvedValue(1);
-
-      // COMPLETED payouts aggregate (for totalWithdrawn)
-      mockPrisma.payout.aggregate.mockResolvedValue({
-        _sum: { amount: 200 }, // Only COMPLETED payouts
-      });
     });
 
     it("should retrieve balance history with default pagination", async () => {
@@ -210,12 +196,6 @@ describe("GetBalanceHistoryController", () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          balance: expect.objectContaining({
-            available: 1000, // user.balance
-            pending: 50, // user.pendingBalance
-            total: 1250, // 1000 + 50 + 200
-            totalWithdrawn: 200, // Only COMPLETED payouts
-          }),
           payouts: expect.arrayContaining([
             expect.objectContaining({
               id: 1,
@@ -275,13 +255,8 @@ describe("GetBalanceHistoryController", () => {
 
   describe("Success Cases - Filtering", () => {
     beforeEach(() => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
       mockPrisma.payout.findMany.mockResolvedValue([]);
       mockPrisma.payout.count.mockResolvedValue(0);
-      mockPrisma.payout.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
     });
 
     it("should filter by status", async () => {
@@ -443,13 +418,8 @@ describe("GetBalanceHistoryController", () => {
 
   describe("Success Cases - Sorting", () => {
     beforeEach(() => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
       mockPrisma.payout.findMany.mockResolvedValue([]);
       mockPrisma.payout.count.mockResolvedValue(0);
-      mockPrisma.payout.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
     });
 
     it("should sort by createdAt desc (default)", async () => {
@@ -531,103 +501,9 @@ describe("GetBalanceHistoryController", () => {
     });
   });
 
-  describe("Balance Calculations", () => {
-    it("should calculate correct total from user fields and payouts", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000, // Available
-        pendingBalance: 150, // Pending
-      });
-      mockPrisma.payout.findMany.mockResolvedValue([]);
-      mockPrisma.payout.count.mockResolvedValue(0);
-      mockPrisma.payout.aggregate.mockResolvedValue({
-        _sum: { amount: 500 }, // Only COMPLETED payouts
-      });
-
-      await GetBalanceHistoryController.getHistory(
-        mockReq as any,
-        mockRes as any,
-        mockNext
-      );
-
-      expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          balance: {
-            available: 1000, // user.balance
-            pending: 150, // user.pendingBalance
-            total: 1650, // 1000 + 150 + 500
-            totalWithdrawn: 500, // Only COMPLETED payouts
-          },
-        })
-      );
-    });
-
-    it("should handle zero pending balance", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
-      mockPrisma.payout.findMany.mockResolvedValue([]);
-      mockPrisma.payout.count.mockResolvedValue(0);
-      mockPrisma.payout.aggregate.mockResolvedValue({
-        _sum: { amount: 500 },
-      });
-
-      await GetBalanceHistoryController.getHistory(
-        mockReq as any,
-        mockRes as any,
-        mockNext
-      );
-
-      expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          balance: {
-            available: 1000,
-            pending: 0,
-            total: 1500, // 1000 + 0 + 500
-            totalWithdrawn: 500,
-          },
-        })
-      );
-    });
-
-    it("should handle zero withdrawn amount", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 500,
-        pendingBalance: 100,
-      });
-      mockPrisma.payout.findMany.mockResolvedValue([]);
-      mockPrisma.payout.count.mockResolvedValue(0);
-      mockPrisma.payout.aggregate.mockResolvedValue({
-        _sum: { amount: null }, // No payouts
-      });
-
-      await GetBalanceHistoryController.getHistory(
-        mockReq as any,
-        mockRes as any,
-        mockNext
-      );
-
-      expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          balance: {
-            available: 500,
-            pending: 100,
-            total: 600, // 500 + 100 + 0
-            totalWithdrawn: 0,
-          },
-        })
-      );
-    });
-  });
-
   describe("Pagination Metadata", () => {
     beforeEach(() => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
       mockPrisma.payout.findMany.mockResolvedValue([]);
-      mockPrisma.payout.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
     });
 
     it("should calculate correct pagination for first page", async () => {
@@ -704,20 +580,8 @@ describe("GetBalanceHistoryController", () => {
   });
 
   describe("Error Handling", () => {
-    it("should handle user not found", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-
-      await GetBalanceHistoryController.getHistory(
-        mockReq as any,
-        mockRes as any,
-        mockNext
-      );
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-    });
-
     it("should handle database errors", async () => {
-      mockPrisma.user.findUnique.mockRejectedValue(
+      mockPrisma.payout.findMany.mockRejectedValue(
         new Error("Database error")
       );
 
@@ -748,13 +612,8 @@ describe("GetBalanceHistoryController", () => {
         usdtWalletAddress: null,
       };
 
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
       mockPrisma.payout.findMany.mockResolvedValue([mockPayout]);
       mockPrisma.payout.count.mockResolvedValue(1);
-      mockPrisma.payout.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
 
       await GetBalanceHistoryController.getHistory(
         mockReq as any,
@@ -800,13 +659,8 @@ describe("GetBalanceHistoryController", () => {
         usdtWalletAddress: "0x1234567890abcdef",
       };
 
-      mockPrisma.user.findUnique.mockResolvedValue({
-        balance: 1000,
-        pendingBalance: 0,
-      });
       mockPrisma.payout.findMany.mockResolvedValue([mockPayout]);
       mockPrisma.payout.count.mockResolvedValue(1);
-      mockPrisma.payout.aggregate.mockResolvedValue({ _sum: { amount: 0 } });
 
       await GetBalanceHistoryController.getHistory(
         mockReq as any,

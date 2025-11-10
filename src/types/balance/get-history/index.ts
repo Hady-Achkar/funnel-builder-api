@@ -70,14 +70,6 @@ export const payoutSummarySchema = z.object({
   usdtWalletAddress: z.string().nullable().optional(),
 });
 
-// Balance Info Schema
-export const balanceInfoSchema = z.object({
-  available: z.number(),
-  pending: z.number(),
-  total: z.number(),
-  totalWithdrawn: z.number(),
-});
-
 // Pagination Schema
 export const paginationSchema = z.object({
   page: z.number(),
@@ -98,7 +90,6 @@ export const filtersSchema = z.object({
 
 // Response Schema
 export const getBalanceHistoryResponseSchema = z.object({
-  balance: balanceInfoSchema,
   payouts: z.array(payoutSummarySchema),
   pagination: paginationSchema,
   filters: filtersSchema,
@@ -109,7 +100,6 @@ export type GetBalanceHistoryRequest = z.infer<
   typeof getBalanceHistoryRequestSchema
 >;
 export type PayoutSummary = z.infer<typeof payoutSummarySchema>;
-export type BalanceInfo = z.infer<typeof balanceInfoSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;
 export type Filters = z.infer<typeof filtersSchema>;
 export type GetBalanceHistoryResponse = z.infer<
