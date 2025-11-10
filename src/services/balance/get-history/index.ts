@@ -22,8 +22,8 @@ export class GetBalanceHistoryService {
         userId,
         status: request.status,
         method: request.method,
-        dateFrom: request.dateFrom,
-        dateTo: request.dateTo,
+        startDate: request.startDate,
+        endDate: request.endDate,
         search: request.search,
       });
 
@@ -109,8 +109,8 @@ export class GetBalanceHistoryService {
       const filters = {
         status: request.status,
         method: request.method,
-        dateFrom: request.dateFrom?.toISOString(),
-        dateTo: request.dateTo?.toISOString(),
+        startDate: request.startDate?.toISOString(),
+        endDate: request.endDate?.toISOString(),
       };
 
       return {

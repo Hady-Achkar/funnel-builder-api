@@ -3,8 +3,8 @@ import { PayoutStatus, PayoutMethod, Prisma } from "../../../../generated/prisma
 export interface FilterParams {
   status?: PayoutStatus;
   method?: PayoutMethod;
-  dateFrom?: Date;
-  dateTo?: Date;
+  startDate?: Date;
+  endDate?: Date;
   search?: string;
   userId: number;
 }
@@ -31,13 +31,13 @@ export function buildPayoutFilters(
   }
 
   // Filter by date range
-  if (params.dateFrom || params.dateTo) {
+  if (params.startDate || params.endDate) {
     where.createdAt = {};
-    if (params.dateFrom) {
-      where.createdAt.gte = params.dateFrom;
+    if (params.startDate) {
+      where.createdAt.gte = params.startDate;
     }
-    if (params.dateTo) {
-      where.createdAt.lte = params.dateTo;
+    if (params.endDate) {
+      where.createdAt.lte = params.endDate;
     }
   }
 

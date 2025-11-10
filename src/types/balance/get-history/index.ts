@@ -18,7 +18,7 @@ export const getBalanceHistoryRequestSchema = z.object({
   // Filters
   status: z.nativeEnum(PayoutStatus).optional(),
   method: z.nativeEnum(PayoutMethod).optional(),
-  dateFrom: z
+  startDate: z
     .union([z.string(), z.date()])
     .transform((val) => {
       if (typeof val === "string") {
@@ -30,7 +30,7 @@ export const getBalanceHistoryRequestSchema = z.object({
       return val;
     })
     .optional(),
-  dateTo: z
+  endDate: z
     .union([z.string(), z.date()])
     .transform((val) => {
       if (typeof val === "string") {
@@ -92,8 +92,8 @@ export const paginationSchema = z.object({
 export const filtersSchema = z.object({
   status: z.nativeEnum(PayoutStatus).optional(),
   method: z.nativeEnum(PayoutMethod).optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
 // Response Schema

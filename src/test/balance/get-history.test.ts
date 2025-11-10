@@ -330,8 +330,8 @@ describe("GetBalanceHistoryController", () => {
 
     it("should filter by date range", async () => {
       mockReq.query = {
-        dateFrom: "2025-01-01",
-        dateTo: "2025-01-31",
+        startDate: "2025-01-01",
+        endDate: "2025-01-31",
       };
 
       await GetBalanceHistoryController.getHistory(
@@ -352,8 +352,8 @@ describe("GetBalanceHistoryController", () => {
       );
     });
 
-    it("should filter by dateFrom only", async () => {
-      mockReq.query = { dateFrom: "2025-01-01" };
+    it("should filter by startDate only", async () => {
+      mockReq.query = { startDate: "2025-01-01" };
 
       await GetBalanceHistoryController.getHistory(
         mockReq as any,
@@ -372,8 +372,8 @@ describe("GetBalanceHistoryController", () => {
       );
     });
 
-    it("should filter by dateTo only", async () => {
-      mockReq.query = { dateTo: "2025-01-31" };
+    it("should filter by endDate only", async () => {
+      mockReq.query = { endDate: "2025-01-31" };
 
       await GetBalanceHistoryController.getHistory(
         mockReq as any,
@@ -396,8 +396,8 @@ describe("GetBalanceHistoryController", () => {
       mockReq.query = {
         status: PayoutStatus.COMPLETED,
         method: PayoutMethod.UAE_BANK,
-        dateFrom: "2025-01-01",
-        dateTo: "2025-01-31",
+        startDate: "2025-01-01",
+        endDate: "2025-01-31",
       };
 
       await GetBalanceHistoryController.getHistory(
