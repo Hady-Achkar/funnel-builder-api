@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { Request, Response, NextFunction } from "express";
 import { checkFunnelAccess } from "../../middleware/funnelAccess";
 import { getPrisma } from "../../lib/prisma";
-import { getFunnelAccessFromCookies } from "../../lib/jwt";
+import { verifyFunnelAccessToken } from "../../lib/jwt";
 
 // Extend Request interface to include funnelId
 interface ExtendedRequest extends Request {
@@ -36,6 +36,7 @@ describe("Get Public Site - Password Protection Tests", () => {
       params: {},
       query: {},
       cookies: {},
+      headers: {},
     };
 
     mockResponse = {
@@ -59,7 +60,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     };
 
     (getPrisma as any).mockReturnValue(mockPrisma);
-    vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
+    vi.mocked(verifyFunnelAccessToken).mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -335,9 +336,9 @@ describe("Get Public Site - Password Protection Tests", () => {
   });
 
   describe("Password Protected Site", () => {
-    it("should return 200 with requiresPassword when site is password protected and no valid cookie", async () => {
+    it("should return 200 with requiresPassword when site is password protected and no valid token", async () => {
       mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
-      mockRequest.cookies = {};
+      mockRequest.headers = {};
 
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
@@ -354,33 +355,27 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
-
       await checkFunnelAccess(
         mockRequest as Request,
         mockResponse as Response,
         mockNext
       );
 
-      expect(getFunnelAccessFromCookies).toHaveBeenCalledWith(
-        mockRequest.cookies,
-        testFunnelSlug
-      );
       expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
-          "This funnel is password protected. Please provide the correct password.",
+          "This content is password protected. Please enter the password to continue.",
         requiresPassword: true,
         funnelSlug: testFunnelSlug,
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("should allow access when site is password protected and valid cookie exists", async () => {
+    it("should allow access when site is password protected and valid token exists in header", async () => {
       mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
-      mockRequest.cookies = {
-        [`funnel_access_${testFunnelSlug}`]: "valid-jwt-token",
+      mockRequest.headers = {
+        authorization: "Bearer valid-jwt-token",
       };
 
       mockPrisma.domain.findUnique.mockResolvedValue({
@@ -398,7 +393,12 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(true);
+      vi.mocked(verifyFunnelAccessToken).mockReturnValue({
+        funnelSlug: testFunnelSlug,
+        funnelId: testFunnelId,
+        hasAccess: true,
+        type: "funnel_access",
+      });
 
       await checkFunnelAccess(
         mockRequest as Request,
@@ -406,10 +406,7 @@ describe("Get Public Site - Password Protection Tests", () => {
         mockNext
       );
 
-      expect(getFunnelAccessFromCookies).toHaveBeenCalledWith(
-        mockRequest.cookies,
-        testFunnelSlug
-      );
+      expect(verifyFunnelAccessToken).toHaveBeenCalledWith("valid-jwt-token");
       expect(mockNext).toHaveBeenCalled();
       expect(statusMock).not.toHaveBeenCalled();
       expect(mockRequest.funnelId).toBe(testFunnelId);
@@ -417,7 +414,7 @@ describe("Get Public Site - Password Protection Tests", () => {
 
     it("should check password protection even for SHARED funnels", async () => {
       mockRequest.query = { hostname: testHostname, funnelSlug: testFunnelSlug };
-      mockRequest.cookies = {};
+      mockRequest.headers = {};
 
       mockPrisma.domain.findUnique.mockResolvedValue({
         id: testDomainId,
@@ -434,8 +431,6 @@ describe("Get Public Site - Password Protection Tests", () => {
         },
       });
 
-      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
-
       await checkFunnelAccess(
         mockRequest as Request,
         mockResponse as Response,
@@ -446,7 +441,7 @@ describe("Get Public Site - Password Protection Tests", () => {
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
-          "This funnel is password protected. Please provide the correct password.",
+          "This content is password protected. Please enter the password to continue.",
         requiresPassword: true,
         funnelSlug: testFunnelSlug,
       });
@@ -517,7 +512,7 @@ describe("Get Public Site - Password Protection Tests", () => {
     it("should enforce password protection for funnelSlug-based access", async () => {
       mockRequest.params = { funnelSlug: "protected-funnel" };
       mockRequest.query = {};
-      mockRequest.cookies = {};
+      mockRequest.headers = {};
 
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: testFunnelId,
@@ -526,8 +521,6 @@ describe("Get Public Site - Password Protection Tests", () => {
           isPasswordProtected: true,
         },
       });
-
-      vi.mocked(getFunnelAccessFromCookies).mockReturnValue(false);
 
       await checkFunnelAccess(
         mockRequest as Request,
@@ -539,7 +532,7 @@ describe("Get Public Site - Password Protection Tests", () => {
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Password required",
         message:
-          "This funnel is password protected. Please provide the correct password.",
+          "This content is password protected. Please enter the password to continue.",
         requiresPassword: true,
         funnelSlug: testFunnelSlug,
       });
