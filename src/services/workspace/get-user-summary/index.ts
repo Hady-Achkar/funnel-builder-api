@@ -1,31 +1,62 @@
 import { getPrisma } from "../../../lib/prisma";
-import { $Enums, MembershipStatus } from "../../../generated/prisma-client";
+import { $Enums, MembershipStatus, Prisma } from "../../../generated/prisma-client";
 import {
   WorkspaceSummary,
+  GetUserWorkspacesSummaryRequest,
 } from "../../../types/workspace/get-user-summary/get-user-summary.types";
 
 export class GetUserWorkspacesSummaryService {
-  static async getUserWorkspacesSummary(userId: number): Promise<WorkspaceSummary[]> {
+  static async getUserWorkspacesSummary(
+    userId: number,
+    request: GetUserWorkspacesSummaryRequest
+  ): Promise<WorkspaceSummary[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }
 
     const prisma = getPrisma();
 
-    const workspaces = await prisma.workspace.findMany({
-      where: {
-        OR: [
-          { ownerId: userId },
-          {
-            members: {
-              some: {
-                userId: userId,
-                status: MembershipStatus.ACTIVE,
+    // Build where clause with search
+    const where: Prisma.WorkspaceWhereInput = {
+      AND: [
+        {
+          OR: [
+            { ownerId: userId },
+            {
+              members: {
+                some: {
+                  userId: userId,
+                  status: MembershipStatus.ACTIVE,
+                },
               },
             },
-          },
-        ],
-      },
+          ],
+        },
+        ...(request.search
+          ? [
+              {
+                OR: [
+                  {
+                    name: {
+                      contains: request.search,
+                      mode: "insensitive" as Prisma.QueryMode,
+                    },
+                  },
+                  {
+                    slug: {
+                      contains: request.search,
+                      mode: "insensitive" as Prisma.QueryMode,
+                    },
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
+
+    const workspaces = await prisma.workspace.findMany({
+      where,
       select: {
         id: true,
         name: true,
