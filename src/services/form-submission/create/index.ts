@@ -40,6 +40,7 @@ export const createFormSubmission = async (
         id: true,
         sessionId: true,
         interactions: true,
+        visitedPages: true,
       },
     });
 
@@ -148,6 +149,23 @@ export const createFormSubmission = async (
 
     if (validatedRequest.isCompleted) {
       try {
+        // Fetch page names for visited pages
+        const visitedPagesWithNames = await prisma.page.findMany({
+          where: {
+            id: {
+              in: session.visitedPages,
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+            order: true,
+          },
+          orderBy: {
+            order: "asc",
+          },
+        });
+
         const webhookPayload = {
           formId: validatedRequest.formId,
           submissionId: result.id,
@@ -160,6 +178,8 @@ export const createFormSubmission = async (
             userAgent: undefined,
             ipAddress: undefined,
           },
+          sessionInteractions: session.interactions,
+          visitedPages: visitedPagesWithNames,
         };
 
         triggerFormSubmissionWebhook(

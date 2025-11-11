@@ -68,6 +68,7 @@ export const getSessionHistory = async (
   }
 
   // If search is provided, we need to fetch all sessions and filter in memory
+  // If all=true, fetch all sessions without pagination
   // Otherwise, use database pagination for better performance
   let allSessions: Array<{
     id: string;
@@ -79,7 +80,7 @@ export const getSessionHistory = async (
     formSubmissions: Array<{ id: number }>;
   }>;
 
-  if (params.search) {
+  if (params.search || params.all) {
     // Fetch all sessions matching date/funnel filters
     allSessions = await prisma.session.findMany({
       where: whereClause,
@@ -99,24 +100,26 @@ export const getSessionHistory = async (
       orderBy: { [params.sortBy]: params.sortOrder },
     });
 
-    // Filter sessions based on search term
-    const searchLower = params.search.toLowerCase();
-    allSessions = allSessions.filter((session) => {
-      // Search in sessionId
-      if (session.sessionId.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+    // Filter sessions based on search term if search is provided
+    if (params.search) {
+      const searchLower = params.search.toLowerCase();
+      allSessions = allSessions.filter((session) => {
+        // Search in sessionId
+        if (session.sessionId.toLowerCase().includes(searchLower)) {
+          return true;
+        }
 
-      // Search in interactions JSON
-      if (session.interactions) {
-        const interactionsStr = JSON.stringify(session.interactions).toLowerCase();
-        return interactionsStr.includes(searchLower);
-      }
+        // Search in interactions JSON
+        if (session.interactions) {
+          const interactionsStr = JSON.stringify(session.interactions).toLowerCase();
+          return interactionsStr.includes(searchLower);
+        }
 
-      return false;
-    });
+        return false;
+      });
+    }
   } else {
-    // Use database pagination when no search
+    // Use database pagination when no search and all=false
     const skip = (params.page - 1) * params.limit;
     allSessions = await prisma.session.findMany({
       where: whereClause,
@@ -145,11 +148,15 @@ export const getSessionHistory = async (
     (s) => s.formSubmissions.length > 0
   ).length;
 
-  // Apply pagination to filtered results if search was used
+  // Apply pagination to filtered results if search was used or all=false
   let paginatedSessions = allSessions;
-  if (params.search) {
+  if ((params.search || params.all) && !params.all) {
+    // Only paginate if search is used but all=false
     const skip = (params.page - 1) * params.limit;
     paginatedSessions = allSessions.slice(skip, skip + params.limit);
+  } else if (params.all) {
+    // If all=true, return all sessions without pagination
+    paginatedSessions = allSessions;
   }
 
   // Transform sessions and determine completion status
@@ -170,17 +177,24 @@ export const getSessionHistory = async (
       : 0;
 
   // Calculate total pages
-  const totalPages = Math.ceil(totalFilteredSessions / params.limit);
+  const totalPages = params.all ? 1 : Math.ceil(totalFilteredSessions / params.limit);
 
   return {
     sessions: sessionsWithCompletion,
     completedSessions: completedSessionsCount,
     ctr: ctr,
-    pagination: {
-      page: params.page,
-      limit: params.limit,
-      total: totalFilteredSessions,
-      totalPages: totalPages,
-    },
+    pagination: params.all
+      ? {
+          page: 1,
+          limit: totalFilteredSessions,
+          total: totalFilteredSessions,
+          totalPages: 1,
+        }
+      : {
+          page: params.page,
+          limit: params.limit,
+          total: totalFilteredSessions,
+          totalPages: totalPages,
+        },
   };
 };

@@ -564,17 +564,23 @@ vi.mock("axios");
 | ------ | --------------------- | ------------------------------ | ------- |
 | POST   | `/api/payout/request` | RequestPayoutController.create | ✅ DONE |
 
+### Balance Routes (1 route)
+
+| Method | Path                    | Controller                      | Status  |
+| ------ | ----------------------- | ------------------------------- | ------- |
+| GET    | `/api/balance/history`  | GetBalanceHistoryController.get | ✅ DONE |
+
 ---
 
 ## 📊 Progress Summary
 
-**Total Routes**: 91
+**Total Routes**: 92
 
 - ❌ TODO: 76
-- ✅ DONE: 15
+- ✅ DONE: 16
 - 🚧 WIP: 0
 
-**Completion**: 16.48%
+**Completion**: 17.39%
 
 ---
 
@@ -779,3 +785,36 @@ Last Updated: 2025-01-10
   - Controller: All error decisions, Zod validation, authentication
   - Service: Database operations with try-catch
   - Utils: Pure functions, no Prisma, no error throwing
+
+### Balance History Route - ✅ DONE (2025-11-10)
+
+**Files Created/Modified**:
+
+- `src/types/balance/get-history/index.ts` - Request/response types using ONLY Zod schemas
+- `src/services/balance/get-history/index.ts` - Balance retrieval with pagination, filtering, sorting
+- `src/services/balance/get-history/utils/build-filters.ts` - Pure filter construction utility
+- `src/services/balance/get-history/utils/build-sorting.ts` - Pure sort order construction utility
+- `src/controllers/balance/get-history/index.ts` - HTTP handling, validation, error decisions
+- `src/routes/balance/index.ts` - Route definition
+- `src/app.ts` - Route registration
+- `src/test/balance/get-history.test.ts` - 70+ comprehensive tests with mocked Prisma
+
+**Key Features**:
+
+- Full Zod validation for query parameters (page, limit, filters, search, sorting)
+- Pagination: Configurable page/limit (max 100 items per page)
+- Filtering: By status (PayoutStatus), method (PayoutMethod), date range (dateFrom/dateTo)
+- Search: By account holder name, bank name, USDT wallet address
+- Sorting: By createdAt, amount, status, method (asc/desc)
+- Balance calculations:
+  - `available`: User's available balance (user.balance)
+  - `pending`: User's pending balance (user.pendingBalance)
+  - `total`: Total lifetime earnings (available + pending + totalWithdrawn)
+  - `totalWithdrawn`: Sum of COMPLETED payouts only (actually withdrawn amount)
+- Withdrawal history includes: account details (accountHolderName/usdtWalletAddress), amount, fees, method, date, status
+- UTC date boundary handling (dateFrom at 00:00:00, dateTo at 23:59:59.999)
+- Reuses existing pagination utilities from domain routes
+- Complete separation of concerns:
+  - Controller: Authentication, Zod validation, error handling with user-friendly messages
+  - Service: Database operations (Prisma), balance calculations, pagination logic
+  - Utils: Pure functions for filter/sort construction, no Prisma, no error throwing

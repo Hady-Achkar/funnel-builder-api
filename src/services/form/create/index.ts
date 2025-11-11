@@ -12,6 +12,10 @@ import {
   ForbiddenError,
 } from "../../../errors";
 import { ZodError } from "zod";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const createForm = async (
   userId: number,
@@ -36,18 +40,19 @@ export const createForm = async (
     if (validatedRequest.funnelId) {
       const funnel = await prisma.funnel.findUnique({
         where: { id: validatedRequest.funnelId },
-        select: { id: true, createdBy: true },
+        select: { id: true, workspaceId: true },
       });
 
       if (!funnel) {
         throw new NotFoundError("Funnel not found");
       }
 
-      if (funnel.createdBy !== userId) {
-        throw new ForbiddenError(
-          "You can only create forms for your own funnels"
-        );
-      }
+      // Use existing permission system: users who can edit funnels can create forms
+      await PermissionManager.requirePermission({
+        userId,
+        workspaceId: funnel.workspaceId,
+        action: PermissionAction.EDIT_FUNNEL,
+      });
     }
 
     const form = await prisma.form.create({

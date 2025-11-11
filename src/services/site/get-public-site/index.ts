@@ -1,10 +1,6 @@
 import { getPrisma } from "../../../lib/prisma";
 import { NotFoundError, ForbiddenError } from "../../../errors/http-errors";
-import {
-  DomainStatus,
-  SslStatus,
-  FunnelStatus,
-} from "../../../generated/prisma-client";
+import { DomainStatus, FunnelStatus } from "../../../generated/prisma-client";
 import {
   GetPublicSiteRequest,
   GetPublicSiteResponse,
@@ -54,6 +50,13 @@ export class GetPublicSiteService {
         where: { id: domainFunnelConnection.funnelId },
         include: {
           pages: {
+            select: {
+              id: true,
+              name: true,
+              linkingId: true,
+              order: true,
+              type: true,
+            },
             orderBy: {
               order: "asc",
             },

@@ -4,6 +4,7 @@ import { PageType } from "../../../generated/prisma-client";
 // Request Schema
 export const getPublicSiteRequestSchema = z.object({
   hostname: z.string().min(1, "Hostname parameter is required"),
+  funnelSlug: z.string().min(1, "Funnel slug parameter is required"),
 });
 
 // Page Schema
@@ -11,12 +12,8 @@ export const publicPageSchema = z.object({
   id: z.number(),
   name: z.string(),
   linkingId: z.string().nullable(),
-  content: z.string().nullable(),
   order: z.number(),
   type: z.nativeEnum(PageType),
-  seoTitle: z.string().nullable(),
-  seoDescription: z.string().nullable(),
-  seoKeywords: z.string().nullable(),
 });
 
 // Settings Schema

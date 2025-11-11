@@ -1,143 +1,129 @@
-import { ZodError } from "zod";
 import { getPrisma } from "../../../lib/prisma";
-import { BadRequestError } from "../../../errors/http-errors";
 import {
-  getAllAffiliateLinksQuery,
-  GetAllAffiliateLinksQuery,
+  GetAllAffiliateLinksRequest,
   GetAllAffiliateLinksResponse,
+  AffiliateLinkDetail,
+  SubscribedUser,
 } from "../../../types/affiliate/get-all-affiliate-links";
+import { buildAffiliateLinkFilters } from "./utils/build-filters";
+import { buildAffiliateLinkSorting } from "./utils/build-sorting";
+import { calculatePagination } from "../../../utils/pagination";
 
 export class GetAllAffiliateLinksService {
   static async getAllAffiliateLinks(
     userId: number,
-    queryData: Record<string, unknown>
+    request: GetAllAffiliateLinksRequest
   ): Promise<GetAllAffiliateLinksResponse> {
     try {
-      // Validate query parameters
-      const validatedQuery = getAllAffiliateLinksQuery.parse(queryData);
-      const { page, limit, search, planType, sortBy, sortOrder } = validatedQuery;
+      const prisma = getPrisma();
 
-      // Calculate offset for pagination
-      const offset = (page - 1) * limit;
-
-      // Build where clause
-      const whereClause: any = {
-        userId: userId,
-      };
-
-      if (search) {
-        whereClause.name = {
-          contains: search,
-          mode: 'insensitive',
-        };
-      }
-
-      if (planType) {
-        whereClause.itemType = planType;
-      }
-
-      // Build order by clause
-      const orderBy: any = {};
-      orderBy[sortBy] = sortOrder;
-
-      // Get total count for pagination
-      const total = await getPrisma().affiliateLink.count({
-        where: whereClause,
+      // Build filters and sorting
+      const where = buildAffiliateLinkFilters({
+        userId,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        search: request.search,
       });
 
-      // Get affiliate links with all related data
-      const affiliateLinks = await getPrisma().affiliateLink.findMany({
-        where: whereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-          _count: {
-            select: {
-              payments: true,
-              subscribedUsers: true,
-            },
-          },
-        },
-        orderBy,
-        take: limit,
-        skip: offset,
-      });
+      const orderBy = buildAffiliateLinkSorting(request.sortBy, request.sortOrder);
 
-      // Get funnel data from JWT tokens and construct affiliate URLs
-      const baseUrl = process.env.FRONTEND_URL;
-      const enrichedAffiliateLinks = await Promise.all(
-        affiliateLinks.map(async (link) => {
-          let funnelData = null;
-          
-          // Try to decode JWT token to get funnel info
-          if (link.token) {
-            try {
-              const jwt = require('jsonwebtoken');
-              const jwtSecret = process.env.JWT_SECRET;
-              if (jwtSecret) {
-                const decoded = jwt.verify(link.token, jwtSecret) as any;
-                if (decoded.funnelId) {
-                  const funnel = await getPrisma().funnel.findUnique({
-                    where: { id: decoded.funnelId },
-                    select: {
-                      id: true,
-                      name: true,
-                      slug: true,
-                      status: true,
-                    },
-                  });
-                  funnelData = funnel;
-                }
-              }
-            } catch (error) {
-              // JWT decode failed, continue without funnel data
-            }
+      // Calculate pagination offset (skip if all=true)
+      const skip = request.all ? undefined : (request.page - 1) * request.limit;
+      const take = request.all ? undefined : request.limit;
+
+      // Fetch affiliate links and total count in parallel
+      const [affiliateLinks, totalLinks] = await Promise.all([
+        prisma.affiliateLink.findMany({
+          where,
+          orderBy,
+          skip,
+          take,
+          include: {
+            workspace: {
+              select: {
+                name: true,
+              },
+            },
+            subscribedUsers: {
+              where: {
+                referralLinkUsedId: {
+                  not: null,
+                },
+                plan: {
+                  not: "NO_PLAN", // Exclude users who haven't paid
+                },
+              },
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                plan: true,
+                avatar: true,
+                createdAt: true,
+              },
+            },
+          },
+        }),
+        prisma.affiliateLink.count({ where }),
+      ]);
+
+      // Calculate pagination metadata
+      const pagination = request.all
+        ? {
+            page: 1,
+            limit: totalLinks,
+            total: totalLinks,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
           }
+        : calculatePagination(request.page, request.limit, totalLinks);
 
-          return {
-            id: link.id,
-            name: link.name,
-            token: link.token,
-            itemType: link.itemType,
-            clickCount: link.clickCount,
-            totalAmount: link.totalAmount,
-            settings: link.settings as Record<string, any>,
-            url: `${baseUrl}/affiliate?affiliate=${link.token}`,
-            createdAt: link.createdAt,
-            updatedAt: link.updatedAt,
-            funnel: funnelData,
-            user: link.user,
-            _count: link._count,
-          };
-        })
-      );
+      // Format affiliate links
+      const baseUrl = process.env.FRONTEND_URL;
+      const formattedLinks: AffiliateLinkDetail[] = affiliateLinks.map((link) => {
+        // Format subscribed users (already filtered to exclude NO_PLAN)
+        const subscribedUsers: SubscribedUser[] = link.subscribedUsers.map((user) => ({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          plan: user.plan,
+          avatar: user.avatar,
+          createdAt: user.createdAt,
+        }));
 
-      // Calculate pagination info
-      const totalPages = Math.ceil(total / limit);
+        // Calculate CVR (Conversion Rate)
+        // CVR = (number of subscribed users / clicks) * 100
+        // If no clicks, CVR is 0
+        const cvr = link.clickCount > 0
+          ? (subscribedUsers.length / link.clickCount) * 100
+          : 0;
 
-      const response: GetAllAffiliateLinksResponse = {
-        message: "Affiliate links retrieved successfully",
-        affiliateLinks: enrichedAffiliateLinks,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages,
-        },
+        return {
+          name: link.name,
+          workspaceName: link.workspace.name,
+          clickCount: link.clickCount,
+          totalEarnings: link.totalAmount,
+          cvr: Number(cvr.toFixed(2)), // Round to 2 decimal places
+          url: `${baseUrl}/register?affiliate=${link.token}`,
+          createdAt: link.createdAt,
+          subscribedUsers,
+        };
+      });
+
+      // Format filters for response
+      const filters = {
+        startDate: request.startDate?.toISOString(),
+        endDate: request.endDate?.toISOString(),
+        search: request.search,
       };
 
-      return response;
-    } catch (error: unknown) {
-      if (error instanceof ZodError) {
-        const message = error.issues[0]?.message || "Invalid query parameters";
-        throw new BadRequestError(message);
-      }
+      return {
+        affiliateLinks: formattedLinks,
+        pagination,
+        filters,
+      };
+    } catch (error) {
       throw error;
     }
   }

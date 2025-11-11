@@ -13,7 +13,7 @@ export const createPageRequest = z.object({
     .string({
       message: "Page content must be a string",
     })
-    .default("")
+    .default(JSON.stringify([]))
     .optional(),
   type: z.enum(PageType).default(PageType.PAGE).optional(),
   funnelId: z.coerce

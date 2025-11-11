@@ -1,23 +1,37 @@
+import { getPrisma } from '../../../lib/prisma';
+
 /**
- * Generate a unique slug from a date (for auto-generated funnel names)
+ * Generate a sequential slug for auto-generated funnel names
  *
- * Creates a timestamp-based slug in format: dd-mm-yyyy-hh-mm-ss
- * Used when funnel is created with auto-generated name (date/time format)
+ * Creates a sequential slug in format: site-{number}
+ * Used when funnel is created with auto-generated name
  *
- * @param date - Date to convert to slug (defaults to current date/time)
- * @returns Slug in format "dd-mm-yyyy-hh-mm-ss"
+ * @param workspaceId - The workspace ID to check for existing slugs
+ * @returns Slug in format "site-{number}"
  *
  * @example
- * generateDateSlug(new Date('2024-01-15 14:30:45')) // Returns: "15-01-2024-14-30-45"
- * generateDateSlug() // Returns current timestamp as slug
+ * generateDateSlug(123) // Returns: "site-1" (if first in workspace)
+ * generateDateSlug(123) // Returns: "site-2" (if one exists)
+ * generateDateSlug(123) // Returns: "site-5" (if 1-4 exist)
  */
-export const generateDateSlug = (date: Date = new Date()): string => {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-  const second = String(date.getSeconds()).padStart(2, "0");
+export const generateDateSlug = async (workspaceId: number): Promise<string> => {
+  const prisma = getPrisma();
 
-  return `${day}-${month}-${year}-${hour}-${minute}-${second}`;
+  // Get all existing funnels in workspace to find the highest site number
+  const funnels = await prisma.funnel.findMany({
+    where: { workspaceId },
+    select: { slug: true },
+  });
+
+  // Extract site numbers from slugs matching "site-{number}" pattern
+  const siteNumbers = funnels
+    .map(f => f.slug.match(/^site-(\d+)$/))
+    .filter(match => match !== null)
+    .map(match => parseInt(match![1], 10));
+
+  // Find the highest number, default to 0 if none exist
+  const highestNumber = siteNumbers.length > 0 ? Math.max(...siteNumbers) : 0;
+
+  // Return next sequential number
+  return `site-${highestNumber + 1}`;
 };

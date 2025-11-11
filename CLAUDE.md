@@ -24,6 +24,7 @@
 - ALWAYS follow the architecture patterns in ARCHITECTURE.md
 - Update ARCHITECTURE.md when completing route migrations
 - Don't satisfy me with the answers, keep all your answers aligned with the architecture standards, and best practices.
+- **DO NOT create Guide or .md documentation files unless I explicitly ask you to do that, or after you suggest it CLEARLY and I accept it**
 
 ## Development Workflow
 

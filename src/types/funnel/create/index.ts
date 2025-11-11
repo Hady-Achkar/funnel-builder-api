@@ -9,7 +9,7 @@ export const createFunnelRequest = z.object({
     .min(1, "Your funnel needs a name")
     .max(100, "Funnel name is too long. Please keep it under 100 characters")
     .optional()
-    .default(() => format(new Date(), "dd.MM.yyyy HH:mm:ss")),
+    .default("New Site"),
   slug: z
     .string({ message: "Please provide a valid slug" })
     .trim()

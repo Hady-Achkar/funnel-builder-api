@@ -11,7 +11,10 @@ import {
   deleteInsightResponse,
   DeleteInsightResponse,
 } from "../../../types/insight/delete";
-import { checkInsightDeletePermission } from "../../../helpers/insight/delete";
+import {
+  PermissionManager,
+  PermissionAction,
+} from "../../../utils/workspace-utils/workspace-permission-manager";
 
 export const deleteInsight = async (
   userId: number,
@@ -33,21 +36,30 @@ export const deleteInsight = async (
       throw new NotFoundError("User not found");
     }
 
-    // Check permissions using helper
-    await checkInsightDeletePermission(userId, validatedRequest.insightId);
-
-    // Verify insight exists
+    // Verify insight exists and get funnel workspaceId for permission check
     const insight = await prisma.insight.findUnique({
       where: { id: validatedRequest.insightId },
-      select: { 
-        id: true, 
+      select: {
+        id: true,
         name: true,
+        funnel: {
+          select: {
+            workspaceId: true,
+          },
+        },
       },
     });
 
     if (!insight) {
       throw new NotFoundError("Insight not found");
     }
+
+    // Use existing permission system: users who can delete funnels can delete insights
+    await PermissionManager.requirePermission({
+      userId,
+      workspaceId: insight.funnel.workspaceId,
+      action: PermissionAction.DELETE_FUNNEL,
+    });
 
     // Delete the insight (cascade will handle submissions)
     await prisma.insight.delete({

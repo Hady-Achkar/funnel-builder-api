@@ -107,7 +107,7 @@ export const createPage = async (
       const page = await tx.page.create({
         data: {
           name: pageName,
-          content: validatedRequest.content || "",
+          content: validatedRequest.content || JSON.stringify([]),
           type: validatedRequest.type || "PAGE",
           funnelId: validatedRequest.funnelId,
           linkingId: linkingId,

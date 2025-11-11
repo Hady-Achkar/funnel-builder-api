@@ -58,7 +58,7 @@ describe("Get User Workspaces Summary Tests", () => {
 
         mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
 
-        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId);
+        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId, {});
 
         expect(result).toEqual([
           {
@@ -79,15 +79,19 @@ describe("Get User Workspaces Summary Tests", () => {
 
         expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith({
           where: {
-            OR: [
-              { ownerId: userId },
+            AND: [
               {
-                members: {
-                  some: {
-                    userId: userId,
-                    status: MembershipStatus.ACTIVE,
+                OR: [
+                  { ownerId: userId },
+                  {
+                    members: {
+                      some: {
+                        userId: userId,
+                        status: MembershipStatus.ACTIVE,
+                      },
+                    },
                   },
-                },
+                ],
               },
             ],
           },
@@ -139,7 +143,7 @@ describe("Get User Workspaces Summary Tests", () => {
 
         mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
 
-        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId);
+        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId, {});
 
         expect(result).toEqual([
           {
@@ -162,7 +166,7 @@ describe("Get User Workspaces Summary Tests", () => {
       it("should return empty array when user has no workspaces", async () => {
         mockPrisma.workspace.findMany.mockResolvedValue([]);
 
-        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId);
+        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId, {});
 
         expect(result).toEqual([]);
       });
@@ -215,7 +219,7 @@ describe("Get User Workspaces Summary Tests", () => {
 
         mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
 
-        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId);
+        const result = await GetUserWorkspacesSummaryService.getUserWorkspacesSummary(userId, {});
 
         expect(result).toEqual([
           {
@@ -252,6 +256,7 @@ describe("Get User Workspaces Summary Tests", () => {
     beforeEach(() => {
       mockRequest = {
         userId,
+        query: {},
       };
       mockResponse = {
         status: vi.fn().mockReturnThis(),
@@ -306,6 +311,255 @@ describe("Get User Workspaces Summary Tests", () => {
       expect(mockNext).toHaveBeenCalledWith(error);
       expect(mockResponse.status).not.toHaveBeenCalled();
       expect(mockResponse.json).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Search Functionality", () => {
+    let mockRequest: Partial<AuthRequest>;
+    let mockResponse: Partial<Response>;
+    let mockNext: NextFunction;
+
+    beforeEach(() => {
+      mockRequest = {
+        userId,
+        query: {},
+      };
+      mockResponse = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      };
+      mockNext = vi.fn();
+    });
+
+    it("should search by workspace name", async () => {
+      mockRequest.query = { search: "Marketing" };
+
+      const workspacesData = [
+        {
+          id: 1,
+          name: "Marketing Team",
+          slug: "marketing-team",
+          image: "https://example.com/marketing.png",
+          ownerId: userId,
+          members: [],
+        },
+      ];
+
+      mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
+
+      await GetUserWorkspacesSummaryController.getUserWorkspacesSummary(
+        mockRequest as AuthRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: expect.objectContaining({
+                      contains: "Marketing",
+                      mode: "insensitive",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        })
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith([
+        {
+          id: 1,
+          name: "Marketing Team",
+          slug: "marketing-team",
+          image: "https://example.com/marketing.png",
+          role: WorkspaceRole.OWNER,
+        },
+      ]);
+    });
+
+    it("should search by workspace slug", async () => {
+      mockRequest.query = { search: "dev-team" };
+
+      const workspacesData = [
+        {
+          id: 2,
+          name: "Development",
+          slug: "dev-team",
+          image: "https://example.com/dev.png",
+          ownerId: userId,
+          members: [],
+        },
+      ];
+
+      mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
+
+      await GetUserWorkspacesSummaryController.getUserWorkspacesSummary(
+        mockRequest as AuthRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  expect.objectContaining({
+                    slug: expect.objectContaining({
+                      contains: "dev-team",
+                      mode: "insensitive",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        })
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+
+    it("should search case-insensitively", async () => {
+      mockRequest.query = { search: "SALES" };
+
+      const workspacesData = [
+        {
+          id: 3,
+          name: "sales team",
+          slug: "sales-team",
+          image: "https://example.com/sales.png",
+          ownerId: userId,
+          members: [],
+        },
+      ];
+
+      mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
+
+      await GetUserWorkspacesSummaryController.getUserWorkspacesSummary(
+        mockRequest as AuthRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: expect.objectContaining({
+                      contains: "SALES",
+                      mode: "insensitive",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        })
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith([
+        {
+          id: 3,
+          name: "sales team",
+          slug: "sales-team",
+          image: "https://example.com/sales.png",
+          role: WorkspaceRole.OWNER,
+        },
+      ]);
+    });
+
+    it("should return empty array when search finds no matches", async () => {
+      mockRequest.query = { search: "nonexistent" };
+
+      mockPrisma.workspace.findMany.mockResolvedValue([]);
+
+      await GetUserWorkspacesSummaryController.getUserWorkspacesSummary(
+        mockRequest as AuthRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith([]);
+    });
+
+    it("should return all workspaces when no search provided", async () => {
+      mockRequest.query = {};
+
+      const workspacesData = [
+        {
+          id: 1,
+          name: "Workspace 1",
+          slug: "workspace-1",
+          image: "https://example.com/1.png",
+          ownerId: userId,
+          members: [],
+        },
+        {
+          id: 2,
+          name: "Workspace 2",
+          slug: "workspace-2",
+          image: "https://example.com/2.png",
+          ownerId: userId,
+          members: [],
+        },
+      ];
+
+      mockPrisma.workspace.findMany.mockResolvedValue(workspacesData);
+
+      await GetUserWorkspacesSummaryController.getUserWorkspacesSummary(
+        mockRequest as AuthRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      // Verify search is not in the where clause
+      expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.not.arrayContaining([
+              expect.objectContaining({
+                OR: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: expect.anything(),
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        })
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith([
+        {
+          id: 1,
+          name: "Workspace 1",
+          slug: "workspace-1",
+          image: "https://example.com/1.png",
+          role: WorkspaceRole.OWNER,
+        },
+        {
+          id: 2,
+          name: "Workspace 2",
+          slug: "workspace-2",
+          image: "https://example.com/2.png",
+          role: WorkspaceRole.OWNER,
+        },
+      ]);
     });
   });
 });

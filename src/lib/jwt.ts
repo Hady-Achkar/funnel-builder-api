@@ -21,7 +21,7 @@ export const generateFunnelAccessToken = (
     hasAccess: true,
     type: "funnel_access",
   };
-  return jwt.sign(payload, JWT_SECRET);
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '2h' });
 };
 
 export const verifyFunnelAccessToken = (
@@ -36,22 +36,6 @@ export const verifyFunnelAccessToken = (
   } catch (error) {
     return null;
   }
-};
-
-export const setFunnelAccessSessionCookie = (
-  res: Response,
-  funnelSlug: string,
-  funnelId?: number
-): void => {
-  // funnelId is optional for backward compatibility, but not used in cookie name anymore
-  const token = generateFunnelAccessToken(funnelSlug, funnelId || 0);
-  const cookieName = `funnel_access_${funnelSlug}`;
-  res.cookie(cookieName, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-  });
 };
 
 export const clearFunnelAccessCookie = (

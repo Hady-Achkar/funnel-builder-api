@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { getPrisma } from '../lib/prisma';
-import { getFunnelAccessFromCookies } from '../lib/jwt';
+import { verifyFunnelAccessToken } from '../lib/jwt';
 
 interface FunnelAccessRequest extends Request {
   funnelId?: number;
@@ -12,11 +12,11 @@ export const checkFunnelAccess = async (
   next: NextFunction
 ) => {
   try {
-    const { funnelSlug } = req.params;
-    const { hostname } = req.query;
+    const { funnelSlug: paramSlug } = req.params;
+    const { hostname, funnelSlug: querySlug } = req.query;
 
     // Must have either funnelSlug (from params) or hostname (from query)
-    if (!funnelSlug && !hostname) {
+    if (!paramSlug && !hostname) {
       return res.status(400).json({ error: 'Funnel slug or hostname is required' });
     }
 
@@ -25,10 +25,10 @@ export const checkFunnelAccess = async (
     let funnel;
 
     // Option 1: Lookup by funnelSlug (existing behavior for /page endpoints)
-    if (funnelSlug) {
+    if (paramSlug) {
       funnel = await prisma.funnel.findFirst({
         where: {
-          slug: funnelSlug as string,
+          slug: paramSlug as string,
           status: 'LIVE'
         },
         select: {
@@ -42,8 +42,13 @@ export const checkFunnelAccess = async (
         }
       });
     }
-    // Option 2: Lookup by hostname (new behavior for /sites/public endpoint)
+    // Option 2: Lookup by hostname + funnelSlug (for /sites/public endpoint)
     else if (hostname) {
+      // For /sites/public endpoint, funnelSlug query parameter is required
+      if (!querySlug) {
+        return res.status(400).json({ error: 'Funnel slug parameter is required' });
+      }
+
       // First find the domain by hostname
       const domain = await prisma.domain.findUnique({
         where: { hostname: hostname as string },
@@ -61,11 +66,14 @@ export const checkFunnelAccess = async (
         });
       }
 
-      // Find the active funnel connected to this domain
+      // Find the active funnel connected to this domain that ALSO matches the slug
       const funnelDomain = await prisma.funnelDomain.findFirst({
         where: {
           domainId: domain.id,
-          isActive: true
+          isActive: true,
+          funnel: {
+            slug: querySlug as string  // Must match the provided slug
+          }
         },
         select: {
           funnel: {
@@ -84,7 +92,10 @@ export const checkFunnelAccess = async (
       });
 
       if (!funnelDomain?.funnel) {
-        return res.status(404).json({ error: 'No active funnel found for this domain' });
+        return res.status(404).json({
+          error: 'Funnel not found or not connected to this domain',
+          message: 'The requested funnel is not associated with this domain'
+        });
       }
 
       // Check funnel status (allow LIVE and SHARED for public sites)
@@ -110,20 +121,56 @@ export const checkFunnelAccess = async (
       return next();
     }
 
-    // Check if user has valid access cookie (now using funnelSlug)
-    const hasAccess = getFunnelAccessFromCookies(req.cookies, funnel.slug);
+    // Check for access token in Authorization header or query parameter
+    let token: string | undefined;
 
-    if (hasAccess) {
-      return next(); // User has valid access
+    // Try to get token from Authorization header (Bearer token)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
     }
 
-    // No access - return 200 with password requirement info (now includes funnelSlug)
-    return res.status(200).json({
-      error: 'Password required',
-      message: 'This funnel is password protected. Please provide the correct password.',
-      requiresPassword: true,
-      funnelSlug: funnel.slug
-    });
+    // Fallback to query parameter
+    if (!token && req.query.token) {
+      token = req.query.token as string;
+    }
+
+    // If no token provided, request password
+    if (!token) {
+      return res.status(200).json({
+        error: 'Password required',
+        message: 'This content is password protected. Please enter the password to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug
+      });
+    }
+
+    // Verify the token
+    const decoded = verifyFunnelAccessToken(token);
+
+    // Token is invalid or expired
+    if (!decoded) {
+      return res.status(200).json({
+        error: 'Access expired',
+        message: 'Your access has expired. Please enter the password again to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug,
+        expired: true
+      });
+    }
+
+    // Verify token is for this specific funnel
+    if (decoded.funnelSlug !== funnel.slug) {
+      return res.status(200).json({
+        error: 'Invalid access',
+        message: 'This content is password protected. Please enter the password to continue.',
+        requiresPassword: true,
+        funnelSlug: funnel.slug
+      });
+    }
+
+    // Token is valid, allow access
+    return next();
 
   } catch (error) {
     console.error('Funnel access middleware error:', error);

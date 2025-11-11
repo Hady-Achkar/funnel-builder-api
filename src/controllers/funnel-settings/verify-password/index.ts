@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyFunnelPassword } from "../../../services/funnel-settings/verify-password";
 import { ZodError } from "zod";
-import { setFunnelAccessSessionCookie } from "../../../lib/jwt";
+import { generateFunnelAccessToken } from "../../../lib/jwt";
 
 export const verifyPasswordController = async (
   req: Request,
@@ -20,9 +20,10 @@ export const verifyPasswordController = async (
       funnelSlug
     });
 
-    // Set session cookie if password is valid
+    // Generate session token if password is valid
     if (result.valid && result.funnelId) {
-      setFunnelAccessSessionCookie(res, funnelSlug, result.funnelId);
+      const sessionToken = generateFunnelAccessToken(funnelSlug, result.funnelId);
+      result.sessionToken = sessionToken;
     }
 
     return res.status(200).json(result);

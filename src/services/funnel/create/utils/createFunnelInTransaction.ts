@@ -114,7 +114,7 @@ export const createFunnelInTransaction = async (
 
     const createHomePageData: CreateHomePagePayload = {
       name: "Home",
-      content: "",
+      content: JSON.stringify([]),
       order: 1,
       funnelId: funnel.id,
       linkingId: "home",

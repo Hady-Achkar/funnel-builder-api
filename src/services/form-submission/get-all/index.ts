@@ -90,9 +90,10 @@ export const getAllFormSubmissions = async (
       where: whereClause,
     });
 
-    // Calculate pagination
-    const totalPages = Math.ceil(totalCount / validatedRequest.limit);
-    const skip = (validatedRequest.page - 1) * validatedRequest.limit;
+    // Calculate pagination (skip if all=true)
+    const totalPages = validatedRequest.all ? 1 : Math.ceil(totalCount / validatedRequest.limit);
+    const skip = validatedRequest.all ? undefined : (validatedRequest.page - 1) * validatedRequest.limit;
+    const take = validatedRequest.all ? undefined : validatedRequest.limit;
 
     // Get paginated form submissions with filters
     const submissions = await prisma.formSubmission.findMany({
@@ -116,7 +117,7 @@ export const getAllFormSubmissions = async (
         [validatedRequest.sortBy]: validatedRequest.sortOrder,
       },
       skip: skip,
-      take: validatedRequest.limit,
+      take: take,
     });
 
     const formattedSubmissions = submissions.map((submission) => ({
@@ -134,12 +135,19 @@ export const getAllFormSubmissions = async (
     const response = {
       submissions: formattedSubmissions,
       funnelName: funnel.name,
-      pagination: {
-        total: totalCount,
-        totalPages: totalPages,
-        currentPage: validatedRequest.page,
-        limit: validatedRequest.limit,
-      },
+      pagination: validatedRequest.all
+        ? {
+            total: totalCount,
+            totalPages: 1,
+            currentPage: 1,
+            limit: totalCount,
+          }
+        : {
+            total: totalCount,
+            totalPages: totalPages,
+            currentPage: validatedRequest.page,
+            limit: validatedRequest.limit,
+          },
       filters: {
         formId: validatedRequest.formId,
         sessionId: validatedRequest.sessionId,
