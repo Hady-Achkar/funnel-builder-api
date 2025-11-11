@@ -25,6 +25,7 @@ describe("Get Earnings Stats Tests", () => {
       },
       payout: {
         aggregate: vi.fn(),
+        findMany: vi.fn(),
       },
     };
 
@@ -43,9 +44,11 @@ describe("Get Earnings Stats Tests", () => {
           pendingBalance: 50,
         });
         mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 200 },
         });
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.user.count.mockResolvedValue(0);
 
         const result = await GetEarningsStatsService.getEarningsStats(userId);
@@ -64,9 +67,11 @@ describe("Get Earnings Stats Tests", () => {
           pendingBalance: null,
         });
         mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: null },
         });
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.user.count.mockResolvedValue(0);
 
         const result = await GetEarningsStatsService.getEarningsStats(userId);
@@ -85,9 +90,11 @@ describe("Get Earnings Stats Tests", () => {
           pendingBalance: 25,
         });
         mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 300 },
         });
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.user.count.mockResolvedValue(0);
 
         await GetEarningsStatsService.getEarningsStats(userId);
@@ -102,6 +109,165 @@ describe("Get Earnings Stats Tests", () => {
           },
         });
       });
+
+      it("should subtract PENDING payout amounts from available balance", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 100,
+          pendingBalance: 50,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 200 },
+        });
+        mockPrisma.payout.findMany.mockResolvedValue([
+          { amount: 30, status: PayoutStatus.PENDING },
+        ]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        const result = await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(result.balance).toEqual({
+          available: 70, // 100 - 30 (pending payout)
+          pending: 50,
+          total: 320, // 70 + 50 + 200
+          totalWithdrawn: 200,
+        });
+      });
+
+      it("should subtract PROCESSING payout amounts from available balance", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 100,
+          pendingBalance: 25,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 0 },
+        });
+        mockPrisma.payout.findMany.mockResolvedValue([
+          { amount: 40, status: PayoutStatus.PROCESSING },
+        ]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        const result = await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(result.balance).toEqual({
+          available: 60, // 100 - 40 (processing payout)
+          pending: 25,
+          total: 85, // 60 + 25 + 0
+          totalWithdrawn: 0,
+        });
+      });
+
+      it("should subtract ON_HOLD payout amounts from available balance", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 150,
+          pendingBalance: 0,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 100 },
+        });
+        mockPrisma.payout.findMany.mockResolvedValue([
+          { amount: 25, status: PayoutStatus.ON_HOLD },
+        ]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        const result = await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(result.balance).toEqual({
+          available: 125, // 150 - 25 (on hold payout)
+          pending: 0,
+          total: 225, // 125 + 0 + 100
+          totalWithdrawn: 100,
+        });
+      });
+
+      it("should subtract multiple pending payouts from available balance", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 200,
+          pendingBalance: 50,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 300 },
+        });
+        mockPrisma.payout.findMany.mockResolvedValue([
+          { amount: 30, status: PayoutStatus.PENDING },
+          { amount: 20, status: PayoutStatus.PROCESSING },
+          { amount: 10, status: PayoutStatus.ON_HOLD },
+        ]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        const result = await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(result.balance).toEqual({
+          available: 140, // 200 - (30 + 20 + 10) = 140
+          pending: 50,
+          total: 490, // 140 + 50 + 300
+          totalWithdrawn: 300,
+        });
+      });
+
+      it("should NOT subtract COMPLETED, FAILED, or CANCELLED payouts from available balance", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 100,
+          pendingBalance: 0,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 50 },
+        });
+        // These payouts should NOT be fetched since they're not pending
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        const result = await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(result.balance).toEqual({
+          available: 100, // No deduction for COMPLETED/FAILED/CANCELLED
+          pending: 0,
+          total: 150, // 100 + 0 + 50
+          totalWithdrawn: 50,
+        });
+      });
+
+      it("should fetch only PENDING, PROCESSING, and ON_HOLD payouts", async () => {
+        mockPrisma.user.findUnique.mockResolvedValue({
+          balance: 100,
+          pendingBalance: 0,
+        });
+        mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
+          _sum: { amount: 0 },
+        });
+        mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.user.count.mockResolvedValue(0);
+
+        await GetEarningsStatsService.getEarningsStats(userId);
+
+        expect(mockPrisma.payout.findMany).toHaveBeenCalledWith({
+          where: {
+            userId,
+            status: {
+              in: [
+                PayoutStatus.PENDING,
+                PayoutStatus.PROCESSING,
+                PayoutStatus.ON_HOLD,
+              ],
+            },
+          },
+          select: {
+            amount: true,
+            status: true,
+          },
+        });
+      });
     });
 
     describe("Affiliate Statistics", () => {
@@ -111,6 +277,7 @@ describe("Get Earnings Stats Tests", () => {
           pendingBalance: 0,
         });
         mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -135,6 +302,7 @@ describe("Get Earnings Stats Tests", () => {
           { id: 2, clickCount: 200 },
           { id: 3, clickCount: 150 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -154,6 +322,7 @@ describe("Get Earnings Stats Tests", () => {
           { id: 1, clickCount: 100 },
           { id: 2, clickCount: 200 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -182,6 +351,7 @@ describe("Get Earnings Stats Tests", () => {
         mockPrisma.affiliateLink.findMany.mockResolvedValue([
           { id: 1, clickCount: 500 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -201,6 +371,7 @@ describe("Get Earnings Stats Tests", () => {
         mockPrisma.affiliateLink.findMany.mockResolvedValue([
           { id: 1, clickCount: 0 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -219,6 +390,7 @@ describe("Get Earnings Stats Tests", () => {
         mockPrisma.affiliateLink.findMany.mockResolvedValue([
           { id: 1, clickCount: 300 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -240,6 +412,7 @@ describe("Get Earnings Stats Tests", () => {
           { id: 2, clickCount: 500 },
           { id: 3, clickCount: 250 },
         ]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 500 },
         });
@@ -265,6 +438,7 @@ describe("Get Earnings Stats Tests", () => {
       it("should throw error when user is not found", async () => {
         mockPrisma.user.findUnique.mockResolvedValue(null);
         mockPrisma.affiliateLink.findMany.mockResolvedValue([]);
+        mockPrisma.payout.findMany.mockResolvedValue([]);
         mockPrisma.payout.aggregate.mockResolvedValue({
           _sum: { amount: 0 },
         });
@@ -323,7 +497,8 @@ describe("Get Earnings Stats Tests", () => {
       mockPrisma.affiliateLink.findMany.mockResolvedValue([
         { id: 1, clickCount: 500 },
       ]);
-      mockPrisma.payout.aggregate.mockResolvedValue({
+      mockPrisma.payout.findMany.mockResolvedValue([]);
+        mockPrisma.payout.aggregate.mockResolvedValue({
         _sum: { amount: 0 },
       });
       mockPrisma.user.count.mockResolvedValue(10);
