@@ -27,8 +27,9 @@ export class GetAllAffiliateLinksService {
 
       const orderBy = buildAffiliateLinkSorting(request.sortBy, request.sortOrder);
 
-      // Calculate pagination offset
-      const skip = (request.page - 1) * request.limit;
+      // Calculate pagination offset (skip if all=true)
+      const skip = request.all ? undefined : (request.page - 1) * request.limit;
+      const take = request.all ? undefined : request.limit;
 
       // Fetch affiliate links and total count in parallel
       const [affiliateLinks, totalLinks] = await Promise.all([
@@ -36,7 +37,7 @@ export class GetAllAffiliateLinksService {
           where,
           orderBy,
           skip,
-          take: request.limit,
+          take,
           include: {
             workspace: {
               select: {
@@ -67,11 +68,16 @@ export class GetAllAffiliateLinksService {
       ]);
 
       // Calculate pagination metadata
-      const pagination = calculatePagination(
-        request.page,
-        request.limit,
-        totalLinks
-      );
+      const pagination = request.all
+        ? {
+            page: 1,
+            limit: totalLinks,
+            total: totalLinks,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        : calculatePagination(request.page, request.limit, totalLinks);
 
       // Format affiliate links
       const baseUrl = process.env.FRONTEND_URL;

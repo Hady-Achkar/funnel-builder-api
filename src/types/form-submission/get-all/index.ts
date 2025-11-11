@@ -79,6 +79,15 @@ export const getAllFormSubmissionsRequest = z.object({
       return num;
     })
     .default(10),
+  all: z
+    .union([z.string(), z.boolean()])
+    .transform((val) => {
+      if (typeof val === "string") {
+        return val.toLowerCase() === "true";
+      }
+      return val;
+    })
+    .optional(),
 });
 
 export type GetAllFormSubmissionsRequest = z.infer<typeof getAllFormSubmissionsRequest>;

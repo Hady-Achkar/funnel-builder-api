@@ -27,7 +27,10 @@ export class AffiliateLinkClickController {
         }
       }
 
-      const result = await AffiliateLinkClickService.trackClick(req.params);
+      const result = await AffiliateLinkClickService.trackClick({
+        token: req.params.token as string,
+        sessionId: req.params.sessionId as string,
+      });
 
       res.status(200).json(result);
     } catch (error) {

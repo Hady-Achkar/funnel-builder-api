@@ -28,8 +28,9 @@ export class GetBalanceHistoryService {
 
       const orderBy = buildPayoutSorting(request.sortBy, request.sortOrder);
 
-      // Calculate pagination offset
-      const skip = (request.page - 1) * request.limit;
+      // Calculate pagination offset (skip if all=true)
+      const skip = request.all ? undefined : (request.page - 1) * request.limit;
+      const take = request.all ? undefined : request.limit;
 
       // Fetch payouts and total count in parallel
       const [payouts, totalPayouts] = await Promise.all([
@@ -37,7 +38,7 @@ export class GetBalanceHistoryService {
           where,
           orderBy,
           skip,
-          take: request.limit,
+          take,
           select: {
             id: true,
             amount: true,
@@ -57,11 +58,16 @@ export class GetBalanceHistoryService {
       ]);
 
       // Calculate pagination metadata
-      const pagination = calculatePagination(
-        request.page,
-        request.limit,
-        totalPayouts
-      );
+      const pagination = request.all
+        ? {
+            page: 1,
+            limit: totalPayouts,
+            total: totalPayouts,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          }
+        : calculatePagination(request.page, request.limit, totalPayouts);
 
       // Format payouts
       const formattedPayouts: PayoutSummary[] = payouts.map((payout) => ({
