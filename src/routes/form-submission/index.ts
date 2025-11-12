@@ -10,7 +10,7 @@ const router: Router = express.Router();
 router.post("/", createFormSubmissionController);
 
 // Get all form submissions for funnel (requires authentication)
-router.get("/:funnelId", authenticateToken, getAllFormSubmissionsController);
+router.get("/:workspaceSlug/:funnelSlug", authenticateToken, getAllFormSubmissionsController);
 
 // Delete a single form submission (requires authentication)
 router.delete("/:submissionId", authenticateToken, deleteFormSubmissionController);

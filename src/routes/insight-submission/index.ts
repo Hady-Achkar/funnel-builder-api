@@ -9,6 +9,6 @@ const router: Router = express.Router();
 router.post("/", createInsightSubmissionController);
 
 // Get all insight submissions - requires authentication
-router.get("/:funnelId", authenticateToken, getAllInsightSubmissionsController);
+router.get("/:workspaceSlug/:funnelSlug", authenticateToken, getAllInsightSubmissionsController);
 
 export default router;

@@ -10,11 +10,13 @@ export const getAllInsightSubmissionsController = async (
 ): Promise<void> => {
   try {
     const userId = req.userId as number;
-    const funnelId = parseInt(req.params.funnelId);
-    
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
+
     // Build request data with proper validation
     const rawRequestData = {
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       ...(req.query.type && { type: req.query.type }),
       ...(req.query.insightId && { insightId: req.query.insightId }),
       ...(req.query.sessionId && { sessionId: req.query.sessionId }),

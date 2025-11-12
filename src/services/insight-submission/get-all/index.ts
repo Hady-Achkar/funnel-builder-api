@@ -33,10 +33,28 @@ export const getAllInsightSubmissions = async (
       throw new NotFoundError("User not found");
     }
 
-    await checkInsightSubmissionsViewPermission(userId, validatedRequest.funnelId);
+    await checkInsightSubmissionsViewPermission(
+      userId,
+      validatedRequest.workspaceSlug,
+      validatedRequest.funnelSlug
+    );
 
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
+    // Find workspace by slug
+    const workspace = await prisma.workspace.findUnique({
+      where: { slug: validatedRequest.workspaceSlug },
+      select: { id: true },
+    });
+
+    if (!workspace) {
+      throw new NotFoundError("Workspace not found");
+    }
+
+    // Find funnel by slug and workspaceId
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspaceId: workspace.id,
+      },
       select: { id: true, name: true },
     });
 
@@ -47,7 +65,7 @@ export const getAllInsightSubmissions = async (
     // Build where clause based on filters
     const whereClause: any = {
       insight: {
-        funnelId: validatedRequest.funnelId,
+        funnelId: funnel.id,
       },
     };
 
@@ -101,7 +119,7 @@ export const getAllInsightSubmissions = async (
     // Get total number of unique sessions in this funnel
     const totalSessions = await prisma.session.count({
       where: {
-        funnelId: validatedRequest.funnelId,
+        funnelId: funnel.id,
       },
     });
 
@@ -141,7 +159,7 @@ export const getAllInsightSubmissions = async (
           where: {
             insightId: insightId,
             insight: {
-              funnelId: validatedRequest.funnelId,
+              funnelId: funnel.id,
             },
           },
         });

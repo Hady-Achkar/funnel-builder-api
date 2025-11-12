@@ -10,11 +10,13 @@ export const getAllFormSubmissionsController = async (
 ): Promise<void> => {
   try {
     const userId = req.userId as number;
-    const funnelId = parseInt(req.params.funnelId);
-    
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
+
     // Build request data with proper validation
     const rawRequestData = {
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       ...(req.query.formId && { formId: req.query.formId }),
       ...(req.query.sessionId && { sessionId: req.query.sessionId }),
       ...(req.query.startDate && { startDate: req.query.startDate }),
@@ -24,6 +26,7 @@ export const getAllFormSubmissionsController = async (
       ...(req.query.sortOrder && { sortOrder: req.query.sortOrder }),
       ...(req.query.page && { page: req.query.page }),
       ...(req.query.limit && { limit: req.query.limit }),
+      ...(req.query.all && { all: req.query.all }),
     };
 
     // Validate and transform request data using Zod

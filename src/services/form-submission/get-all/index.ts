@@ -33,10 +33,28 @@ export const getAllFormSubmissions = async (
       throw new NotFoundError("User not found");
     }
 
-    await checkFormSubmissionsViewPermission(userId, validatedRequest.funnelId);
+    await checkFormSubmissionsViewPermission(
+      userId,
+      validatedRequest.workspaceSlug,
+      validatedRequest.funnelSlug
+    );
 
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
+    // Find workspace by slug
+    const workspace = await prisma.workspace.findUnique({
+      where: { slug: validatedRequest.workspaceSlug },
+      select: { id: true },
+    });
+
+    if (!workspace) {
+      throw new NotFoundError("Workspace not found");
+    }
+
+    // Find funnel by slug and workspaceId
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspaceId: workspace.id,
+      },
       select: { id: true, name: true },
     });
 
@@ -47,7 +65,7 @@ export const getAllFormSubmissions = async (
     // Build where clause based on filters
     const whereClause: any = {
       form: {
-        funnelId: validatedRequest.funnelId,
+        funnelId: funnel.id,
       },
     };
 

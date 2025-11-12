@@ -7,13 +7,27 @@ import {
 
 export const checkInsightSubmissionsViewPermission = async (
   userId: number,
-  funnelId: number
+  workspaceSlug: string,
+  funnelSlug: string
 ): Promise<void> => {
   const prisma = getPrisma();
 
+  // Find workspace by slug
+  const workspace = await prisma.workspace.findUnique({
+    where: { slug: workspaceSlug },
+    select: { id: true },
+  });
+
+  if (!workspace) {
+    throw new NotFoundError("Workspace not found");
+  }
+
   // Get funnel with workspace information
-  const funnel = await prisma.funnel.findUnique({
-    where: { id: funnelId },
+  const funnel = await prisma.funnel.findFirst({
+    where: {
+      slug: funnelSlug,
+      workspaceId: workspace.id,
+    },
     select: {
       id: true,
       name: true,
@@ -37,13 +51,13 @@ export const checkInsightSubmissionsViewPermission = async (
     throw new NotFoundError("Funnel not found");
   }
 
-  const { workspace } = funnel;
+  const { workspace: funnelWorkspace } = funnel;
 
-  if (workspace.ownerId === userId) {
+  if (funnelWorkspace.ownerId === userId) {
     return;
   }
 
-  const member = workspace.members[0];
+  const member = funnelWorkspace.members[0];
   if (!member) {
     throw new ForbiddenError("You do not have access to this workspace");
   }
