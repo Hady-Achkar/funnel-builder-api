@@ -31,7 +31,14 @@ export const deletePage = async (
         funnel: {
           select: {
             id: true,
+            slug: true,
             workspaceId: true,
+            workspace: {
+              select: {
+                id: true,
+                slug: true,
+              },
+            },
           },
         },
       },
@@ -85,10 +92,31 @@ export const deletePage = async (
       }
     });
 
-    // Invalidate funnel cache
-    await cacheService.del(
-      `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:full`
-    );
+    // Invalidate funnel caches
+    try {
+      const cacheKeysToInvalidate = [
+        // Full funnel cache (includes pages)
+        `workspace:${page.funnel.workspace.slug}:funnel:${page.funnel.slug}:full`,
+        // All funnels cache
+        `workspace:${page.funnel.workspace.id}:funnels:all`,
+      ];
+
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
+        )
+      );
+
+      console.log(
+        `[Cache] Invalidated funnel caches for funnel ${page.funnel.id} after page deletion`
+      );
+    } catch (cacheError) {
+      console.warn("Cache invalidation failed but page was deleted:", cacheError);
+    }
 
     const response: DeletePageResponse = {
       message: "Page deleted successfully",

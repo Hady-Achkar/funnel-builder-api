@@ -40,7 +40,12 @@ describe("Update Page Tests", () => {
     updatedAt: new Date("2024-01-01"),
     funnel: {
       id: funnelId,
+      slug: "test-funnel",
       workspaceId,
+      workspace: {
+        id: workspaceId,
+        slug: "test-workspace",
+      },
     },
     ...overrides,
   });
@@ -391,12 +396,14 @@ describe("Update Page Tests", () => {
 
       await updatePage({ id: String(pageId) }, { name: "New Name" }, userId);
 
-      expect(cacheService.del).toHaveBeenCalledTimes(2);
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:test-workspace:funnel:test-funnel:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`
+        `workspace:${workspaceId}:funnels:all`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`
       );
     });
 

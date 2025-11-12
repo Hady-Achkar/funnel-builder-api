@@ -518,7 +518,7 @@ describe("Lock Funnel Tests", () => {
 
       expect(cacheService.del).toHaveBeenCalledTimes(3);
       expect(cacheService.del).toHaveBeenCalledWith(
-        `funnel:${funnelId}:settings:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:settings:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
@@ -567,7 +567,7 @@ describe("Lock Funnel Tests", () => {
       await lockFunnel(userId, { workspaceSlug: customWorkspaceSlug, funnelSlug: customFunnelSlug, password });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `funnel:${customFunnelId}:settings:full`
+        `workspace:${customWorkspaceSlug}:funnel:${customFunnelSlug}:settings:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${customWorkspaceSlug}:funnel:${customFunnelSlug}:full`

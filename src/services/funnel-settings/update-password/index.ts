@@ -106,17 +106,23 @@ export async function updateFunnelPassword(
     });
 
     // 9. Invalidate cache (non-blocking)
+    const cacheKeysToInvalidate = [
+      // Funnel settings cache (slug-based)
+      `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:settings:full`,
+      // Full funnel cache (includes settings)
+      `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
+      // All funnels cache for workspace
+      `workspace:${funnel.workspaceId}:funnels:all`,
+    ];
+
     try {
-      await cacheService.del(`funnel:${funnel.id}:settings:full`, {
-        prefix: "settings",
-      });
-      await cacheService.del(
-        `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
-        { prefix: "funnel" }
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService.del(key).catch((err) =>
+            console.warn(`Failed to invalidate cache key ${key}:`, err)
+          )
+        )
       );
-      await cacheService.del(`workspace:${funnel.workspaceId}:funnels:all`, {
-        prefix: "funnel",
-      });
 
       console.log(
         `[Cache] Invalidated funnel ${funnel.id} settings cache after password update`

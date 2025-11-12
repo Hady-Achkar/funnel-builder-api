@@ -16,16 +16,17 @@ export const getSessionHistoryController = async (
       });
     }
 
-    const funnelId = parseInt(req.params.funnelId, 10);
-    if (isNaN(funnelId)) {
+    const { workspaceSlug, funnelSlug } = req.params;
+    if (!workspaceSlug || !funnelSlug) {
       return res.status(400).json({
-        message: "Invalid funnel ID",
+        message: "Workspace slug and funnel slug are required",
       });
     }
 
     // Validate and parse query parameters
     const validatedParams = getSessionHistoryParams.parse({
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       search: req.query.search,
       startDate: req.query.startDate,
       endDate: req.query.endDate,

@@ -1,10 +1,14 @@
 import { z } from "zod";
 
 export const getSessionsByFunnelParams = z.object({
-  funnelId: z
-    .number()
-    .int("Funnel ID must be an integer")
-    .positive("Funnel ID must be a positive number"),
+  workspaceSlug: z
+    .string()
+    .min(1, "Workspace slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid workspace slug format"),
+  funnelSlug: z
+    .string()
+    .min(1, "Funnel slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid funnel slug format"),
   startDate: z
     .union([z.string(), z.date()])
     .transform((val) => {

@@ -71,8 +71,11 @@ export const unlockFunnel = async (
     });
 
     const cacheKeysToInvalidate = [
-      `funnel:${funnel.id}:settings:full`,
+      // Funnel settings cache (slug-based)
+      `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:settings:full`,
+      // Full funnel cache (includes settings)
       `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
+      // All funnels cache for workspace
       `workspace:${funnel.workspaceId}:funnels:all`,
     ];
 

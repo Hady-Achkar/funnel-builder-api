@@ -30,7 +30,12 @@ describe("Delete Page Tests", () => {
     order: 2,
     funnel: {
       id: funnelId,
+      slug: "test-funnel",
       workspaceId,
+      workspace: {
+        id: workspaceId,
+        slug: "test-workspace",
+      },
     },
     ...overrides,
   });
@@ -330,7 +335,10 @@ describe("Delete Page Tests", () => {
       await deletePage(userId, { pageId });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:test-workspace:funnel:test-funnel:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
       );
     });
 
@@ -344,9 +352,9 @@ describe("Delete Page Tests", () => {
       mockPrisma.page.findMany.mockResolvedValue([]);
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
 
-      await expect(deletePage(userId, { pageId })).rejects.toThrow(
-        "Cache error"
-      );
+      // Should not throw even if cache fails
+      const result = await deletePage(userId, { pageId });
+      expect(result.message).toBe("Page deleted successfully");
     });
   });
 

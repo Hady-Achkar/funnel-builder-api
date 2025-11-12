@@ -27,7 +27,14 @@ export const reorderPages = async (
       where: { id: funnelId },
       select: {
         id: true,
+        slug: true,
         workspaceId: true,
+        workspace: {
+          select: {
+            id: true,
+            slug: true,
+          },
+        },
         pages: {
           select: { id: true, order: true },
           orderBy: { order: "asc" },
@@ -50,7 +57,7 @@ export const reorderPages = async (
       action: PermissionAction.REORDER_PAGE,
     });
 
-    const { workspaceId, pages: existingPages } = funnel;
+    const { workspaceId, workspace, pages: existingPages } = funnel;
 
     // Validation: Ensure all provided page IDs exist in the funnel
     const existingPageIds = new Set(existingPages.map((page) => page.id));
@@ -98,10 +105,31 @@ export const reorderPages = async (
       )
     );
 
-    // Simplified cache invalidation - just delete the funnel cache
-    await cacheService.del(
-      `workspace:${workspaceId}:funnel:${funnelId}:full`
-    );
+    // Invalidate funnel caches
+    try {
+      const cacheKeysToInvalidate = [
+        // Full funnel cache (includes pages)
+        `workspace:${workspace.slug}:funnel:${funnel.slug}:full`,
+        // All funnels cache
+        `workspace:${workspace.id}:funnels:all`,
+      ];
+
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
+        )
+      );
+
+      console.log(
+        `[Cache] Invalidated funnel caches for funnel ${funnel.id} after page reordering`
+      );
+    } catch (cacheError) {
+      console.warn("Cache invalidation failed but pages were reordered:", cacheError);
+    }
 
     const response: ReorderPagesResponse = {
       message: "Pages reordered successfully",

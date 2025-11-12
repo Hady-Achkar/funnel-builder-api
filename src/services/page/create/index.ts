@@ -31,10 +31,12 @@ export const createPage = async (
       select: {
         id: true,
         name: true,
+        slug: true,
         workspaceId: true,
         workspace: {
           select: {
             id: true,
+            slug: true,
             name: true,
             ownerId: true,
             planType: true,
@@ -118,10 +120,27 @@ export const createPage = async (
       return page;
     });
 
-    // Simplified cache invalidation - just delete the funnel full cache
+    // Invalidate funnel cache
     try {
-      await cacheService.del(
-        `workspace:${funnel.workspace.id}:funnel:${validatedRequest.funnelId}:full`
+      const cacheKeysToInvalidate = [
+        // Full funnel cache (includes pages)
+        `workspace:${funnel.workspace.slug}:funnel:${funnel.slug}:full`,
+        // All funnels cache
+        `workspace:${funnel.workspace.id}:funnels:all`,
+      ];
+
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
+        )
+      );
+
+      console.log(
+        `[Cache] Invalidated funnel caches for funnel ${funnel.id} after page creation`
       );
     } catch (cacheError) {
       console.warn(

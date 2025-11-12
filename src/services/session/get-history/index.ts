@@ -13,8 +13,13 @@ export const getSessionHistory = async (
   const prisma = getPrisma();
 
   // Check if funnel exists and get workspace info
-  const funnel = await prisma.funnel.findUnique({
-    where: { id: params.funnelId },
+  const funnel = await prisma.funnel.findFirst({
+    where: {
+      slug: params.funnelSlug,
+      workspace: {
+        slug: params.workspaceSlug,
+      },
+    },
     select: {
       id: true,
       workspaceId: true,
@@ -47,7 +52,7 @@ export const getSessionHistory = async (
       lte?: Date;
     };
   } = {
-    funnelId: params.funnelId,
+    funnelId: funnel.id,
   };
 
   // Date range filtering on updatedAt

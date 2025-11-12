@@ -17,7 +17,9 @@ describe("Get Session History", () => {
 
   let userId: number;
   let workspaceId: number;
+  let workspaceSlug: string;
   let funnelId: number;
+  let funnelSlug: string;
 
   beforeAll(async () => {
     const dbUrl = process.env.DATABASE_URL || "";
@@ -78,6 +80,7 @@ describe("Get Session History", () => {
       },
     });
     workspaceId = workspace.id;
+    workspaceSlug = workspace.slug;
 
     // Add user as workspace member with admin role
     await prisma.workspaceMember.create({
@@ -102,12 +105,13 @@ describe("Get Session History", () => {
       },
     });
     funnelId = funnel.id;
+    funnelSlug = funnel.slug;
   });
 
   describe("Basic Functionality", () => {
     it("should return empty sessions list for funnel with no sessions", async () => {
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -143,7 +147,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -201,7 +205,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -255,7 +259,7 @@ describe("Get Session History", () => {
       }
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -304,7 +308,7 @@ describe("Get Session History", () => {
       }
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -346,7 +350,7 @@ describe("Get Session History", () => {
       }
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -387,7 +391,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -427,7 +431,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -484,7 +488,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -529,7 +533,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -544,7 +548,14 @@ describe("Get Session History", () => {
     it("should throw error if funnel does not exist", async () => {
       await expect(
         getSessionHistory(
-          { funnelId: 99999, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+          {
+            workspaceSlug: "nonexistent",
+            funnelSlug: "nonexistent",
+            page: 1,
+            limit: 10,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          },
           userId
         )
       ).rejects.toThrow("Funnel not found");
@@ -566,7 +577,7 @@ describe("Get Session History", () => {
 
       await expect(
         getSessionHistory(
-          { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+          { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
           otherUser.id
         )
       ).rejects.toThrow("access to this workspace");
@@ -603,7 +614,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -634,7 +645,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -666,7 +677,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "abc123", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "abc123", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -745,7 +756,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "John Doe", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "John Doe", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -794,7 +805,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "mailinator", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "mailinator", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -825,7 +836,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "Ahmad Naser", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "Ahmad Naser", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -853,7 +864,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "Newsletter", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "Newsletter", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -881,7 +892,7 @@ describe("Get Session History", () => {
       });
 
       const result = await getSessionHistory(
-        { funnelId, search: "nonexistent-search-term", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "nonexistent-search-term", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -910,7 +921,7 @@ describe("Get Session History", () => {
 
       // Search with different case
       const result = await getSessionHistory(
-        { funnelId, search: "AMANDA HAMPTON", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "AMANDA HAMPTON", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 
@@ -961,7 +972,7 @@ describe("Get Session History", () => {
       }
 
       const result = await getSessionHistory(
-        { funnelId, search: "test", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+        { workspaceSlug, funnelSlug, search: "test", page: 1, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
         userId
       );
 

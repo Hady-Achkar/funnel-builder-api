@@ -8,7 +8,7 @@ const router: Router = express.Router();
 router.use(authenticateToken);
 
 // More specific routes first
-router.get("/:funnelId/history", getSessionHistoryController);
-router.get("/:funnelId", getSessionsByFunnelController);
+router.get("/:workspaceSlug/:funnelSlug/history", getSessionHistoryController);
+router.get("/:workspaceSlug/:funnelSlug", getSessionsByFunnelController);
 
 export default router;
