@@ -2,12 +2,15 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { lockFunnel } from "../../services/funnel-settings/lock-funnel";
 import { getPrisma } from "../../lib/prisma";
 import { cacheService } from "../../services/cache/cache.service";
-import bcrypt from "bcryptjs";
 import { BadRequestError } from "../../errors";
+import * as encryptionModule from "../../services/funnel-settings/lock-funnel/utils/encryption";
 
 vi.mock("../../lib/prisma");
 vi.mock("../../services/cache/cache.service");
-vi.mock("bcryptjs");
+vi.mock("../../services/funnel-settings/lock-funnel/utils/encryption", () => ({
+  encrypt: vi.fn(),
+  decrypt: vi.fn(),
+}));
 vi.mock("../../utils/workspace-utils/workspace-permission-manager", () => ({
   PermissionManager: {
     requirePermission: vi.fn(),
@@ -23,16 +26,18 @@ describe("Lock Funnel Tests", () => {
   let mockPrisma: any;
   const userId = 1;
   const funnelId = 1;
+  const funnelSlug = "test-funnel";
+  const workspaceSlug = "test-workspace";
   const workspaceId = 1;
   const password = "SecurePass123";
-  const hashedPassword = "$2a$10$hashedPasswordExample";
+  const encryptedPassword = "encrypted:iv:salt:data";
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     mockPrisma = {
       funnel: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
       },
       funnelSettings: {
         findUnique: vi.fn(),
@@ -45,7 +50,7 @@ describe("Lock Funnel Tests", () => {
     (getPrisma as any).mockReturnValue(mockPrisma);
     (cacheService.del as any).mockResolvedValue(undefined);
     (PermissionManager.requirePermission as any).mockResolvedValue(undefined);
-    (bcrypt.hash as any).mockResolvedValue(hashedPassword);
+    (encryptionModule.encrypt as any).mockReturnValue(encryptedPassword);
   });
 
   afterEach(() => {
@@ -55,51 +60,51 @@ describe("Lock Funnel Tests", () => {
   describe("Validation", () => {
     it("should throw error if user ID is not provided", async () => {
       await expect(
-        lockFunnel(0, { funnelId, password })
+        lockFunnel(0, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("User ID is required");
     });
 
-    it("should throw error for invalid funnel ID (negative)", async () => {
+    it("should throw error for missing workspace slug", async () => {
       await expect(
-        lockFunnel(userId, { funnelId: -1, password })
+        lockFunnel(userId, { workspaceSlug: "", funnelSlug, password })
       ).rejects.toThrow(BadRequestError);
     });
 
-    it("should throw error for invalid funnel ID (zero)", async () => {
+    it("should throw error for missing funnel slug", async () => {
       await expect(
-        lockFunnel(userId, { funnelId: 0, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug: "", password })
       ).rejects.toThrow(BadRequestError);
     });
 
-    it("should throw error for invalid funnel ID (non-integer)", async () => {
+    it("should throw error for invalid workspace slug type", async () => {
       await expect(
-        lockFunnel(userId, { funnelId: 1.5, password } as any)
+        lockFunnel(userId, { workspaceSlug: 123, funnelSlug, password } as any)
       ).rejects.toThrow(BadRequestError);
     });
 
     it("should throw error if password is missing", async () => {
       await expect(
-        lockFunnel(userId, { funnelId } as any)
+        lockFunnel(userId, { workspaceSlug, funnelSlug } as any)
       ).rejects.toThrow(BadRequestError);
     });
 
     it("should throw error if password is empty string", async () => {
       await expect(
-        lockFunnel(userId, { funnelId, password: "" })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password: "" })
       ).rejects.toThrow(BadRequestError);
     });
 
     it("should throw error if password is too short", async () => {
       await expect(
-        lockFunnel(userId, { funnelId, password: "short" })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password: "short" })
       ).rejects.toThrow(BadRequestError);
     });
 
     it("should throw error if funnel does not exist", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("Funnel not found");
     });
   });
@@ -107,11 +112,15 @@ describe("Lock Funnel Tests", () => {
   describe("Permission Checks", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
@@ -127,10 +136,10 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(PermissionManager.requirePermission).toHaveBeenCalledWith({
         userId,
@@ -145,7 +154,7 @@ describe("Lock Funnel Tests", () => {
       );
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("You don't have permission to edit funnel");
     });
 
@@ -159,10 +168,10 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      const result = await lockFunnel(userId, { funnelId, password });
+      const result = await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(result.success).toBe(true);
       expect(result.message).toBe("Funnel locked successfully");
@@ -174,25 +183,29 @@ describe("Lock Funnel Tests", () => {
       );
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("You don't have access to this workspace");
     });
   });
 
-  describe("Password Hashing", () => {
+  describe("Password Encryption", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
     });
 
-    it("should hash password using bcrypt with 10 salt rounds", async () => {
+    it("should encrypt password using encryption utility", async () => {
       mockPrisma.funnelSettings.findUnique.mockResolvedValue({
         id: 1,
         funnelId,
@@ -202,15 +215,15 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+      expect(encryptionModule.encrypt).toHaveBeenCalledWith(password);
     });
 
-    it("should trim whitespace from password before hashing", async () => {
+    it("should trim whitespace from password before encrypting", async () => {
       mockPrisma.funnelSettings.findUnique.mockResolvedValue({
         id: 1,
         funnelId,
@@ -220,16 +233,16 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
       const passwordWithSpaces = "  SecurePass123  ";
-      await lockFunnel(userId, { funnelId, password: passwordWithSpaces });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password: passwordWithSpaces });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith("SecurePass123", 10);
+      expect(encryptionModule.encrypt).toHaveBeenCalledWith("SecurePass123");
     });
 
-    it("should store hashed password, not plain text", async () => {
+    it("should store encrypted password, not plain text", async () => {
       mockPrisma.funnelSettings.findUnique.mockResolvedValue({
         id: 1,
         funnelId,
@@ -239,34 +252,38 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
         where: { funnelId },
         data: {
           isPasswordProtected: true,
-          passwordHash: hashedPassword,
+          passwordHash: encryptedPassword,
         },
       });
 
       // Verify that the plain password is NOT stored
       const updateCall = mockPrisma.funnelSettings.update.mock.calls[0][0];
       expect(updateCall.data.passwordHash).not.toBe(password);
-      expect(updateCall.data.passwordHash).toBe(hashedPassword);
+      expect(updateCall.data.passwordHash).toBe(encryptedPassword);
     });
   });
 
   describe("Settings Update (Existing Settings)", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
@@ -284,16 +301,16 @@ describe("Lock Funnel Tests", () => {
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
         where: { funnelId },
         data: {
           isPasswordProtected: true,
-          passwordHash: hashedPassword,
+          passwordHash: encryptedPassword,
         },
       });
       expect(mockPrisma.funnelSettings.create).not.toHaveBeenCalled();
@@ -311,16 +328,16 @@ describe("Lock Funnel Tests", () => {
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(mockPrisma.funnelSettings.update).toHaveBeenCalledWith({
         where: { funnelId },
         data: {
           isPasswordProtected: true,
-          passwordHash: hashedPassword,
+          passwordHash: encryptedPassword,
         },
       });
     });
@@ -337,10 +354,10 @@ describe("Lock Funnel Tests", () => {
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       const updateCall = mockPrisma.funnelSettings.update.mock.calls[0][0];
       expect(updateCall.data.isPasswordProtected).toBe(true);
@@ -350,11 +367,15 @@ describe("Lock Funnel Tests", () => {
   describe("Settings Creation (No Existing Settings)", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
@@ -366,16 +387,16 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(mockPrisma.funnelSettings.create).toHaveBeenCalledWith({
         data: {
           funnelId,
           isPasswordProtected: true,
-          passwordHash: hashedPassword,
+          passwordHash: encryptedPassword,
         },
       });
       expect(mockPrisma.funnelSettings.update).not.toHaveBeenCalled();
@@ -387,25 +408,29 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       const createCall = mockPrisma.funnelSettings.create.mock.calls[0][0];
       expect(createCall.data.isPasswordProtected).toBe(true);
-      expect(createCall.data.passwordHash).toBe(hashedPassword);
+      expect(createCall.data.passwordHash).toBe(encryptedPassword);
     });
   });
 
   describe("Transaction Handling", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
     });
 
     it("should execute settings update within a transaction", async () => {
@@ -421,10 +446,10 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(mockPrisma.$transaction).toHaveBeenCalled();
     });
@@ -435,7 +460,7 @@ describe("Lock Funnel Tests", () => {
       );
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("Transaction failed");
     });
 
@@ -455,7 +480,7 @@ describe("Lock Funnel Tests", () => {
       });
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("Update failed");
     });
   });
@@ -463,11 +488,15 @@ describe("Lock Funnel Tests", () => {
   describe("Cache Invalidation", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
@@ -480,19 +509,19 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
     });
 
     it("should invalidate all relevant cache keys", async () => {
-      await lockFunnel(userId, { funnelId, password });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(cacheService.del).toHaveBeenCalledTimes(3);
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${funnelId}:settings:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${workspaceId}:funnels:all`
@@ -502,7 +531,7 @@ describe("Lock Funnel Tests", () => {
     it("should continue operation if cache invalidation fails", async () => {
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
 
-      const result = await lockFunnel(userId, { funnelId, password });
+      const result = await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(result.success).toBe(true);
       expect(result.message).toBe("Funnel locked successfully");
@@ -510,13 +539,19 @@ describe("Lock Funnel Tests", () => {
 
     it("should invalidate cache with correct funnel ID", async () => {
       const customFunnelId = 999;
+      const customFunnelSlug = "custom-funnel";
+      const customWorkspaceSlug = "custom-workspace";
       const customWorkspaceId = 888;
       const customFunnel = {
         id: customFunnelId,
+        slug: customFunnelSlug,
         workspaceId: customWorkspaceId,
+        workspace: {
+          slug: customWorkspaceSlug,
+        },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(customFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(customFunnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue({
         id: 1,
         funnelId: customFunnelId,
@@ -526,16 +561,16 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId: customFunnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId: customFunnelId, password });
+      await lockFunnel(userId, { workspaceSlug: customWorkspaceSlug, funnelSlug: customFunnelSlug, password });
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `funnel:${customFunnelId}:settings:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${customWorkspaceId}:funnel:${customFunnelId}:full`
+        `workspace:${customWorkspaceSlug}:funnel:${customFunnelSlug}:full`
       );
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${customWorkspaceId}:funnels:all`
@@ -546,11 +581,15 @@ describe("Lock Funnel Tests", () => {
   describe("Response Format", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
@@ -563,19 +602,19 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
     });
 
     it("should return success message", async () => {
-      const result = await lockFunnel(userId, { funnelId, password });
+      const result = await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(result.message).toBe("Funnel locked successfully");
       expect(result.success).toBe(true);
     });
 
     it("should return valid response object", async () => {
-      const result = await lockFunnel(userId, { funnelId, password });
+      const result = await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(result).toHaveProperty("message");
       expect(result).toHaveProperty("success");
@@ -584,7 +623,7 @@ describe("Lock Funnel Tests", () => {
     });
 
     it("should not include password or hash in response", async () => {
-      const result = await lockFunnel(userId, { funnelId, password });
+      const result = await lockFunnel(userId, { workspaceSlug, funnelSlug, password });
 
       expect(result).not.toHaveProperty("password");
       expect(result).not.toHaveProperty("passwordHash");
@@ -594,22 +633,28 @@ describe("Lock Funnel Tests", () => {
   describe("Edge Cases", () => {
     const funnel = {
       id: funnelId,
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         return await callback(mockPrisma);
       });
     });
 
-    it("should handle bcrypt errors gracefully", async () => {
-      (bcrypt.hash as any).mockRejectedValue(new Error("Bcrypt error"));
+    it("should handle encryption errors gracefully", async () => {
+      (encryptionModule.encrypt as any).mockImplementation(() => {
+        throw new Error("Encryption error");
+      });
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
-      ).rejects.toThrow("Bcrypt error");
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
+      ).rejects.toThrow("Encryption error");
     });
 
     it("should handle very long passwords", async () => {
@@ -623,12 +668,12 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password: longPassword });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password: longPassword });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(longPassword, 10);
+      expect(encryptionModule.encrypt).toHaveBeenCalledWith(longPassword);
     });
 
     it("should handle special characters in password", async () => {
@@ -642,12 +687,12 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password: specialPassword });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password: specialPassword });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(specialPassword, 10);
+      expect(encryptionModule.encrypt).toHaveBeenCalledWith(specialPassword);
     });
 
     it("should handle unicode characters in password", async () => {
@@ -661,12 +706,12 @@ describe("Lock Funnel Tests", () => {
         id: 1,
         funnelId,
         isPasswordProtected: true,
-        passwordHash: hashedPassword,
+        passwordHash: encryptedPassword,
       });
 
-      await lockFunnel(userId, { funnelId, password: unicodePassword });
+      await lockFunnel(userId, { workspaceSlug, funnelSlug, password: unicodePassword });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(unicodePassword, 10);
+      expect(encryptionModule.encrypt).toHaveBeenCalledWith(unicodePassword);
     });
 
     it("should handle database errors gracefully", async () => {
@@ -675,7 +720,7 @@ describe("Lock Funnel Tests", () => {
       );
 
       await expect(
-        lockFunnel(userId, { funnelId, password })
+        lockFunnel(userId, { workspaceSlug, funnelSlug, password })
       ).rejects.toThrow("Database connection failed");
     });
   });
@@ -683,7 +728,7 @@ describe("Lock Funnel Tests", () => {
   describe("Zod Validation Errors", () => {
     it("should throw BadRequestError for Zod validation errors", async () => {
       try {
-        await lockFunnel(userId, { funnelId: -1, password });
+        await lockFunnel(userId, { workspaceSlug: "", funnelSlug, password });
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestError);
       }
@@ -691,7 +736,7 @@ describe("Lock Funnel Tests", () => {
 
     it("should include validation message in BadRequestError", async () => {
       try {
-        await lockFunnel(userId, { funnelId: 0, password });
+        await lockFunnel(userId, { workspaceSlug, funnelSlug: "", password });
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestError);
         if (error instanceof BadRequestError) {

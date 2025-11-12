@@ -7,10 +7,8 @@ import { z } from "zod";
  * Only requires new password - no verification of current password needed
  */
 export const updatePasswordRequestSchema = z.object({
-  funnelId: z
-    .number()
-    .int("Funnel ID must be an integer")
-    .positive("Funnel ID must be a positive number"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 
   newPassword: z
     .string()

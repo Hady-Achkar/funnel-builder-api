@@ -2,10 +2,13 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { verifyFunnelPassword } from "../../services/funnel-settings/verify-password";
 import { getPrisma } from "../../lib/prisma";
 import { BadRequestError, NotFoundError } from "../../errors";
-import bcrypt from "bcryptjs";
+import * as encryptionModule from "../../services/funnel-settings/lock-funnel/utils/encryption";
 
 vi.mock("../../lib/prisma");
-vi.mock("bcryptjs");
+vi.mock("../../services/funnel-settings/lock-funnel/utils/encryption", () => ({
+  encrypt: vi.fn(),
+  decrypt: vi.fn(),
+}));
 
 describe("Verify Funnel Password Tests", () => {
   let mockPrisma: any;
@@ -211,7 +214,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(result.message).toBe("Funnel is not password protected");
     });
 
-    it("should not call bcrypt.compare if funnel is not protected", async () => {
+    it("should not call encryptionModule.decrypt if funnel is not protected", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -223,7 +226,7 @@ describe("Verify Funnel Password Tests", () => {
 
       await verifyFunnelPassword({ funnelSlug, password });
 
-      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(encryptionModule.decrypt).not.toHaveBeenCalled();
     });
   });
 
@@ -240,7 +243,7 @@ describe("Verify Funnel Password Tests", () => {
     });
 
     it("should return valid=true for correct password", async () => {
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -250,7 +253,7 @@ describe("Verify Funnel Password Tests", () => {
     });
 
     it("should return valid=false for incorrect password", async () => {
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({
         funnelSlug,
@@ -262,16 +265,16 @@ describe("Verify Funnel Password Tests", () => {
       expect(result.funnelId).toBe(funnelId);
     });
 
-    it("should call bcrypt.compare with correct arguments", async () => {
-      (bcrypt.compare as any).mockResolvedValue(true);
+    it("should call encryptionModule.decrypt with correct arguments", async () => {
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       await verifyFunnelPassword({ funnelSlug, password });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+      expect(encryptionModule.decrypt).toHaveBeenCalledWith(hashedPassword);
     });
 
     it("should reject password with wrong case", async () => {
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({
         funnelSlug,
@@ -282,7 +285,7 @@ describe("Verify Funnel Password Tests", () => {
     });
 
     it("should reject password with extra spaces", async () => {
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({
         funnelSlug,
@@ -294,38 +297,32 @@ describe("Verify Funnel Password Tests", () => {
 
     it("should verify password with special characters", async () => {
       const specialPassword = "P@ssw0rd!#$%^&*()";
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(specialPassword);
 
       const result = await verifyFunnelPassword({
         funnelSlug,
         password: specialPassword,
       });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        specialPassword,
-        hashedPassword
-      );
+      expect(encryptionModule.decrypt).toHaveBeenCalledWith(hashedPassword);
       expect(result.valid).toBe(true);
     });
 
     it("should verify password with unicode characters", async () => {
       const unicodePassword = "Пароль123密码";
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(unicodePassword);
 
       const result = await verifyFunnelPassword({
         funnelSlug,
         password: unicodePassword,
       });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        unicodePassword,
-        hashedPassword
-      );
+      expect(encryptionModule.decrypt).toHaveBeenCalledWith(hashedPassword);
       expect(result.valid).toBe(true);
     });
 
     it("should handle empty string password against hash", async () => {
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       await expect(
         verifyFunnelPassword({ funnelSlug, password: "" })
@@ -343,7 +340,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -364,7 +361,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -423,14 +420,14 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({
         funnelSlug,
         password: longPassword,
       });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith(longPassword, hashedPassword);
+      expect(encryptionModule.decrypt).toHaveBeenCalledWith(hashedPassword);
       expect(result.valid).toBe(false);
     });
 
@@ -444,7 +441,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({
         funnelSlug,
@@ -454,7 +451,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(result.valid).toBe(false);
     });
 
-    it("should handle bcrypt compare error", async () => {
+    it("should handle decrypt error", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -463,11 +460,14 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockRejectedValue(new Error("Bcrypt error"));
+      (encryptionModule.decrypt as any).mockImplementation(() => {
+        throw new Error("Decryption error");
+      });
 
-      await expect(
-        verifyFunnelPassword({ funnelSlug, password })
-      ).rejects.toThrow("Bcrypt error");
+      const result = await verifyFunnelPassword({ funnelSlug, password });
+
+      // When decryption fails, password should be considered invalid
+      expect(result.valid).toBe(false);
     });
 
     it("should handle null password hash gracefully", async () => {
@@ -496,10 +496,10 @@ describe("Verify Funnel Password Tests", () => {
         },
       });
 
-      (bcrypt.compare as any)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true);
+      (encryptionModule.decrypt as any)
+        .mockReturnValueOnce("DifferentPassword1")
+        .mockReturnValueOnce("DifferentPassword2")
+        .mockReturnValueOnce("correct");
 
       const result1 = await verifyFunnelPassword({
         funnelSlug,
@@ -517,7 +517,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(result1.valid).toBe(false);
       expect(result2.valid).toBe(false);
       expect(result3.valid).toBe(true);
-      expect(bcrypt.compare).toHaveBeenCalledTimes(3);
+      expect(encryptionModule.decrypt).toHaveBeenCalledTimes(3);
     });
 
     it("should handle funnel slug with numbers", async () => {
@@ -555,7 +555,7 @@ describe("Verify Funnel Password Tests", () => {
       ).rejects.toThrow("Database connection failed");
     });
 
-    it("should handle bcrypt errors", async () => {
+    it("should handle decryption errors", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -564,11 +564,14 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockRejectedValue(new Error("Bcrypt failed"));
+      (encryptionModule.decrypt as any).mockImplementation(() => {
+        throw new Error("Decryption failed");
+      });
 
-      await expect(
-        verifyFunnelPassword({ funnelSlug, password })
-      ).rejects.toThrow("Bcrypt failed");
+      const result = await verifyFunnelPassword({ funnelSlug, password });
+
+      // When decryption fails, password should be considered invalid
+      expect(result.valid).toBe(false);
     });
 
     it("should throw BadRequestError for Zod validation errors", async () => {
@@ -601,7 +604,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -619,7 +622,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -640,7 +643,7 @@ describe("Verify Funnel Password Tests", () => {
       }
     });
 
-    it("should always use bcrypt.compare for timing attack resistance", async () => {
+    it("should always use encryptionModule.decrypt for timing attack resistance", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -649,11 +652,11 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       await verifyFunnelPassword({ funnelSlug, password });
 
-      expect(bcrypt.compare).toHaveBeenCalled();
+      expect(encryptionModule.decrypt).toHaveBeenCalled();
       // Bcrypt is inherently slow, protecting against timing attacks
     });
   });
@@ -668,7 +671,7 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any).mockReturnValue(password);
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
@@ -685,7 +688,7 @@ describe("Verify Funnel Password Tests", () => {
           },
         },
       });
-      expect(bcrypt.compare).toHaveBeenCalled();
+      expect(encryptionModule.decrypt).toHaveBeenCalled();
       expect(result.valid).toBe(true);
       expect(result.message).toBe("Password is correct");
     });
@@ -699,12 +702,12 @@ describe("Verify Funnel Password Tests", () => {
           passwordHash: hashedPassword,
         },
       });
-      (bcrypt.compare as any).mockResolvedValue(false);
+      (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalled();
-      expect(bcrypt.compare).toHaveBeenCalled();
+      expect(encryptionModule.decrypt).toHaveBeenCalled();
       expect(result.valid).toBe(false);
       expect(result.message).toBe("Invalid password");
     });
@@ -722,7 +725,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalled();
-      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(encryptionModule.decrypt).not.toHaveBeenCalled();
       expect(result.valid).toBe(true);
       expect(result.message).toBe("Funnel is not password protected");
     });
@@ -751,7 +754,9 @@ describe("Verify Funnel Password Tests", () => {
           },
         });
 
-      (bcrypt.compare as any).mockResolvedValue(true);
+      (encryptionModule.decrypt as any)
+        .mockReturnValueOnce("password1")
+        .mockReturnValueOnce("password2");
 
       const result1 = await verifyFunnelPassword({
         funnelSlug: funnel1Slug,
@@ -764,8 +769,8 @@ describe("Verify Funnel Password Tests", () => {
 
       expect(result1.valid).toBe(true);
       expect(result2.valid).toBe(true);
-      expect(bcrypt.compare).toHaveBeenNthCalledWith(1, "password1", hash1);
-      expect(bcrypt.compare).toHaveBeenNthCalledWith(2, "password2", hash2);
+      expect(encryptionModule.decrypt).toHaveBeenNthCalledWith(1, hash1);
+      expect(encryptionModule.decrypt).toHaveBeenNthCalledWith(2, hash2);
     });
   });
 

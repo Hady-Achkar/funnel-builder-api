@@ -21,6 +21,8 @@ describe("Update Funnel Settings Tests", () => {
   let mockPrisma: any;
   const userId = 1;
   const funnelId = 1;
+  const funnelSlug = "test-funnel";
+  const workspaceSlug = "test-workspace";
   const workspaceId = 1;
 
   beforeEach(() => {
@@ -28,7 +30,7 @@ describe("Update Funnel Settings Tests", () => {
 
     mockPrisma = {
       funnel: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
       },
       funnelSettings: {
         findUnique: vi.fn(),
@@ -47,35 +49,36 @@ describe("Update Funnel Settings Tests", () => {
 
   describe("Validation", () => {
     it("should throw error if user ID is not provided", async () => {
-      await expect(updateFunnelSettings(0, { funnelId })).rejects.toThrow(
+      await expect(updateFunnelSettings(0, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "User ID is required"
       );
     });
 
-    it("should throw error for invalid funnel ID (negative)", async () => {
+    it("should throw error for missing workspace slug", async () => {
       await expect(
-        updateFunnelSettings(userId, { funnelId: -1 })
+        updateFunnelSettings(userId, { workspaceSlug: "", funnelSlug })
       ).rejects.toThrow("Invalid input");
     });
 
-    it("should throw error for invalid funnel ID (zero)", async () => {
+    it("should throw error for missing funnel slug", async () => {
       await expect(
-        updateFunnelSettings(userId, { funnelId: 0 })
+        updateFunnelSettings(userId, { workspaceSlug, funnelSlug: "" })
       ).rejects.toThrow("Invalid input");
     });
 
-    it("should throw error for invalid funnel ID (non-integer)", async () => {
+    it("should throw error for invalid workspace slug type", async () => {
       await expect(
-        updateFunnelSettings(userId, { funnelId: 1.5 } as any)
+        updateFunnelSettings(userId, { workspaceSlug: 123, funnelSlug } as any)
       ).rejects.toThrow("Invalid input");
     });
 
     it("should throw error if funnel does not exist", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("Funnel not found");
@@ -85,15 +88,20 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(null);
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("Funnel settings not found");
@@ -103,7 +111,11 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
       const existingSettings = {
@@ -112,10 +124,10 @@ describe("Update Funnel Settings Tests", () => {
         defaultSeoTitle: "Existing Title",
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
 
-      await expect(updateFunnelSettings(userId, { funnelId })).rejects.toThrow(
+      await expect(updateFunnelSettings(userId, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "Nothing to update"
       );
     });
@@ -123,7 +135,8 @@ describe("Update Funnel Settings Tests", () => {
     it("should validate privacy policy URL format", async () => {
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           privacyPolicyUrl: "not-a-valid-url",
         })
       ).rejects.toThrow("Invalid input");
@@ -132,7 +145,8 @@ describe("Update Funnel Settings Tests", () => {
     it("should validate terms of service URL format", async () => {
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           termsOfServiceUrl: "invalid-url",
         })
       ).rejects.toThrow("Invalid input");
@@ -142,7 +156,11 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
       const existingSettings = {
@@ -151,7 +169,7 @@ describe("Update Funnel Settings Tests", () => {
         privacyPolicyUrl: "https://example.com/privacy",
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
@@ -159,7 +177,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         privacyPolicyUrl: "",
       });
 
@@ -176,7 +195,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -186,7 +209,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -197,7 +220,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -215,7 +239,8 @@ describe("Update Funnel Settings Tests", () => {
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("You don't have permission to edit funnel");
@@ -228,7 +253,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       const result = await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "Updated by Owner",
       });
 
@@ -243,7 +269,8 @@ describe("Update Funnel Settings Tests", () => {
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "Try to Update",
         })
       ).rejects.toThrow("You don't have access to this workspace");
@@ -254,7 +281,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -266,7 +297,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -277,7 +308,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New SEO Title",
       });
 
@@ -296,7 +328,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoDescription: "New SEO Description",
       });
 
@@ -316,7 +349,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoKeywords: keywords,
       });
 
@@ -335,7 +369,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoKeywords: [],
       });
 
@@ -354,7 +389,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoKeywords: null,
       });
 
@@ -371,7 +407,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -382,7 +422,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -393,7 +433,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         favicon: "https://example.com/new-favicon.ico",
       });
 
@@ -412,7 +453,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         ogImage: "https://example.com/new-og.png",
       });
 
@@ -431,7 +473,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         favicon: null,
       });
 
@@ -448,7 +491,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -460,7 +507,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -471,7 +518,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         googleAnalyticsId: "GA-123456789",
       });
 
@@ -490,7 +538,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         facebookPixelId: "FB-987654321",
       });
 
@@ -514,7 +563,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         customTrackingScripts: customScripts,
       });
 
@@ -533,7 +583,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         googleAnalyticsId: null,
       });
 
@@ -550,7 +601,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -561,7 +616,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -572,7 +627,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         enableCookieConsent: true,
       });
 
@@ -591,7 +647,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         enableCookieConsent: false,
       });
 
@@ -610,7 +667,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         cookieConsentText: "We use cookies to improve your experience.",
       });
 
@@ -627,7 +685,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -638,7 +700,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -649,7 +711,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         privacyPolicyUrl: "https://example.com/privacy",
       });
 
@@ -668,7 +731,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         termsOfServiceUrl: "https://example.com/terms",
       });
 
@@ -687,7 +751,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         privacyPolicyUrl: null,
       });
 
@@ -704,7 +769,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -716,7 +785,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -727,7 +796,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         language: "es",
       });
 
@@ -746,7 +816,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         timezone: "America/New_York",
       });
 
@@ -765,7 +836,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         dateFormat: "DD/MM/YYYY",
       });
 
@@ -782,7 +854,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -795,7 +871,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
     });
 
@@ -809,7 +885,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
         defaultSeoDescription: "New Description",
         googleAnalyticsId: "GA-123456789",
@@ -830,7 +907,8 @@ describe("Update Funnel Settings Tests", () => {
     it("should update all settings fields", async () => {
       const keywords = ["complete", "keywords"];
       const allUpdates = {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "Complete Title",
         defaultSeoDescription: "Complete Description",
         defaultSeoKeywords: keywords,
@@ -875,7 +953,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -885,7 +967,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
@@ -895,7 +977,8 @@ describe("Update Funnel Settings Tests", () => {
 
     it("should invalidate funnel settings cache", async () => {
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -906,18 +989,20 @@ describe("Update Funnel Settings Tests", () => {
 
     it("should invalidate full funnel cache", async () => {
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
       );
     });
 
     it("should invalidate all funnels cache", async () => {
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -928,13 +1013,14 @@ describe("Update Funnel Settings Tests", () => {
 
     it("should invalidate all relevant cache keys", async () => {
       await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
       const expectedCacheKeys = [
         `funnel:${funnelId}:settings:full`,
-        `workspace:${workspaceId}:funnel:${funnelId}:full`,
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`,
         `workspace:${workspaceId}:funnels:all`,
       ];
 
@@ -949,7 +1035,8 @@ describe("Update Funnel Settings Tests", () => {
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
 
       const result = await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -968,7 +1055,8 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       const result = await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -980,7 +1068,11 @@ describe("Update Funnel Settings Tests", () => {
     const funnel = {
       id: funnelId,
       name: "Test Funnel",
+      slug: funnelSlug,
       workspaceId,
+      workspace: {
+        slug: workspaceSlug,
+      },
     };
 
     const existingSettings = {
@@ -990,7 +1082,7 @@ describe("Update Funnel Settings Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
       mockPrisma.funnelSettings.update.mockResolvedValue({
         ...existingSettings,
@@ -1000,7 +1092,8 @@ describe("Update Funnel Settings Tests", () => {
 
     it("should return success message", async () => {
       const result = await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -1010,7 +1103,8 @@ describe("Update Funnel Settings Tests", () => {
 
     it("should return valid response object", async () => {
       const result = await updateFunnelSettings(userId, {
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         defaultSeoTitle: "New Title",
       });
 
@@ -1026,7 +1120,11 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
       const existingSettings = {
@@ -1035,7 +1133,7 @@ describe("Update Funnel Settings Tests", () => {
         defaultSeoTitle: "Old Title",
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockResolvedValue(existingSettings);
       mockPrisma.funnelSettings.update.mockRejectedValue(
         new Error("Database connection failed")
@@ -1043,7 +1141,8 @@ describe("Update Funnel Settings Tests", () => {
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("Failed to update funnel settings");
@@ -1053,17 +1152,22 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockRejectedValue(
         new Error("Prisma error")
       );
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("Failed to update funnel settings");
@@ -1073,15 +1177,20 @@ describe("Update Funnel Settings Tests", () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
+        slug: funnelSlug,
         workspaceId,
+        workspace: {
+          slug: workspaceSlug,
+        },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnel);
       mockPrisma.funnelSettings.findUnique.mockRejectedValue("Unknown error");
 
       await expect(
         updateFunnelSettings(userId, {
-          funnelId,
+          workspaceSlug,
+          funnelSlug,
           defaultSeoTitle: "New Title",
         })
       ).rejects.toThrow("Couldn't update the funnel settings");

@@ -10,19 +10,17 @@ export const lockFunnelController = async (
 ) => {
   try {
     const userId = req.userId;
-    const funnelId = parseInt(req.params.funnelId);
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
 
     if (!userId) {
       throw new UnauthorizedError("Authentication required");
     }
 
-    if (!funnelId || isNaN(funnelId)) {
-      throw new Error("Invalid funnel ID");
-    }
-
     const result = await lockFunnel(userId, {
       ...req.body,
-      funnelId
+      workspaceSlug,
+      funnelSlug
     });
 
     return res.status(200).json(result);

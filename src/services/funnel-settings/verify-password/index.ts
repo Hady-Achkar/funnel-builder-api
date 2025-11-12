@@ -1,6 +1,6 @@
 import { getPrisma } from '../../../lib/prisma';
 import { BadRequestError, NotFoundError } from '../../../errors';
-import bcrypt from 'bcryptjs';
+import { decrypt } from '../lock-funnel/utils/encryption';
 import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
@@ -52,8 +52,15 @@ export const verifyFunnelPassword = async (
       return verifyPasswordResponse.parse(response);
     }
 
-    // Verify the password using bcrypt
-    const isValidPassword = await bcrypt.compare(validatedRequest.password, funnelSettings.passwordHash);
+    // Decrypt and verify the password
+    let isValidPassword = false;
+    try {
+      const decryptedPassword = decrypt(funnelSettings.passwordHash);
+      isValidPassword = decryptedPassword === validatedRequest.password;
+    } catch (error) {
+      // If decryption fails, password is invalid
+      isValidPassword = false;
+    }
 
     const response = {
       valid: isValidPassword,

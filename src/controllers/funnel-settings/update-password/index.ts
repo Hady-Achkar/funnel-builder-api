@@ -13,7 +13,8 @@ export const updatePasswordController = async (
 ): Promise<void> => {
   try {
     const userId = req.userId;
-    const funnelId = parseInt(req.params.funnelId);
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
 
     // Validate authentication
     if (!userId) {
@@ -22,14 +23,10 @@ export const updatePasswordController = async (
       );
     }
 
-    // Validate funnelId parameter
-    if (!funnelId || isNaN(funnelId)) {
-      throw new BadRequestError("Invalid funnel ID provided");
-    }
-
-    // Call service with funnelId from params and newPassword from body
+    // Call service with slugs from params and newPassword from body
     const result = await updateFunnelPassword(userId, {
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       newPassword: req.body.newPassword,
     });
 

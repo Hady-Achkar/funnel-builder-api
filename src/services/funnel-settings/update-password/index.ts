@@ -1,5 +1,5 @@
 import { getPrisma } from "../../../lib/prisma";
-import bcrypt from "bcryptjs";
+import { encrypt } from "../lock-funnel/utils/encryption";
 import {
   UpdatePasswordRequest,
   UpdatePasswordResponse,
@@ -31,11 +31,17 @@ export async function updateFunnelPassword(
 
     const prisma = getPrisma();
 
-    // 3. Get funnel with workspace information
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
+    // 3. Get funnel with workspace information by slug
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspace: {
+          slug: validatedRequest.workspaceSlug,
+        },
+      },
       select: {
         id: true,
+        slug: true,
         name: true,
         workspaceId: true,
         workspace: {
@@ -61,7 +67,7 @@ export async function updateFunnelPassword(
 
     // 5. Get funnel settings
     const funnelSettings = await prisma.funnelSettings.findUnique({
-      where: { funnelId: validatedRequest.funnelId },
+      where: { funnelId: funnel.id },
       select: {
         id: true,
         isPasswordProtected: true,
@@ -88,8 +94,8 @@ export async function updateFunnelPassword(
       );
     }
 
-    // 7. Hash new password
-    const newPasswordHash = await bcrypt.hash(validatedRequest.newPassword, 10);
+    // 7. Encrypt new password
+    const newPasswordHash = encrypt(validatedRequest.newPassword);
 
     // 8. Update password hash in settings
     await prisma.funnelSettings.update({
@@ -105,7 +111,7 @@ export async function updateFunnelPassword(
         prefix: "settings",
       });
       await cacheService.del(
-        `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+        `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
         { prefix: "funnel" }
       );
       await cacheService.del(`workspace:${funnel.workspaceId}:funnels:all`, {

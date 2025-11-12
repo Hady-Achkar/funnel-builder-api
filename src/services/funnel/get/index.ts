@@ -11,7 +11,7 @@ import {
 } from "../../../types/funnel/get";
 
 export const getFunnel = async (
-  funnelSlug: string,
+  params: { workspaceSlug: string; funnelSlug: string },
   userId: number
 ): Promise<GetFunnelResponse> => {
   let validatedParams: GetFunnelParams;
@@ -19,27 +19,17 @@ export const getFunnel = async (
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = getFunnelParams.parse({ funnelSlug });
+    validatedParams = getFunnelParams.parse(params);
 
     const prisma = getPrisma();
 
-    // Get user's accessible workspaces to find funnel by slug
-    const userWorkspaces = await prisma.workspaceMember.findMany({
-      where: { userId },
-      select: { workspaceId: true },
-    });
-
-    const workspaceIds = userWorkspaces.map((wm) => wm.workspaceId);
-
-    if (workspaceIds.length === 0) {
-      throw new Error("You don't have access to any workspaces");
-    }
-
-    // Find funnel by slug within user's accessible workspaces
+    // Find funnel by slug within the specified workspace
     const funnelExists = await prisma.funnel.findFirst({
       where: {
         slug: validatedParams.funnelSlug,
-        workspaceId: { in: workspaceIds },
+        workspace: {
+          slug: validatedParams.workspaceSlug,
+        },
       },
       select: {
         id: true,
@@ -50,6 +40,7 @@ export const getFunnel = async (
             id: true,
             name: true,
             ownerId: true,
+            slug: true,
           },
         },
       },
@@ -74,7 +65,7 @@ export const getFunnel = async (
     }
 
     // Try to get funnel from cache first
-    const fullFunnelCacheKey = `workspace:${funnelExists.workspaceId}:funnel:${funnelExists.slug}:full`;
+    const fullFunnelCacheKey = `workspace:${validatedParams.workspaceSlug}:funnel:${funnelExists.slug}:full`;
     let funnel = await cacheService.get<any>(fullFunnelCacheKey);
 
     // If not in cache, fetch from database

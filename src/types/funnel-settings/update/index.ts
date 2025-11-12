@@ -1,10 +1,8 @@
 import { z } from "zod";
 
 export const updateFunnelSettingsRequest = z.object({
-  funnelId: z
-    .number()
-    .int("Funnel ID must be an integer")
-    .positive("Funnel ID must be a positive number"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 
   defaultSeoTitle: z.string().nullable().optional(),
 

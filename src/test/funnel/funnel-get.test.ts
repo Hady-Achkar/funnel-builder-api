@@ -19,6 +19,7 @@ describe("Get Funnel by Slug Tests", () => {
   const userId = 1;
   const funnelId = 1;
   const funnelSlug = "test-funnel";
+  const workspaceSlug = "test-workspace";
   const workspaceId = 1;
 
   beforeEach(() => {
@@ -28,9 +29,6 @@ describe("Get Funnel by Slug Tests", () => {
       funnel: {
         findUnique: vi.fn(),
         findFirst: vi.fn(),
-      },
-      workspaceMember: {
-        findMany: vi.fn(),
       },
     };
 
@@ -45,30 +43,25 @@ describe("Get Funnel by Slug Tests", () => {
 
   describe("Funnel Validation", () => {
     it("should throw error if funnel does not exist", async () => {
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, userId)).rejects.toThrow(
         "Funnel not found"
       );
     });
 
     it("should throw error if user ID is not provided", async () => {
-      await expect(getFunnel(funnelSlug, 0)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, 0)).rejects.toThrow(
         "User ID is required"
       );
     });
 
-    it("should throw error if user has no workspace access", async () => {
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([]);
-
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
-        "You don't have access to any workspaces"
-      );
+    it("should throw error for empty funnel slug", async () => {
+      await expect(getFunnel({ workspaceSlug, funnelSlug: "" }, userId)).rejects.toThrow("Invalid input");
     });
 
-    it("should throw error for empty funnel slug", async () => {
-      await expect(getFunnel("", userId)).rejects.toThrow("Invalid input");
+    it("should throw error for empty workspace slug", async () => {
+      await expect(getFunnel({ workspaceSlug: "", funnelSlug }, userId)).rejects.toThrow("Invalid input");
     });
   });
 
@@ -80,6 +73,7 @@ describe("Get Funnel by Slug Tests", () => {
       workspace: {
         id: workspaceId,
         name: "Test Workspace",
+        slug: workspaceSlug,
         ownerId: userId,
       },
     };
@@ -99,7 +93,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -110,7 +103,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: true,
       });
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
       expect(result.name).toBe("Test Funnel");
@@ -144,7 +137,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExistsNonOwner);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -155,7 +147,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: false,
       });
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
       expect(PermissionManager.can).toHaveBeenCalled();
@@ -184,7 +176,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExistsNonOwner);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -195,7 +186,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: false,
       });
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
     });
@@ -223,7 +214,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExistsNonOwner);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -234,7 +224,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: false,
       });
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
     });
@@ -248,7 +238,6 @@ describe("Get Funnel by Slug Tests", () => {
         },
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelExistsNonOwner);
 
       (PermissionManager.can as any).mockResolvedValue({
@@ -259,7 +248,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: false,
       });
 
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, userId)).rejects.toThrow(
         "You don't have access to this workspace"
       );
     });
@@ -273,7 +262,6 @@ describe("Get Funnel by Slug Tests", () => {
         },
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelExistsNonOwner);
 
       (PermissionManager.can as any).mockResolvedValue({
@@ -284,7 +272,7 @@ describe("Get Funnel by Slug Tests", () => {
         isOwner: false,
       });
 
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, userId)).rejects.toThrow(
         "You don't have permission to view funnel"
       );
     });
@@ -298,6 +286,7 @@ describe("Get Funnel by Slug Tests", () => {
       workspace: {
         id: workspaceId,
         name: "Test Workspace",
+        slug: workspaceSlug,
         ownerId: userId,
       },
     };
@@ -343,7 +332,6 @@ describe("Get Funnel by Slug Tests", () => {
     };
 
     it("should return cached funnel when available", async () => {
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelExists);
 
       (PermissionManager.can as any).mockResolvedValue({
@@ -355,12 +343,12 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(mockCachedFunnel);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
       expect(result.name).toBe("Cached Funnel");
       expect(cacheService.get).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelSlug}:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
       );
       // Should NOT fetch from database when cache hit
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalledTimes(1); // Only for permission check
@@ -393,7 +381,6 @@ describe("Get Funnel by Slug Tests", () => {
         ],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -406,13 +393,13 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(null);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
       expect(result.name).toBe("Fresh Funnel");
       expect(cacheService.get).toHaveBeenCalled();
       expect(cacheService.set).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelSlug}:full`,
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`,
         expect.objectContaining({
           id: funnelId,
           name: "Fresh Funnel",
@@ -436,7 +423,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -452,7 +438,7 @@ describe("Get Funnel by Slug Tests", () => {
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.id).toBe(funnelId);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -472,6 +458,7 @@ describe("Get Funnel by Slug Tests", () => {
       workspace: {
         id: workspaceId,
         name: "Test Workspace",
+        slug: workspaceSlug,
         ownerId: userId,
       },
     };
@@ -528,7 +515,6 @@ describe("Get Funnel by Slug Tests", () => {
         ],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -541,7 +527,7 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(null);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result).toHaveProperty("id", funnelId);
       expect(result).toHaveProperty("name", "Complete Funnel");
@@ -579,7 +565,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -592,7 +577,7 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(null);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.customTheme).toBeNull();
       expect(result.activeThemeId).toBeNull();
@@ -613,7 +598,6 @@ describe("Get Funnel by Slug Tests", () => {
         pages: [],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -626,7 +610,7 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(null);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.pages).toEqual([]);
     });
@@ -669,7 +653,6 @@ describe("Get Funnel by Slug Tests", () => {
         ],
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(mockFunnelExists);
       mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel);
 
@@ -682,7 +665,7 @@ describe("Get Funnel by Slug Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(null);
 
-      const result = await getFunnel(funnelSlug, userId);
+      const result = await getFunnel({ workspaceSlug, funnelSlug }, userId);
 
       expect(result.pages).toHaveLength(2);
       expect(result.pages[0]).toHaveProperty("visits", 0);
@@ -697,11 +680,11 @@ describe("Get Funnel by Slug Tests", () => {
 
   describe("Edge Cases", () => {
     it("should handle database error gracefully", async () => {
-      mockPrisma.workspaceMember.findMany.mockRejectedValue(
+      mockPrisma.funnel.findFirst.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, userId)).rejects.toThrow(
         "Failed to get funnel: Database connection failed"
       );
     });
@@ -714,20 +697,129 @@ describe("Get Funnel by Slug Tests", () => {
         workspace: {
           id: workspaceId,
           name: "Test Workspace",
+          slug: workspaceSlug,
           ownerId: 999,
         },
       };
 
-      mockPrisma.workspaceMember.findMany.mockResolvedValue([{ workspaceId }]);
       mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelExists);
 
       (PermissionManager.can as any).mockRejectedValue(
         new Error("Permission service error")
       );
 
-      await expect(getFunnel(funnelSlug, userId)).rejects.toThrow(
+      await expect(getFunnel({ workspaceSlug, funnelSlug }, userId)).rejects.toThrow(
         "Failed to get funnel"
       );
+    });
+  });
+
+  describe("Multi-Workspace Scenario", () => {
+    it("should return correct funnel when user has access to multiple workspaces with same funnel slug", async () => {
+      const workspace1Slug = "workspace-1";
+      const workspace2Slug = "workspace-2";
+      const sameFunnelSlug = "landing-page";
+
+      // Mock finding funnel in workspace-1
+      const funnel1Exists = {
+        id: 1,
+        slug: sameFunnelSlug,
+        workspaceId: 1,
+        workspace: {
+          id: 1,
+          name: "Workspace 1",
+          slug: workspace1Slug,
+          ownerId: userId,
+        },
+      };
+
+      const fullFunnel1 = {
+        id: 1,
+        name: "Funnel in Workspace 1",
+        slug: sameFunnelSlug,
+        status: $Enums.FunnelStatus.DRAFT,
+        workspaceId: 1,
+        createdBy: userId,
+        activeThemeId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        customTheme: null,
+        pages: [],
+      };
+
+      mockPrisma.funnel.findFirst.mockResolvedValueOnce(funnel1Exists);
+      mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel1);
+
+      (PermissionManager.can as any).mockResolvedValue({
+        allowed: true,
+        userRole: $Enums.WorkspaceRole.OWNER,
+        userPermissions: [],
+        isOwner: true,
+      });
+
+      const result1 = await getFunnel({ workspaceSlug: workspace1Slug, funnelSlug: sameFunnelSlug }, userId);
+
+      expect(result1.id).toBe(1);
+      expect(result1.name).toBe("Funnel in Workspace 1");
+      expect(result1.workspaceId).toBe(1);
+
+      // Mock finding funnel in workspace-2
+      const funnel2Exists = {
+        id: 2,
+        slug: sameFunnelSlug,
+        workspaceId: 2,
+        workspace: {
+          id: 2,
+          name: "Workspace 2",
+          slug: workspace2Slug,
+          ownerId: userId,
+        },
+      };
+
+      const fullFunnel2 = {
+        id: 2,
+        name: "Funnel in Workspace 2",
+        slug: sameFunnelSlug,
+        status: $Enums.FunnelStatus.LIVE,
+        workspaceId: 2,
+        createdBy: userId,
+        activeThemeId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        customTheme: null,
+        pages: [],
+      };
+
+      mockPrisma.funnel.findFirst.mockResolvedValueOnce(funnel2Exists);
+      mockPrisma.funnel.findUnique.mockResolvedValueOnce(fullFunnel2);
+
+      const result2 = await getFunnel({ workspaceSlug: workspace2Slug, funnelSlug: sameFunnelSlug }, userId);
+
+      expect(result2.id).toBe(2);
+      expect(result2.name).toBe("Funnel in Workspace 2");
+      expect(result2.workspaceId).toBe(2);
+
+      // Verify the query used workspace slug to differentiate
+      expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            slug: sameFunnelSlug,
+            workspace: {
+              slug: workspace2Slug,
+            },
+          }),
+        })
+      );
+    });
+
+    it("should not find funnel in wrong workspace", async () => {
+      const wrongWorkspaceSlug = "wrong-workspace";
+
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+
+      await expect(
+        getFunnel({ workspaceSlug: wrongWorkspaceSlug, funnelSlug }, userId)
+      ).rejects.toThrow("Funnel not found");
     });
   });
 });

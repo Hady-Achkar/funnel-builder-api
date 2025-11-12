@@ -1,6 +1,6 @@
 import { getPrisma } from '../../../lib/prisma';
 import { BadRequestError } from '../../../errors';
-import bcrypt from 'bcryptjs';
+import { encrypt } from './utils/encryption';
 import { PermissionManager, PermissionAction } from '../../../utils/workspace-utils/workspace-permission-manager';
 import {
   LockFunnelRequest,
@@ -22,10 +22,24 @@ export const lockFunnel = async (
 
     const prisma = getPrisma();
 
-    // Get funnel to retrieve workspaceId
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
-      select: { id: true, workspaceId: true },
+    // Get funnel with workspace information by slug
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspace: {
+          slug: validatedRequest.workspaceSlug,
+        },
+      },
+      select: {
+        id: true,
+        slug: true,
+        workspaceId: true,
+        workspace: {
+          select: {
+            slug: true,
+          },
+        },
+      },
     });
 
     if (!funnel) {
@@ -39,17 +53,17 @@ export const lockFunnel = async (
       action: PermissionAction.EDIT_FUNNEL,
     });
 
-    // Hash password using bcrypt (10 salt rounds)
-    const passwordHash = await bcrypt.hash(validatedRequest.password.trim(), 10);
+    // Encrypt password using AES-256-GCM
+    const passwordHash = encrypt(validatedRequest.password.trim());
 
     await prisma.$transaction(async (tx) => {
       const existingSettings = await tx.funnelSettings.findUnique({
-        where: { funnelId: validatedRequest.funnelId },
+        where: { funnelId: funnel.id },
       });
 
       if (existingSettings) {
         await tx.funnelSettings.update({
-          where: { funnelId: validatedRequest.funnelId },
+          where: { funnelId: funnel.id },
           data: {
             isPasswordProtected: true,
             passwordHash,
@@ -58,7 +72,7 @@ export const lockFunnel = async (
       } else {
         await tx.funnelSettings.create({
           data: {
-            funnelId: validatedRequest.funnelId,
+            funnelId: funnel.id,
             isPasswordProtected: true,
             passwordHash,
           },
@@ -67,8 +81,8 @@ export const lockFunnel = async (
     });
 
     const cacheKeysToInvalidate = [
-      `funnel:${validatedRequest.funnelId}:settings:full`,
-      `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+      `funnel:${funnel.id}:settings:full`,
+      `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
       `workspace:${funnel.workspaceId}:funnels:all`,
     ];
 
