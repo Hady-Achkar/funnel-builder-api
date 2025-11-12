@@ -621,10 +621,12 @@ describe("Create Page Tests", () => {
     it("should invalidate funnel cache after page creation", async () => {
       const funnel = {
         id: funnelId,
+        slug: "test-funnel",
         name: "Test Funnel",
         workspaceId,
         workspace: {
           id: workspaceId,
+          slug: "test-workspace",
           ownerId: userId,
           planType: UserPlan.FREE,
           addOns: [],
@@ -665,7 +667,10 @@ describe("Create Page Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:test-workspace:funnel:test-funnel:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
       );
     });
 

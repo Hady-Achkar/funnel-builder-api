@@ -23,7 +23,12 @@ describe("Reorder Pages Tests", () => {
 
   const createMockFunnel = (pages: Array<{ id: number; order: number}> = []) => ({
     id: funnelId,
+    slug: "test-funnel",
     workspaceId,
+    workspace: {
+      id: workspaceId,
+      slug: "test-workspace",
+    },
     pages,
   });
 
@@ -315,7 +320,10 @@ describe("Reorder Pages Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:test-workspace:funnel:test-funnel:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${workspaceId}:funnels:all`
       );
     });
   });

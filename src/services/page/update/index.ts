@@ -29,7 +29,14 @@ export const updatePage = async (
       funnel: {
         select: {
           id: true,
+          slug: true,
           workspaceId: true,
+          workspace: {
+            select: {
+              id: true,
+              slug: true,
+            },
+          },
         },
       },
     },
@@ -123,15 +130,33 @@ export const updatePage = async (
     data: updateData,
   });
 
-  // Invalidate both funnel cache and individual page cache
-  await Promise.all([
-    cacheService.del(
-      `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:full`
-    ),
-    cacheService.del(
-      `workspace:${existingPage.funnel.workspaceId}:funnel:${existingPage.funnelId}:page:${existingPage.id}:full`
-    ),
-  ]);
+  // Invalidate funnel and page caches
+  try {
+    const cacheKeysToInvalidate = [
+      // Full funnel cache (includes pages)
+      `workspace:${existingPage.funnel.workspace.slug}:funnel:${existingPage.funnel.slug}:full`,
+      // All funnels cache
+      `workspace:${existingPage.funnel.workspace.id}:funnels:all`,
+      // Individual page cache
+      `workspace:${existingPage.funnel.workspace.slug}:funnel:${existingPage.funnel.slug}:page:${existingPage.id}:full`,
+    ];
+
+    await Promise.all(
+      cacheKeysToInvalidate.map((key) =>
+        cacheService
+          .del(key)
+          .catch((err) =>
+            console.warn(`Failed to invalidate cache key ${key}:`, err)
+          )
+      )
+    );
+
+    console.log(
+      `[Cache] Invalidated caches for page ${existingPage.id} after update`
+    );
+  } catch (cacheError) {
+    console.warn("Cache invalidation failed but page was updated:", cacheError);
+  }
 
   return {
     message: "Page updated successfully",
