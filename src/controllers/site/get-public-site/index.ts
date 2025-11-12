@@ -14,8 +14,14 @@ export class GetPublicSiteController {
       // Validate request - hostname must be in query parameters
       const validatedData = getPublicSiteRequestSchema.parse(req.query);
 
-      // Call service
-      const result = await GetPublicSiteService.getPublicSite(validatedData);
+      // Extract cookies from request
+      const cookies = req.cookies || {};
+
+      // Call service with cookies
+      const result = await GetPublicSiteService.getPublicSite(
+        validatedData,
+        cookies
+      );
 
       // Send response
       res.status(200).json(result);

@@ -6,14 +6,17 @@ import {
   GetPublicSiteResponse,
 } from "../../../types/site/get-public-site";
 import { formatSiteResponse } from "./utils/format-site-response";
+import { verifyFunnelAccessToken } from "../../../lib/jwt";
+import jwt from "jsonwebtoken";
 
 export class GetPublicSiteService {
   static async getPublicSite(
-    requestData: GetPublicSiteRequest
+    requestData: GetPublicSiteRequest,
+    cookies?: any
   ): Promise<GetPublicSiteResponse> {
     try {
       const prisma = getPrisma();
-      const { hostname } = requestData;
+      const { hostname, funnelSlug } = requestData;
 
       // Step 1: Look up domain by hostname
       const domain = await prisma.domain.findUnique({
@@ -70,7 +73,12 @@ export class GetPublicSiteService {
         throw new NotFoundError("Site not found");
       }
 
-      // Step 5: Validate site status
+      // Step 5: Validate that the funnel slug matches the provided funnelSlug parameter
+      if (funnel.slug !== funnelSlug) {
+        throw new NotFoundError("Site not found for this domain");
+      }
+
+      // Step 6: Validate site status
       if (funnel.status === FunnelStatus.DRAFT) {
         throw new ForbiddenError("Site is not published");
       }
@@ -79,8 +87,54 @@ export class GetPublicSiteService {
         throw new ForbiddenError("Site has been archived");
       }
 
-      // Step 6: Format and return response
-      return formatSiteResponse(funnel);
+      // Step 7: Check password protection and access token
+      const requiresPassword = funnel.settings?.isPasswordProtected || false;
+      let hasAccess = !requiresPassword; // If not password protected, user has access
+      let tokenExpiry: number | null = null;
+
+      if (requiresPassword && cookies) {
+        const cookieName = `funnel_access_${funnelSlug}`;
+        const token = cookies[cookieName];
+
+        if (token) {
+          const decoded = verifyFunnelAccessToken(token);
+          if (
+            decoded &&
+            decoded.funnelSlug === funnelSlug &&
+            decoded.funnelId === funnel.id &&
+            decoded.hasAccess
+          ) {
+            hasAccess = true;
+            // Extract token expiry from JWT
+            try {
+              const jwtPayload = jwt.decode(token) as any;
+              if (jwtPayload && jwtPayload.exp) {
+                tokenExpiry = jwtPayload.exp * 1000; // Convert to milliseconds
+              }
+            } catch (error) {
+              // If decoding fails, leave tokenExpiry as null
+            }
+          }
+        }
+      }
+
+      // Step 8: Format and return response with access control
+      if (!hasAccess) {
+        return {
+          site: null,
+          requiresPassword,
+          hasAccess,
+          tokenExpiry,
+        };
+      }
+
+      const siteData = formatSiteResponse(funnel);
+      return {
+        ...siteData,
+        requiresPassword,
+        hasAccess,
+        tokenExpiry,
+      };
     } catch (error) {
       throw error;
     }

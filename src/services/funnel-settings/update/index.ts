@@ -26,13 +26,24 @@ export const updateFunnelSettings = async (
 
     const prisma = getPrisma();
 
-    // Get funnel with workspace information
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedData.funnelId },
+    // Get funnel with workspace information by slug
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedData.funnelSlug,
+        workspace: {
+          slug: validatedData.workspaceSlug,
+        },
+      },
       select: {
         id: true,
         name: true,
+        slug: true,
         workspaceId: true,
+        workspace: {
+          select: {
+            slug: true,
+          },
+        },
       },
     });
 
@@ -49,7 +60,7 @@ export const updateFunnelSettings = async (
 
     // Check if settings already exist
     const existingSettings = await prisma.funnelSettings.findUnique({
-      where: { funnelId: validatedData.funnelId },
+      where: { funnelId: funnel.id },
     });
 
     if (!existingSettings) {
@@ -100,7 +111,7 @@ export const updateFunnelSettings = async (
 
     // Update the funnel settings in the database
     const updatedSettings = await prisma.funnelSettings.update({
-      where: { funnelId: validatedData.funnelId },
+      where: { funnelId: funnel.id },
       data: updateData,
     });
 
@@ -108,9 +119,9 @@ export const updateFunnelSettings = async (
     try {
       const cacheKeysToInvalidate = [
         // Funnel settings cache
-        `funnel:${validatedData.funnelId}:settings:full`,
-        // Full funnel cache (includes settings)
-        `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+        `workspace:${validatedData.workspaceSlug}:funnel:${funnel.slug}:settings:full`,
+        // Full funnel cache (includes settings) - using workspace slug and funnel slug
+        `workspace:${validatedData.workspaceSlug}:funnel:${funnel.slug}:full`,
         // All funnels cache (includes settings)
         `workspace:${funnel.workspaceId}:funnels:all`,
       ];

@@ -12,6 +12,8 @@ describe("Funnel Deletion Tests", () => {
   const userId = 1;
   const funnelId = 1;
   const workspaceId = 1;
+  const workspaceSlug = "test-workspace";
+  const funnelSlug = "test-funnel";
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -26,6 +28,7 @@ describe("Funnel Deletion Tests", () => {
       },
       funnel: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
         delete: vi.fn(),
       },
     };
@@ -44,15 +47,15 @@ describe("Funnel Deletion Tests", () => {
 
   describe("Authentication & Authorization", () => {
     it("should require user to be logged in", async () => {
-      await expect(deleteFunnel(funnelId, null as any)).rejects.toThrow(
+      await expect(deleteFunnel(null as any, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "User ID is required"
       );
     });
 
     it("should throw error when funnel not found", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
-      await expect(deleteFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(deleteFunnel(userId, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "Funnel not found"
       );
     });
@@ -60,24 +63,26 @@ describe("Funnel Deletion Tests", () => {
     it("should allow workspace owner to delete funnel", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [{ id: 1 }, { id: 2 }],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId, // User is owner
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
       expect(mockPrisma.funnel.delete).toHaveBeenCalledWith({
@@ -88,11 +93,13 @@ describe("Funnel Deletion Tests", () => {
     it("should allow admin to delete funnel", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999, // Different owner
         },
@@ -103,7 +110,7 @@ describe("Funnel Deletion Tests", () => {
         permissions: [],
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
@@ -111,7 +118,7 @@ describe("Funnel Deletion Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
     });
@@ -119,11 +126,13 @@ describe("Funnel Deletion Tests", () => {
     it("should allow editor with DELETE_FUNNELS permission to delete", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999,
         },
@@ -134,7 +143,7 @@ describe("Funnel Deletion Tests", () => {
         permissions: [$Enums.WorkspacePermission.DELETE_FUNNELS],
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
@@ -142,7 +151,7 @@ describe("Funnel Deletion Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
     });
@@ -150,11 +159,13 @@ describe("Funnel Deletion Tests", () => {
     it("should deny editor without DELETE_FUNNELS permission", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999,
         },
@@ -165,14 +176,14 @@ describe("Funnel Deletion Tests", () => {
         permissions: [], // No DELETE_FUNNELS permission
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
       });
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      await expect(deleteFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(deleteFunnel(userId, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "permission"
       );
     });
@@ -180,11 +191,13 @@ describe("Funnel Deletion Tests", () => {
     it("should allow viewer with DELETE_FUNNELS permission to delete", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999,
         },
@@ -195,7 +208,7 @@ describe("Funnel Deletion Tests", () => {
         permissions: [$Enums.WorkspacePermission.DELETE_FUNNELS],
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
@@ -203,7 +216,7 @@ describe("Funnel Deletion Tests", () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
     });
@@ -211,11 +224,13 @@ describe("Funnel Deletion Tests", () => {
     it("should deny viewer without DELETE_FUNNELS permission", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999,
         },
@@ -226,14 +241,14 @@ describe("Funnel Deletion Tests", () => {
         permissions: [], // No DELETE_FUNNELS permission
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
       });
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
 
-      await expect(deleteFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(deleteFunnel(userId, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "permission"
       );
     });
@@ -241,42 +256,46 @@ describe("Funnel Deletion Tests", () => {
     it("should deny non-member from deleting funnel", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: 999,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: 999,
       });
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null); // Not a member
 
-      await expect(deleteFunnel(funnelId, userId)).rejects.toThrow();
+      await expect(deleteFunnel(userId, { workspaceSlug, funnelSlug })).rejects.toThrow();
     });
   });
 
   describe("Cache Invalidation", () => {
     const mockFunnel = {
       id: funnelId,
+      slug: funnelSlug,
       name: "Test Funnel",
       workspaceId,
       pages: [{ id: 1 }, { id: 2 }, { id: 3 }],
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
@@ -285,15 +304,15 @@ describe("Funnel Deletion Tests", () => {
     });
 
     it("should delete individual funnel cache key", async () => {
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
       );
     });
 
     it("should delete all page cache keys for the funnel", async () => {
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       // Verify each page cache key is deleted
       expect(cacheService.del).toHaveBeenCalledWith(
@@ -308,7 +327,7 @@ describe("Funnel Deletion Tests", () => {
     });
 
     it("should delete workspace funnels list cache keys", async () => {
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${workspaceId}:funnels:list`
@@ -316,7 +335,7 @@ describe("Funnel Deletion Tests", () => {
     });
 
     it("should delete user-specific workspace cache", async () => {
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `user:${userId}:workspace:${workspaceId}:funnels`
@@ -331,7 +350,7 @@ describe("Funnel Deletion Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(existingFunnels);
 
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       // Should get the existing cache
       expect(cacheService.get).toHaveBeenCalledWith(
@@ -351,7 +370,7 @@ describe("Funnel Deletion Tests", () => {
 
       (cacheService.get as any).mockResolvedValue(existingFunnels);
 
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       // Should delete the cache if empty
       expect(cacheService.del).toHaveBeenCalledWith(
@@ -365,7 +384,7 @@ describe("Funnel Deletion Tests", () => {
       );
 
       // Should not throw even if cache deletion fails
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
     });
@@ -375,24 +394,26 @@ describe("Funnel Deletion Tests", () => {
     it("should delete funnel from database", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      await deleteFunnel(funnelId, userId);
+      await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(mockPrisma.funnel.delete).toHaveBeenCalledWith({
         where: { id: funnelId },
@@ -402,24 +423,26 @@ describe("Funnel Deletion Tests", () => {
     it("should work with funnel that has no pages", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [], // No pages
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
     });
@@ -427,51 +450,54 @@ describe("Funnel Deletion Tests", () => {
     it("should work with funnel that has many pages", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: Array.from({ length: 20 }, (_, i) => ({ id: i + 1 })),
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result.message).toBe("Funnel deleted successfully");
       // Verify all page caches were deleted
-      expect(cacheService.del).toHaveBeenCalledTimes(23); // 20 pages + 3 other cache keys
+      expect(cacheService.del).toHaveBeenCalledTimes(24); // 20 pages + 4 other cache keys (including funnel settings)
     });
   });
 
   describe("Edge Cases", () => {
-    it("should validate funnel ID parameter", async () => {
-      await expect(deleteFunnel(-1, userId)).rejects.toThrow();
-      await expect(deleteFunnel(0, userId)).rejects.toThrow();
+    it("should validate funnel slug parameter", async () => {
+      await expect(deleteFunnel(userId, { workspaceSlug: "", funnelSlug: "" })).rejects.toThrow();
     });
 
     it("should handle database errors gracefully", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
@@ -480,7 +506,7 @@ describe("Funnel Deletion Tests", () => {
         new Error("Database connection failed")
       );
 
-      await expect(deleteFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(deleteFunnel(userId, { workspaceSlug, funnelSlug })).rejects.toThrow(
         "Database connection failed"
       );
     });
@@ -488,24 +514,26 @@ describe("Funnel Deletion Tests", () => {
     it("should return proper success message", async () => {
       const mockFunnel = {
         id: funnelId,
+        slug: funnelSlug,
         name: "Test Funnel",
         workspaceId,
         pages: [],
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.workspace.findUnique.mockResolvedValue({
         id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnel.delete.mockResolvedValue(mockFunnel);
 
-      const result = await deleteFunnel(funnelId, userId);
+      const result = await deleteFunnel(userId, { workspaceSlug, funnelSlug });
 
       expect(result).toEqual({
         message: "Funnel deleted successfully",

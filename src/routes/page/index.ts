@@ -29,7 +29,6 @@ router.post("/:pageId/duplicate", authenticateToken, duplicatePageController);
 // Public routes
 router.get(
   "/funnel/:funnelSlug([a-z0-9-]+)/page/:linkingId",
-  checkFunnelAccess,
   getPublicPageController
 );
 router.post("/:pageId/visit", createPageVisitController);

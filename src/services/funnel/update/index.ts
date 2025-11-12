@@ -14,8 +14,8 @@ import { PermissionAction } from "../../../utils/workspace-utils/workspace-permi
 import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 
 export const updateFunnel = async (
-  funnelId: number,
   userId: number,
+  params: UpdateFunnelParams,
   data: UpdateFunnelRequest
 ): Promise<UpdateFunnelResponse> => {
   let validatedParams: UpdateFunnelParams;
@@ -24,7 +24,7 @@ export const updateFunnel = async (
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = updateFunnelParams.parse({ funnelId });
+    validatedParams = updateFunnelParams.parse(params);
     validatedData = updateFunnelRequest.parse(data);
 
     if (!validatedData.name && !validatedData.status && !validatedData.slug) {
@@ -33,12 +33,19 @@ export const updateFunnel = async (
 
     const prisma = getPrisma();
 
-    const existingFunnel = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
+    // Get funnel with workspace information by slug
+    const existingFunnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedParams.funnelSlug,
+        workspace: {
+          slug: validatedParams.workspaceSlug,
+        },
+      },
       include: {
         workspace: {
           select: {
             id: true,
+            slug: true,
             name: true,
             ownerId: true,
           },
@@ -85,7 +92,7 @@ export const updateFunnel = async (
         prisma,
         validatedData.slug.trim(),
         existingFunnel.workspaceId,
-        validatedParams.funnelId
+        existingFunnel.id
       );
       changed.push("slug");
     }
@@ -96,7 +103,7 @@ export const updateFunnel = async (
         prisma,
         updates.name,
         existingFunnel.workspaceId,
-        validatedParams.funnelId
+        existingFunnel.id
       );
       changed.push("slug");
     }
@@ -115,7 +122,7 @@ export const updateFunnel = async (
 
     // Update funnel
     const updatedFunnel = await prisma.funnel.update({
-      where: { id: validatedParams.funnelId },
+      where: { id: existingFunnel.id },
       data: updates,
       select: {
         id: true,
@@ -130,16 +137,22 @@ export const updateFunnel = async (
     try {
       // Invalidate all relevant cache keys
       const cacheKeysToInvalidate = [
-        // Individual funnel full cache
-        `workspace:${existingFunnel.workspaceId}:funnel:${updatedFunnel.id}:full`,
+        // Individual funnel full cache (using both old and new slugs if slug changed)
+        `funnel:${updatedFunnel.id}:settings:full`,
+        `workspace:${validatedParams.workspaceSlug}:funnel:${updatedFunnel.slug}:full`,
         // Workspace's all funnels cache
         `workspace:${existingFunnel.workspaceId}:funnels:all`,
         // Legacy cache keys (for backward compatibility)
         `workspace:${existingFunnel.workspaceId}:funnels:list`,
         `user:${userId}:workspace:${existingFunnel.workspaceId}:funnels`,
-        // Funnel settings cache
-        `funnel:${updatedFunnel.id}:settings:full`
       ];
+
+      // If slug was changed, also invalidate old slug cache
+      if (existingFunnel.slug !== updatedFunnel.slug) {
+        cacheKeysToInvalidate.push(
+          `workspace:${validatedParams.workspaceSlug}:funnel:${existingFunnel.slug}:full`
+        );
+      }
 
       // Delete all cache keys in parallel
       await Promise.all(

@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 export const lockFunnelRequest = z.object({
-  funnelId: z.number()
-    .int("Funnel ID must be an integer")
-    .positive("Funnel ID must be a positive number"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
   password: z.string()
     .min(6, "Password must be at least 6 characters long")
     .max(100, "Password must not exceed 100 characters"),

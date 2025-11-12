@@ -10,19 +10,17 @@ export const updateFunnelSettingsController = async (
 ) => {
   try {
     const userId = req.userId;
-    const funnelId = parseInt(req.params.id);
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
 
     if (!userId) {
       throw new UnauthorizedError("Please log in to update funnel settings");
     }
 
-    if (!funnelId || isNaN(funnelId)) {
-      throw new Error("Invalid funnel ID");
-    }
-
     const result = await updateFunnelSettings(userId, {
       ...req.body,
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
     });
     return res.status(200).json(result);
   } catch (error) {

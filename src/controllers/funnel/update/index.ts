@@ -13,11 +13,13 @@ export const updateFunnelController = async (
     if (!userId) {
       throw new UnauthorizedError("Please log in to update a funnel");
     }
-    const funnelId = parseInt(req.params.id);
-    if (!funnelId || isNaN(funnelId)) {
-      throw new Error("Invalid funnel ID");
-    }
-    const result = await updateFunnel(funnelId, userId, req.body);
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
+
+    const result = await updateFunnel(userId, {
+      workspaceSlug,
+      funnelSlug,
+    }, req.body);
     return res.json(result);
   } catch (error) {
     return next(error);

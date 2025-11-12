@@ -1,18 +1,8 @@
 import { z } from "zod";
 
 export const getAllInsightSubmissionsRequest = z.object({
-  funnelId: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      const num = typeof val === "string" ? parseInt(val, 10) : val;
-      if (isNaN(num)) {
-        throw new Error("Funnel ID must be a valid number");
-      }
-      return num;
-    })
-    .refine((val) => val > 0, {
-      message: "Funnel ID must be a positive number",
-    }),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
   // Filter options (all optional)
   type: z.enum(["QUIZ", "SINGLE_CHOICE", "MULTIPLE_CHOICE"]).optional(),
   insightId: z

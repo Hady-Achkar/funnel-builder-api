@@ -10,13 +10,13 @@ import { updatePasswordController } from "../../controllers/funnel-settings/upda
 const router = Router();
 
 // Public endpoints - no authentication required
-router.get("/:funnelId", getFunnelSettingsController);
 router.post("/verify-password/:funnelSlug", verifyPasswordController);
 
 // Protected endpoints - requires authentication
-router.put("/:id", authenticateToken, updateFunnelSettingsController);
-router.post("/lock-funnel/:funnelId", authenticateToken, lockFunnelController);
-router.post("/unlock-funnel/:funnelId", authenticateToken, unlockFunnelController);
-router.post("/update-password/:funnelId", authenticateToken, updatePasswordController);
+router.get("/:workspaceSlug/:funnelSlug", authenticateToken, getFunnelSettingsController);
+router.put("/:workspaceSlug/:funnelSlug", authenticateToken, updateFunnelSettingsController);
+router.post("/lock-funnel/:workspaceSlug/:funnelSlug", authenticateToken, lockFunnelController);
+router.post("/unlock-funnel/:workspaceSlug/:funnelSlug", authenticateToken, unlockFunnelController);
+router.post("/update-password/:workspaceSlug/:funnelSlug", authenticateToken, updatePasswordController);
 
 export default router;

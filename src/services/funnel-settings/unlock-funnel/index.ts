@@ -22,15 +22,22 @@ export const unlockFunnel = async (
 
     const prisma = getPrisma();
 
-    // Get funnel with workspace information
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
+    // Get funnel with workspace information by slug
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspace: {
+          slug: validatedRequest.workspaceSlug,
+        },
+      },
       select: {
         id: true,
+        slug: true,
         workspaceId: true,
         workspace: {
           select: {
             id: true,
+            slug: true,
             status: true,
           },
         },
@@ -56,7 +63,7 @@ export const unlockFunnel = async (
     }
 
     await prisma.funnelSettings.update({
-      where: { funnelId: validatedRequest.funnelId },
+      where: { funnelId: funnel.id },
       data: {
         isPasswordProtected: false,
         passwordHash: null,
@@ -64,8 +71,8 @@ export const unlockFunnel = async (
     });
 
     const cacheKeysToInvalidate = [
-      `funnel:${validatedRequest.funnelId}:settings:full`,
-      `workspace:${funnel.workspaceId}:funnel:${funnel.id}:full`,
+      `funnel:${funnel.id}:settings:full`,
+      `workspace:${validatedRequest.workspaceSlug}:funnel:${funnel.slug}:full`,
       `workspace:${funnel.workspaceId}:funnels:all`,
     ];
 

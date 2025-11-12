@@ -11,7 +11,7 @@ import {
 } from "../../../types/funnel/get";
 
 export const getFunnel = async (
-  funnelId: number,
+  params: { workspaceSlug: string; funnelSlug: string },
   userId: number
 ): Promise<GetFunnelResponse> => {
   let validatedParams: GetFunnelParams;
@@ -19,20 +19,28 @@ export const getFunnel = async (
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = getFunnelParams.parse({ funnelId });
+    validatedParams = getFunnelParams.parse(params);
 
     const prisma = getPrisma();
 
-    const funnelExists = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
+    // Find funnel by slug within the specified workspace
+    const funnelExists = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedParams.funnelSlug,
+        workspace: {
+          slug: validatedParams.workspaceSlug,
+        },
+      },
       select: {
         id: true,
+        slug: true,
         workspaceId: true,
         workspace: {
           select: {
             id: true,
             name: true,
             ownerId: true,
+            slug: true,
           },
         },
       },
@@ -57,13 +65,13 @@ export const getFunnel = async (
     }
 
     // Try to get funnel from cache first
-    const fullFunnelCacheKey = `workspace:${funnelExists.workspaceId}:funnel:${validatedParams.funnelId}:full`;
+    const fullFunnelCacheKey = `workspace:${validatedParams.workspaceSlug}:funnel:${funnelExists.slug}:full`;
     let funnel = await cacheService.get<any>(fullFunnelCacheKey);
 
     // If not in cache, fetch from database
     if (!funnel) {
       const funnelFromDb = await prisma.funnel.findUnique({
-        where: { id: validatedParams.funnelId },
+        where: { id: funnelExists.id },
         include: {
           customTheme: true,
           pages: {

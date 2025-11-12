@@ -12,8 +12,11 @@ import {
   ForbiddenError,
   BadRequestError,
 } from "../../errors/http-errors";
+import * as jwtLib from "../../lib/jwt";
+import jwt from "jsonwebtoken";
 
 vi.mock("../../lib/prisma");
+vi.mock("../../lib/jwt");
 
 describe("Get Public Site Tests", () => {
   let mockPrisma: any;
@@ -187,7 +190,7 @@ describe("Get Public Site Tests", () => {
   };
 
   describe("Success Cases", () => {
-    it("should return site data for valid hostname with LIVE site", async () => {
+    it("should return site data for valid hostname with LIVE site (no password protection)", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
@@ -204,6 +207,9 @@ describe("Get Public Site Tests", () => {
       expect(result.site.id).toBe(1);
       expect(result.site.name).toBe("My Awesome Site");
       expect(result.site.status).toBe(FunnelStatus.LIVE);
+      expect(result.requiresPassword).toBe(false);
+      expect(result.hasAccess).toBe(true);
+      expect(result.tokenExpiry).toBeNull();
     });
 
     it("should include all pages in the response", async () => {
@@ -323,6 +329,196 @@ describe("Get Public Site Tests", () => {
     });
   });
 
+  describe("Access Control Tests", () => {
+    it("should deny access to password-protected site without token", async () => {
+      const protectedFunnel = {
+        ...mockFunnel,
+        settings: {
+          ...mockFunnel.settings,
+          isPasswordProtected: true,
+          passwordHash: "hashed_password",
+        },
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+
+      const result = await GetPublicSiteService.getPublicSite(
+        {
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        },
+        {} // Empty cookies
+      );
+
+      expect(result.site).toBeNull();
+      expect(result.requiresPassword).toBe(true);
+      expect(result.hasAccess).toBe(false);
+      expect(result.tokenExpiry).toBeNull();
+    });
+
+    it("should grant access to password-protected site with valid token", async () => {
+      const protectedFunnel = {
+        ...mockFunnel,
+        settings: {
+          ...mockFunnel.settings,
+          isPasswordProtected: true,
+          passwordHash: "hashed_password",
+        },
+      };
+
+      const mockToken = "valid.jwt.token";
+      const mockTokenPayload = {
+        funnelSlug: "my-awesome-site",
+        funnelId: 1,
+        hasAccess: true,
+        type: "funnel_access" as const,
+      };
+
+      const mockDecodedJwt = {
+        funnelSlug: "my-awesome-site",
+        funnelId: 1,
+        hasAccess: true,
+        type: "funnel_access",
+        exp: Math.floor(Date.now() / 1000) + 7200, // 2 hours from now
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+
+      vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(
+        mockTokenPayload
+      );
+      vi.spyOn(jwt, "decode").mockReturnValue(mockDecodedJwt);
+
+      const cookies = {
+        "funnel_access_my-awesome-site": mockToken,
+      };
+
+      const result = await GetPublicSiteService.getPublicSite(
+        {
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        },
+        cookies
+      );
+
+      expect(result.site).toBeDefined();
+      expect(result.site?.id).toBe(1);
+      expect(result.requiresPassword).toBe(true);
+      expect(result.hasAccess).toBe(true);
+      expect(result.tokenExpiry).toBeGreaterThan(0);
+    });
+
+    it("should deny access with invalid token", async () => {
+      const protectedFunnel = {
+        ...mockFunnel,
+        settings: {
+          ...mockFunnel.settings,
+          isPasswordProtected: true,
+          passwordHash: "hashed_password",
+        },
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+
+      vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(null);
+
+      const cookies = {
+        "funnel_access_my-awesome-site": "invalid.jwt.token",
+      };
+
+      const result = await GetPublicSiteService.getPublicSite(
+        {
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        },
+        cookies
+      );
+
+      expect(result.site).toBeNull();
+      expect(result.requiresPassword).toBe(true);
+      expect(result.hasAccess).toBe(false);
+      expect(result.tokenExpiry).toBeNull();
+    });
+
+    it("should deny access with token for wrong funnel", async () => {
+      const protectedFunnel = {
+        ...mockFunnel,
+        settings: {
+          ...mockFunnel.settings,
+          isPasswordProtected: true,
+          passwordHash: "hashed_password",
+        },
+      };
+
+      const mockTokenPayload = {
+        funnelSlug: "different-funnel",
+        funnelId: 999,
+        hasAccess: true,
+        type: "funnel_access" as const,
+      };
+
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+
+      vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(
+        mockTokenPayload
+      );
+
+      const cookies = {
+        "funnel_access_my-awesome-site": "valid.jwt.token",
+      };
+
+      const result = await GetPublicSiteService.getPublicSite(
+        {
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        },
+        cookies
+      );
+
+      expect(result.site).toBeNull();
+      expect(result.requiresPassword).toBe(true);
+      expect(result.hasAccess).toBe(false);
+      expect(result.tokenExpiry).toBeNull();
+    });
+
+    it("should grant access to non-protected site without token", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+
+      const result = await GetPublicSiteService.getPublicSite(
+        {
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        },
+        {} // Empty cookies
+      );
+
+      expect(result.site).toBeDefined();
+      expect(result.requiresPassword).toBe(false);
+      expect(result.hasAccess).toBe(true);
+      expect(result.tokenExpiry).toBeNull();
+    });
+  });
+
   describe("Error Cases - Domain Validation", () => {
     it("should throw NotFoundError for non-existent hostname", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(null);
@@ -340,6 +536,29 @@ describe("Get Public Site Tests", () => {
           funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Domain not found");
+    });
+
+    it("should throw NotFoundError when funnelSlug doesn't match the connected funnel", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+
+      // Request with a different funnelSlug than the one connected to the domain
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "wrong-funnel-slug",
+        })
+      ).rejects.toThrow(NotFoundError);
+
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "wrong-funnel-slug",
+        })
+      ).rejects.toThrow("Site not found for this domain");
     });
 
     it("should throw NotFoundError for domain with PENDING status", async () => {

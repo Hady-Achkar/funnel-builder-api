@@ -24,9 +24,11 @@ export const verifyPasswordController = async (
     if (result.valid && result.funnelId) {
       const sessionToken = generateFunnelAccessToken(funnelSlug, result.funnelId);
       result.sessionToken = sessionToken;
+      return res.status(200).json(result);
     }
 
-    return res.status(200).json(result);
+    // If password is invalid, return 401 Unauthorized
+    return res.status(401).json(result);
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({

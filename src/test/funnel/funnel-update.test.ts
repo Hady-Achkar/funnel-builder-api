@@ -19,6 +19,8 @@ describe("Update Funnel Tests", () => {
   const userId = 1;
   const funnelId = 1;
   const workspaceId = 1;
+  const workspaceSlug = "test-workspace";
+  const funnelSlug = "test-funnel";
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -45,21 +47,21 @@ describe("Update Funnel Tests", () => {
   describe("Validation", () => {
     it("should throw error if user ID is not provided", async () => {
       await expect(
-        updateFunnel(funnelId, 0, { name: "New Name" })
+        updateFunnel(0, { workspaceSlug, funnelSlug }, { name: "New Name" })
       ).rejects.toThrow("User ID is required");
     });
 
     it("should throw error for invalid funnel ID", async () => {
       await expect(
-        updateFunnel(-1, userId, { name: "New Name" })
+        updateFunnel(userId, { workspaceSlug: "", funnelSlug: "" }, { name: "New Name" })
       ).rejects.toThrow("Invalid input");
     });
 
     it("should throw error if funnel does not exist", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
       await expect(
-        updateFunnel(funnelId, userId, { name: "New Name" })
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "New Name" })
       ).rejects.toThrow("Funnel not found");
     });
 
@@ -72,19 +74,20 @@ describe("Update Funnel Tests", () => {
         workspaceId,
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(existingFunnel);
 
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
         userRole: $Enums.WorkspaceRole.OWNER,
       });
 
-      await expect(updateFunnel(funnelId, userId, {})).rejects.toThrow(
+      await expect(updateFunnel(userId, { workspaceSlug, funnelSlug }, {})).rejects.toThrow(
         "Nothing to update"
       );
     });
@@ -98,12 +101,13 @@ describe("Update Funnel Tests", () => {
         workspaceId,
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(existingFunnel);
 
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
@@ -111,7 +115,7 @@ describe("Update Funnel Tests", () => {
       });
 
       await expect(
-        updateFunnel(funnelId, userId, {
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, {
           name: "Test Funnel",
           status: $Enums.FunnelStatus.DRAFT,
         })
@@ -128,14 +132,16 @@ describe("Update Funnel Tests", () => {
       workspaceId,
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
     };
 
     it("should allow workspace owner to update funnel", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Updated Funnel",
@@ -150,7 +156,7 @@ describe("Update Funnel Tests", () => {
         isOwner: true,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "Updated Funnel",
       });
 
@@ -171,8 +177,9 @@ describe("Update Funnel Tests", () => {
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(adminFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(adminFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Updated by Admin",
@@ -187,7 +194,7 @@ describe("Update Funnel Tests", () => {
         isOwner: false,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "Updated by Admin",
       });
 
@@ -203,8 +210,9 @@ describe("Update Funnel Tests", () => {
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(editorFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(editorFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Updated by Editor",
@@ -219,7 +227,7 @@ describe("Update Funnel Tests", () => {
         isOwner: false,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "Updated by Editor",
       });
 
@@ -235,7 +243,7 @@ describe("Update Funnel Tests", () => {
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(viewerFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(viewerFunnel);
 
       (PermissionManager.can as any).mockResolvedValue({
         allowed: false,
@@ -244,7 +252,7 @@ describe("Update Funnel Tests", () => {
       });
 
       await expect(
-        updateFunnel(funnelId, userId, { name: "Try to Update" })
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Try to Update" })
       ).rejects.toThrow("You don't have permission to update funnel");
     });
 
@@ -257,7 +265,7 @@ describe("Update Funnel Tests", () => {
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(nonMemberFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(nonMemberFunnel);
 
       (PermissionManager.can as any).mockResolvedValue({
         allowed: false,
@@ -265,7 +273,7 @@ describe("Update Funnel Tests", () => {
       });
 
       await expect(
-        updateFunnel(funnelId, userId, { name: "Try to Update" })
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Try to Update" })
       ).rejects.toThrow("You don't have access to this workspace");
     });
   });
@@ -279,6 +287,7 @@ describe("Update Funnel Tests", () => {
       workspaceId,
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
@@ -292,8 +301,9 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should update funnel name", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "New Name",
@@ -302,7 +312,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "New Name",
       });
 
@@ -318,8 +328,9 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should trim whitespace from name", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Trimmed Name",
@@ -328,7 +339,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      await updateFunnel(funnelId, userId, {
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "  Trimmed Name  ",
       });
 
@@ -342,8 +353,9 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should auto-generate slug when name changes", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "New Name",
@@ -352,7 +364,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      await updateFunnel(funnelId, userId, {
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "New Name",
       });
 
@@ -366,15 +378,16 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should throw error for duplicate name", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
 
       const duplicateError = new Error("Unique constraint failed on slug");
       (duplicateError as any).code = "P2002";
       mockPrisma.funnel.update.mockRejectedValue(duplicateError);
 
       await expect(
-        updateFunnel(funnelId, userId, { name: "Duplicate Name" })
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Duplicate Name" })
       ).rejects.toThrow("already in use");
     });
   });
@@ -388,6 +401,7 @@ describe("Update Funnel Tests", () => {
       workspaceId,
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
@@ -401,8 +415,9 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should update funnel slug", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Test Funnel",
@@ -411,7 +426,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         slug: "new-slug",
       });
 
@@ -426,8 +441,9 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should not auto-generate slug if explicitly provided", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "New Name",
@@ -436,7 +452,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      await updateFunnel(funnelId, userId, {
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "New Name",
         slug: "custom-slug",
       });
@@ -454,6 +470,7 @@ describe("Update Funnel Tests", () => {
       workspaceId,
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
@@ -464,7 +481,7 @@ describe("Update Funnel Tests", () => {
         allowed: true,
         userRole: $Enums.WorkspaceRole.OWNER,
       });
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(existingFunnel);
     });
 
     it("should update funnel status to LIVE", async () => {
@@ -476,7 +493,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         status: $Enums.FunnelStatus.LIVE,
       });
 
@@ -499,7 +516,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      await updateFunnel(funnelId, userId, {
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         status: $Enums.FunnelStatus.ARCHIVED,
       });
 
@@ -521,7 +538,7 @@ describe("Update Funnel Tests", () => {
         workspaceId,
       });
 
-      await updateFunnel(funnelId, userId, {
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         status: $Enums.FunnelStatus.SHARED,
       });
 
@@ -544,6 +561,7 @@ describe("Update Funnel Tests", () => {
       workspaceId,
       workspace: {
         id: workspaceId,
+        slug: workspaceSlug,
         name: "Test Workspace",
         ownerId: userId,
       },
@@ -554,8 +572,9 @@ describe("Update Funnel Tests", () => {
         allowed: true,
         userRole: $Enums.WorkspaceRole.OWNER,
       });
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "Updated Funnel",
@@ -566,15 +585,15 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should invalidate individual funnel cache after update", async () => {
-      await updateFunnel(funnelId, userId, { name: "Updated Funnel" });
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Updated Funnel" });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:full`
+        `workspace:${workspaceSlug}:funnel:updated-funnel:full`
       );
     });
 
     it("should invalidate workspace funnels list cache after update", async () => {
-      await updateFunnel(funnelId, userId, { name: "Updated Funnel" });
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Updated Funnel" });
 
       expect(cacheService.del).toHaveBeenCalledWith(
         `workspace:${workspaceId}:funnels:all`
@@ -582,14 +601,15 @@ describe("Update Funnel Tests", () => {
     });
 
     it("should invalidate all relevant cache keys", async () => {
-      await updateFunnel(funnelId, userId, { name: "Updated Funnel" });
+      await updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "Updated Funnel" });
 
       const expectedCacheKeys = [
-        `workspace:${workspaceId}:funnel:${funnelId}:full`,
+        `funnel:${funnelId}:settings:full`,
+        `workspace:${workspaceSlug}:funnel:updated-funnel:full`,
         `workspace:${workspaceId}:funnels:all`,
         `workspace:${workspaceId}:funnels:list`,
         `user:${userId}:workspace:${workspaceId}:funnels`,
-        `funnel:${funnelId}:settings:full`,
+        `workspace:${workspaceSlug}:funnel:test-funnel:full`, // Old slug cache invalidation
       ];
 
       expectedCacheKeys.forEach((key) => {
@@ -602,7 +622,7 @@ describe("Update Funnel Tests", () => {
     it("should continue operation if cache invalidation fails", async () => {
       (cacheService.del as any).mockRejectedValue(new Error("Cache error"));
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "Updated Funnel",
       });
 
@@ -620,25 +640,27 @@ describe("Update Funnel Tests", () => {
         workspaceId,
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
 
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
         userRole: $Enums.WorkspaceRole.OWNER,
       });
 
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
       mockPrisma.funnel.update.mockRejectedValue(
         new Error("Database connection failed")
       );
 
       await expect(
-        updateFunnel(funnelId, userId, { name: "New Name" })
+        updateFunnel(userId, { workspaceSlug, funnelSlug }, { name: "New Name" })
       ).rejects.toThrow("Failed to update funnel");
     });
 
@@ -651,13 +673,15 @@ describe("Update Funnel Tests", () => {
         workspaceId,
         workspace: {
           id: workspaceId,
+          slug: workspaceSlug,
           name: "Test Workspace",
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(existingFunnel);
-      mockPrisma.funnel.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst
+        .mockResolvedValueOnce(existingFunnel)
+        .mockResolvedValueOnce(null);
       mockPrisma.funnel.update.mockResolvedValue({
         id: funnelId,
         name: "New Name",
@@ -671,7 +695,7 @@ describe("Update Funnel Tests", () => {
         userRole: $Enums.WorkspaceRole.OWNER,
       });
 
-      const result = await updateFunnel(funnelId, userId, {
+      const result = await updateFunnel(userId, { workspaceSlug, funnelSlug }, {
         name: "New Name",
         slug: "new-slug",
         status: $Enums.FunnelStatus.LIVE,

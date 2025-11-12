@@ -19,20 +19,22 @@ export const duplicateFunnelController = async (
       throw new UnauthorizedError("Please log in to duplicate a funnel");
     }
 
-    const funnelId = parseInt(req.params.id);
-    if (isNaN(funnelId)) {
-      return res.status(400).json({ error: "Invalid funnel ID" });
-    }
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
 
-    const { response, workspaceId } = await duplicateFunnel(
-      funnelId,
+    const { response, workspaceId, workspaceSlug: targetWorkspaceSlug, funnelSlug: newFunnelSlug } = await duplicateFunnel(
       userId,
+      {
+        workspaceSlug,
+        funnelSlug,
+      },
       validatedData
     );
 
     try {
       const cacheKeysToInvalidate = [
-        `workspace:${workspaceId}:funnel:${response.funnelId}:full`,
+        `workspace:${targetWorkspaceSlug}:funnel:${newFunnelSlug}:full`,
+        `funnel:${response.funnelId}:settings:full`,
         `workspace:${workspaceId}:funnels:all`,
         `workspace:${workspaceId}:funnels:list`,
         `user:${userId}:workspace:${workspaceId}:funnels`,

@@ -11,22 +11,29 @@ import {
 } from "../../../types/funnel/delete";
 
 export const deleteFunnel = async (
-  funnelId: number,
-  userId: number
+  userId: number,
+  params: DeleteFunnelParams
 ): Promise<DeleteFunnelResponse> => {
   let validatedParams: DeleteFunnelParams;
 
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = deleteFunnelParams.parse({ funnelId });
+    validatedParams = deleteFunnelParams.parse(params);
 
     const prisma = getPrisma();
 
-    const funnelToDelete = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
+    // Get funnel with workspace information by slug
+    const funnelToDelete = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedParams.funnelSlug,
+        workspace: {
+          slug: validatedParams.workspaceSlug,
+        },
+      },
       select: {
         id: true,
+        slug: true,
         name: true,
         workspaceId: true,
         pages: {
@@ -37,6 +44,7 @@ export const deleteFunnel = async (
         workspace: {
           select: {
             id: true,
+            slug: true,
             name: true,
             ownerId: true,
           },
@@ -56,17 +64,20 @@ export const deleteFunnel = async (
     });
 
     await prisma.funnel.delete({
-      where: { id: validatedParams.funnelId },
+      where: { id: funnelToDelete.id },
     });
 
     try {
-      // Delete individual funnel cache
-      const fullFunnelCacheKey = `workspace:${funnelToDelete.workspaceId}:funnel:${validatedParams.funnelId}:full`;
+      // Delete individual funnel cache (slug-based)
+      const fullFunnelCacheKey = `workspace:${validatedParams.workspaceSlug}:funnel:${funnelToDelete.slug}:full`;
       await cacheService.del(fullFunnelCacheKey);
+
+      // Delete funnel settings cache
+      await cacheService.del(`funnel:${funnelToDelete.id}:settings:full`);
 
       // Delete all page cache keys for this funnel
       for (const page of funnelToDelete.pages) {
-        const pageCacheKey = `funnel:${validatedParams.funnelId}:page:${page.id}:full`;
+        const pageCacheKey = `funnel:${funnelToDelete.id}:page:${page.id}:full`;
         await cacheService.del(pageCacheKey);
       }
 
@@ -76,7 +87,7 @@ export const deleteFunnel = async (
 
       if (existingFunnels) {
         const updatedFunnels = existingFunnels.filter(
-          (f) => f.id !== validatedParams.funnelId
+          (f) => f.id !== funnelToDelete.id
         );
 
         if (updatedFunnels.length === 0) {
@@ -96,7 +107,7 @@ export const deleteFunnel = async (
       );
     } catch (cacheError) {
       console.warn(
-        `Funnel deleted from database, but cache update failed for funnel ${validatedParams.funnelId}:`,
+        `Funnel deleted from database, but cache update failed for funnel ${funnelToDelete.id}:`,
         cacheError
       );
     }

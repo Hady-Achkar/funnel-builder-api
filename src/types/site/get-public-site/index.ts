@@ -26,6 +26,16 @@ export const publicSiteSettingsSchema = z.object({
     description: z.string().nullable(),
     image: z.string().nullable(),
   }),
+  googleAnalyticsId: z.string().nullable(),
+  facebookPixelId: z.string().nullable(),
+  customTrackingScripts: z.any(),
+  enableCookieConsent: z.boolean(),
+  cookieConsentText: z.string().nullable(),
+  privacyPolicyUrl: z.string().nullable(),
+  termsOfServiceUrl: z.string().nullable(),
+  timezone: z.string().nullable(),
+  dateFormat: z.string().nullable(),
+  defaultSeoKeywords: z.string().nullable(),
 });
 
 // Theme Schema
@@ -44,18 +54,23 @@ export const publicSiteThemeSchema = z.object({
 
 // Response Schema
 export const getPublicSiteResponseSchema = z.object({
-  site: z.object({
-    id: z.number(),
-    name: z.string(),
-    slug: z.string(),
-    status: z.string(),
-    workspaceId: z.number(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    pages: z.array(publicPageSchema),
-    settings: publicSiteSettingsSchema,
-    theme: publicSiteThemeSchema,
-  }),
+  site: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      slug: z.string(),
+      status: z.string(),
+      workspaceId: z.number(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+      pages: z.array(publicPageSchema),
+      settings: publicSiteSettingsSchema,
+      theme: publicSiteThemeSchema,
+    })
+    .nullable(),
+  requiresPassword: z.boolean(),
+  hasAccess: z.boolean(),
+  tokenExpiry: z.number().nullable(),
 });
 
 // Inferred Types

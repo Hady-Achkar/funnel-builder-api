@@ -2,9 +2,8 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const getFunnelSettingsRequest = z.object({
-  funnelId: z.number()
-    .int("Funnel ID must be an integer")
-    .positive("Funnel ID must be a positive number"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 });
 
 export type GetFunnelSettingsRequest = z.infer<typeof getFunnelSettingsRequest>;
@@ -28,6 +27,7 @@ export const getFunnelSettingsResponse = z.object({
   timezone: z.string().nullable(),
   dateFormat: z.string().nullable(),
   isPasswordProtected: z.boolean(),
+  password: z.string().nullable(),
   funnelStatus: z.enum($Enums.FunnelStatus),
   createdAt: z.date().or(z.string()),
   updatedAt: z.date().or(z.string()),

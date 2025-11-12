@@ -26,9 +26,10 @@ interface FunnelWithRelations extends Funnel {
   activeTheme: Theme;
 }
 
-export function formatSiteResponse(
-  funnel: FunnelWithRelations
-): GetPublicSiteResponse {
+export function formatSiteResponse(funnel: FunnelWithRelations): Omit<
+  GetPublicSiteResponse,
+  "requiresPassword" | "hasAccess" | "tokenExpiry"
+> {
   const pages: PublicPage[] = funnel.pages
     .sort((a, b) => a.order - b.order)
     .map((page) => ({
@@ -50,6 +51,16 @@ export function formatSiteResponse(
           description: funnel.settings.defaultSeoDescription,
           image: funnel.settings.ogImage,
         },
+        googleAnalyticsId: funnel.settings.googleAnalyticsId,
+        facebookPixelId: funnel.settings.facebookPixelId,
+        customTrackingScripts: funnel.settings.customTrackingScripts,
+        enableCookieConsent: funnel.settings.enableCookieConsent,
+        cookieConsentText: funnel.settings.cookieConsentText,
+        privacyPolicyUrl: funnel.settings.privacyPolicyUrl,
+        termsOfServiceUrl: funnel.settings.termsOfServiceUrl,
+        timezone: funnel.settings.timezone,
+        dateFormat: funnel.settings.dateFormat,
+        defaultSeoKeywords: funnel.settings.defaultSeoKeywords,
       }
     : {
         favicon: null,
@@ -60,6 +71,16 @@ export function formatSiteResponse(
           description: null,
           image: null,
         },
+        googleAnalyticsId: null,
+        facebookPixelId: null,
+        customTrackingScripts: [],
+        enableCookieConsent: false,
+        cookieConsentText: null,
+        privacyPolicyUrl: null,
+        termsOfServiceUrl: null,
+        timezone: "UTC",
+        dateFormat: "DD.MM.YYYY",
+        defaultSeoKeywords: null,
       };
 
   const theme: PublicSiteTheme | null = funnel.activeTheme

@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const GetFunnelConnectionRequestSchema = z.object({
-  funnelId: z.number().int().positive("Funnel ID must be a positive integer"),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 });
 
 export type GetFunnelConnectionRequest = z.infer<typeof GetFunnelConnectionRequestSchema>;

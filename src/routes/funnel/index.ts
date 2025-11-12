@@ -14,14 +14,14 @@ router.use(authenticateToken);
 
 router.post("/", createFunnelController);
 router.post("/from-template/:templateId", createFromTemplateController);
-router.post("/:id/duplicate", duplicateFunnelController);
 router.get(
   "/:workspaceSlug/summary",
   GetFunnelsSummaryController.getFunnelsSummary
 );
 router.get("/workspace/:workspaceSlug", getAllFunnelsController);
-router.get("/:id", getFunnelController);
-router.put("/:id", updateFunnelController);
-router.delete("/:id", deleteFunnelController);
+router.get("/:workspaceSlug/:funnelSlug", getFunnelController);
+router.put("/:workspaceSlug/:funnelSlug", updateFunnelController);
+router.delete("/:workspaceSlug/:funnelSlug", deleteFunnelController);
+router.post("/:workspaceSlug/:funnelSlug/duplicate", duplicateFunnelController);
 
 export default router;

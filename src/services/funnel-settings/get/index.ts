@@ -6,13 +6,66 @@ import {
 } from "../../../types/funnel-settings/get";
 import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
+import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
+import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
+import { decrypt } from "../lock-funnel/utils/encryption";
 
 export const getFunnelSettings = async (
-  funnelId: number
+  workspaceSlug: string,
+  funnelSlug: string,
+  userId: number
 ): Promise<GetFunnelSettingsResponse> => {
   try {
-    const validatedData = getFunnelSettingsRequest.parse({ funnelId });
-    const cacheKey = `funnel:${validatedData.funnelId}:settings:full`;
+    if (!userId) throw new Error("User ID is required");
+
+    const validatedData = getFunnelSettingsRequest.parse({ workspaceSlug, funnelSlug });
+
+    const prisma = getPrisma();
+
+    // Find workspace by slug
+    const workspace = await prisma.workspace.findUnique({
+      where: { slug: validatedData.workspaceSlug },
+      select: { id: true },
+    });
+
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    // Find funnel by slug and workspaceId
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedData.funnelSlug,
+        workspaceId: workspace.id,
+      },
+      select: {
+        id: true,
+        slug: true,
+        workspaceId: true,
+      },
+    });
+
+    if (!funnel) {
+      throw new Error("Funnel not found");
+    }
+
+    // Check permissions
+    const permissionCheck = await PermissionManager.can({
+      userId,
+      workspaceId: funnel.workspaceId,
+      action: PermissionAction.VIEW_FUNNEL,
+    });
+
+    if (!permissionCheck.allowed) {
+      throw new Error(
+        permissionCheck.reason ||
+        `You don't have permission to view this funnel's settings. Please contact your workspace admin.`
+      );
+    }
+
+    // Try to get from cache
+    const cacheKey = `workspace:${validatedData.workspaceSlug}:funnel:${validatedData.funnelSlug}:settings:full`;
+
     const cachedSettings = await cacheService.get<GetFunnelSettingsResponse>(
       cacheKey
     );
@@ -21,10 +74,9 @@ export const getFunnelSettings = async (
       return getFunnelSettingsResponse.parse(cachedSettings);
     }
 
-    const prisma = getPrisma();
-
+    // Fetch from database
     const settings = await prisma.funnelSettings.findUnique({
-      where: { funnelId: validatedData.funnelId },
+      where: { funnelId: funnel.id },
       include: {
         funnel: {
           select: {
@@ -38,9 +90,41 @@ export const getFunnelSettings = async (
       throw new Error("Funnel settings not found");
     }
 
+    // Decrypt password if it exists
+    let decryptedPassword: string | null = null;
+    if (settings.passwordHash && settings.passwordHash !== null) {
+      try {
+        decryptedPassword = decrypt(settings.passwordHash);
+      } catch (error) {
+        console.warn("Failed to decrypt password:", error);
+        // If decryption fails, leave password as null
+        decryptedPassword = null;
+      }
+    }
+
     const responseData = {
-      ...settings,
+      id: settings.id,
+      funnelId: settings.funnelId,
+      defaultSeoTitle: settings.defaultSeoTitle ?? null,
+      defaultSeoDescription: settings.defaultSeoDescription ?? null,
+      defaultSeoKeywords: settings.defaultSeoKeywords ?? null,
+      favicon: settings.favicon ?? null,
+      ogImage: settings.ogImage ?? null,
+      googleAnalyticsId: settings.googleAnalyticsId ?? null,
+      facebookPixelId: settings.facebookPixelId ?? null,
+      customTrackingScripts: settings.customTrackingScripts ?? null,
+      enableCookieConsent: settings.enableCookieConsent ?? false,
+      cookieConsentText: settings.cookieConsentText ?? null,
+      privacyPolicyUrl: settings.privacyPolicyUrl ?? null,
+      termsOfServiceUrl: settings.termsOfServiceUrl ?? null,
+      language: settings.language ?? null,
+      timezone: settings.timezone ?? null,
+      dateFormat: settings.dateFormat ?? null,
+      isPasswordProtected: settings.isPasswordProtected ?? false,
+      password: decryptedPassword ?? null,
       funnelStatus: settings.funnel.status,
+      createdAt: settings.createdAt,
+      updatedAt: settings.updatedAt,
     };
 
     try {
@@ -52,8 +136,11 @@ export const getFunnelSettings = async (
     return getFunnelSettingsResponse.parse(responseData);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      const firstError = error.issues[0];
-      throw new Error(`Invalid input: ${firstError.message}`);
+      const errorDetails = error.issues.map(issue => {
+        const received = 'received' in issue ? JSON.stringify(issue.received) : 'unknown';
+        return `${issue.path.join('.')}: ${issue.message} (received: ${received})`;
+      }).join(', ');
+      throw new Error(`Validation failed: ${errorDetails}`);
     }
     if (error instanceof Error) {
       throw new Error(`Failed to get funnel settings: ${error.message}`);

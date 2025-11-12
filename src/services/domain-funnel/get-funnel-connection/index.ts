@@ -16,13 +16,18 @@ export class GetFunnelConnectionService {
   ): Promise<GetFunnelConnectionResponse> {
     try {
       const validatedData = GetFunnelConnectionRequestSchema.parse(requestData);
-      const { funnelId } = validatedData;
+      const { workspaceSlug, funnelSlug } = validatedData;
 
       const prisma = getPrisma();
 
-      // Get funnel with workspace info
-      const funnel = await prisma.funnel.findUnique({
-        where: { id: funnelId },
+      // Get funnel with workspace info using slugs
+      const funnel = await prisma.funnel.findFirst({
+        where: {
+          slug: funnelSlug,
+          workspace: {
+            slug: workspaceSlug,
+          },
+        },
         select: {
           id: true,
           name: true,
@@ -30,6 +35,7 @@ export class GetFunnelConnectionService {
           workspace: {
             select: {
               id: true,
+              slug: true,
               ownerId: true,
             },
           },
@@ -55,7 +61,7 @@ export class GetFunnelConnectionService {
 
       // Get the connected domain for this funnel
       const connection = await prisma.funnelDomain.findFirst({
-        where: { funnelId },
+        where: { funnelId: funnel.id },
         select: {
           domain: {
             select: {

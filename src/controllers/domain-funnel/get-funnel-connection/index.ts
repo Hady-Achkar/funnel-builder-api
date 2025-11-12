@@ -16,13 +16,16 @@ export class GetFunnelConnectionController {
         throw new UnauthorizedError("Authentication is required");
       }
 
-      const funnelId = parseInt(req.params.funnelId);
+      const { workspaceSlug, funnelSlug } = req.params;
 
-      if (!funnelId || isNaN(funnelId)) {
-        throw new BadRequestError("Invalid funnel ID");
+      if (!workspaceSlug || !funnelSlug) {
+        throw new BadRequestError("Workspace slug and funnel slug are required");
       }
 
-      const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
+      const result = await GetFunnelConnectionService.getFunnelConnection(userId, {
+        workspaceSlug,
+        funnelSlug
+      });
 
       res.status(200).json(result);
     } catch (error) {
