@@ -46,7 +46,7 @@ export const verifyFunnelPassword = async (
     if (!funnelSettings.isPasswordProtected || !funnelSettings.passwordHash) {
       const response = {
         valid: true,
-        message: 'Funnel is not password protected',
+        message: 'Access granted',
         funnelId: funnel.id,
       };
       return verifyPasswordResponse.parse(response);
@@ -64,7 +64,7 @@ export const verifyFunnelPassword = async (
 
     const response = {
       valid: isValidPassword,
-      message: isValidPassword ? 'Password is correct' : 'Invalid password',
+      message: isValidPassword ? 'Access granted' : 'Incorrect password. Please try again.',
       funnelId: funnel.id,
     };
 

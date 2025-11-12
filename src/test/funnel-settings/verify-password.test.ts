@@ -178,7 +178,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Funnel is not password protected");
+      expect(result.message).toBe("Access granted");
       expect(result.funnelId).toBe(funnelId);
     });
 
@@ -195,7 +195,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Funnel is not password protected");
+      expect(result.message).toBe("Access granted");
     });
 
     it("should allow access if isPasswordProtected is false even with hash", async () => {
@@ -211,7 +211,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Funnel is not password protected");
+      expect(result.message).toBe("Access granted");
     });
 
     it("should not call encryptionModule.decrypt if funnel is not protected", async () => {
@@ -248,7 +248,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Password is correct");
+      expect(result.message).toBe("Access granted");
       expect(result.funnelId).toBe(funnelId);
     });
 
@@ -261,7 +261,7 @@ describe("Verify Funnel Password Tests", () => {
       });
 
       expect(result.valid).toBe(false);
-      expect(result.message).toBe("Invalid password");
+      expect(result.message).toBe("Incorrect password. Please try again.");
       expect(result.funnelId).toBe(funnelId);
     });
 
@@ -483,7 +483,7 @@ describe("Verify Funnel Password Tests", () => {
       const result = await verifyFunnelPassword({ funnelSlug, password });
 
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Funnel is not password protected");
+      expect(result.message).toBe("Access granted");
     });
 
     it("should handle multiple consecutive verification attempts", async () => {
@@ -690,7 +690,7 @@ describe("Verify Funnel Password Tests", () => {
       });
       expect(encryptionModule.decrypt).toHaveBeenCalled();
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Password is correct");
+      expect(result.message).toBe("Access granted");
     });
 
     it("should complete full workflow with incorrect password", async () => {
@@ -709,7 +709,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalled();
       expect(encryptionModule.decrypt).toHaveBeenCalled();
       expect(result.valid).toBe(false);
-      expect(result.message).toBe("Invalid password");
+      expect(result.message).toBe("Incorrect password. Please try again.");
     });
 
     it("should complete full workflow for unprotected funnel", async () => {
@@ -727,7 +727,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalled();
       expect(encryptionModule.decrypt).not.toHaveBeenCalled();
       expect(result.valid).toBe(true);
-      expect(result.message).toBe("Funnel is not password protected");
+      expect(result.message).toBe("Access granted");
     });
 
     it("should handle multiple funnels with different passwords", async () => {
