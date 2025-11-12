@@ -11,7 +11,7 @@ import {
 } from "../../../types/funnel/get";
 
 export const getFunnel = async (
-  funnelId: number,
+  funnelSlug: string,
   userId: number
 ): Promise<GetFunnelResponse> => {
   let validatedParams: GetFunnelParams;
@@ -19,14 +19,31 @@ export const getFunnel = async (
   try {
     if (!userId) throw new Error("User ID is required");
 
-    validatedParams = getFunnelParams.parse({ funnelId });
+    validatedParams = getFunnelParams.parse({ funnelSlug });
 
     const prisma = getPrisma();
 
-    const funnelExists = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
+    // Get user's accessible workspaces to find funnel by slug
+    const userWorkspaces = await prisma.workspaceMember.findMany({
+      where: { userId },
+      select: { workspaceId: true },
+    });
+
+    const workspaceIds = userWorkspaces.map((wm) => wm.workspaceId);
+
+    if (workspaceIds.length === 0) {
+      throw new Error("You don't have access to any workspaces");
+    }
+
+    // Find funnel by slug within user's accessible workspaces
+    const funnelExists = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedParams.funnelSlug,
+        workspaceId: { in: workspaceIds },
+      },
       select: {
         id: true,
+        slug: true,
         workspaceId: true,
         workspace: {
           select: {
@@ -57,13 +74,13 @@ export const getFunnel = async (
     }
 
     // Try to get funnel from cache first
-    const fullFunnelCacheKey = `workspace:${funnelExists.workspaceId}:funnel:${validatedParams.funnelId}:full`;
+    const fullFunnelCacheKey = `workspace:${funnelExists.workspaceId}:funnel:${funnelExists.slug}:full`;
     let funnel = await cacheService.get<any>(fullFunnelCacheKey);
 
     // If not in cache, fetch from database
     if (!funnel) {
       const funnelFromDb = await prisma.funnel.findUnique({
-        where: { id: validatedParams.funnelId },
+        where: { id: funnelExists.id },
         include: {
           customTheme: true,
           pages: {

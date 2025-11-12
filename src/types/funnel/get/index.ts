@@ -2,7 +2,7 @@ import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const getFunnelParams = z.object({
-  funnelId: z.number().int().positive(),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 });
 
 export const getFunnelResponse = z.object({

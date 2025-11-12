@@ -20,7 +20,7 @@ router.get(
   GetFunnelsSummaryController.getFunnelsSummary
 );
 router.get("/workspace/:workspaceSlug", getAllFunnelsController);
-router.get("/:id", getFunnelController);
+router.get("/:funnelSlug", getFunnelController);
 router.put("/:id", updateFunnelController);
 router.delete("/:id", deleteFunnelController);
 

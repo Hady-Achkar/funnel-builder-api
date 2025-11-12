@@ -13,10 +13,10 @@ export const getFunnelController = async (
     if (!userId) {
       throw new UnauthorizedError("Please log in to view the funnel");
     }
-    
-    const funnelId = parseInt(req.params.id);
 
-    const result = await getFunnel(funnelId, userId);
+    const funnelSlug = req.params.funnelSlug;
+
+    const result = await getFunnel(funnelSlug, userId);
 
     return res.status(200).json(result);
   } catch (error) {

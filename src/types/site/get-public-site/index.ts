@@ -26,6 +26,16 @@ export const publicSiteSettingsSchema = z.object({
     description: z.string().nullable(),
     image: z.string().nullable(),
   }),
+  googleAnalyticsId: z.string().nullable(),
+  facebookPixelId: z.string().nullable(),
+  customTrackingScripts: z.any(),
+  enableCookieConsent: z.boolean(),
+  cookieConsentText: z.string().nullable(),
+  privacyPolicyUrl: z.string().nullable(),
+  termsOfServiceUrl: z.string().nullable(),
+  timezone: z.string().nullable(),
+  dateFormat: z.string().nullable(),
+  defaultSeoKeywords: z.string().nullable(),
 });
 
 // Theme Schema
