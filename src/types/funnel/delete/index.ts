@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const deleteFunnelParams = z.object({
-  funnelId: z.number().int().positive(),
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
 });
 
 export const deleteFunnelResponse = z.object({

@@ -9,13 +9,16 @@ describe("Get Funnel Connection Tests", () => {
   let mockPrisma: any;
   const userId = 1;
   const funnelId = 123;
+  const workspaceId = 1;
+  const workspaceSlug = "test-workspace";
+  const funnelSlug = "test-funnel";
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     mockPrisma = {
       funnel: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
       },
       workspace: {
         findUnique: vi.fn(),
@@ -40,9 +43,10 @@ describe("Get Funnel Connection Tests", () => {
       const funnelData = {
         id: funnelId,
         name: "Test Funnel",
-        workspaceId: 1,
+        workspaceId: workspaceId,
         workspace: {
-          id: 1,
+          id: workspaceId,
+          slug: workspaceSlug,
           ownerId: userId,
         },
       };
@@ -55,14 +59,17 @@ describe("Get Funnel Connection Tests", () => {
         isActive: true,
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelData);
       mockPrisma.workspace.findUnique.mockResolvedValue({
-        id: 1,
+        id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(connectionData);
 
-      const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
+      const result = await GetFunnelConnectionService.getFunnelConnection(userId, {
+        workspaceSlug,
+        funnelSlug,
+      });
 
       expect(result).toEqual({
         funnel: {
@@ -76,8 +83,13 @@ describe("Get Funnel Connection Tests", () => {
         isActive: true,
       });
 
-      expect(mockPrisma.funnel.findUnique).toHaveBeenCalledWith({
-        where: { id: funnelId },
+      expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith({
+        where: {
+          slug: funnelSlug,
+          workspace: {
+            slug: workspaceSlug,
+          },
+        },
         select: {
           id: true,
           name: true,
@@ -85,6 +97,7 @@ describe("Get Funnel Connection Tests", () => {
           workspace: {
             select: {
               id: true,
+              slug: true,
               ownerId: true,
             },
           },
@@ -109,21 +122,25 @@ describe("Get Funnel Connection Tests", () => {
       const funnelData = {
         id: funnelId,
         name: "Test Funnel",
-        workspaceId: 1,
+        workspaceId: workspaceId,
         workspace: {
-          id: 1,
+          id: workspaceId,
+          slug: workspaceSlug,
           ownerId: userId,
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelData);
       mockPrisma.workspace.findUnique.mockResolvedValue({
-        id: 1,
+        id: workspaceId,
         ownerId: userId,
       });
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(null);
 
-      const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
+      const result = await GetFunnelConnectionService.getFunnelConnection(userId, {
+        workspaceSlug,
+        funnelSlug,
+      });
 
       expect(result).toEqual({
         funnel: {
@@ -139,9 +156,10 @@ describe("Get Funnel Connection Tests", () => {
       const funnelData = {
         id: funnelId,
         name: "Test Funnel",
-        workspaceId: 1,
+        workspaceId: workspaceId,
         workspace: {
-          id: 1,
+          id: workspaceId,
+          slug: workspaceSlug,
           ownerId: 999, // Different owner
         },
       };
@@ -158,15 +176,18 @@ describe("Get Funnel Connection Tests", () => {
         isActive: true,
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelData);
       mockPrisma.workspace.findUnique.mockResolvedValue({
-        id: 1,
+        id: workspaceId,
         ownerId: 999, // Different owner
       });
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberData);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(connectionData);
 
-      const result = await GetFunnelConnectionService.getFunnelConnection(userId, { funnelId });
+      const result = await GetFunnelConnectionService.getFunnelConnection(userId, {
+        workspaceSlug,
+        funnelSlug,
+      });
 
       expect(result.domain).toBeDefined();
       expect(result.domain?.hostname).toBe("example.com");
@@ -175,10 +196,13 @@ describe("Get Funnel Connection Tests", () => {
 
   describe("Error Cases", () => {
     it("should throw NotFoundError when funnel doesn't exist", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
       await expect(
-        GetFunnelConnectionService.getFunnelConnection(userId, { funnelId })
+        GetFunnelConnectionService.getFunnelConnection(userId, {
+          workspaceSlug,
+          funnelSlug,
+        })
       ).rejects.toThrow(NotFoundError);
     });
 
@@ -186,18 +210,22 @@ describe("Get Funnel Connection Tests", () => {
       const funnelData = {
         id: funnelId,
         name: "Test Funnel",
-        workspaceId: 1,
+        workspaceId: workspaceId,
         workspace: {
-          id: 1,
+          id: workspaceId,
+          slug: workspaceSlug,
           ownerId: 999, // Different owner
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelData);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
       await expect(
-        GetFunnelConnectionService.getFunnelConnection(userId, { funnelId })
+        GetFunnelConnectionService.getFunnelConnection(userId, {
+          workspaceSlug,
+          funnelSlug,
+        })
       ).rejects.toThrow(ForbiddenError);
     });
 
@@ -205,18 +233,22 @@ describe("Get Funnel Connection Tests", () => {
       const funnelData = {
         id: funnelId,
         name: "Test Funnel",
-        workspaceId: 1,
+        workspaceId: workspaceId,
         workspace: {
-          id: 1,
+          id: workspaceId,
+          slug: workspaceSlug,
           ownerId: 999, // Different owner
         },
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelData);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelData);
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
 
       await expect(
-        GetFunnelConnectionService.getFunnelConnection(userId, { funnelId })
+        GetFunnelConnectionService.getFunnelConnection(userId, {
+          workspaceSlug,
+          funnelSlug,
+        })
       ).rejects.toThrow(ForbiddenError);
     });
   });

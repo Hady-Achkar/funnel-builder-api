@@ -18,15 +18,39 @@ import { PermissionAction } from "../../../utils/workspace-utils/workspace-permi
 import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
 
 export const duplicateFunnel = async (
-  funnelId: number,
   userId: number,
+  params: { workspaceSlug: string; funnelSlug: string },
   data: DuplicateFunnelRequest
-): Promise<{ response: DuplicateFunnelResponse; workspaceId: number }> => {
+): Promise<{ response: DuplicateFunnelResponse; workspaceId: number; workspaceSlug: string; funnelSlug: string }> => {
   try {
     const prisma = getPrisma();
 
-    // Get the original funnel with all its data
-    const originalFunnel = await validateOriginalFunnel(prisma, funnelId);
+    // Get the original funnel by slug
+    const originalFunnel = await prisma.funnel.findFirst({
+      where: {
+        slug: params.funnelSlug,
+        workspace: {
+          slug: params.workspaceSlug,
+        },
+      },
+      include: {
+        pages: {
+          orderBy: { order: "asc" },
+        },
+        activeTheme: true,
+        settings: true,
+        workspace: {
+          select: {
+            id: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!originalFunnel) {
+      throw new Error("Funnel not found");
+    }
 
     // Determine target workspace (same workspace if not provided)
     let targetWorkspaceId = originalFunnel.workspaceId;
@@ -228,6 +252,11 @@ export const duplicateFunnel = async (
         include: {
           activeTheme: true,
           settings: true,
+          workspace: {
+            select: {
+              slug: true,
+            },
+          },
         },
       });
 
@@ -239,7 +268,12 @@ export const duplicateFunnel = async (
       funnelId: result.funnel!.id,
     };
 
-    return { response, workspaceId: targetWorkspaceId };
+    return {
+      response,
+      workspaceId: targetWorkspaceId,
+      workspaceSlug: result.funnel!.workspace.slug,
+      funnelSlug: result.funnel!.slug,
+    };
   } catch (error) {
     throw error;
   }

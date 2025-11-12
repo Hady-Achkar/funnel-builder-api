@@ -14,7 +14,7 @@ router.get(
   GetConnectionsController.getConnections
 );
 router.get(
-  "/:funnelId/connection",
+  "/:workspaceSlug/:funnelSlug/connection",
   authenticateToken,
   GetFunnelConnectionController.getFunnelConnection
 );
