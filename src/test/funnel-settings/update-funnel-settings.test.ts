@@ -983,7 +983,7 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `funnel:${funnelId}:settings:full`
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:settings:full`
       );
     });
 
@@ -1019,7 +1019,7 @@ describe("Update Funnel Settings Tests", () => {
       });
 
       const expectedCacheKeys = [
-        `funnel:${funnelId}:settings:full`,
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:settings:full`,
         `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`,
         `workspace:${workspaceId}:funnels:all`,
       ];

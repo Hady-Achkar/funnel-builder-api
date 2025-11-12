@@ -119,7 +119,7 @@ export const updateFunnelSettings = async (
     try {
       const cacheKeysToInvalidate = [
         // Funnel settings cache
-        `funnel:${funnel.id}:settings:full`,
+        `workspace:${validatedData.workspaceSlug}:funnel:${funnel.slug}:settings:full`,
         // Full funnel cache (includes settings) - using workspace slug and funnel slug
         `workspace:${validatedData.workspaceSlug}:funnel:${funnel.slug}:full`,
         // All funnels cache (includes settings)
