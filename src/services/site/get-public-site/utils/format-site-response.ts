@@ -26,9 +26,10 @@ interface FunnelWithRelations extends Funnel {
   activeTheme: Theme;
 }
 
-export function formatSiteResponse(
-  funnel: FunnelWithRelations
-): GetPublicSiteResponse {
+export function formatSiteResponse(funnel: FunnelWithRelations): Omit<
+  GetPublicSiteResponse,
+  "requiresPassword" | "hasAccess" | "tokenExpiry"
+> {
   const pages: PublicPage[] = funnel.pages
     .sort((a, b) => a.order - b.order)
     .map((page) => ({

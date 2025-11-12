@@ -54,18 +54,23 @@ export const publicSiteThemeSchema = z.object({
 
 // Response Schema
 export const getPublicSiteResponseSchema = z.object({
-  site: z.object({
-    id: z.number(),
-    name: z.string(),
-    slug: z.string(),
-    status: z.string(),
-    workspaceId: z.number(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    pages: z.array(publicPageSchema),
-    settings: publicSiteSettingsSchema,
-    theme: publicSiteThemeSchema,
-  }),
+  site: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      slug: z.string(),
+      status: z.string(),
+      workspaceId: z.number(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+      pages: z.array(publicPageSchema),
+      settings: publicSiteSettingsSchema,
+      theme: publicSiteThemeSchema,
+    })
+    .nullable(),
+  requiresPassword: z.boolean(),
+  hasAccess: z.boolean(),
+  tokenExpiry: z.number().nullable(),
 });
 
 // Inferred Types
