@@ -538,6 +538,29 @@ describe("Get Public Site Tests", () => {
       ).rejects.toThrow("Domain not found");
     });
 
+    it("should throw NotFoundError when funnelSlug doesn't match the connected funnel", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+
+      // Request with a different funnelSlug than the one connected to the domain
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "wrong-funnel-slug",
+        })
+      ).rejects.toThrow(NotFoundError);
+
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "wrong-funnel-slug",
+        })
+      ).rejects.toThrow("Site not found for this domain");
+    });
+
     it("should throw NotFoundError for domain with PENDING status", async () => {
       const pendingDomain = { ...mockDomain, status: DomainStatus.PENDING };
       mockPrisma.domain.findUnique.mockResolvedValue(pendingDomain);

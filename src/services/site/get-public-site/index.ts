@@ -73,7 +73,12 @@ export class GetPublicSiteService {
         throw new NotFoundError("Site not found");
       }
 
-      // Step 5: Validate site status
+      // Step 5: Validate that the funnel slug matches the provided funnelSlug parameter
+      if (funnel.slug !== funnelSlug) {
+        throw new NotFoundError("Site not found for this domain");
+      }
+
+      // Step 6: Validate site status
       if (funnel.status === FunnelStatus.DRAFT) {
         throw new ForbiddenError("Site is not published");
       }
@@ -82,7 +87,7 @@ export class GetPublicSiteService {
         throw new ForbiddenError("Site has been archived");
       }
 
-      // Step 6: Check password protection and access token
+      // Step 7: Check password protection and access token
       const requiresPassword = funnel.settings?.isPasswordProtected || false;
       let hasAccess = !requiresPassword; // If not password protected, user has access
       let tokenExpiry: number | null = null;
@@ -113,7 +118,7 @@ export class GetPublicSiteService {
         }
       }
 
-      // Step 7: Format and return response with access control
+      // Step 8: Format and return response with access control
       if (!hasAccess) {
         return {
           site: null,
