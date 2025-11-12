@@ -16,11 +16,11 @@ export const getSessionsByFunnelController = async (
       });
     }
 
-    const funnelId = parseInt(req.params.funnelId, 10);
+    const { workspaceSlug, funnelSlug } = req.params;
 
-    if (isNaN(funnelId)) {
+    if (!workspaceSlug || !funnelSlug) {
       return res.status(400).json({
-        message: "Invalid funnel ID",
+        message: "Workspace slug and funnel slug are required",
       });
     }
 
@@ -29,7 +29,8 @@ export const getSessionsByFunnelController = async (
     const endDate = req.query.endDate as string | undefined;
 
     const result = await getSessionsByFunnel(
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       userId,
       startDate,
       endDate

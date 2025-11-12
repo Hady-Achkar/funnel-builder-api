@@ -17,6 +17,8 @@ import { PermissionManager } from "../../utils/workspace-utils/workspace-permiss
 describe("Get Sessions by Funnel Tests", () => {
   let mockPrisma: any;
   const userId = 1;
+  const workspaceSlug = "test-workspace";
+  const funnelSlug = "test-funnel";
   const funnelId = 1;
   const workspaceId = 1;
 
@@ -25,7 +27,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
     mockPrisma = {
       funnel: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
       },
       session: {
         findMany: vi.fn(),
@@ -41,29 +43,29 @@ describe("Get Sessions by Funnel Tests", () => {
 
   describe("Validation", () => {
     it("should throw error if user ID is not provided", async () => {
-      await expect(getSessionsByFunnel(funnelId, 0)).rejects.toThrow(
-        "User ID is required"
-      );
+      await expect(
+        getSessionsByFunnel(workspaceSlug, funnelSlug, 0)
+      ).rejects.toThrow("User ID is required");
     });
 
-    it("should throw error for invalid funnel ID (negative)", async () => {
-      await expect(getSessionsByFunnel(-1, userId)).rejects.toThrow(
-        "Invalid input"
-      );
+    it("should throw error for invalid workspace slug", async () => {
+      await expect(
+        getSessionsByFunnel("INVALID", funnelSlug, userId)
+      ).rejects.toThrow("Invalid input");
     });
 
-    it("should throw error for invalid funnel ID (zero)", async () => {
-      await expect(getSessionsByFunnel(0, userId)).rejects.toThrow(
-        "Invalid input"
-      );
+    it("should throw error for invalid funnel slug", async () => {
+      await expect(
+        getSessionsByFunnel(workspaceSlug, "INVALID_SLUG", userId)
+      ).rejects.toThrow("Invalid input");
     });
 
     it("should throw error if funnel does not exist", async () => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
-        "Funnel not found"
-      );
+      await expect(
+        getSessionsByFunnel(workspaceSlug, funnelSlug, userId)
+      ).rejects.toThrow("Funnel not found");
     });
   });
 
@@ -78,7 +80,7 @@ describe("Get Sessions by Funnel Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
     });
 
     it("should allow user with VIEW_FUNNEL permission", async () => {
@@ -98,7 +100,11 @@ describe("Get Sessions by Funnel Tests", () => {
         allowed: true,
       });
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(
+        workspaceSlug,
+        funnelSlug,
+        userId
+      );
 
       expect(result.sessions).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -115,7 +121,7 @@ describe("Get Sessions by Funnel Tests", () => {
         reason: "You don't have permission to view this funnel",
       });
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(getSessionsByFunnel(workspaceSlug, funnelSlug, userId)).rejects.toThrow(
         "You don't have permission to view this funnel"
       );
     });
@@ -126,7 +132,7 @@ describe("Get Sessions by Funnel Tests", () => {
         reason: "You don't have access to this workspace",
       });
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(getSessionsByFunnel(workspaceSlug, funnelSlug, userId)).rejects.toThrow(
         "You don't have access to this workspace"
       );
     });
@@ -143,7 +149,7 @@ describe("Get Sessions by Funnel Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
       });
@@ -152,7 +158,7 @@ describe("Get Sessions by Funnel Tests", () => {
     it("should return empty array when funnel has no sessions", async () => {
       mockPrisma.session.findMany.mockResolvedValue([]);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.sessions).toEqual([]);
       expect(result.total).toBe(0);
@@ -185,7 +191,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.sessions).toHaveLength(3);
       expect(result.total).toBe(3);
@@ -217,7 +223,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.sessions[0]).toHaveProperty("id", "session-1");
       expect(result.sessions[0]).toHaveProperty("sessionId", "sess-abc-123");
@@ -239,7 +245,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.sessions[0].visitedPages).toEqual([]);
     });
@@ -271,7 +277,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.sessions[0].sessionId).toBe("sess-newest");
       expect(result.sessions[1].sessionId).toBe("sess-middle");
@@ -290,7 +296,7 @@ describe("Get Sessions by Funnel Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
       });
@@ -309,7 +315,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result).toHaveProperty("sessions");
       expect(result).toHaveProperty("total");
@@ -344,7 +350,7 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      const result = await getSessionsByFunnel(funnelId, userId);
+      const result = await getSessionsByFunnel(workspaceSlug, funnelSlug, userId);
 
       expect(result.total).toBe(result.sessions.length);
       expect(result.total).toBe(3);
@@ -362,7 +368,7 @@ describe("Get Sessions by Funnel Tests", () => {
     };
 
     beforeEach(() => {
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
       });
@@ -388,7 +394,13 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      await getSessionsByFunnel(funnelId, userId, "2025-10-01", undefined);
+      await getSessionsByFunnel(
+        workspaceSlug,
+        funnelSlug,
+        userId,
+        "2025-10-01",
+        undefined
+      );
 
       const expectedStartDate = new Date("2025-10-01");
       expectedStartDate.setHours(0, 0, 0, 0);
@@ -426,7 +438,13 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      await getSessionsByFunnel(funnelId, userId, undefined, "2025-10-08");
+      await getSessionsByFunnel(
+        workspaceSlug,
+        funnelSlug,
+        userId,
+        undefined,
+        "2025-10-08"
+      );
 
       const expectedEndDate = new Date("2025-10-08");
       expectedEndDate.setHours(23, 59, 59, 999);
@@ -464,7 +482,13 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      await getSessionsByFunnel(funnelId, userId, "2025-09-30", "2025-10-08");
+      await getSessionsByFunnel(
+        workspaceSlug,
+        funnelSlug,
+        userId,
+        "2025-09-30",
+        "2025-10-08"
+      );
 
       const expectedStartDate = new Date("2025-09-30");
       expectedStartDate.setHours(0, 0, 0, 0);
@@ -505,7 +529,13 @@ describe("Get Sessions by Funnel Tests", () => {
 
       mockPrisma.session.findMany.mockResolvedValue(mockSessions);
 
-      await getSessionsByFunnel(funnelId, userId, undefined, undefined);
+      await getSessionsByFunnel(
+        workspaceSlug,
+        funnelSlug,
+        userId,
+        undefined,
+        undefined
+      );
 
       expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
         where: {
@@ -528,7 +558,8 @@ describe("Get Sessions by Funnel Tests", () => {
       mockPrisma.session.findMany.mockResolvedValue([]);
 
       const result = await getSessionsByFunnel(
-        funnelId,
+        workspaceSlug,
+        funnelSlug,
         userId,
         "2025-11-01",
         "2025-11-30"
@@ -541,11 +572,11 @@ describe("Get Sessions by Funnel Tests", () => {
 
   describe("Edge Cases", () => {
     it("should handle database error gracefully", async () => {
-      mockPrisma.funnel.findUnique.mockRejectedValue(
+      mockPrisma.funnel.findFirst.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(getSessionsByFunnel(workspaceSlug, funnelSlug, userId)).rejects.toThrow(
         "Failed to get sessions: Database connection failed"
       );
     });
@@ -556,13 +587,13 @@ describe("Get Sessions by Funnel Tests", () => {
         workspaceId,
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
 
       (PermissionManager.can as any).mockRejectedValue(
         new Error("Permission service error")
       );
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(getSessionsByFunnel(workspaceSlug, funnelSlug, userId)).rejects.toThrow(
         "Failed to get sessions"
       );
     });
@@ -573,7 +604,7 @@ describe("Get Sessions by Funnel Tests", () => {
         workspaceId,
       };
 
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       (PermissionManager.can as any).mockResolvedValue({
         allowed: true,
       });
@@ -581,7 +612,7 @@ describe("Get Sessions by Funnel Tests", () => {
         new Error("Session query failed")
       );
 
-      await expect(getSessionsByFunnel(funnelId, userId)).rejects.toThrow(
+      await expect(getSessionsByFunnel(workspaceSlug, funnelSlug, userId)).rejects.toThrow(
         "Failed to get sessions: Session query failed"
       );
     });

@@ -499,6 +499,13 @@ vi.mock("axios");
 | POST   | `/api/insight-submission`           | createInsightSubmissionController  | ❌ TODO |
 | GET    | `/api/insight-submission/:funnelId` | getAllInsightSubmissionsController | ❌ TODO |
 
+### Session Routes (2 routes)
+
+| Method | Path                                                   | Controller                     | Status  |
+| ------ | ------------------------------------------------------ | ------------------------------ | ------- |
+| GET    | `/api/sessions/:workspaceSlug/:funnelSlug`             | getSessionsByFunnelController  | ✅ DONE |
+| GET    | `/api/sessions/:workspaceSlug/:funnelSlug/history`     | getSessionHistoryController    | ✅ DONE |
+
 ### Funnel Settings Routes (6 routes)
 
 | Method | Path                                             | Controller                     | Status  |

@@ -10,7 +10,8 @@ import {
 } from "../../../types/session/get-by-funnel";
 
 export const getSessionsByFunnel = async (
-  funnelId: number,
+  workspaceSlug: string,
+  funnelSlug: string,
   userId: number,
   startDate?: string,
   endDate?: string
@@ -22,7 +23,8 @@ export const getSessionsByFunnel = async (
 
     // Validate params
     const validatedParams = getSessionsByFunnelParams.parse({
-      funnelId,
+      workspaceSlug,
+      funnelSlug,
       startDate,
       endDate,
     });
@@ -30,8 +32,13 @@ export const getSessionsByFunnel = async (
     const prisma = getPrisma();
 
     // Check if funnel exists and get workspace info and pages
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedParams.funnelId },
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: validatedParams.funnelSlug,
+        workspace: {
+          slug: validatedParams.workspaceSlug,
+        },
+      },
       select: {
         id: true,
         workspaceId: true,
@@ -67,7 +74,7 @@ export const getSessionsByFunnel = async (
 
     // Build where clause with optional date filters
     const whereClause: any = {
-      funnelId: validatedParams.funnelId,
+      funnelId: funnel.id,
     };
 
     // Add date filters if provided
