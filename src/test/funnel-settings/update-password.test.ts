@@ -443,8 +443,7 @@ describe("Update Funnel Password Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `funnel:${funnelId}:settings:full`,
-        { prefix: "settings" }
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:settings:full`
       );
     });
 
@@ -456,8 +455,7 @@ describe("Update Funnel Password Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`,
-        { prefix: "funnel" }
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`
       );
     });
 
@@ -469,8 +467,7 @@ describe("Update Funnel Password Tests", () => {
       });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnels:all`,
-        { prefix: "funnel" }
+        `workspace:${workspaceId}:funnels:all`
       );
     });
 
