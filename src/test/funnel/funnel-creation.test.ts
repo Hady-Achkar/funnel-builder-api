@@ -1645,11 +1645,12 @@ describe("Funnel Creation Tests", () => {
         status: $Enums.FunnelStatus.DRAFT,
       });
 
-      // Verify password hash is not plain text
+      // Verify password is encrypted (not plain text)
       expect(funnelSettingsData.passwordHash).not.toBeNull();
       expect(funnelSettingsData.passwordHash).not.toBe("FunnelDefault123!");
-      // Verify it's a bcrypt hash (starts with $2a$ or $2b$)
-      expect(funnelSettingsData.passwordHash).toMatch(/^\$2[ab]\$/);
+      // Verify it's an encrypted string (should be a non-empty string)
+      expect(typeof funnelSettingsData.passwordHash).toBe("string");
+      expect(funnelSettingsData.passwordHash.length).toBeGreaterThan(0);
     });
 
     it("should verify password hash format is correct for DRAFT workspace", async () => {
@@ -1718,10 +1719,10 @@ describe("Funnel Creation Tests", () => {
         status: $Enums.FunnelStatus.DRAFT,
       });
 
-      // Verify hash length (bcrypt hashes are 60 characters)
-      expect(funnelSettingsData.passwordHash?.length).toBe(60);
-      // Verify it contains expected bcrypt structure
-      expect(funnelSettingsData.passwordHash).toMatch(/^\$2[ab]\$\d{2}\$/);
+      // Verify password is encrypted (AES-256-GCM produces variable length encrypted strings)
+      expect(funnelSettingsData.passwordHash).toBeTruthy();
+      expect(typeof funnelSettingsData.passwordHash).toBe("string");
+      expect(funnelSettingsData.passwordHash.length).toBeGreaterThan(0);
     });
   });
 });
