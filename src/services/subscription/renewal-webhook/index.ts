@@ -43,7 +43,20 @@ export class RenewalWebhookService {
         };
       }
 
-      // 4. Check if payment already exists (idempotency)
+      // 4. Check if subscription_id exists (one-time payments don't have subscription_id)
+      const subscriptionId = webhookData.subscription_id;
+      if (!subscriptionId) {
+        console.log(
+          "[RenewalWebhook] Missing subscription_id - likely a one-time payment, not a renewal"
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason: "No subscription_id - one-time payment, not a renewal",
+        };
+      }
+
+      // 5. Check if payment already exists (idempotency)
       const transactionId = webhookData.id;
       if (!transactionId) {
         console.log("[RenewalWebhook] Missing transaction ID");

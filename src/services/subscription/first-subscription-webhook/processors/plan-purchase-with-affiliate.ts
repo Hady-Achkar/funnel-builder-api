@@ -23,7 +23,7 @@ interface PlanPurchaseWithAffiliateResult {
   message: string;
   userId: number;
   paymentId: number;
-  subscriptionId: number;
+  subscriptionId: number | null;
 }
 
 export class PlanPurchaseWithAffiliateProcessor {
@@ -67,7 +67,14 @@ export class PlanPurchaseWithAffiliateProcessor {
         affiliateOwnerId: affiliateLink.userId,
       });
 
-      // 1. Find user by userId (if provided) OR email
+      // 1. Detect payment model (subscription vs one-time)
+      const isSubscription = !!subscription_id;
+      console.log("[PlanPurchaseAffiliate] Payment model detected:", {
+        isSubscription,
+        subscription_id,
+      });
+
+      // 2. Find user by userId (if provided) OR email
       const userIdFromCustomData = custom_data.userId;
       let user = null;
 
@@ -127,15 +134,25 @@ export class PlanPurchaseWithAffiliateProcessor {
 
       console.log("[PlanPurchaseAffiliate] User found and verified:", user.id);
 
-      // 2. Update existing user's plan
+      // 3. Update existing user's plan
       const userPlan = this.mapPlanType(planType);
 
-      // Calculate trial period - ALWAYS override existing trial dates
-      const trialPeriod = FrequencyConverter.convertToTrialPeriod(
-        frequency,
-        frequencyInterval || 1
-      );
-      const trialDates = calculateTrialDates(trialPeriod);
+      // Calculate trial dates based on payment model
+      let trialDates;
+      if (isSubscription) {
+        // For subscription-based payments: calculate trial period normally
+        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+          frequency,
+          frequencyInterval || 1
+        );
+        trialDates = calculateTrialDates(trialPeriod);
+      } else {
+        // For one-time payments: lifetime access (trialEndDate = null)
+        trialDates = {
+          trialStartDate: new Date(),
+          trialEndDate: null,
+        };
+      }
 
       // Prepare update data - ALWAYS set trial dates
       const updateData: any = {
@@ -229,38 +246,48 @@ export class PlanPurchaseWithAffiliateProcessor {
         payment.id
       );
 
-      // 9. Calculate subscription dates
-      const startsAt = new Date();
-      const intervalUnit = FrequencyConverter.convertToIntervalUnit(frequency);
-      const intervalCount = frequencyInterval || 1;
+      // 9. Create Subscription record (only for subscription-based payments)
+      let subscription = null;
+      if (isSubscription) {
+        const startsAt = new Date();
+        const intervalUnit = FrequencyConverter.convertToIntervalUnit(frequency);
+        const intervalCount = frequencyInterval || 1;
 
-      // Calculate end date based on frequency (reuse trialDates from above)
-      const endsAt = TrialPeriodCalculator.calculateEndDate(
-        startsAt,
-        trialPeriod
-      );
-
-      // 10. Create Subscription record
-      const subscription = await prisma.subscription.create({
-        data: {
-          subscriptionId: subscription_id || `SUB-${transactionId}`,
+        // Calculate end date based on frequency
+        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+          frequency,
+          frequencyInterval || 1
+        );
+        const endsAt = TrialPeriodCalculator.calculateEndDate(
           startsAt,
-          endsAt,
-          status: "ACTIVE",
-          userId: user.id,
-          intervalUnit,
-          intervalCount,
-          itemType: "PLAN",
-          subscriptionType: this.mapPlanType(planType),
-          addonType: null,
-          rawData: [webhookData] as any, // Store as array from the start
-        },
-      });
+          trialPeriod
+        );
 
-      console.log(
-        "[PlanPurchaseAffiliate] Subscription record created:",
-        subscription.id
-      );
+        subscription = await prisma.subscription.create({
+          data: {
+            subscriptionId: subscription_id, // Required for subscriptions
+            startsAt,
+            endsAt,
+            status: "ACTIVE",
+            userId: user.id,
+            intervalUnit,
+            intervalCount,
+            itemType: "PLAN",
+            subscriptionType: this.mapPlanType(planType),
+            addonType: null,
+            rawData: [webhookData] as any, // Store as array from the start
+          },
+        });
+
+        console.log(
+          "[PlanPurchaseAffiliate] Subscription record created:",
+          subscription.id
+        );
+      } else {
+        console.log(
+          "[PlanPurchaseAffiliate] One-time payment - no subscription record created"
+        );
+      }
 
       // 11. Extract workspace data (from explicit field OR decode from token)
       let workspaceData: {
@@ -386,53 +413,56 @@ export class PlanPurchaseWithAffiliateProcessor {
         );
       }
 
-      // 14. Send subscription confirmation email to buyer
-      try {
-        const apiKey = process.env.SENDGRID_API_KEY;
-        if (!apiKey) {
-          throw new Error("SENDGRID_API_KEY is not configured");
+      // 14. Send confirmation email to buyer (only for subscription-based payments)
+      if (isSubscription && subscription) {
+        try {
+          const apiKey = process.env.SENDGRID_API_KEY;
+          if (!apiKey) {
+            throw new Error("SENDGRID_API_KEY is not configured");
+          }
+          sgMail.setApiKey(apiKey);
+
+          const emailData = {
+            userEmail: user.email,
+            planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
+            subscriptionId: subscription.subscriptionId,
+          };
+
+          const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
+          const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
+
+          await sgMail.send({
+            to: user.email,
+            from: {
+              email: process.env.SENDGRID_FROM_EMAIL,
+              name: "Digitalsite",
+            },
+            subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
+            html: getSubscriptionConfirmationEmailHtml(emailData),
+            text: getSubscriptionConfirmationEmailText(emailData),
+          });
+
+          console.log(
+            "[PlanPurchaseAffiliate] Subscription confirmation email sent to:",
+            user.email
+          );
+        } catch (emailError) {
+          console.error(
+            "[PlanPurchaseAffiliate] Failed to send subscription confirmation email:",
+            emailError
+          );
+          // Continue processing even if email fails
         }
-        sgMail.setApiKey(apiKey);
-
-        const emailData = {
-          userEmail: user.email,
-          planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
-          subscriptionId: subscription.subscriptionId,
-        };
-
-        const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
-        const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
-
-        await sgMail.send({
-          to: user.email,
-          from: {
-            email: process.env.SENDGRID_FROM_EMAIL,
-            name: "Digitalsite",
-          },
-          subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
-          html: getSubscriptionConfirmationEmailHtml(emailData),
-          text: getSubscriptionConfirmationEmailText(emailData),
-        });
-
-        console.log(
-          "[PlanPurchaseAffiliate] Subscription confirmation email sent to:",
-          user.email
-        );
-      } catch (emailError) {
-        console.error(
-          "[PlanPurchaseAffiliate] Failed to send subscription confirmation email:",
-          emailError
-        );
-        // Continue processing even if email fails
       }
 
       return {
         success: true,
-        message:
-          "Payment recorded and subscription activated for existing user with affiliate tracking",
+        message: isSubscription
+          ? "Payment recorded and subscription activated for existing user with affiliate tracking"
+          : "Payment recorded and lifetime access granted with affiliate tracking",
         userId: user.id,
         paymentId: payment.id,
-        subscriptionId: subscription.id,
+        subscriptionId: subscription ? subscription.id : null,
       };
     } catch (error) {
       console.error(

@@ -15,8 +15,9 @@ const PRICING = {
         title: "Business Plan",
         description:
           "Full access to business features with unlimited funnels & analytics",
+        isSubscription: false, // One-time payment
         frequency: "annually" as const,
-        frequencyInterval: 1,
+        frequencyInterval: 1000,
         freeTrialPeriodInDays: 0,
       },
       AGENCY: {
@@ -24,8 +25,9 @@ const PRICING = {
         title: "Partner Plan",
         description:
           "Enterprise features for agencies & partners with white-label options",
+        isSubscription: false, // One-time payment
         frequency: "annually" as const,
-        frequencyInterval: 1,
+        frequencyInterval: 1000,
         freeTrialPeriodInDays: 0,
       },
     },
@@ -35,6 +37,7 @@ const PRICING = {
         title: "Business Plan",
         description:
           "Full access to business features via partner program with exclusive pricing",
+        isSubscription: true, // Yearly subscription
         frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -49,6 +52,7 @@ const PRICING = {
         amount: 10,
         title: "Extra Team Member",
         description: "Add an additional team member to your Business workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -58,6 +62,7 @@ const PRICING = {
         amount: 15,
         title: "Extra Funnel",
         description: "Add an additional funnel to your Business workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -68,6 +73,7 @@ const PRICING = {
         title: "Extra Pages",
         description:
           "Add 5 additional pages per funnel to your Business workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -77,6 +83,7 @@ const PRICING = {
         amount: 5,
         title: "Extra Subdomain",
         description: "Add an additional subdomain to your Business workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -87,6 +94,7 @@ const PRICING = {
         title: "Extra Custom Domain",
         description:
           "Add an additional custom domain to your Business workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -99,6 +107,7 @@ const PRICING = {
         amount: 5,
         title: "Extra Team Member",
         description: "Add an additional team member to your Agency workspace",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
@@ -115,6 +124,7 @@ const PRICING = {
         title: "Extra Workspace",
         description:
           "Add an additional workspace slot to your Business account",
+        isSubscription: true, // Always monthly subscription
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
