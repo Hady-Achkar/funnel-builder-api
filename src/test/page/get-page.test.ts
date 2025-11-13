@@ -39,7 +39,12 @@ describe("Get Page Tests", () => {
     updatedAt: new Date("2024-01-01"),
     funnel: {
       id: funnelId,
+      slug: "test-funnel",
       workspaceId,
+      workspace: {
+        id: workspaceId,
+        slug: "test-workspace",
+      },
     },
     ...overrides,
   });
@@ -146,7 +151,7 @@ describe("Get Page Tests", () => {
       expect(result.name).toBe("Cached Page");
       expect(result.content).toBe("Cached content");
       expect(cacheService.get).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`
+        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`
       );
     });
 
@@ -158,7 +163,7 @@ describe("Get Page Tests", () => {
       await getPage(userId, { pageId });
 
       expect(cacheService.set).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`,
+        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`,
         expect.objectContaining({
           id: pageId,
           name: "Test Page",

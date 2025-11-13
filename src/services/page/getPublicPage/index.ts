@@ -19,13 +19,20 @@ export const getPublicPage = async (
     
     // First, find the funnel by slug and ensure it's LIVE
     const funnel = await prisma.funnel.findFirst({
-      where: { 
+      where: {
         slug: validatedRequest.funnelSlug,
         status: 'LIVE'
       },
       select: {
         id: true,
+        slug: true,
         workspaceId: true,
+        workspace: {
+          select: {
+            id: true,
+            slug: true,
+          },
+        },
         pages: {
           where: {
             linkingId: validatedRequest.linkingId,
@@ -46,11 +53,9 @@ export const getPublicPage = async (
     }
 
     const pageId = funnel.pages[0].id;
-    const funnelId = funnel.id;
-    const workspaceId = funnel.workspaceId;
 
     // Try to get page from cache first
-    const pageCacheKey = `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`;
+    const pageCacheKey = `workspace:${funnel.workspace.slug}:funnel:${funnel.slug}:page:${pageId}:full`;
     let cachedPage = await cacheService.get<any>(pageCacheKey);
 
     if (cachedPage && typeof cachedPage === 'object') {

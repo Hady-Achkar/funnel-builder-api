@@ -22,7 +22,12 @@ describe("Create Page Visit Tests", () => {
     funnelId,
     funnel: {
       id: funnelId,
+      slug: "test-funnel",
       workspaceId,
+      workspace: {
+        id: workspaceId,
+        slug: "test-workspace",
+      },
       status: "LIVE",
     },
     ...overrides,
@@ -329,7 +334,7 @@ describe("Create Page Visit Tests", () => {
       await createPageVisit({ pageId }, { sessionId });
 
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${workspaceId}:funnel:${funnelId}:page:${pageId}:full`
+        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`
       );
     });
 

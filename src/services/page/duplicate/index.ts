@@ -40,10 +40,12 @@ export const duplicatePage = async (
         funnel: {
           select: {
             id: true,
+            slug: true,
             workspaceId: true,
             workspace: {
               select: {
                 id: true,
+                slug: true,
                 ownerId: true,
                 planType: true,
                 addOns: {
@@ -88,10 +90,12 @@ export const duplicatePage = async (
         where: { id: validatedRequest.targetFunnelId },
         select: {
           id: true,
+          slug: true,
           workspaceId: true,
           workspace: {
             select: {
               id: true,
+              slug: true,
               ownerId: true,
               planType: true,
               addOns: {
@@ -226,18 +230,36 @@ export const duplicatePage = async (
       return created;
     });
 
-    // Simplified cache invalidation - just delete the funnel full cache
+    // Cache invalidation with slug-based keys
     try {
-      await cacheService.del(
-        `workspace:${sourcePage.funnel.workspaceId}:funnel:${sourcePage.funnelId}:full`
-      );
+      const cacheKeysToInvalidate = [
+        // Source funnel cache
+        `workspace:${sourcePage.funnel.workspace.slug}:funnel:${sourcePage.funnel.slug}:full`,
+        // All funnels cache for source workspace
+        `workspace:${sourcePage.funnel.workspaceId}:funnels:all`,
+      ];
 
       // If different funnel, also invalidate target funnel cache
       if (!isSameFunnel) {
-        await cacheService.del(
-          `workspace:${targetWorkspaceId}:funnel:${targetFunnel.id}:full`
+        cacheKeysToInvalidate.push(
+          `workspace:${targetFunnel.workspace.slug}:funnel:${targetFunnel.slug}:full`,
+          `workspace:${targetWorkspaceId}:funnels:all`
         );
       }
+
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
+        )
+      );
+
+      console.log(
+        `[Cache] Invalidated caches for page duplication from page ${sourcePage.id}`
+      );
     } catch (cacheError) {
       console.warn(
         "Cache invalidation failed but page was duplicated:",
