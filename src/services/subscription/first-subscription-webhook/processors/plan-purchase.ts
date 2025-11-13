@@ -17,7 +17,7 @@ interface PlanPurchaseResult {
   message: string;
   userId: number;
   paymentId: number;
-  subscriptionId: number;
+  subscriptionId: number | null;
 }
 export class PlanPurchaseProcessor {
   static async process(
@@ -45,8 +45,15 @@ export class PlanPurchaseProcessor {
         subscription_id,
       });
 
-      // 1. Check if this is a renewal (subscription already exists)
-      if (subscription_id) {
+      // 1. Detect payment model (subscription vs one-time)
+      const isSubscription = !!subscription_id;
+      console.log("[PlanPurchase] Payment model detected:", {
+        isSubscription,
+        subscription_id,
+      });
+
+      // 2. Check if this is a renewal (subscription already exists) - only for subscription-based payments
+      if (isSubscription) {
         const existingSubscription = await prisma.subscription.findUnique({
           where: { subscriptionId: subscription_id },
           include: { user: true },
@@ -128,12 +135,22 @@ export class PlanPurchaseProcessor {
       // 3. Update existing user's plan
       const userPlan = this.mapPlanType(planType);
 
-      // Calculate trial period
-      const trialPeriod = FrequencyConverter.convertToTrialPeriod(
-        frequency,
-        frequencyInterval || 1
-      );
-      const trialDates = calculateTrialDates(trialPeriod);
+      // Calculate trial dates based on payment model
+      let trialDates;
+      if (isSubscription) {
+        // For subscription-based payments: calculate trial period normally
+        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+          frequency,
+          frequencyInterval || 1
+        );
+        trialDates = calculateTrialDates(trialPeriod);
+      } else {
+        // For one-time payments: lifetime access (trialEndDate = null)
+        trialDates = {
+          trialStartDate: new Date(),
+          trialEndDate: null,
+        };
+      }
 
       user = await prisma.user.update({
         where: { id: user.id },
@@ -147,6 +164,8 @@ export class PlanPurchaseProcessor {
       console.log("[PlanPurchase] Updated user plan:", {
         userId: user.id,
         newPlan: userPlan,
+        isSubscription,
+        trialEndDate: trialDates.trialEndDate,
       });
 
       // 4. Create Payment record
@@ -165,86 +184,99 @@ export class PlanPurchaseProcessor {
 
       console.log("[PlanPurchase] Payment record created:", payment.id);
 
-      // 7. Calculate subscription dates
-      const startsAt = new Date();
-      const intervalUnit = FrequencyConverter.convertToIntervalUnit(frequency);
-      const intervalCount = frequencyInterval || 1;
+      // 5. Create Subscription record (only for subscription-based payments)
+      let subscription = null;
+      if (isSubscription) {
+        const startsAt = new Date();
+        const intervalUnit = FrequencyConverter.convertToIntervalUnit(frequency);
+        const intervalCount = frequencyInterval || 1;
 
-      // Calculate end date based on frequency (reuse trialDates from above)
-      const endsAt = TrialPeriodCalculator.calculateEndDate(
-        startsAt,
-        trialPeriod
-      );
-
-      // 8. Create Subscription record
-      const subscription = await prisma.subscription.create({
-        data: {
-          subscriptionId: subscription_id || `SUB-${transactionId}`, // Use subscription_id from webhook or generate one
+        // Calculate end date based on frequency
+        const trialPeriod = FrequencyConverter.convertToTrialPeriod(
+          frequency,
+          frequencyInterval || 1
+        );
+        const endsAt = TrialPeriodCalculator.calculateEndDate(
           startsAt,
-          endsAt,
-          status: "ACTIVE",
-          userId: user.id,
-          intervalUnit,
-          intervalCount,
-          itemType: "PLAN",
-          subscriptionType: this.mapPlanType(planType),
-          addonType: null,
-          rawData: [webhookData] as any, // Store as array from the start
-        },
-      });
+          trialPeriod
+        );
 
-      console.log(
-        "[PlanPurchase] Subscription record created:",
-        subscription.id
-      );
-
-      // 9. Send subscription confirmation email to buyer
-      try {
-        const apiKey = process.env.SENDGRID_API_KEY;
-        if (!apiKey) {
-          throw new Error("SENDGRID_API_KEY is not configured");
-        }
-        sgMail.setApiKey(apiKey);
-
-        const emailData = {
-          userEmail: user.email,
-          planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
-          subscriptionId: subscription.subscriptionId,
-        };
-
-        const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
-        const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
-
-        await sgMail.send({
-          to: user.email,
-          from: {
-            email: process.env.SENDGRID_FROM_EMAIL,
-            name: "Digitalsite",
+        subscription = await prisma.subscription.create({
+          data: {
+            subscriptionId: subscription_id, // Required for subscriptions
+            startsAt,
+            endsAt,
+            status: "ACTIVE",
+            userId: user.id,
+            intervalUnit,
+            intervalCount,
+            itemType: "PLAN",
+            subscriptionType: this.mapPlanType(planType),
+            addonType: null,
+            rawData: [webhookData] as any, // Store as array from the start
           },
-          subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
-          html: getSubscriptionConfirmationEmailHtml(emailData),
-          text: getSubscriptionConfirmationEmailText(emailData),
         });
 
         console.log(
-          "[PlanPurchase] Subscription confirmation email sent to:",
-          user.email
+          "[PlanPurchase] Subscription record created:",
+          subscription.id
         );
-      } catch (emailError) {
-        console.error(
-          "[PlanPurchase] Failed to send subscription confirmation email:",
-          emailError
+      } else {
+        console.log(
+          "[PlanPurchase] One-time payment - no subscription record created"
         );
-        // Continue processing even if email fails
+      }
+
+      // 6. Send confirmation email to buyer (only for subscription-based payments)
+      if (isSubscription && subscription) {
+        try {
+          const apiKey = process.env.SENDGRID_API_KEY;
+          if (!apiKey) {
+            throw new Error("SENDGRID_API_KEY is not configured");
+          }
+          sgMail.setApiKey(apiKey);
+
+          const emailData = {
+            userEmail: user.email,
+            planType: this.mapPlanType(planType) as "BUSINESS" | "AGENCY",
+            subscriptionId: subscription.subscriptionId,
+          };
+
+          const planName = emailData.planType === "BUSINESS" ? "Business" : "Partner Plan";
+          const planNameArabic = emailData.planType === "BUSINESS" ? "الأعمال" : "الشريك";
+
+          await sgMail.send({
+            to: user.email,
+            from: {
+              email: process.env.SENDGRID_FROM_EMAIL,
+              name: "Digitalsite",
+            },
+            subject: `Subscription Confirmed - ${planName} Plan | تأكيد الاشتراك - خطة ${planNameArabic}`,
+            html: getSubscriptionConfirmationEmailHtml(emailData),
+            text: getSubscriptionConfirmationEmailText(emailData),
+          });
+
+          console.log(
+            "[PlanPurchase] Subscription confirmation email sent to:",
+            user.email
+          );
+        } catch (emailError) {
+          console.error(
+            "[PlanPurchase] Failed to send subscription confirmation email:",
+            emailError
+          );
+          // Continue processing even if email fails
+        }
       }
 
       return {
         success: true,
-        message:
-          "Payment recorded and subscription activated for existing user",
+        message: isSubscription
+          ? "Payment recorded and subscription activated for existing user"
+          : "Payment recorded and lifetime access granted",
         userId: user.id,
         paymentId: payment.id,
-        subscriptionId: subscription.id,
+        subscriptionId: subscription ? subscription.id : null,
       };
     } catch (error) {
       console.error("[PlanPurchase] Error processing PLAN_PURCHASE:", error);

@@ -94,11 +94,13 @@ export class PaymentWebhookService {
       if (paymentType === "PLAN_PURCHASE" && !hasAffiliateLink) {
         const result = await PlanPurchaseProcessor.process(validatedData);
 
-        // Fetch and store subscriberId from MamoPay
-        await fetchAndStoreSubscriberId(
-          result.subscriptionId,
-          validatedData.subscription_id
-        );
+        // Fetch and store subscriberId from MamoPay (only for subscription-based payments)
+        if (validatedData.subscription_id && result.subscriptionId) {
+          await fetchAndStoreSubscriberId(
+            result.subscriptionId,
+            validatedData.subscription_id
+          );
+        }
 
         return {
           received: true,
@@ -116,11 +118,13 @@ export class PaymentWebhookService {
           validatedData
         );
 
-        // Fetch and store subscriberId from MamoPay
-        await fetchAndStoreSubscriberId(
-          result.subscriptionId,
-          validatedData.subscription_id
-        );
+        // Fetch and store subscriberId from MamoPay (only for subscription-based payments)
+        if (validatedData.subscription_id && result.subscriptionId) {
+          await fetchAndStoreSubscriberId(
+            result.subscriptionId,
+            validatedData.subscription_id
+          );
+        }
 
         return {
           received: true,

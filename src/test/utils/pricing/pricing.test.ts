@@ -17,8 +17,9 @@ describe("Pricing Utility", () => {
           title: "Business Plan",
           description:
             "Full access to business features with unlimited funnels & analytics",
+          isSubscription: false,
           frequency: "annually",
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           freeTrialPeriodInDays: 0,
         });
       });
@@ -34,8 +35,9 @@ describe("Pricing Utility", () => {
           title: "Partner Plan",
           description:
             "Enterprise features for agencies & partners with white-label options",
+          isSubscription: false,
           frequency: "annually",
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           freeTrialPeriodInDays: 0,
         });
       });
@@ -53,6 +55,7 @@ describe("Pricing Utility", () => {
           title: "Business Plan",
           description:
             "Full access to business features via partner program with exclusive pricing",
+          isSubscription: true,
           frequency: "annually",
           frequencyInterval: 1,
           freeTrialPeriodInDays: 0,
@@ -113,6 +116,7 @@ describe("Pricing Utility", () => {
           title: "Extra Team Member",
           description:
             "Add an additional team member to your Business workspace",
+          isSubscription: true,
           frequency: "monthly",
           frequencyInterval: 1,
           freeTrialPeriodInDays: 0,
@@ -246,6 +250,7 @@ describe("Pricing Utility", () => {
         title: "Extra Workspace",
         description:
           "Add an additional workspace slot to your Business account",
+        isSubscription: true,
         frequency: "monthly",
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,

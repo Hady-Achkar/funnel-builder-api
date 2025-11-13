@@ -44,7 +44,14 @@ export const getPage = async (
         funnel: {
           select: {
             id: true,
+            slug: true,
             workspaceId: true,
+            workspace: {
+              select: {
+                id: true,
+                slug: true,
+              },
+            },
           },
         },
       },
@@ -62,7 +69,7 @@ export const getPage = async (
     });
 
     // Try cache first
-    const cacheKey = `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:page:${page.id}:full`;
+    const cacheKey = `workspace:${page.funnel.workspace.slug}:funnel:${page.funnel.slug}:page:${page.id}:full`;
     const cachedPage = await cacheService.get<any>(cacheKey);
 
     if (cachedPage) {

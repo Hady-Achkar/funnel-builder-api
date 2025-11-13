@@ -33,7 +33,14 @@ export const createPageVisit = async (
         funnel: {
           select: {
             id: true,
+            slug: true,
             workspaceId: true,
+            workspace: {
+              select: {
+                id: true,
+                slug: true,
+              },
+            },
             status: true,
           },
         },
@@ -111,7 +118,7 @@ export const createPageVisit = async (
     // Invalidate page cache after recording visit
     if (result.isNewVisit) {
       await cacheService.del(
-        `workspace:${page.funnel.workspaceId}:funnel:${page.funnelId}:page:${pageId}:full`
+        `workspace:${page.funnel.workspace.slug}:funnel:${page.funnel.slug}:page:${pageId}:full`
       );
     }
 

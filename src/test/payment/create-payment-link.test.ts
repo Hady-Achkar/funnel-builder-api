@@ -260,7 +260,7 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           url: "https://mamopay.com/pay/abc123",
           amount: 999, // From centralized pricing (not manual 99.99)
           frequency: "annually", // From centralized pricing (not manual monthly)
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           trialPeriodDays: 0, // From centralized pricing (not manual 14)
           planType: "BUSINESS",
         });
@@ -274,9 +274,9 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
           lastName: "Seller", // From authenticated user
           // email will be seller's email from auth token
           planType: "BUSINESS",
-          
+
           frequency: "annually", // From centralized pricing
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           trialDays: 0, // From centralized pricing
         });
 
@@ -338,14 +338,14 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         const payload = JSON.parse((global.fetch as any).mock.calls[0][1].body);
         expect(payload.custom_data.details).toMatchObject({
           frequency: "annually", // From centralized pricing (NOT monthly)
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           trialDays: 0,
         });
 
         const responseData = (res.json as any).mock.calls[0][0];
         expect(responseData.paymentLink).toMatchObject({
           frequency: "annually", // From centralized pricing
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           trialPeriodDays: 0,
         });
       });

@@ -12,6 +12,7 @@ interface EnrichedPaymentLinkData {
   amount: number;
   title: string;
   description: string;
+  isSubscription: boolean;
   frequency: "monthly" | "annually" | "weekly";
   frequencyInterval: number;
   freeTrialPeriodInDays: number;
@@ -115,10 +116,13 @@ export class CreatePaymentLinkService {
         failure_return_url: data.failureReturnUrl, // From centralized pricing metadata
         terms_and_conditions_url: data.termsAndConditionsUrl, // From centralized pricing metadata
         custom_data: customData,
-        subscription: {
-          frequency: data.frequency, // "annually", "monthly", "weekly" - from pricing config
-          frequency_interval: data.frequencyInterval, // 1, 2, 3, etc. - from pricing config
-        },
+        // Only include subscription object for subscription-based payments
+        ...(data.isSubscription && {
+          subscription: {
+            frequency: data.frequency, // "annually", "monthly", "weekly" - from pricing config
+            frequency_interval: data.frequencyInterval, // 1, 2, 3, etc. - from pricing config
+          },
+        }),
         processing_fee_percentage: 2,
       };
 
