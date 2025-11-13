@@ -111,6 +111,7 @@ export const createFunnel = async (
   const response: CreateFunnelResponse = {
     message: "Funnel created successfully!",
     funnelId: result.funnel.id,
+    funnelSlug: result.funnel.slug,
   };
 
   return { response, workspaceId: workspace.id };

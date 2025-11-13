@@ -42,8 +42,9 @@ export const updateTheme = async (
 
     // Invalidate cache using the helper
     await updateThemeInCache(
+      permissionResult.workspace?.slug || null,
+      permissionResult.theme.funnel?.slug || null,
       permissionResult.workspace?.id || null,
-      permissionResult.theme.funnel?.id || null,
       permissionResult.isGlobalTheme
     );
 

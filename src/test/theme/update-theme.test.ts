@@ -81,7 +81,10 @@ describe("Update Theme Tests", () => {
     updatedAt: new Date(),
     funnel: {
       id: testFunnelId,
+      name: "Test Funnel",
+      slug: "test-funnel",
       workspaceId: testWorkspaceId,
+      createdBy: ownerUserId,
       workspace: mockWorkspace,
     },
   };
@@ -496,8 +499,12 @@ describe("Update Theme Tests", () => {
         { name: "Cache Test" }
       );
 
+      // Should invalidate both funnel full cache and funnels:all cache with slug-based keys
       expect(cacheService.del).toHaveBeenCalledWith(
-        `workspace:${testWorkspaceId}:funnel:${testFunnelId}:full`
+        `workspace:${mockWorkspace.slug}:funnel:${mockFunnel.slug}:full`
+      );
+      expect(cacheService.del).toHaveBeenCalledWith(
+        `workspace:${testWorkspaceId}:funnels:all`
       );
     });
 

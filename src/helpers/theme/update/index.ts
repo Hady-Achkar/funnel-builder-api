@@ -4,8 +4,9 @@ import { ForbiddenError, NotFoundError } from "../../../errors";
 import { $Enums } from "../../../generated/prisma-client";
 
 export const updateThemeInCache = async (
+  workspaceSlug: string | null,
+  funnelSlug: string | null,
   workspaceId: number | null,
-  funnelId: number | null,
   isGlobalTheme: boolean
 ): Promise<void> => {
   try {
@@ -13,11 +14,28 @@ export const updateThemeInCache = async (
       // Invalidate global themes cache
       await cacheService.del("themes:global");
       console.log("Invalidated global themes cache");
-    } else if (workspaceId && funnelId) {
-      // Delete cache for custom theme
-      const fullCacheKey = `workspace:${workspaceId}:funnel:${funnelId}:full`;
-      await cacheService.del(fullCacheKey);
-      console.log(`Invalidated theme cache key: ${fullCacheKey}`);
+    } else if (workspaceSlug && funnelSlug && workspaceId) {
+      // Invalidate cache keys for custom theme
+      const cacheKeysToInvalidate = [
+        // Full funnel cache
+        `workspace:${workspaceSlug}:funnel:${funnelSlug}:full`,
+        // All funnels cache
+        `workspace:${workspaceId}:funnels:all`,
+      ];
+
+      await Promise.all(
+        cacheKeysToInvalidate.map((key) =>
+          cacheService
+            .del(key)
+            .catch((err) =>
+              console.warn(`Failed to invalidate cache key ${key}:`, err)
+            )
+        )
+      );
+
+      console.log(
+        `[Cache] Invalidated theme caches for workspace:${workspaceSlug}:funnel:${funnelSlug}`
+      );
     }
   } catch (cacheError) {
     console.warn("Failed to invalidate theme cache:", cacheError);
@@ -34,6 +52,7 @@ export interface ThemeUpdatePermissionResult {
     funnel: {
       id: number;
       name: string;
+      slug: string;
       workspaceId: number;
       createdBy: number;
     } | null;
@@ -41,6 +60,7 @@ export interface ThemeUpdatePermissionResult {
   workspace: {
     id: number;
     name: string;
+    slug: string;
     ownerId: number;
   } | null;
 }
@@ -61,12 +81,14 @@ export const checkThemeUpdatePermissions = async (
         select: {
           id: true,
           name: true,
+          slug: true,
           workspaceId: true,
           createdBy: true,
           workspace: {
             select: {
               id: true,
               name: true,
+              slug: true,
               ownerId: true,
             },
           },
@@ -159,10 +181,16 @@ export const checkThemeUpdatePermissions = async (
       funnel: {
         id: theme.funnel.id,
         name: theme.funnel.name,
+        slug: theme.funnel.slug,
         workspaceId: theme.funnel.workspaceId,
         createdBy: theme.funnel.createdBy,
       },
     },
-    workspace: theme.funnel.workspace,
+    workspace: {
+      id: theme.funnel.workspace.id,
+      name: theme.funnel.workspace.name,
+      slug: theme.funnel.workspace.slug,
+      ownerId: theme.funnel.workspace.ownerId,
+    },
   };
 };
