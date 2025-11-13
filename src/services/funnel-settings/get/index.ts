@@ -76,7 +76,28 @@ export const getFunnelSettings = async (
     // Fetch from database
     const settings = await prisma.funnelSettings.findUnique({
       where: { funnelId: funnel.id },
-      include: {
+      select: {
+        id: true,
+        funnelId: true,
+        defaultSeoTitle: true,
+        defaultSeoDescription: true,
+        defaultSeoKeywords: true,
+        favicon: true,
+        ogImage: true,
+        googleAnalyticsId: true,
+        facebookPixelId: true,
+        customTrackingScripts: true,
+        enableCookieConsent: true,
+        cookieConsentText: true,
+        privacyPolicyUrl: true,
+        termsOfServiceUrl: true,
+        language: true,
+        timezone: true,
+        dateFormat: true,
+        isPasswordProtected: true,
+        passwordHash: true,
+        createdAt: true,
+        updatedAt: true,
         funnel: {
           select: {
             status: true,
