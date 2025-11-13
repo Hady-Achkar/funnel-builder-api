@@ -27,7 +27,7 @@ export const getFunnelSettingsResponse = z.object({
   timezone: z.string().nullable(),
   dateFormat: z.string().nullable(),
   isPasswordProtected: z.boolean(),
-  password: z.string().nullable(),
+  passwordHash: z.string().nullable(),
   funnelStatus: z.enum($Enums.FunnelStatus),
   createdAt: z.date().or(z.string()),
   updatedAt: z.date().or(z.string()),

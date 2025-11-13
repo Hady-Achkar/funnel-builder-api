@@ -8,7 +8,6 @@ import { cacheService } from "../../cache/cache.service";
 import { getPrisma } from "../../../lib/prisma";
 import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager";
 import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
-import { decrypt } from "../lock-funnel/utils/encryption";
 
 export const getFunnelSettings = async (
   workspaceSlug: string,
@@ -90,18 +89,6 @@ export const getFunnelSettings = async (
       throw new Error("Funnel settings not found");
     }
 
-    // Decrypt password if it exists
-    let decryptedPassword: string | null = null;
-    if (settings.passwordHash && settings.passwordHash !== null) {
-      try {
-        decryptedPassword = decrypt(settings.passwordHash);
-      } catch (error) {
-        console.warn("Failed to decrypt password:", error);
-        // If decryption fails, leave password as null
-        decryptedPassword = null;
-      }
-    }
-
     const responseData = {
       id: settings.id,
       funnelId: settings.funnelId,
@@ -121,7 +108,7 @@ export const getFunnelSettings = async (
       timezone: settings.timezone ?? null,
       dateFormat: settings.dateFormat ?? null,
       isPasswordProtected: settings.isPasswordProtected ?? false,
-      password: decryptedPassword ?? null,
+      passwordHash: settings.passwordHash ?? null,
       funnelStatus: settings.funnel.status,
       createdAt: settings.createdAt,
       updatedAt: settings.updatedAt,
