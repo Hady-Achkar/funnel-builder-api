@@ -28,6 +28,7 @@ export const createFunnelRequest = z.object({
 export const createFunnelResponse = z.object({
   message: z.string(),
   funnelId: z.number(),
+  funnelSlug: z.string(),
 });
 
 export const workspaceMemberPayload = z.object({
