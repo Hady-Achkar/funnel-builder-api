@@ -8,6 +8,9 @@ export const getPublicPageRequest = z.object({
   linkingId: z
     .string({ message: "Linking ID must be a string" })
     .min(1, "Linking ID cannot be empty"),
+  hostname: z
+    .string({ message: "Hostname must be a string" })
+    .min(1, "Hostname cannot be empty"),
 });
 
 export const getPublicPageResponse = z.object({
