@@ -8,7 +8,7 @@ import { configureWebhookController } from "../../controllers/form/webhook";
 const router: Router = express.Router();
 
 // Form CRUD routes
-router.post("/", authenticateToken, createFormController);
+router.post("/:workspaceSlug/:funnelSlug", authenticateToken, createFormController);
 router.put("/:id", authenticateToken, updateFormController);
 router.delete("/:id", authenticateToken, deleteFormController);
 

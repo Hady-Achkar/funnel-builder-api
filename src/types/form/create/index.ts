@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+export const createFormParams = z.object({
+  workspaceSlug: z
+    .string()
+    .min(1, "Workspace slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid workspace slug format"),
+  funnelSlug: z
+    .string()
+    .min(1, "Funnel slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid funnel slug format"),
+});
+
+export type CreateFormParams = z.infer<typeof createFormParams>;
+
 export const createFormRequest = z.object({
   name: z
     .string({
@@ -27,13 +40,6 @@ export const createFormRequest = z.object({
     })
     .default(true)
     .optional(),
-  funnelId: z
-    .number({
-      message: "Funnel ID must be a number",
-    })
-    .positive("Funnel ID must be a positive number")
-    .optional()
-    .nullable(),
   webhookUrl: z
     .string({
       message: "Webhook URL must be a string",

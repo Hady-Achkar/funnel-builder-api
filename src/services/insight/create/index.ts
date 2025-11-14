@@ -1,16 +1,13 @@
 import {
   CreateInsightRequest,
   CreateInsightResponse,
-  createInsightRequest,
   createInsightResponse,
 } from "../../../types/insight/create";
 import { getPrisma } from "../../../lib/prisma";
 import {
-  BadRequestError,
   UnauthorizedError,
   NotFoundError,
 } from "../../../errors";
-import { ZodError } from "zod";
 import {
   PermissionManager,
   PermissionAction,
@@ -18,15 +15,16 @@ import {
 
 export const createInsight = async (
   userId: number,
-  request: CreateInsightRequest
+  workspaceSlug: string,
+  funnelSlug: string,
+  data: CreateInsightRequest
 ): Promise<CreateInsightResponse> => {
   try {
     if (!userId) throw new UnauthorizedError("User ID is required");
 
-    const validatedRequest = createInsightRequest.parse(request);
-
     const prisma = getPrisma();
 
+    // Verify user exists
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true },
@@ -36,31 +34,39 @@ export const createInsight = async (
       throw new NotFoundError("User not found");
     }
 
-    // Fetch funnel to get workspaceId and check permissions
-    const funnel = await prisma.funnel.findUnique({
-      where: { id: validatedRequest.funnelId },
+    // Find funnel using slugs
+    const funnel = await prisma.funnel.findFirst({
+      where: {
+        slug: funnelSlug,
+        workspace: {
+          slug: workspaceSlug,
+        },
+      },
       select: { id: true, workspaceId: true },
     });
 
     if (!funnel) {
-      throw new NotFoundError("Funnel not found");
+      throw new NotFoundError(
+        "Funnel not found in the specified workspace"
+      );
     }
 
-    // Use existing permission system: users who can edit funnels can create insights
+    // Check permissions
     await PermissionManager.requirePermission({
       userId,
       workspaceId: funnel.workspaceId,
       action: PermissionAction.EDIT_FUNNEL,
     });
 
+    // Create insight linked to funnel
     const insight = await prisma.insight.create({
       data: {
-        type: validatedRequest.type,
-        name: validatedRequest.name,
-        description: validatedRequest.description,
-        content: validatedRequest.content,
-        settings: validatedRequest.settings,
-        funnelId: validatedRequest.funnelId,
+        type: data.type,
+        name: data.name,
+        description: data.description,
+        content: data.content,
+        settings: data.settings,
+        funnelId: funnel.id,
       },
       include: {
         submissions: {
@@ -74,14 +80,8 @@ export const createInsight = async (
       insightId: insight.id,
     };
 
-    const validatedResponse = createInsightResponse.parse(response);
-
-    return validatedResponse;
+    return createInsightResponse.parse(response);
   } catch (error) {
-    if (error instanceof ZodError) {
-      const message = error.issues[0]?.message || "Invalid data provided";
-      throw new BadRequestError(message);
-    }
     throw error;
   }
 };

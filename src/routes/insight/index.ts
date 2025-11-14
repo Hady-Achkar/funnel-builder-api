@@ -8,7 +8,7 @@ const router: Router = express.Router();
 
 router.use(authenticateToken);
 
-router.post("/", createInsightController);
+router.post("/:workspaceSlug/:funnelSlug", createInsightController);
 
 router.put("/:id", updateInsightController);
 
