@@ -10,7 +10,7 @@ import { updatePasswordController } from "../../controllers/funnel-settings/upda
 const router = Router();
 
 // Public endpoints - no authentication required
-router.post("/verify-password/:workspaceSlug/:funnelSlug", verifyPasswordController);
+router.post("/verify-password", verifyPasswordController);
 
 // Protected endpoints - requires authentication
 router.get("/:workspaceSlug/:funnelSlug", authenticateToken, getFunnelSettingsController);
