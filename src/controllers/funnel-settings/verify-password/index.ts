@@ -9,14 +9,16 @@ export const verifyPasswordController = async (
   next: NextFunction
 ) => {
   try {
+    const workspaceSlug = req.params.workspaceSlug;
     const funnelSlug = req.params.funnelSlug;
 
-    if (!funnelSlug) {
-      throw new Error("Funnel slug is required");
+    if (!workspaceSlug || !funnelSlug) {
+      throw new Error("Workspace slug and funnel slug are required");
     }
 
     const result = await verifyFunnelPassword({
       ...req.body,
+      workspaceSlug,
       funnelSlug
     });
 

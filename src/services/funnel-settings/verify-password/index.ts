@@ -17,9 +17,14 @@ export const verifyFunnelPassword = async (
 
     const prisma = getPrisma();
 
-    // First, find the funnel by slug (using findFirst since slug is not unique alone)
+    // Find the funnel by workspace slug and funnel slug
     const funnel = await prisma.funnel.findFirst({
-      where: { slug: validatedRequest.funnelSlug },
+      where: {
+        slug: validatedRequest.funnelSlug,
+        workspace: {
+          slug: validatedRequest.workspaceSlug
+        }
+      },
       select: {
         id: true,
         slug: true,

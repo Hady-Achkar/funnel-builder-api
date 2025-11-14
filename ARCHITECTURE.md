@@ -437,7 +437,7 @@ vi.mock("axios");
 | ------ | ------------------- | ------------------------------------- | ------- | ----------------- |
 | GET    | `/api/sites/public` | GetPublicSiteController.getPublicSite | ✅ DONE | checkFunnelAccess |
 
-**Note**: The `/api/sites/public?hostname=X` endpoint uses the `checkFunnelAccess` middleware to enforce password protection. When a funnel is password-protected, visitors must verify the password via `/api/funnel-settings/verify-password/:funnelId` before accessing the site data.
+**Note**: The `/api/sites/public?hostname=X` endpoint uses the `checkFunnelAccess` middleware to enforce password protection. When a funnel is password-protected, visitors must verify the password via `/api/funnel-settings/verify-password/:workspaceSlug/:funnelSlug` before accessing the site data.
 
 ### Domain Routes (7 routes)
 
@@ -510,14 +510,16 @@ vi.mock("axios");
 
 ### Funnel Settings Routes (6 routes)
 
-| Method | Path                                             | Controller                     | Status  |
-| ------ | ------------------------------------------------ | ------------------------------ | ------- |
-| GET    | `/api/funnel-settings/:funnelId`                 | getFunnelSettingsController    | ❌ TODO |
-| POST   | `/api/funnel-settings/verify-password/:funnelId` | verifyPasswordController       | ❌ TODO |
-| PUT    | `/api/funnel-settings/:id`                       | updateFunnelSettingsController | ❌ TODO |
-| POST   | `/api/funnel-settings/lock-funnel/:funnelId`     | lockFunnelController           | ❌ TODO |
-| POST   | `/api/funnel-settings/unlock-funnel/:funnelId`   | unlockFunnelController         | ❌ TODO |
-| POST   | `/api/funnel-settings/update-password/:funnelId` | updatePasswordController       | ✅ DONE |
+| Method | Path                                                               | Controller                     | Status  |
+| ------ | ------------------------------------------------------------------ | ------------------------------ | ------- |
+| GET    | `/api/funnel-settings/:workspaceSlug/:funnelSlug`                  | getFunnelSettingsController    | ✅ DONE |
+| POST   | `/api/funnel-settings/verify-password/:workspaceSlug/:funnelSlug`  | verifyPasswordController       | ✅ DONE |
+| PUT    | `/api/funnel-settings/:workspaceSlug/:funnelSlug`                  | updateFunnelSettingsController | ✅ DONE |
+| POST   | `/api/funnel-settings/lock-funnel/:workspaceSlug/:funnelSlug`      | lockFunnelController           | ✅ DONE |
+| POST   | `/api/funnel-settings/unlock-funnel/:workspaceSlug/:funnelSlug`    | unlockFunnelController         | ✅ DONE |
+| POST   | `/api/funnel-settings/update-password/:workspaceSlug/:funnelSlug`  | updatePasswordController       | ✅ DONE |
+
+**Note**: The verify-password endpoint is public (no authentication required) and requires both `workspaceSlug` and `funnelSlug` to ensure workspace isolation. Since funnel slugs are only unique within a workspace, the workspace slug is necessary to prevent accessing the wrong funnel.
 
 ### Theme Routes (1 route)
 
