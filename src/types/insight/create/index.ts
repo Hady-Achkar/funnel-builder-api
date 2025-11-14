@@ -1,6 +1,19 @@
 import { z } from "zod";
 import { $Enums } from "../../../generated/prisma-client";
 
+export const createInsightParams = z.object({
+  workspaceSlug: z
+    .string()
+    .min(1, "Workspace slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid workspace slug format"),
+  funnelSlug: z
+    .string()
+    .min(1, "Funnel slug is required")
+    .regex(/^[a-z0-9-]+$/, "Invalid funnel slug format"),
+});
+
+export type CreateInsightParams = z.infer<typeof createInsightParams>;
+
 export const createInsightRequest = z.object({
   type: z.enum($Enums.InsightType, {
     message: "Type must be QUIZ, SINGLE_CHOICE, or MULTIPLE_CHOICE",
@@ -28,11 +41,6 @@ export const createInsightRequest = z.object({
     .record(z.string(), z.any())
     .optional()
     .transform((val) => val || {}),
-  funnelId: z
-    .number({
-      message: "Funnel ID must be a number",
-    })
-    .positive("Funnel ID must be a positive number"),
 });
 
 export type CreateInsightRequest = z.infer<typeof createInsightRequest>;

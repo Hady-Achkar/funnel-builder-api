@@ -5,7 +5,7 @@ import {
   CreateHomePagePayload,
 } from "../../../../types/funnel/create";
 import { $Enums } from "../../../../generated/prisma-client";
-import bcrypt from "bcryptjs";
+import { encrypt } from "../../../funnel-settings/lock-funnel/utils/encryption";
 
 // Default password for funnels in DRAFT workspaces
 const DEFAULT_FUNNEL_PASSWORD = process.env.DEFAULT_FUNNEL_PASSWORD || "FunnelDefault123!";
@@ -89,7 +89,7 @@ export const createFunnelInTransaction = async (
 
     if (data.workspaceStatus === $Enums.WorkspaceStatus.DRAFT) {
       isPasswordProtected = true;
-      passwordHash = await bcrypt.hash(DEFAULT_FUNNEL_PASSWORD, 10);
+      passwordHash = encrypt(DEFAULT_FUNNEL_PASSWORD);
     }
 
     const createFunnelSettingsData: CreateFunnelSettingsPayload = {

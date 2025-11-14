@@ -9,12 +9,15 @@ export const getPublicPageController = async (
   try {
     const funnelSlug = req.params.funnelSlug;
     const linkingId = req.params.linkingId;
+    const hostname = req.query.hostname as string;
 
-    if (!funnelSlug || !linkingId) {
-      return res.status(400).json({ error: "Funnel slug and linking ID are required" });
+    if (!funnelSlug || !linkingId || !hostname) {
+      return res.status(400).json({
+        error: "Funnel slug, linking ID, and hostname are required"
+      });
     }
 
-    const requestBody = { funnelSlug, linkingId };
+    const requestBody = { funnelSlug, linkingId, hostname };
 
     const result = await getPublicPage(requestBody);
     return res.status(200).json(result);

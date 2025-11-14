@@ -426,8 +426,10 @@ vi.mock("axios");
 | DELETE | `/api/page/:id`                                   | deletePageController         | ❌ TODO |                   |
 | POST   | `/api/page/:pageId/duplicate`                     | duplicatePageController      | ❌ TODO |                   |
 | GET    | `/api/page/funnel/:funnelId/page-by-link/:linkId` | getPageByLinkingIdController | ❌ TODO |                   |
-| GET    | `/api/page/funnel/:funnelSlug/page/:linkingId`    | getPublicPageController      | ✅ DONE | checkFunnelAccess |
+| GET    | `/api/page/funnel/:funnelSlug/page/:linkingId?hostname=required` | getPublicPageController | ✅ DONE | checkFunnelAccess |
 | POST   | `/api/page/:pageId/visit`                         | createPageVisitController    | ❌ TODO |                   |
+
+**Note**: The `/api/page/funnel/:funnelSlug/page/:linkingId?hostname=X` endpoint requires the `hostname` query parameter to identify the correct funnel, as multiple funnels across different workspaces may share the same slug. The endpoint verifies that the domain is either owned by the workspace or connected to the funnel via `FunnelDomain` with `isActive=true`. The page data is fetched directly from the database (no caching) to ensure accuracy.
 
 ### Site Routes (1 route)
 

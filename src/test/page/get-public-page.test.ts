@@ -19,6 +19,7 @@ describe("Get Public Page Tests", () => {
     pageId = 1;
   const funnelSlug = "test-funnel";
   const linkingId = "test-page";
+  const hostname = "example.com";
 
   const createMockFunnel = (overrides = {}) => ({
     id: funnelId,
@@ -28,7 +29,20 @@ describe("Get Public Page Tests", () => {
       id: workspaceId,
       slug: "test-workspace",
     },
-    pages: [{ id: pageId }],
+    pages: [{
+      id: pageId,
+      name: "Test Page",
+      content: "Test content",
+      order: 1,
+      type: PageType.PAGE,
+      linkingId: "test-page",
+      seoTitle: "Test SEO Title",
+      seoDescription: "Test SEO Description",
+      seoKeywords: "test, page, keywords",
+      funnelId,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    }],
     ...overrides,
   });
 
@@ -63,6 +77,7 @@ describe("Get Public Page Tests", () => {
     (cacheService.set as any).mockResolvedValue(undefined);
     mockReq = {
       params: { funnelSlug, linkingId },
+      query: { hostname },
     };
     mockRes = {
       status: vi.fn().mockReturnThis(),
@@ -75,26 +90,30 @@ describe("Get Public Page Tests", () => {
 
   describe("Input Validation", () => {
     it("should validate funnelSlug is required", async () => {
-      await expect(getPublicPage({ linkingId })).rejects.toThrow();
+      await expect(getPublicPage({ linkingId, hostname })).rejects.toThrow();
     });
 
     it("should validate linkingId is required", async () => {
-      await expect(getPublicPage({ funnelSlug })).rejects.toThrow();
+      await expect(getPublicPage({ funnelSlug, hostname })).rejects.toThrow();
     });
 
-    it("should accept valid funnelSlug and linkingId", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
+    it("should validate hostname is required", async () => {
+      await expect(getPublicPage({ funnelSlug, linkingId })).rejects.toThrow("Hostname must be a string");
+    });
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
+    it("should accept valid funnelSlug, linkingId, and hostname", async () => {
+      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
+
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result.id).toBe(pageId);
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith({
         where: {
           slug: funnelSlug,
           status: "LIVE",
+          OR: expect.any(Array),
         },
-        select: expect.any(Object),
+        include: expect.any(Object),
       });
     });
   });
@@ -103,7 +122,7 @@ describe("Get Public Page Tests", () => {
     it("should reject if funnel not found", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
-      await expect(getPublicPage({ funnelSlug, linkingId })).rejects.toThrow(
+      await expect(getPublicPage({ funnelSlug, linkingId, hostname })).rejects.toThrow(
         "Page not found or not publicly accessible"
       );
     });
@@ -111,7 +130,7 @@ describe("Get Public Page Tests", () => {
     it("should reject if funnel is not LIVE", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(null);
 
-      await expect(getPublicPage({ funnelSlug, linkingId })).rejects.toThrow(
+      await expect(getPublicPage({ funnelSlug, linkingId, hostname })).rejects.toThrow(
         "Page not found or not publicly accessible"
       );
 
@@ -129,16 +148,15 @@ describe("Get Public Page Tests", () => {
         createMockFunnel({ pages: [] })
       );
 
-      await expect(getPublicPage({ funnelSlug, linkingId })).rejects.toThrow(
+      await expect(getPublicPage({ funnelSlug, linkingId, hostname })).rejects.toThrow(
         "Page not found or not publicly accessible"
       );
     });
 
-    it("should successfully find page by funnelSlug + linkingId", async () => {
+    it("should successfully find page by funnelSlug + linkingId + hostname", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result.id).toBe(pageId);
       expect(result.name).toBe("Test Page");
@@ -146,80 +164,60 @@ describe("Get Public Page Tests", () => {
     });
   });
 
-  describe("Cache Behavior", () => {
-    it("should return cached page when available", async () => {
-      const cachedPage = {
-        id: pageId,
-        name: "Cached Page",
-        content: "Cached content",
-        order: 1,
-        type: PageType.PAGE,
-        linkingId: "cached-page",
-        seoTitle: null,
-        seoDescription: null,
-        seoKeywords: null,
-        funnelId,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      };
-
+  describe("Domain Verification", () => {
+    it("should verify domain association via workspace domains", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      (cacheService.get as any).mockResolvedValue(cachedPage);
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
-
-      expect(result.name).toBe("Cached Page");
-      expect(result.content).toBe("Cached content");
-      expect(cacheService.get).toHaveBeenCalledWith(
-        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`
-      );
-      expect(mockPrisma.page.findUnique).not.toHaveBeenCalled();
-    });
-
-    it("should cache page data on cache miss", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
-      (cacheService.get as any).mockResolvedValue(null);
-
-      await getPublicPage({ funnelSlug, linkingId });
-
-      expect(cacheService.set).toHaveBeenCalledWith(
-        `workspace:test-workspace:funnel:test-funnel:page:${pageId}:full`,
-        expect.objectContaining({
-          id: pageId,
-          name: "Test Page",
-          content: "Test content",
-        }),
-        { ttl: 0 }
-      );
-    });
-
-    it("should handle cache set errors gracefully", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
-      (cacheService.get as any).mockResolvedValue(null);
-      (cacheService.set as any).mockRejectedValue(new Error("Cache error"));
-
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-      const result = await getPublicPage({ funnelSlug, linkingId });
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result.id).toBe(pageId);
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Failed to cache page data:",
-        expect.any(Error)
+      expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              expect.objectContaining({
+                workspace: expect.objectContaining({
+                  domains: expect.objectContaining({
+                    some: expect.objectContaining({ hostname })
+                  })
+                })
+              })
+            ])
+          })
+        })
       );
+    });
 
-      consoleWarnSpy.mockRestore();
+    it("should verify domain association via funnel connections", async () => {
+      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
+
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
+
+      expect(result.id).toBe(pageId);
+      expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              expect.objectContaining({
+                domainConnections: expect.objectContaining({
+                  some: expect.objectContaining({
+                    domain: expect.objectContaining({ hostname }),
+                    isActive: true
+                  })
+                })
+              })
+            ])
+          })
+        })
+      );
     });
   });
 
   describe("Data Retrieval", () => {
     it("should return all page fields with correct types", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result).toMatchObject({
         id: pageId,
@@ -238,16 +236,25 @@ describe("Get Public Page Tests", () => {
     });
 
     it("should handle pages with null SEO fields", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(
-        createMockPage({
+      const mockFunnelWithNullSeo = createMockFunnel({
+        pages: [{
+          id: pageId,
+          name: "Test Page",
+          content: "Test content",
+          order: 1,
+          type: PageType.PAGE,
+          linkingId: "test-page",
           seoTitle: null,
           seoDescription: null,
           seoKeywords: null,
-        })
-      );
+          funnelId,
+          createdAt: new Date("2024-01-01"),
+          updatedAt: new Date("2024-01-01"),
+        }]
+      });
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelWithNullSeo);
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result.seoTitle).toBeNull();
       expect(result.seoDescription).toBeNull();
@@ -255,12 +262,25 @@ describe("Get Public Page Tests", () => {
     });
 
     it("should handle different page types", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(
-        createMockPage({ type: PageType.RESULT })
-      );
+      const mockFunnelWithResult = createMockFunnel({
+        pages: [{
+          id: pageId,
+          name: "Test Page",
+          content: "Test content",
+          order: 1,
+          type: PageType.RESULT,
+          linkingId: "test-page",
+          seoTitle: "Test SEO Title",
+          seoDescription: "Test SEO Description",
+          seoKeywords: "test, page, keywords",
+          funnelId,
+          createdAt: new Date("2024-01-01"),
+          updatedAt: new Date("2024-01-01"),
+        }]
+      });
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnelWithResult);
 
-      const result = await getPublicPage({ funnelSlug, linkingId });
+      const result = await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(result.type).toBe(PageType.RESULT);
     });
@@ -269,7 +289,6 @@ describe("Get Public Page Tests", () => {
   describe("Controller Integration", () => {
     it("should return 200 with page data", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
 
       await getPublicPageController(mockReq, mockRes, mockNext);
 
@@ -292,33 +311,38 @@ describe("Get Public Page Tests", () => {
 
     it("should validate required params in controller", async () => {
       mockReq.params = {};
+      mockReq.query = {};
 
       await getPublicPageController(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Funnel slug and linking ID are required",
+        error: "Funnel slug, linking ID, and hostname are required",
       });
     });
   });
 
   describe("Database Query Optimization", () => {
-    it("should fetch funnel and page in two queries (not N+1)", async () => {
+    it("should fetch funnel and page in single query with include", async () => {
       mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(createMockPage());
 
-      await getPublicPage({ funnelSlug, linkingId });
+      await getPublicPage({ funnelSlug, linkingId, hostname });
 
       expect(mockPrisma.funnel.findFirst).toHaveBeenCalledTimes(1);
-      expect(mockPrisma.page.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.funnel.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            pages: expect.any(Object)
+          })
+        })
+      );
     });
 
-    it("should handle page not found after successful funnel lookup", async () => {
-      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel());
-      mockPrisma.page.findUnique.mockResolvedValue(null);
+    it("should handle page not found in funnel pages array", async () => {
+      mockPrisma.funnel.findFirst.mockResolvedValue(createMockFunnel({ pages: [] }));
 
-      await expect(getPublicPage({ funnelSlug, linkingId })).rejects.toThrow(
-        "Page not found"
+      await expect(getPublicPage({ funnelSlug, linkingId, hostname })).rejects.toThrow(
+        "Page not found or not publicly accessible"
       );
     });
   });

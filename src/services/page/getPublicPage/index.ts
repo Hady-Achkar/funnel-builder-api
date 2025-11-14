@@ -4,7 +4,6 @@ import {
   getPublicPageResponse,
 } from "../../../types/page/getPublicPage";
 import { getPrisma } from "../../../lib/prisma";
-import { cacheService } from "../../cache/cache.service";
 import { BadRequestError } from "../../../errors";
 import { ZodError } from "zod";
 
@@ -16,29 +15,54 @@ export const getPublicPage = async (
     const validatedRequest = getPublicPageRequest.parse(requestBody);
 
     const prisma = getPrisma();
-    
-    // First, find the funnel by slug and ensure it's LIVE
+
+    // Find the funnel by slug, ensure it's LIVE, and verify domain association
     const funnel = await prisma.funnel.findFirst({
       where: {
         slug: validatedRequest.funnelSlug,
-        status: 'LIVE'
-      },
-      select: {
-        id: true,
-        slug: true,
-        workspaceId: true,
-        workspace: {
-          select: {
-            id: true,
-            slug: true,
+        status: 'LIVE',
+        OR: [
+          {
+            // Workspace owns the domain
+            workspace: {
+              domains: {
+                some: {
+                  hostname: validatedRequest.hostname
+                }
+              }
+            }
           },
-        },
+          {
+            // Funnel is connected to the domain
+            domainConnections: {
+              some: {
+                domain: {
+                  hostname: validatedRequest.hostname
+                },
+                isActive: true
+              }
+            }
+          }
+        ]
+      },
+      include: {
         pages: {
           where: {
             linkingId: validatedRequest.linkingId,
           },
           select: {
             id: true,
+            name: true,
+            content: true,
+            order: true,
+            type: true,
+            linkingId: true,
+            seoTitle: true,
+            seoDescription: true,
+            seoKeywords: true,
+            funnelId: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
       },
@@ -52,46 +76,7 @@ export const getPublicPage = async (
       throw new BadRequestError("Page not found or not publicly accessible");
     }
 
-    const pageId = funnel.pages[0].id;
-
-    // Try to get page from cache first
-    const pageCacheKey = `workspace:${funnel.workspace.slug}:funnel:${funnel.slug}:page:${pageId}:full`;
-    let cachedPage = await cacheService.get<any>(pageCacheKey);
-
-    if (cachedPage && typeof cachedPage === 'object') {
-      // Return cached data
-      return getPublicPageResponse.parse(cachedPage);
-    }
-
-    // Cache miss - fetch from database
-    const page = await prisma.page.findUnique({
-      where: { id: pageId },
-      select: {
-        id: true,
-        name: true,
-        content: true,
-        order: true,
-        type: true,
-        linkingId: true,
-        seoTitle: true,
-        seoDescription: true,
-        seoKeywords: true,
-        funnelId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!page) {
-      throw new BadRequestError("Page not found");
-    }
-
-    // Cache the page for future requests
-    try {
-      await cacheService.set(pageCacheKey, page, { ttl: 0 });
-    } catch (cacheError) {
-      console.warn("Failed to cache page data:", cacheError);
-    }
+    const page = funnel.pages[0];
 
     return getPublicPageResponse.parse(page);
   } catch (error: unknown) {
