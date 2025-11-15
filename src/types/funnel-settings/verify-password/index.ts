@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const verifyPasswordRequest = z.object({
+  hostname: z.string()
+    .min(1, "Hostname is required"),
   funnelSlug: z.string()
     .min(1, "Funnel slug is required")
     .regex(/^[a-z0-9-]+$/, "Funnel slug must contain only lowercase letters, numbers, and hyphens"),

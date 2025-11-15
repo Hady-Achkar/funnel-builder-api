@@ -9,14 +9,16 @@ export const verifyPasswordController = async (
   next: NextFunction
 ) => {
   try {
-    const funnelSlug = req.params.funnelSlug;
+    const hostname = req.query.hostname as string;
+    const funnelSlug = req.query.funnelSlug as string;
 
-    if (!funnelSlug) {
-      throw new Error("Funnel slug is required");
+    if (!hostname || !funnelSlug) {
+      throw new Error("Hostname and funnel slug are required");
     }
 
     const result = await verifyFunnelPassword({
       ...req.body,
+      hostname,
       funnelSlug
     });
 

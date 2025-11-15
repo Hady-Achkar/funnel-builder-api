@@ -1,5 +1,5 @@
 import { getPrisma } from '../../../lib/prisma';
-import { BadRequestError, NotFoundError } from '../../../errors';
+import { BadRequestError, NotFoundError, ForbiddenError } from '../../../errors';
 import { decrypt } from '../lock-funnel/utils/encryption';
 import {
   VerifyPasswordRequest,
@@ -17,12 +17,38 @@ export const verifyFunnelPassword = async (
 
     const prisma = getPrisma();
 
-    // First, find the funnel by slug (using findFirst since slug is not unique alone)
-    const funnel = await prisma.funnel.findFirst({
-      where: { slug: validatedRequest.funnelSlug },
+    // Step 1: Find domain by hostname
+    const domain = await prisma.domain.findUnique({
+      where: { hostname: validatedRequest.hostname },
+    });
+
+    if (!domain) {
+      throw new NotFoundError('Domain not found');
+    }
+
+    if (domain.status !== 'ACTIVE') {
+      throw new NotFoundError('Domain is not active');
+    }
+
+    // Step 2: Find active funnel-domain connection
+    const connection = await prisma.funnelDomain.findFirst({
+      where: {
+        domainId: domain.id,
+        isActive: true,
+      },
+    });
+
+    if (!connection) {
+      throw new NotFoundError('No funnel connected to this domain');
+    }
+
+    // Step 3: Find funnel with settings
+    const funnel = await prisma.funnel.findUnique({
+      where: { id: connection.funnelId },
       select: {
         id: true,
         slug: true,
+        status: true,
         settings: {
           select: {
             isPasswordProtected: true,
@@ -34,6 +60,20 @@ export const verifyFunnelPassword = async (
 
     if (!funnel) {
       throw new NotFoundError('Funnel not found');
+    }
+
+    // Step 4: Validate funnel slug matches parameter
+    if (funnel.slug !== validatedRequest.funnelSlug) {
+      throw new NotFoundError('Funnel not found for this domain');
+    }
+
+    // Step 5: Validate funnel is LIVE
+    if (funnel.status === 'DRAFT') {
+      throw new ForbiddenError('Funnel is not published');
+    }
+
+    if (funnel.status === 'ARCHIVED') {
+      throw new ForbiddenError('Funnel has been archived');
     }
 
     if (!funnel.settings) {
