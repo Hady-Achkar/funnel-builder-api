@@ -10,9 +10,9 @@ import { SubscriptionValidator } from "../../subscription-utils/subscription-val
 const BASE_PAGE_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.NO_PLAN]: 0, // No plan: 0 pages
   [UserPlan.WORKSPACE_MEMBER]: 0, // Workspace member: 0 pages (not applicable)
-  [UserPlan.FREE]: 35, // Free workspace: 35 pages per funnel
-  [UserPlan.BUSINESS]: 35, // Business workspace: 35 pages per funnel
-  [UserPlan.AGENCY]: 35, // Agency workspace: 35 pages per funnel
+  [UserPlan.FREE]: 100, // Free workspace: 100 pages per funnel
+  [UserPlan.BUSINESS]: 100, // Business workspace: 100 pages per funnel
+  [UserPlan.AGENCY]: 100, // Agency workspace: 100 pages per funnel
 };
 
 export interface PageAllocationInput {
@@ -38,7 +38,7 @@ export class FunnelPageAllocations {
 
   /**
    * Calculate total page allocation including add-ons
-   * Each EXTRA_PAGE add-on adds 5 pages per funnel
+   * Each EXTRA_PAGE add-on adds 100 pages per funnel
    */
   static calculateTotalAllocation(input: PageAllocationInput): number {
     const { workspacePlanType, addOns = [] } = input;
@@ -47,14 +47,14 @@ export class FunnelPageAllocations {
     let totalPages = this.getBaseAllocation(workspacePlanType);
 
     // Add extra pages from valid EXTRA_PAGE add-ons (active or cancelled but not expired)
-    // Each add-on quantity represents units, where each unit gives 5 extra pages
+    // Each add-on quantity represents units, where each unit gives 100 extra pages
     const extraPages = addOns
       .filter(
         (addon) =>
           addon.type === AddOnType.EXTRA_PAGE &&
           SubscriptionValidator.isAddonValid(addon as any)
       )
-      .reduce((sum, addon) => sum + addon.quantity * 5, 0); // 5 pages per add-on unit
+      .reduce((sum, addon) => sum + addon.quantity * 100, 0); // 100 pages per add-on unit
 
     totalPages += extraPages;
 

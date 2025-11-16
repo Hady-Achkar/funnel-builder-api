@@ -11,7 +11,7 @@ const PRICING = {
   plans: {
     DIRECT: {
       BUSINESS: {
-        amount: 999,
+        amount: 499,
         title: "Business Plan",
         description:
           "Full access to business features with unlimited funnels & analytics",
@@ -20,8 +20,9 @@ const PRICING = {
         frequencyInterval: 1000,
         freeTrialPeriodInDays: 0,
       },
+      // partner plan
       AGENCY: {
-        amount: 50,
+        amount: 59.99,
         title: "Partner Plan",
         description:
           "Enterprise features for agencies & partners with white-label options",
@@ -72,30 +73,29 @@ const PRICING = {
         amount: 10,
         title: "Extra Pages",
         description:
-          "Add 5 additional pages per funnel to your Business workspace",
-        isSubscription: true, // Always monthly subscription
+          "Add 100 additional pages per funnel to your Business workspace",
         frequency: "monthly" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
-        effectDescription: "+5 pages per funnel",
+        effectDescription: "+100 pages per funnel",
       },
       EXTRA_SUBDOMAIN: {
-        amount: 5,
+        amount: 15,
         title: "Extra Subdomain",
         description: "Add an additional subdomain to your Business workspace",
         isSubscription: true, // Always monthly subscription
-        frequency: "monthly" as const,
+        frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
         effectDescription: "+1 subdomain slot",
       },
       EXTRA_CUSTOM_DOMAIN: {
-        amount: 5,
+        amount: 50,
         title: "Extra Custom Domain",
         description:
           "Add an additional custom domain to your Business workspace",
         isSubscription: true, // Always monthly subscription
-        frequency: "monthly" as const,
+        frequency: "annually" as const,
         frequencyInterval: 1,
         freeTrialPeriodInDays: 0,
         effectDescription: "+1 custom domain slot",
@@ -104,7 +104,7 @@ const PRICING = {
     AGENCY: {
       // AGENCY workspaces can ONLY purchase EXTRA_ADMIN add-on
       EXTRA_ADMIN: {
-        amount: 5,
+        amount: 10,
         title: "Extra Team Member",
         description: "Add an additional team member to your Agency workspace",
         isSubscription: true, // Always monthly subscription
@@ -120,7 +120,7 @@ const PRICING = {
   userAddons: {
     BUSINESS: {
       EXTRA_WORKSPACE: {
-        amount: 999,
+        amount: 499,
         title: "Extra Workspace",
         description:
           "Add an additional workspace slot to your Business account",
