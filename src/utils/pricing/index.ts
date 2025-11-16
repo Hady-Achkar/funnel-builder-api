@@ -13,8 +13,7 @@ const PRICING = {
       BUSINESS: {
         amount: 499,
         title: "Business Plan",
-        description:
-          "Full access to business features with unlimited funnels & analytics",
+        description: "Create a mobile optimized site with advanced analytics",
         isSubscription: false, // One-time payment
         frequency: "annually" as const,
         frequencyInterval: 1000,
@@ -24,8 +23,7 @@ const PRICING = {
       AGENCY: {
         amount: 59.99,
         title: "Partner Plan",
-        description:
-          "Enterprise features for agencies & partners with white-label options",
+        description: "Create unlimited websites with all Digitalsite features",
         isSubscription: false, // One-time payment
         frequency: "annually" as const,
         frequencyInterval: 1000,
@@ -36,8 +34,7 @@ const PRICING = {
       BUSINESS: {
         amount: 299,
         title: "Business Plan",
-        description:
-          "Full access to business features via partner program with exclusive pricing",
+        description: "Create a mobile optimized site with advanced analytics",
         isSubscription: true, // Yearly subscription
         frequency: "annually" as const,
         frequencyInterval: 1,

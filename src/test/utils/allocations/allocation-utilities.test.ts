@@ -259,18 +259,18 @@ describe("Allocation Utilities", () => {
         expect(allocation).toBe(1);
       });
 
-      it("should return 1 funnel for BUSINESS workspace", () => {
+      it("should return 2 funnels for BUSINESS workspace", () => {
         const allocation = WorkspaceFunnelAllocations.getBaseAllocation(
           UserPlan.BUSINESS
         );
-        expect(allocation).toBe(1);
+        expect(allocation).toBe(2);
       });
 
-      it("should return 10 funnels for AGENCY workspace", () => {
+      it("should return 2 funnels for AGENCY workspace", () => {
         const allocation = WorkspaceFunnelAllocations.getBaseAllocation(
           UserPlan.AGENCY
         );
-        expect(allocation).toBe(1);
+        expect(allocation).toBe(2);
       });
     });
 
@@ -282,7 +282,7 @@ describe("Allocation Utilities", () => {
             { type: AddOnType.EXTRA_FUNNEL, quantity: 4, status: "ACTIVE" },
           ],
         });
-        expect(total).toBe(5); // 1 base + 4 from add-ons
+        expect(total).toBe(6); // 2 base + 4 from add-ons
       });
 
       it("should only count ACTIVE add-ons", () => {
@@ -306,20 +306,20 @@ describe("Allocation Utilities", () => {
       });
 
       it("should return false when at limit", () => {
-        const canCreate = WorkspaceFunnelAllocations.canCreateFunnel(1, {
+        const canCreate = WorkspaceFunnelAllocations.canCreateFunnel(2, {
           workspacePlanType: UserPlan.BUSINESS,
         });
         expect(canCreate).toBe(false);
       });
 
       it("should account for add-ons", () => {
-        const canCreate = WorkspaceFunnelAllocations.canCreateFunnel(2, {
+        const canCreate = WorkspaceFunnelAllocations.canCreateFunnel(3, {
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
             { type: AddOnType.EXTRA_FUNNEL, quantity: 3, status: "ACTIVE" },
           ],
         });
-        expect(canCreate).toBe(true); // 2 < 4 (1 base + 3 add-ons)
+        expect(canCreate).toBe(true); // 3 < 5 (2 base + 3 add-ons)
       });
     });
 
@@ -345,26 +345,26 @@ describe("Allocation Utilities", () => {
   // ========== FUNNEL PAGE ALLOCATIONS ==========
   describe("FunnelPageAllocations", () => {
     describe("getBaseAllocation", () => {
-      it("should return 35 pages for all plan types", () => {
-        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.FREE)).toBe(35);
+      it("should return 100 pages for all plan types", () => {
+        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.FREE)).toBe(100);
         expect(FunnelPageAllocations.getBaseAllocation(UserPlan.BUSINESS)).toBe(
-          35
+          100
         );
         expect(FunnelPageAllocations.getBaseAllocation(UserPlan.AGENCY)).toBe(
-          35
+          100
         );
       });
     });
 
     describe("calculateTotalAllocation", () => {
-      it("should add 5 pages per EXTRA_PAGE add-on unit", () => {
+      it("should add 100 pages per EXTRA_PAGE add-on unit", () => {
         const total = FunnelPageAllocations.calculateTotalAllocation({
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
             { type: AddOnType.EXTRA_PAGE, quantity: 3, status: "ACTIVE" },
           ],
         });
-        expect(total).toBe(50); // 35 base + 15 (3 × 5) from add-ons
+        expect(total).toBe(400); // 100 base + 300 (3 × 100) from add-ons
       });
 
       it("should only count ACTIVE add-ons", () => {
@@ -375,7 +375,7 @@ describe("Allocation Utilities", () => {
             { type: AddOnType.EXTRA_PAGE, quantity: 4, status: "INACTIVE" },
           ],
         });
-        expect(total).toBe(45); // 35 base + 10 (2 × 5) from active add-ons only
+        expect(total).toBe(300); // 100 base + 200 (2 × 100) from active add-ons only
       });
 
       it("should handle multiple EXTRA_PAGE add-ons correctly", () => {
@@ -386,7 +386,7 @@ describe("Allocation Utilities", () => {
             { type: AddOnType.EXTRA_PAGE, quantity: 2, status: "ACTIVE" },
           ],
         });
-        expect(total).toBe(50); // 35 base + 15 (3 × 5) from add-ons
+        expect(total).toBe(400); // 100 base + 300 (3 × 100) from add-ons
       });
     });
 
@@ -399,20 +399,20 @@ describe("Allocation Utilities", () => {
       });
 
       it("should return false when at limit", () => {
-        const canCreate = FunnelPageAllocations.canCreatePage(35, {
+        const canCreate = FunnelPageAllocations.canCreatePage(100, {
           workspacePlanType: UserPlan.FREE,
         });
         expect(canCreate).toBe(false);
       });
 
       it("should account for add-ons", () => {
-        const canCreate = FunnelPageAllocations.canCreatePage(40, {
+        const canCreate = FunnelPageAllocations.canCreatePage(150, {
           workspacePlanType: UserPlan.BUSINESS,
           addOns: [
             { type: AddOnType.EXTRA_PAGE, quantity: 2, status: "ACTIVE" },
           ],
         });
-        expect(canCreate).toBe(true); // 40 < 45 (35 base + 10 from add-ons)
+        expect(canCreate).toBe(true); // 150 < 300 (100 base + 200 from add-ons)
       });
     });
 
@@ -426,11 +426,11 @@ describe("Allocation Utilities", () => {
         });
 
         expect(summary).toEqual({
-          baseAllocation: 35,
-          extraFromAddOns: 5,
-          totalAllocation: 40,
+          baseAllocation: 100,
+          extraFromAddOns: 100,
+          totalAllocation: 200,
           currentUsage: 20,
-          remainingSlots: 20,
+          remainingSlots: 180,
           canCreateMore: true,
         });
       });
@@ -683,7 +683,7 @@ describe("Allocation Utilities", () => {
       const pages = FunnelPageAllocations.getAllocationSummary(10, {
         workspacePlanType: freePlan,
       });
-      expect(pages.totalAllocation).toBe(35);
+      expect(pages.totalAllocation).toBe(100);
       expect(pages.canCreateMore).toBe(true);
     });
 
@@ -710,7 +710,7 @@ describe("Allocation Utilities", () => {
         workspacePlanType: businessPlan,
         addOns,
       });
-      expect(funnels.totalAllocation).toBe(4); // 1 base + 3 add-ons
+      expect(funnels.totalAllocation).toBe(5); // 2 base + 3 add-ons
       expect(funnels.canCreateMore).toBe(true);
 
       const subdomains = WorkspaceSubdomainAllocations.getAllocationSummary(1, {
@@ -729,11 +729,11 @@ describe("Allocation Utilities", () => {
       expect(customDomains.canCreateMore).toBe(true);
 
       // Funnel level
-      const pages = FunnelPageAllocations.getAllocationSummary(35, {
+      const pages = FunnelPageAllocations.getAllocationSummary(150, {
         workspacePlanType: businessPlan,
         addOns,
       });
-      expect(pages.totalAllocation).toBe(45); // 35 base + 10 (2 × 5) add-ons
+      expect(pages.totalAllocation).toBe(300); // 100 base + 200 (2 × 100) add-ons
       expect(pages.canCreateMore).toBe(true);
     });
 
@@ -758,11 +758,11 @@ describe("Allocation Utilities", () => {
       expect(members.totalAllocation).toBe(101); // 1 base + 100 add-ons
       expect(members.canAddMore).toBe(true);
 
-      const funnels = WorkspaceFunnelAllocations.getAllocationSummary(5, {
+      const funnels = WorkspaceFunnelAllocations.getAllocationSummary(1, {
         workspacePlanType: agencyPlan,
       });
-      expect(funnels.totalAllocation).toBe(1);
-      expect(funnels.canCreateMore).toBe(false);
+      expect(funnels.totalAllocation).toBe(2);
+      expect(funnels.canCreateMore).toBe(true);
     });
   });
 
@@ -802,7 +802,7 @@ describe("Allocation Utilities", () => {
         workspacePlanType: UserPlan.AGENCY,
       });
 
-      expect(total).toBe(35);
+      expect(total).toBe(100);
     });
 
     it("should ignore non-relevant add-on types", () => {
@@ -814,7 +814,7 @@ describe("Allocation Utilities", () => {
         ],
       });
 
-      expect(total).toBe(1); // Only base, no EXTRA_FUNNEL add-ons
+      expect(total).toBe(2); // Only base, no EXTRA_FUNNEL add-ons
     });
 
     it("should handle mix of active and inactive add-ons correctly", () => {

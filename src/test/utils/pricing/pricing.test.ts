@@ -13,10 +13,9 @@ describe("Pricing Utility", () => {
         );
 
         expect(pricing).toEqual({
-          amount: 999,
+          amount: 499,
           title: "Business Plan",
-          description:
-            "Full access to business features with unlimited funnels & analytics",
+          description: "Create a mobile optimized site with advanced analytics",
           isSubscription: false,
           frequency: "annually",
           frequencyInterval: 1000,
@@ -31,10 +30,9 @@ describe("Pricing Utility", () => {
         );
 
         expect(pricing).toEqual({
-          amount: 50,
+          amount: 59.99,
           title: "Partner Plan",
-          description:
-            "Enterprise features for agencies & partners with white-label options",
+          description: "Create unlimited websites with all Digitalsite features",
           isSubscription: false,
           frequency: "annually",
           frequencyInterval: 1000,
@@ -53,8 +51,7 @@ describe("Pricing Utility", () => {
         expect(pricing).toEqual({
           amount: 299,
           title: "Business Plan",
-          description:
-            "Full access to business features via partner program with exclusive pricing",
+          description: "Create a mobile optimized site with advanced analytics",
           isSubscription: true,
           frequency: "annually",
           frequencyInterval: 1,
@@ -141,7 +138,7 @@ describe("Pricing Utility", () => {
         );
 
         expect(pricing?.amount).toBe(10);
-        expect(pricing?.effectDescription).toBe("+5 pages per funnel");
+        expect(pricing?.effectDescription).toBe("+100 pages per funnel");
       });
 
       it("should return EXTRA_SUBDOMAIN pricing", () => {
@@ -150,7 +147,7 @@ describe("Pricing Utility", () => {
           $Enums.AddOnType.EXTRA_SUBDOMAIN
         );
 
-        expect(pricing?.amount).toBe(5);
+        expect(pricing?.amount).toBe(15);
         expect(pricing?.effectDescription).toBe("+1 subdomain slot");
       });
 
@@ -160,7 +157,7 @@ describe("Pricing Utility", () => {
           $Enums.AddOnType.EXTRA_CUSTOM_DOMAIN
         );
 
-        expect(pricing?.amount).toBe(5);
+        expect(pricing?.amount).toBe(50);
         expect(pricing?.effectDescription).toBe("+1 custom domain slot");
       });
 
@@ -181,7 +178,7 @@ describe("Pricing Utility", () => {
           $Enums.AddOnType.EXTRA_ADMIN
         );
 
-        expect(pricing?.amount).toBe(5); // Cheaper than BUSINESS ($10)
+        expect(pricing?.amount).toBe(10); // Same as BUSINESS
       });
 
       it("should return null for EXTRA_FUNNEL (not allowed)", () => {
@@ -222,7 +219,7 @@ describe("Pricing Utility", () => {
     });
 
     describe("Price comparison", () => {
-      it("should have AGENCY workspace addons cheaper than BUSINESS", () => {
+      it("should have AGENCY and BUSINESS workspace EXTRA_ADMIN at same price", () => {
         const businessAdmin = PaymentLinkPricing.getWorkspaceAddonPricing(
           $Enums.UserPlan.BUSINESS,
           $Enums.AddOnType.EXTRA_ADMIN
@@ -232,7 +229,7 @@ describe("Pricing Utility", () => {
           $Enums.AddOnType.EXTRA_ADMIN
         );
 
-        expect(agencyAdmin?.amount).toBeLessThan(businessAdmin?.amount!);
+        expect(agencyAdmin?.amount).toBe(businessAdmin?.amount);
       });
     });
   });
@@ -246,7 +243,7 @@ describe("Pricing Utility", () => {
       );
 
       expect(pricing).toEqual({
-        amount: 999,
+        amount: 499,
         title: "Extra Workspace",
         description:
           "Add an additional workspace slot to your Business account",
@@ -304,7 +301,7 @@ describe("Pricing Utility", () => {
         $Enums.AddOnType.EXTRA_WORKSPACE
       );
 
-      expect(pricing?.amount).toBe(999);
+      expect(pricing?.amount).toBe(499);
       expect(pricing?.effectDescription).toBe("+1 workspace slot");
     });
 
@@ -580,7 +577,7 @@ describe("Pricing Utility", () => {
         $Enums.RegistrationSource.DIRECT,
         $Enums.UserPlan.BUSINESS
       );
-      expect(pricing?.amount).toBe(999);
+      expect(pricing?.amount).toBe(499);
 
       // Get metadata
       const metadata = PaymentLinkPricing.getMetadata();
@@ -613,7 +610,7 @@ describe("Pricing Utility", () => {
         $Enums.UserPlan.BUSINESS,
         $Enums.AddOnType.EXTRA_WORKSPACE
       );
-      expect(workspaceAddonPricing?.amount).toBe(999);
+      expect(workspaceAddonPricing?.amount).toBe(499);
     });
 
     it("should reject AFFILIATE + AGENCY combination", () => {
