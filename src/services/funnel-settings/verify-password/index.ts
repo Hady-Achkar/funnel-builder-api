@@ -102,9 +102,13 @@ export const verifyFunnelPassword = async (
       isValidPassword = false;
     }
 
+    if (!isValidPassword) {
+      throw new BadRequestError('Incorrect password. Please try again.');
+    }
+
     const response = {
-      valid: isValidPassword,
-      message: isValidPassword ? 'Access granted' : 'Incorrect password. Please try again.',
+      valid: true,
+      message: 'Access granted',
       funnelId: funnel.id,
     };
 

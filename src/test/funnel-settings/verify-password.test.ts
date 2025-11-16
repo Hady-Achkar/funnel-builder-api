@@ -311,18 +311,16 @@ describe("Verify Funnel Password Tests", () => {
       expect(result.funnelId).toBe(funnelId);
     });
 
-    it("should return valid=false for incorrect password", async () => {
+    it("should throw BadRequestError for incorrect password", async () => {
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: "WrongPassword",
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.message).toBe("Incorrect password. Please try again.");
-      expect(result.funnelId).toBe(funnelId);
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: "WrongPassword",
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should call encryptionModule.decrypt with correct arguments", async () => {
@@ -336,25 +334,25 @@ describe("Verify Funnel Password Tests", () => {
     it("should reject password with wrong case", async () => {
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: "securepass123",
-      });
-
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: "securepass123",
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should reject password with extra spaces", async () => {
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: "  SecurePass123  ",
-      });
-
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: "  SecurePass123  ",
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should verify password with special characters", async () => {
@@ -419,7 +417,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(typeof result.funnelId).toBe("number");
     });
 
-    it("should return valid response structure for incorrect password", async () => {
+    it("should throw BadRequestError for incorrect password", async () => {
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -431,12 +429,9 @@ describe("Verify Funnel Password Tests", () => {
       });
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({ hostname, funnelSlug, password });
-
-      expect(result).toHaveProperty("valid");
-      expect(result).toHaveProperty("message");
-      expect(result).toHaveProperty("funnelId");
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({ hostname, funnelSlug, password })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should return valid response structure for unprotected funnel", async () => {
@@ -480,7 +475,7 @@ describe("Verify Funnel Password Tests", () => {
   });
 
   describe("Edge Cases", () => {
-    it("should handle very long password", async () => {
+    it("should reject very long password", async () => {
       const longPassword = "A".repeat(500);
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
@@ -493,17 +488,18 @@ describe("Verify Funnel Password Tests", () => {
       });
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: longPassword,
-      });
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: longPassword,
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
 
       expect(encryptionModule.decrypt).toHaveBeenCalledWith(hashedPassword);
-      expect(result.valid).toBe(false);
     });
 
-    it("should handle SQL injection attempt in password", async () => {
+    it("should reject SQL injection attempt in password", async () => {
       const sqlInjectionPassword = "' OR '1'='1";
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
@@ -516,16 +512,16 @@ describe("Verify Funnel Password Tests", () => {
       });
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: sqlInjectionPassword,
-      });
-
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: sqlInjectionPassword,
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
-    it("should handle decrypt error", async () => {
+    it("should throw error when decryption fails", async () => {
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -539,10 +535,9 @@ describe("Verify Funnel Password Tests", () => {
         throw new Error("Decryption error");
       });
 
-      const result = await verifyFunnelPassword({ hostname, funnelSlug, password });
-
-      // When decryption fails, password should be considered invalid
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({ hostname, funnelSlug, password })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should handle null password hash gracefully", async () => {
@@ -578,24 +573,28 @@ describe("Verify Funnel Password Tests", () => {
         .mockReturnValueOnce("DifferentPassword2")
         .mockReturnValueOnce("correct");
 
-      const result1 = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: "wrong1",
-      });
-      const result2 = await verifyFunnelPassword({
-        hostname,
-        funnelSlug,
-        password: "wrong2",
-      });
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: "wrong1",
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
+      
+      await expect(
+        verifyFunnelPassword({
+          hostname,
+          funnelSlug,
+          password: "wrong2",
+        })
+      ).rejects.toThrow("Incorrect password. Please try again.");
+      
       const result3 = await verifyFunnelPassword({
         hostname,
         funnelSlug,
         password: "correct",
       });
 
-      expect(result1.valid).toBe(false);
-      expect(result2.valid).toBe(false);
       expect(result3.valid).toBe(true);
       expect(encryptionModule.decrypt).toHaveBeenCalledTimes(3);
     });
@@ -638,7 +637,7 @@ describe("Verify Funnel Password Tests", () => {
       ).rejects.toThrow("Database connection failed");
     });
 
-    it("should handle decryption errors", async () => {
+    it("should throw error when decryption fails", async () => {
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -652,10 +651,9 @@ describe("Verify Funnel Password Tests", () => {
         throw new Error("Decryption failed");
       });
 
-      const result = await verifyFunnelPassword({ hostname, funnelSlug, password });
-
-      // When decryption fails, password should be considered invalid
-      expect(result.valid).toBe(false);
+      await expect(
+        verifyFunnelPassword({ hostname, funnelSlug, password })
+      ).rejects.toThrow("Incorrect password. Please try again.");
     });
 
     it("should throw BadRequestError for Zod validation errors", async () => {
@@ -698,7 +696,7 @@ describe("Verify Funnel Password Tests", () => {
       expect(JSON.stringify(result)).not.toContain(hashedPassword);
     });
 
-    it("should not leak password hash on incorrect password", async () => {
+    it("should not leak password hash in error message", async () => {
       mockPrisma.funnel.findUnique.mockResolvedValue({
         id: funnelId,
         slug: funnelSlug,
@@ -710,10 +708,13 @@ describe("Verify Funnel Password Tests", () => {
       });
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({ hostname, funnelSlug, password });
-
-      expect(result).not.toHaveProperty("passwordHash");
-      expect(JSON.stringify(result)).not.toContain(hashedPassword);
+      try {
+        await verifyFunnelPassword({ hostname, funnelSlug, password });
+      } catch (error) {
+        if (error instanceof Error) {
+          expect(error.message).not.toContain(hashedPassword);
+        }
+      }
     });
 
     it("should not include sensitive data in error messages", async () => {
@@ -787,12 +788,12 @@ describe("Verify Funnel Password Tests", () => {
       });
       (encryptionModule.decrypt as any).mockReturnValue("DifferentPassword");
 
-      const result = await verifyFunnelPassword({ hostname, funnelSlug, password });
-
+      await expect(
+        verifyFunnelPassword({ hostname, funnelSlug, password })
+      ).rejects.toThrow("Incorrect password. Please try again.");
+      
       expect(mockPrisma.funnel.findUnique).toHaveBeenCalled();
       expect(encryptionModule.decrypt).toHaveBeenCalled();
-      expect(result.valid).toBe(false);
-      expect(result.message).toBe("Incorrect password. Please try again.");
     });
 
     it("should complete full workflow for unprotected funnel", async () => {
