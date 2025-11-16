@@ -376,7 +376,7 @@ describe("Funnel Creation Tests", () => {
       });
     });
 
-    it("should reject when workspace limit reached (BUSINESS plan: 1 funnel)", async () => {
+    it("should reject when workspace limit reached (BUSINESS plan: 2 funnels)", async () => {
       const workspace = {
         id: workspaceId,
         name: "Test Workspace",
@@ -389,7 +389,7 @@ describe("Funnel Creation Tests", () => {
       };
 
       mockPrisma.workspace.findUnique.mockResolvedValue(workspace);
-      mockPrisma.funnel.count.mockResolvedValue(1); // At limit (BUSINESS = 1 funnel)
+      mockPrisma.funnel.count.mockResolvedValue(2); // At limit (BUSINESS = 2 funnels)
 
       await expect(
         createFunnel(userId, {
@@ -397,7 +397,7 @@ describe("Funnel Creation Tests", () => {
           workspaceSlug,
           status: $Enums.FunnelStatus.DRAFT,
         })
-      ).rejects.toThrow("You've reached the maximum of 1 funnel for this workspace");
+      ).rejects.toThrow("You've reached the maximum of 2 funnels for this workspace");
     });
   });
 

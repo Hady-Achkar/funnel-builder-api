@@ -262,7 +262,7 @@ describe("Create Page Tests", () => {
   });
 
   describe("Page Allocation Limits", () => {
-    it("should enforce page limit for FREE plan (35 pages)", async () => {
+    it("should enforce page limit for FREE plan (100 pages)", async () => {
       const funnel = {
         id: funnelId,
         name: "Test Funnel",
@@ -276,14 +276,14 @@ describe("Create Page Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
-      mockPrisma.page.count.mockResolvedValue(35); // At limit
+      mockPrisma.page.count.mockResolvedValue(100); // At limit
 
       await expect(
         createPage(userId, {
           name: "Test Page",
           funnelId,
         })
-      ).rejects.toThrow(/reached its page limit \(35 pages\)/);
+      ).rejects.toThrow(/reached its page limit \(100 pages\)/);
     });
 
     it("should allow page creation when under limit", async () => {
@@ -347,7 +347,7 @@ describe("Create Page Tests", () => {
           addOns: [
             {
               type: AddOnType.EXTRA_PAGE,
-              quantity: 2, // 2 units = 10 extra pages (2*5)
+              quantity: 2, // 2 units = 200 extra pages (2*100)
               status: "ACTIVE",
             },
           ],
@@ -355,7 +355,7 @@ describe("Create Page Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
-      mockPrisma.page.count.mockResolvedValue(44); // 35 + 10 = 45 total, currently at 44
+      mockPrisma.page.count.mockResolvedValue(299); // 100 + 200 = 300 total, currently at 299
       mockPrisma.page.findFirst
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
@@ -366,7 +366,7 @@ describe("Create Page Tests", () => {
             create: vi.fn().mockResolvedValue({
               id: 1,
               name: "Test Page",
-              order: 45,
+              order: 300,
               linkingId: "test-page",
               type: PageType.PAGE,
               funnelId,
@@ -410,7 +410,7 @@ describe("Create Page Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
-      mockPrisma.page.count.mockResolvedValue(40); // At limit (35 + 5)
+      mockPrisma.page.count.mockResolvedValue(200); // At limit (100 + 100)
 
       await expect(
         createPage(userId, {
@@ -418,7 +418,7 @@ describe("Create Page Tests", () => {
           funnelId,
         })
       ).rejects.toThrow(
-        /Your funnel has reached its page limit \(40 pages\)\. You have 35 base pages \+ 5 from add-ons\./
+        /Your funnel has reached its page limit \(200 pages\)\. You have 100 base pages \+ 100 from add-ons\./
       );
     });
 
@@ -442,14 +442,14 @@ describe("Create Page Tests", () => {
       };
 
       mockPrisma.funnel.findUnique.mockResolvedValue(funnel);
-      mockPrisma.page.count.mockResolvedValue(35); // At base limit
+      mockPrisma.page.count.mockResolvedValue(100); // At base limit
 
       await expect(
         createPage(userId, {
           name: "Test Page",
           funnelId,
         })
-      ).rejects.toThrow(/page limit \(35 pages\)/);
+      ).rejects.toThrow(/page limit \(100 pages\)/);
     });
   });
 

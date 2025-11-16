@@ -160,7 +160,7 @@ describe("Duplicate Page Tests", () => {
     it("should enforce page limit", async () => {
       mockPrisma.page.findUnique.mockResolvedValue(createPage());
       (PermissionManager.requirePermission as any).mockResolvedValue(undefined);
-      mockPrisma.page.count.mockResolvedValue(35);
+      mockPrisma.page.count.mockResolvedValue(100);
       await expect(duplicatePage(userId, { pageId })).rejects.toThrow(
         /page limit/
       );
@@ -190,7 +190,7 @@ describe("Duplicate Page Tests", () => {
         })
       );
       (PermissionManager.requirePermission as any).mockResolvedValue(undefined);
-      mockPrisma.page.count.mockResolvedValue(44);
+      mockPrisma.page.count.mockResolvedValue(299); // 100 base + 200 from add-ons = 300 total, currently at 299
       mockPrisma.page.findMany.mockResolvedValue([]);
       mockPrisma.page.findFirst.mockResolvedValue(null);
       mockPrisma.$transaction.mockImplementation(async (cb: any) =>
