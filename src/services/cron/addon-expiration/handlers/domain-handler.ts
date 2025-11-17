@@ -33,6 +33,7 @@ export class DomainExpirationHandler {
         select: {
           id: true,
           planType: true,
+          isProtected: true,
           ownerId: true,
         },
       });
@@ -81,6 +82,7 @@ export class DomainExpirationHandler {
       } else {
         allowedDomains = WorkspaceCustomDomainAllocations.calculateTotalAllocation({
           workspacePlanType: workspace.planType,
+          isProtected: workspace.isProtected,
           addOns: activeAddons,
         });
       }

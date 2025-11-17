@@ -19,6 +19,7 @@ const BASE_CUSTOM_DOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
 
 export interface CustomDomainAllocationInput {
   workspacePlanType: UserPlan; // The plan type of the workspace (not user)
+  isProtected?: boolean; // Whether the workspace is protected (for OLD_MEMBER migration)
   addOns?: Array<{
     type: AddOnType;
     quantity: number;
@@ -42,10 +43,15 @@ export class WorkspaceCustomDomainAllocations {
    * Calculate total custom domain allocation including add-ons
    */
   static calculateTotalAllocation(input: CustomDomainAllocationInput): number {
-    const { workspacePlanType, addOns = [] } = input;
+    const { workspacePlanType, isProtected = false, addOns = [] } = input;
 
     // Start with base allocation from workspace plan type
     let totalCustomDomains = this.getBaseAllocation(workspacePlanType);
+
+    // Special case: Protected workspaces (OLD_MEMBER migration) get 1 custom domain
+    if (isProtected && workspacePlanType === UserPlan.OLD_MEMBER) {
+      totalCustomDomains = 1;
+    }
 
     // Add extra custom domains from valid EXTRA_CUSTOM_DOMAIN add-ons (active or cancelled but not expired)
     const extraCustomDomains = addOns

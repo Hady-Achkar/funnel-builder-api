@@ -80,6 +80,7 @@ export class CreateCustomDomainService {
         currentCustomDomainCount,
         {
           workspacePlanType: workspace.planType,
+          isProtected: workspace.isProtected,
           addOns: workspace.addOns,
         }
       );
@@ -89,6 +90,7 @@ export class CreateCustomDomainService {
           currentCustomDomainCount,
           {
             workspacePlanType: workspace.planType,
+            isProtected: workspace.isProtected,
             addOns: workspace.addOns,
           }
         );

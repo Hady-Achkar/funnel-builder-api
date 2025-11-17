@@ -424,6 +424,73 @@ describe("Create Custom Domain Tests", () => {
         })
       ).rejects.toThrow(/maximum limit of 1 custom domain/);
     });
+
+    it("should allow 1 custom domain for protected OLD_MEMBER workspace", async () => {
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        ...mockWorkspace,
+        planType: UserPlan.OLD_MEMBER,
+        isProtected: true,
+        addOns: [],
+      });
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
+      mockPrisma.domain.count.mockResolvedValue(0); // No custom domains yet
+      mockPrisma.domain.findUnique.mockResolvedValue(null);
+      mockPrisma.domain.create.mockResolvedValue(mockCreatedDomain);
+
+      const { addCustomHostname, getCustomHostnameDetails } = await import(
+        "../../cloudflare"
+      );
+      vi.mocked(addCustomHostname).mockResolvedValue(
+        mockCloudflareHostname as any
+      );
+      vi.mocked(getCustomHostnameDetails).mockResolvedValue(
+        mockCloudflareHostname as any
+      );
+
+      const result = await CreateCustomDomainService.create(userId, {
+        hostname,
+        workspaceSlug,
+      });
+
+      expect(result).toBeDefined();
+      expect(result.domain.hostname).toBe(hostname);
+    });
+
+    it("should enforce 1 custom domain limit for protected OLD_MEMBER workspace", async () => {
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        ...mockWorkspace,
+        planType: UserPlan.OLD_MEMBER,
+        isProtected: true,
+        addOns: [],
+      });
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
+      mockPrisma.domain.count.mockResolvedValue(1); // Already has 1 custom domain
+
+      await expect(
+        CreateCustomDomainService.create(userId, {
+          hostname,
+          workspaceSlug,
+        })
+      ).rejects.toThrow(/maximum limit of 1 custom domain/);
+    });
+
+    it("should NOT allow custom domains for non-protected OLD_MEMBER workspace", async () => {
+      mockPrisma.workspace.findUnique.mockResolvedValue({
+        ...mockWorkspace,
+        planType: UserPlan.OLD_MEMBER,
+        isProtected: false,
+        addOns: [],
+      });
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(mockMember);
+      mockPrisma.domain.count.mockResolvedValue(0);
+
+      await expect(
+        CreateCustomDomainService.create(userId, {
+          hostname,
+          workspaceSlug,
+        })
+      ).rejects.toThrow(/maximum limit of 0 custom domain/);
+    });
   });
 
   describe("Business Logic", () => {
