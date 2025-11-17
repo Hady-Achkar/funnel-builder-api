@@ -46,6 +46,13 @@ export class DeleteWorkspaceService {
         );
       }
 
+      // Prevent deletion of protected workspaces
+      if (workspace.isProtected) {
+        throw new ForbiddenError(
+          "This workspace is protected and cannot be deleted"
+        );
+      }
+
       if (workspace.funnels.length > 0) {
         throw new BadRequestError(
           "Cannot delete workspace with existing funnels. Please delete all funnels first."

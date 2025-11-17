@@ -13,6 +13,8 @@ const BASE_PAGE_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.FREE]: 100, // Free workspace: 100 pages per funnel
   [UserPlan.BUSINESS]: 100, // Business workspace: 100 pages per funnel
   [UserPlan.AGENCY]: 100, // Agency workspace: 100 pages per funnel
+  [UserPlan.OLD_MEMBER]: 100, // Old member workspace: 100 pages per funnel
+  [UserPlan.ADMIN]: 10000, // Admin workspace: 10000 pages per funnel (unlimited)
 };
 
 export interface PageAllocationInput {

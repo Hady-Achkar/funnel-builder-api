@@ -153,6 +153,7 @@ model Workspace {
   image             String?
   status            WorkspaceStatus             @default(ACTIVE)
   planType          UserPlan                    @default(FREE)
+  isProtected       Boolean                     @default(false)
   addOns            AddOn[]                     @relation("WorkspaceAddOns")
   affiliateLinks    AffiliateLink[]
   domains           Domain[]
@@ -671,6 +672,8 @@ enum UserPlan {
   BUSINESS
   AGENCY
   FREE
+  OLD_MEMBER
+  ADMIN
 }
 
 enum SubscriptionStatus {

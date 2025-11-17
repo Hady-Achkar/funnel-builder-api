@@ -13,6 +13,8 @@ const BASE_WORKSPACE_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.FREE]: 1, // Free plan: 1 workspace
   [UserPlan.BUSINESS]: 1, // Business plan: 1 workspaces
   [UserPlan.AGENCY]: 10000, // Agency plan: 10000 workspaces
+  [UserPlan.OLD_MEMBER]: 300, // Old member: 300 workspaces (legacy users)
+  [UserPlan.ADMIN]: 10000, // Admin: 10000 workspaces (unlimited)
 };
 
 export interface WorkspaceAllocationInput {

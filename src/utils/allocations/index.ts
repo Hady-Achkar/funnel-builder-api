@@ -68,6 +68,26 @@ export class AllocationService {
             maxMembers: 500,
           },
         };
+      case "OLD_MEMBER":
+        return {
+          maxWorkspaces: 300,
+          workspaceAllocations: {
+            maxFunnels: 1,
+            maxSubdomains: 1,
+            maxCustomDomains: 0,
+            maxMembers: 1,
+          },
+        };
+      case "ADMIN":
+        return {
+          maxWorkspaces: 10000,
+          workspaceAllocations: {
+            maxFunnels: 10000,
+            maxSubdomains: 10000,
+            maxCustomDomains: 10000,
+            maxMembers: 10000,
+          },
+        };
       default:
         return {
           maxWorkspaces: 1,

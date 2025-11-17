@@ -111,6 +111,29 @@ const PRICING = {
         effectDescription: "+1 member slot",
       },
     },
+    OLD_MEMBER: {
+      // OLD_MEMBER workspaces can purchase specific add-ons at legacy prices
+      EXTRA_ADMIN: {
+        amount: 10,
+        title: "Extra Team Member",
+        description: "Add an additional team member to your workspace",
+        isSubscription: true,
+        frequency: "annually" as const,
+        frequencyInterval: 1,
+        freeTrialPeriodInDays: 0,
+        effectDescription: "+1 member slot",
+      },
+      EXTRA_FUNNEL: {
+        amount: 1,
+        title: "Extra Funnel",
+        description: "Add an additional funnel to your workspace",
+        isSubscription: true,
+        frequency: "annually" as const,
+        frequencyInterval: 1,
+        freeTrialPeriodInDays: 0,
+        effectDescription: "+1 funnel",
+      },
+    },
   },
 
   // 👤 USER-LEVEL ADD-ON PRICES (based on user's plan type)
@@ -128,8 +151,22 @@ const PRICING = {
         effectDescription: "+1 workspace slot",
       },
     },
-    // AGENCY users have unlimited workspaces, so no EXTRA_WORKSPACE addon needed
+    OLD_MEMBER: {
+      EXTRA_WORKSPACE: {
+        amount: 10,
+        title: "Extra Workspace",
+        description:
+          "Add an additional workspace slot to your account",
+        isSubscription: true,
+        frequency: "annually" as const,
+        frequencyInterval: 1,
+        freeTrialPeriodInDays: 0,
+        effectDescription: "+1 workspace slot",
+      },
+    },
+    // AGENCY and ADMIN users have unlimited workspaces, so no EXTRA_WORKSPACE addon needed
     AGENCY: {},
+    ADMIN: {},
   },
 
   // 🔗 METADATA

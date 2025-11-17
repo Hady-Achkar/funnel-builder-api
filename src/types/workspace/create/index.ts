@@ -41,6 +41,8 @@ export const createWorkspaceRequest = z.object({
     .optional(),
 
   planType: z.nativeEnum(UserPlan).optional(),
+
+  isProtected: z.boolean().optional(),
 });
 
 export type CreateWorkspaceRequest = z.infer<typeof createWorkspaceRequest>;

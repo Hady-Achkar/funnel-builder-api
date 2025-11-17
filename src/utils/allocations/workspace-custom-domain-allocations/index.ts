@@ -13,6 +13,8 @@ const BASE_CUSTOM_DOMAIN_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.FREE]: 0, // Free workspace: 0 custom domains
   [UserPlan.BUSINESS]: 1, // Business workspace: 1 custom domain
   [UserPlan.AGENCY]: 0, // Agency workspace: 0 custom domains
+  [UserPlan.OLD_MEMBER]: 0, // Old member workspace: 0 custom domains
+  [UserPlan.ADMIN]: 10000, // Admin workspace: 10000 custom domains (unlimited)
 };
 
 export interface CustomDomainAllocationInput {

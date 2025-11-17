@@ -31,6 +31,20 @@ describe("Allocation Utilities", () => {
         );
         expect(allocation).toBe(10000);
       });
+
+      it("should return 300 workspaces for OLD_MEMBER plan", () => {
+        const allocation = UserWorkspaceAllocations.getBaseAllocation(
+          UserPlan.OLD_MEMBER
+        );
+        expect(allocation).toBe(300);
+      });
+
+      it("should return 10000 workspaces for ADMIN plan", () => {
+        const allocation = UserWorkspaceAllocations.getBaseAllocation(
+          UserPlan.ADMIN
+        );
+        expect(allocation).toBe(10000);
+      });
     });
 
     describe("calculateTotalAllocation", () => {
@@ -179,6 +193,20 @@ describe("Allocation Utilities", () => {
         );
         expect(allocation).toBe(1);
       });
+
+      it("should return 1 member for OLD_MEMBER workspace", () => {
+        const allocation = WorkspaceMemberAllocations.getBaseAllocation(
+          UserPlan.OLD_MEMBER
+        );
+        expect(allocation).toBe(1);
+      });
+
+      it("should return 10000 members for ADMIN workspace", () => {
+        const allocation = WorkspaceMemberAllocations.getBaseAllocation(
+          UserPlan.ADMIN
+        );
+        expect(allocation).toBe(10000);
+      });
     });
 
     describe("calculateTotalAllocation", () => {
@@ -272,6 +300,20 @@ describe("Allocation Utilities", () => {
         );
         expect(allocation).toBe(2);
       });
+
+      it("should return 1 funnel for OLD_MEMBER workspace", () => {
+        const allocation = WorkspaceFunnelAllocations.getBaseAllocation(
+          UserPlan.OLD_MEMBER
+        );
+        expect(allocation).toBe(1);
+      });
+
+      it("should return 10000 funnels for ADMIN workspace", () => {
+        const allocation = WorkspaceFunnelAllocations.getBaseAllocation(
+          UserPlan.ADMIN
+        );
+        expect(allocation).toBe(10000);
+      });
     });
 
     describe("calculateTotalAllocation", () => {
@@ -352,6 +394,15 @@ describe("Allocation Utilities", () => {
         );
         expect(FunnelPageAllocations.getBaseAllocation(UserPlan.AGENCY)).toBe(
           100
+        );
+        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)).toBe(
+          100
+        );
+      });
+
+      it("should return 10000 pages for ADMIN plan", () => {
+        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.ADMIN)).toBe(
+          10000
         );
       });
     });
@@ -450,6 +501,15 @@ describe("Allocation Utilities", () => {
         expect(
           WorkspaceSubdomainAllocations.getBaseAllocation(UserPlan.AGENCY)
         ).toBe(1);
+        expect(
+          WorkspaceSubdomainAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)
+        ).toBe(1);
+      });
+
+      it("should return 10000 subdomains for ADMIN plan", () => {
+        expect(
+          WorkspaceSubdomainAllocations.getBaseAllocation(UserPlan.ADMIN)
+        ).toBe(10000);
       });
     });
 
@@ -538,6 +598,15 @@ describe("Allocation Utilities", () => {
         expect(
           WorkspaceCustomDomainAllocations.getBaseAllocation(UserPlan.AGENCY)
         ).toBe(0);
+        expect(
+          WorkspaceCustomDomainAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)
+        ).toBe(0);
+      });
+
+      it("should return 10000 custom domains for ADMIN plan", () => {
+        expect(
+          WorkspaceCustomDomainAllocations.getBaseAllocation(UserPlan.ADMIN)
+        ).toBe(10000);
       });
     });
 
