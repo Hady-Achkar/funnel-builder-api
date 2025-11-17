@@ -38,6 +38,8 @@ export class RegisterService {
         userPlan = UserPlan.WORKSPACE_MEMBER;
       } else if (registrationSource === RegistrationSource.OUTER_PAYMENT) {
         userPlan = UserPlan.AGENCY;
+      } else if (registrationSource === RegistrationSource.AD) {
+        userPlan = UserPlan.NO_PLAN;
       }
 
       // Determine which token to save (priority: workspace > outerPayment > ad > affiliate)
