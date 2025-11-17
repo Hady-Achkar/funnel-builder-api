@@ -75,6 +75,16 @@ export const registerRequestSchema = z.object({
     .min(1, "Affiliate token cannot be empty")
     .optional()
     .describe("Optional affiliate referral token"),
+  adToken: z
+    .string({ message: "Ad token must be a string" })
+    .min(1, "Ad token cannot be empty")
+    .optional()
+    .describe("Optional ad campaign token"),
+  outerPaymentToken: z
+    .string({ message: "Outer payment token must be a string" })
+    .min(1, "Outer payment token cannot be empty")
+    .optional()
+    .describe("Optional outer payment integration token"),
 });
 
 // User response schema using Prisma types inside Zod

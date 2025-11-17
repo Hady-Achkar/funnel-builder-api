@@ -36,14 +36,20 @@ export class RegisterService {
       let userPlan = data.plan || UserPlan.NO_PLAN;
       if (registrationSource === RegistrationSource.WORKSPACE_INVITE) {
         userPlan = UserPlan.WORKSPACE_MEMBER;
+      } else if (registrationSource === RegistrationSource.OUTER_PAYMENT) {
+        userPlan = UserPlan.AGENCY;
       }
 
-      // Determine which token to save (affiliate or workspace invitation)
+      // Determine which token to save (priority: workspace > outerPayment > ad > affiliate)
       let registrationToken: string | undefined;
-      if (data.affiliateToken) {
-        registrationToken = data.affiliateToken;
-      } else if (data.workspaceInvitationToken) {
+      if (data.workspaceInvitationToken) {
         registrationToken = data.workspaceInvitationToken;
+      } else if (data.outerPaymentToken) {
+        registrationToken = data.outerPaymentToken;
+      } else if (data.adToken) {
+        registrationToken = data.adToken;
+      } else if (data.affiliateToken) {
+        registrationToken = data.affiliateToken;
       }
 
       // Set trial dates for all plans except WORKSPACE_MEMBER (default: 1 year)
