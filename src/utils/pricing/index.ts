@@ -155,8 +155,7 @@ const PRICING = {
       EXTRA_WORKSPACE: {
         amount: 10,
         title: "Extra Workspace",
-        description:
-          "Add an additional workspace slot to your account",
+        description: "Add an additional workspace slot to your account",
         isSubscription: true,
         frequency: "annually" as const,
         frequencyInterval: 1,
@@ -251,7 +250,8 @@ export class PaymentLinkPricing {
     planType: $Enums.UserPlan
   ): string {
     if (
-      registrationSource === $Enums.RegistrationSource.AFFILIATE &&
+      (registrationSource === $Enums.RegistrationSource.AFFILIATE ||
+        registrationSource === $Enums.RegistrationSource.AD) &&
       planType === $Enums.UserPlan.AGENCY
     ) {
       return "Users who registered via affiliate link can only purchase the Business Plan. Please select the Business Plan to continue.";
