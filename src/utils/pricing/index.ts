@@ -41,6 +41,26 @@ const PRICING = {
         freeTrialPeriodInDays: 0,
       },
     },
+    AD: {
+      BUSINESS: {
+        amount: 499,
+        title: "Business Plan",
+        description: "Create a mobile optimized site with advanced analytics",
+        isSubscription: false, // One-time payment
+        frequency: "annually" as const,
+        frequencyInterval: 1000,
+        freeTrialPeriodInDays: 0,
+      },
+      AGENCY: {
+        amount: 59.99,
+        title: "Partner Plan",
+        description: "Create unlimited websites with all Digitalsite features",
+        isSubscription: false, // One-time payment
+        frequency: "annually" as const,
+        frequencyInterval: 1000,
+        freeTrialPeriodInDays: 0,
+      },
+    },
   },
 
   // 🔌 WORKSPACE-LEVEL ADD-ON PRICES (based on workspace's plan type)
@@ -250,8 +270,7 @@ export class PaymentLinkPricing {
     planType: $Enums.UserPlan
   ): string {
     if (
-      (registrationSource === $Enums.RegistrationSource.AFFILIATE ||
-        registrationSource === $Enums.RegistrationSource.AD) &&
+      registrationSource === $Enums.RegistrationSource.AFFILIATE &&
       planType === $Enums.UserPlan.AGENCY
     ) {
       return "Users who registered via affiliate link can only purchase the Business Plan. Please select the Business Plan to continue.";
