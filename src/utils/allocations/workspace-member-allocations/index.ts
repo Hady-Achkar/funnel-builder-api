@@ -13,6 +13,8 @@ const BASE_MEMBER_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.FREE]: 1, // Free workspace: 1 member total
   [UserPlan.BUSINESS]: 2, // Business workspace: 2 members total
   [UserPlan.AGENCY]: 1, // Agency workspace: 1 member total
+  [UserPlan.OLD_MEMBER]: 1, // Old member workspace: 1 member total
+  [UserPlan.ADMIN]: 10000, // Admin workspace: 10000 members (unlimited)
 };
 
 export interface MemberAllocationInput {

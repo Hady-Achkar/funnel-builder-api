@@ -157,6 +157,7 @@ export class CreateWorkspaceService {
           ownerId: number;
           planType: typeof workspacePlanType;
           status: typeof workspaceStatus;
+          isProtected?: boolean;
         } = {
           name: data.name,
           slug: data.slug,
@@ -169,6 +170,11 @@ export class CreateWorkspaceService {
         // Add image if provided
         if (data.image) {
           workspaceData.image = data.image;
+        }
+
+        // Add isProtected if provided
+        if (data.isProtected !== undefined) {
+          workspaceData.isProtected = data.isProtected;
         }
 
         const workspace = await tx.workspace.create({

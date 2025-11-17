@@ -13,6 +13,8 @@ const BASE_FUNNEL_ALLOCATIONS: Record<UserPlan, number> = {
   [UserPlan.FREE]: 1, // Free workspace: 1 funnel
   [UserPlan.BUSINESS]: 2, // Business workspace: 1 funnel
   [UserPlan.AGENCY]: 2, // Agency workspace: 10 funnels
+  [UserPlan.OLD_MEMBER]: 1, // Old member workspace: 1 funnel
+  [UserPlan.ADMIN]: 10000, // Admin workspace: 10000 funnels (unlimited)
 };
 
 export interface FunnelAllocationInput {
