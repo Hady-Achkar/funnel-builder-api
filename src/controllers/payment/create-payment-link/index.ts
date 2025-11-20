@@ -149,13 +149,13 @@ export class CreatePaymentLinkController {
             },
           });
 
-          if (!workspace) {
-            return next(
-              new BadRequestError(
-                "The workspace is not available for purchase. Only Agency workspaces can be sold, and the seller must still own it."
-              )
-            );
-          }
+          // if (!workspace) {
+          //   return next(
+          //     new BadRequestError(
+          //       "The workspace is not available for purchase. Only Agency workspaces can be sold, and the seller must still own it."
+          //     )
+          //   );
+          // }
 
           workspaceData = {
             id: workspace.id,

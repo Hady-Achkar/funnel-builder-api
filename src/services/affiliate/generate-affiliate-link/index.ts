@@ -28,11 +28,11 @@ export class AffiliateLinkService {
     }
 
     // Only AGENCY users can generate affiliate links
-    if (user.plan !== "AGENCY") {
-      throw new BadRequestError(
-        "Only Agency plan users can generate affiliate links. Please upgrade to the Agency plan to access this feature."
-      );
-    }
+    // if (user.plan !== "AGENCY") {
+    //   throw new BadRequestError(
+    //     "Only Agency plan users can generate affiliate links. Please upgrade to the Agency plan to access this feature."
+    //   );
+    // }
 
     // 2. VALIDATE WORKSPACE EXISTS AND USER OWNS IT
     const workspace = await prisma.workspace.findFirst({

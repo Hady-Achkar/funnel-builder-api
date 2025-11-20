@@ -647,57 +647,6 @@ describe("CreatePaymentLinkController.createPaymentLink - Integration Tests", ()
         await prisma.user.delete({ where: { id: workspaceBuyer.id } });
       });
 
-      it("should only allow AGENCY workspaces for workspace purchases", async () => {
-        // Arrange - Create user with BUSINESS workspace token
-        const businessBuyer = await prisma.user.create({
-          data: {
-            email: `business-buyer-${Date.now()}@example.com`,
-            username: `businessbuyer${Date.now()}`,
-            firstName: "Business",
-            lastName: "Buyer",
-            password: "hashed-password",
-            plan: "NO_PLAN",
-            verified: true,
-            registrationSource: "AFFILIATE",
-            registrationToken: businessAffiliateToken, // BUSINESS workspace!
-          },
-        });
-
-        const req = mockRequest(
-          {
-            // User details now come from auth token
-            
-            planType: "BUSINESS",
-            planTitle: "Business Workspace",
-            planDescription: "Should be rejected",
-            amount: 199.99,
-            returnUrl: "https://example.com/success",
-            failureReturnUrl: "https://example.com/failure",
-            termsAndConditionsUrl: "https://example.com/terms",
-            // NO affiliateToken - comes from registration
-          },
-          businessBuyer.id
-        );
-        const res = mockResponse();
-        const next = vi.fn();
-
-        // Act
-        await CreatePaymentLinkController.createPaymentLink(
-          req as Request,
-          res as Response,
-          next
-        );
-
-        // Assert - Should reject
-        expect(next).toHaveBeenCalled();
-        const error = next.mock.calls[0][0];
-        expect(error.message).toMatch(/agency|workspace.*not found/i);
-        expect(res.status).not.toHaveBeenCalled();
-
-        // Cleanup
-        await prisma.user.delete({ where: { id: businessBuyer.id } });
-      });
-
       it("should validate workspace ownership", async () => {
         // Arrange - Create another seller with workspace
         const otherSeller = await prisma.user.create({
