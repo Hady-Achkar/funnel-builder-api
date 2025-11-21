@@ -1,7 +1,7 @@
 /**
  * Migration Controller - Migrate User
  *
- * Public endpoint to migrate a single user from old database
+ * Public endpoint to migrate a single user or all users from old database
  *
  * @see ARCHITECTURE.md - Controller patterns
  */
@@ -15,6 +15,8 @@ import {
 } from '../../../types/migration/migrate-user';
 import { oldUserDataSchema, OldUserData } from '../../../types/migration/old-user';
 import { BadRequestError } from '../../../errors/http-errors';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Old database client
 const oldDbClient = new PrismaClient({
@@ -27,23 +29,70 @@ const oldDbClient = new PrismaClient({
 });
 
 /**
+ * Migration result for CSV report
+ */
+interface MigrationResult {
+  email: string;
+  status: 'SUCCESS' | 'FAILED' | 'SKIPPED';
+  plan: string;
+  workspaceCreated: boolean;
+  workspaceId: number | null;
+  emailSent: boolean;
+  errorMessage: string;
+  timestamp: string;
+}
+
+/**
+ * Generate CSV report from migration results
+ */
+function generateCSVReport(results: MigrationResult[]): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const desktopPath = 'C:\\Users\\User\\Desktop';
+  const csvFilePath = path.join(desktopPath, `migration-report-${timestamp}.csv`);
+
+  // CSV Header
+  const header = 'Email,Status,Plan,Workspace Created,Workspace ID,Email Sent,Error Message,Timestamp\n';
+
+  // CSV Rows
+  const rows = results.map(result => {
+    return [
+      result.email,
+      result.status,
+      result.plan,
+      result.workspaceCreated ? 'Yes' : 'No',
+      result.workspaceId || 'N/A',
+      result.emailSent ? 'Yes' : 'No',
+      `"${result.errorMessage.replace(/"/g, '""')}"`, // Escape quotes
+      result.timestamp,
+    ].join(',');
+  }).join('\n');
+
+  // Write to file
+  fs.writeFileSync(csvFilePath, header + rows, 'utf-8');
+
+  return csvFilePath;
+}
+
+/**
  * POST /api/migration/migrate-user
  *
- * Migrates a single user from old database to new system
+ * Migrates a single user or all users from old database to new system
  *
- * @param req - Express request with email in body
+ * @param req - Express request with email and/or allUsers in body
  * @param res - Express response
  */
 export async function migrateUser(
   req: Request,
   res: Response
 ): Promise<Response<MigrateUserResponse>> {
+  const migrationResults: MigrationResult[] = [];
+
   try {
     // 1. Validate request body
     const validatedData = migrateUserRequest.parse(req.body);
-    const { email } = validatedData;
+    const { email, allUsers } = validatedData;
 
-    console.log('[Migration API] Starting migration for:', email);
+    console.log('[Migration API] Starting migration - allUsers:', allUsers);
 
     // 2. Test old database connection
     try {
@@ -54,72 +103,180 @@ export async function migrateUser(
       throw new Error(`Old database connection failed: ${dbError.message}`);
     }
 
-    // 3. Fetch user from old database (with parameterized query to prevent SQL injection)
-    const oldUserRaw: any[] = await oldDbClient.$queryRaw`
-      SELECT
-        id,
-        username,
-        email,
-        firstname,
-        lastname,
-        usertype,
-        is_paid,
-        stripe_customer_id,
-        balance,
-        created_at,
-        updated_at,
-        trial_end_date,
-        maximum_funnels_allowed,
-        maximum_subdomains_allowed,
-        maximum_custom_domains_allowed,
-        maximum_admins_allowed
-      FROM up_users
-      WHERE email = ${email}
-      LIMIT 1
-    `;
+    // 3. Determine which users to migrate
+    let usersToMigrate: any[] = [];
 
-    console.log('[Migration API] Query result:', oldUserRaw.length, 'rows');
-
-    if (oldUserRaw.length === 0) {
-      throw new BadRequestError('User not found in old database');
-    }
-
-    // 3. Validate old user data
-    const oldUser: OldUserData = oldUserDataSchema.parse(oldUserRaw[0]);
-
-    // 4. Migrate user
-    const migrationResult = await MigrateOldUserService.migrateUser(oldUser);
-
-    // 5. Return response
-    if (migrationResult.success) {
-      return res.status(200).json({
-        success: true,
-        message: migrationResult.message,
-        data: {
-          userId: migrationResult.userId,
-          email: migrationResult.email,
-          plan: migrationResult.plan,
-          workspaceCreated: migrationResult.workspaceCreated,
-          workspaceId: migrationResult.workspaceId,
-          temporaryPassword: migrationResult.temporaryPassword,
-          emailSent: migrationResult.emailSent,
-          emailError: migrationResult.emailError,
-        },
-      });
+    if (allUsers === true) {
+      // Fetch ALL users from old database
+      console.log('[Migration API] Fetching all users from old database');
+      usersToMigrate = await oldDbClient.$queryRaw`
+        SELECT
+          id,
+          username,
+          email,
+          firstname,
+          lastname,
+          usertype,
+          is_paid,
+          stripe_customer_id,
+          balance,
+          created_at,
+          updated_at,
+          trial_end_date,
+          maximum_funnels_allowed,
+          maximum_subdomains_allowed,
+          maximum_custom_domains_allowed,
+          maximum_admins_allowed
+        FROM up_users
+        ORDER BY id
+      `;
+      console.log(`[Migration API] Found ${usersToMigrate.length} users to migrate`);
     } else {
-      return res.status(400).json({
-        success: false,
-        message: migrationResult.message,
-        error: migrationResult.error,
-        data: {
-          email: migrationResult.email,
-          plan: migrationResult.plan,
-        },
-      });
+      // Fetch single user by email
+      if (!email) {
+        throw new BadRequestError('Email is required when allUsers is false');
+      }
+
+      console.log('[Migration API] Fetching user:', email);
+      usersToMigrate = await oldDbClient.$queryRaw`
+        SELECT
+          id,
+          username,
+          email,
+          firstname,
+          lastname,
+          usertype,
+          is_paid,
+          stripe_customer_id,
+          balance,
+          created_at,
+          updated_at,
+          trial_end_date,
+          maximum_funnels_allowed,
+          maximum_subdomains_allowed,
+          maximum_custom_domains_allowed,
+          maximum_admins_allowed
+        FROM up_users
+        WHERE email = ${email}
+        LIMIT 1
+      `;
+
+      if (usersToMigrate.length === 0) {
+        throw new BadRequestError('User not found in old database');
+      }
     }
+
+    // 4. Process each user
+    let successCount = 0;
+    let failedCount = 0;
+    let skippedCount = 0;
+
+    for (const userRaw of usersToMigrate) {
+      const timestamp = new Date().toISOString();
+      let result: MigrationResult = {
+        email: userRaw.email || 'unknown',
+        status: 'FAILED',
+        plan: '',
+        workspaceCreated: false,
+        workspaceId: null,
+        emailSent: false,
+        errorMessage: '',
+        timestamp,
+      };
+
+      try {
+        // Validate old user data
+        const oldUser: OldUserData = oldUserDataSchema.parse(userRaw);
+        result.email = oldUser.email;
+
+        console.log(`[Migration API] Processing user: ${oldUser.email}`);
+
+        // Migrate user
+        const migrationResult = await MigrateOldUserService.migrateUser(oldUser);
+
+        // Update result based on migration outcome
+        result.plan = migrationResult.plan;
+        result.workspaceCreated = migrationResult.workspaceCreated || false;
+        result.workspaceId = migrationResult.workspaceId || null;
+        result.emailSent = migrationResult.emailSent || false;
+
+        if (migrationResult.success) {
+          if (migrationResult.message.includes('already exists')) {
+            result.status = 'SKIPPED';
+            result.errorMessage = migrationResult.message;
+            skippedCount++;
+          } else {
+            result.status = 'SUCCESS';
+            result.errorMessage = '';
+            successCount++;
+          }
+        } else {
+          result.status = 'FAILED';
+          result.errorMessage = migrationResult.error || migrationResult.message;
+          failedCount++;
+        }
+
+        // Add email error if present
+        if (migrationResult.emailError) {
+          result.errorMessage += ` | Email error: ${migrationResult.emailError}`;
+        }
+
+      } catch (userError: any) {
+        console.error(`[Migration API] Error migrating user ${result.email}:`, userError);
+        result.status = 'FAILED';
+        result.errorMessage = userError.message || 'Unknown error occurred';
+        failedCount++;
+      }
+
+      migrationResults.push(result);
+      console.log(`[Migration API] User ${result.email}: ${result.status}`);
+    }
+
+    // 5. Generate CSV report
+    const csvFilePath = generateCSVReport(migrationResults);
+    console.log(`[Migration API] CSV report generated: ${csvFilePath}`);
+
+    // 6. Return response
+    const totalProcessed = migrationResults.length;
+    const overallSuccess = failedCount === 0;
+
+    return res.status(overallSuccess ? 200 : 207).json({
+      success: overallSuccess,
+      message: allUsers
+        ? `Processed ${totalProcessed} users: ${successCount} succeeded, ${skippedCount} skipped, ${failedCount} failed`
+        : migrationResults[0]?.status === 'SUCCESS'
+        ? 'User migrated successfully'
+        : migrationResults[0]?.status === 'SKIPPED'
+        ? 'User already exists'
+        : 'Migration failed',
+      csvReportPath: csvFilePath,
+      totalProcessed,
+      successCount,
+      failedCount,
+      skippedCount,
+      data: !allUsers && migrationResults.length === 1 ? {
+        email: migrationResults[0].email,
+        plan: migrationResults[0].plan,
+        workspaceCreated: migrationResults[0].workspaceCreated,
+        workspaceId: migrationResults[0].workspaceId || undefined,
+        emailSent: migrationResults[0].emailSent,
+      } : undefined,
+    });
+
   } catch (error: any) {
     console.error('[Migration API] Error:', error);
     console.error('[Migration API] Request body:', req.body);
+
+    // Generate CSV report even on error if we have any results
+    let csvFilePath: string | undefined;
+    if (migrationResults.length > 0) {
+      try {
+        csvFilePath = generateCSVReport(migrationResults);
+        console.log(`[Migration API] CSV report generated (with errors): ${csvFilePath}`);
+      } catch (csvError) {
+        console.error('[Migration API] Failed to generate CSV report:', csvError);
+      }
+    }
 
     if (error.name === 'ZodError') {
       const zodErrors = error.errors?.map((e: any) => ({
@@ -132,6 +289,7 @@ export async function migrateUser(
         message: 'Validation error',
         error: error.errors?.[0]?.message || 'Invalid request data',
         validationErrors: zodErrors,
+        csvReportPath: csvFilePath,
       });
     }
 
@@ -140,6 +298,7 @@ export async function migrateUser(
         success: false,
         message: error.message,
         error: error.message,
+        csvReportPath: csvFilePath,
       });
     }
 
@@ -147,6 +306,7 @@ export async function migrateUser(
       success: false,
       message: 'Migration failed',
       error: error.message || 'Unknown error occurred',
+      csvReportPath: csvFilePath,
     });
   }
 }

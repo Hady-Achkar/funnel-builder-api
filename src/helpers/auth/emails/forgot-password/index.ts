@@ -1,4 +1,9 @@
 import sgMail from "@sendgrid/mail";
+import {
+  getResetPasswordEmailHtml,
+  getResetPasswordEmailText,
+  ResetPasswordEmailData,
+} from "../../../../constants/emails/auth/reset-password";
 
 let initialized = false;
 
@@ -22,16 +27,19 @@ export async function sendPasswordResetEmail(
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
+    const emailData: ResetPasswordEmailData = {
+      resetUrl: resetLink,
+    };
+
     const msg = {
       to,
       from: {
         email: process.env.SENDGRID_FROM_EMAIL,
         name: "Digitalsite",
       },
-      templateId: "d-ca1cbed91a944936a97c1492783a6f38",
-      dynamicTemplateData: {
-        link: resetLink,
-      },
+      subject: "Reset Your Password | إعادة تعيين كلمة المرور",
+      html: getResetPasswordEmailHtml(emailData),
+      text: getResetPasswordEmailText(emailData),
     };
 
     await sgMail.send(msg);
