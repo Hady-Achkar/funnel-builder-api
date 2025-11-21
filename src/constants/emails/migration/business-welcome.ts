@@ -42,21 +42,21 @@ export function getBusinessWelcomeEmailHtml(data: BusinessWelcomeData): string {
     day: "numeric",
   });
 
-  // Video tutorial URL (placeholder)
-  const videoUrl = "https://digitalsite.com/migration-tutorial";
+  // Video tutorial URL
+  const videoUrl = "https://www.loom.com/share/d986e3304d934779a87a5073521524a6";
 
   // Base content structure
   const content: BilingualContent = {
     english: {
       greeting: `Welcome to the New Digitalsite, ${firstName}`,
-      mainContent: `Your Business account has been migrated to our new platform. We have created your new account with the credentials below. For security, please change your password after your first login.<br><br><strong>Your Login Credentials:</strong><br>Email: ${email}<br>Password: ${temporaryPassword}`,
+      mainContent: `Your Business account has been migrated to our new platform. We have created your new account with the credentials below.<br><br><strong>Your Login Credentials:</strong><br>Email: ${email}<br>Password: ${temporaryPassword}<br><br><strong>Next Steps:</strong><br>1. Go to <a href="https://digitalsite.io/login" style="color: #000000; text-decoration: underline;">https://digitalsite.io/login</a><br>2. Sign in with the credentials above, OR<br>3. Click on "Forgot password?" to reset your auto-generated password<br><br>For security, we recommend resetting your password after your first login.`,
       ctaText: "Watch Migration Tutorial",
       ctaUrl: videoUrl,
       additionalInfo: `Your Business plan benefits and settings have been preserved. You can continue using Digitalsite with full access to all Business features.<br><br><strong>1 Year Extra Trial:</strong> As a valued Business member, we have extended your trial period by 1 additional year. Your new trial expires on ${formattedDate}. This means you can continue using all Business features until that date. For example, if your original trial was ending in January 2025, it is now extended to January 2026.`,
     },
     arabic: {
       greeting: `مرحبًا بك في Digitalsite الجديد، ${firstName}`,
-      mainContent: `تم إضافة حسابك من نوع Business إلى منصتنا الجديدة. قمنا بإنشاء حسابك الجديد باستخدام البيانات أدناه. للأمان، يرجى تغيير كلمة المرور بعد أول تسجيل دخول.<br><br><strong>بيانات الدخول الخاصة بك:</strong><br>البريد الإلكتروني: ${email}<br>كلمة المرور: ${temporaryPassword}`,
+      mainContent: `تم إضافة حسابك من نوع Business إلى منصتنا الجديدة. قمنا بإنشاء حسابك الجديد باستخدام البيانات أدناه.<br><br><strong>بيانات الدخول الخاصة بك:</strong><br>البريد الإلكتروني: ${email}<br>كلمة المرور: ${temporaryPassword}<br><br><strong>الخطوات التالية:</strong><br>1. اذهب إلى <a href="https://digitalsite.io/login" style="color: #000000; text-decoration: underline;">https://digitalsite.io/login</a><br>2. سجل الدخول باستخدام البيانات أعلاه، أو<br>3. انقر على "نسيت كلمة المرور؟" لإعادة تعيين كلمة المرور التلقائية<br><br>للأمان، نوصي بإعادة تعيين كلمة المرور بعد أول تسجيل دخول.`,
       ctaText: "شاهد الفيديو التوضيحي",
       ctaUrl: videoUrl,
       additionalInfo: `جميع ميزات خطة Business والإعدادات الخاصة بك محفوظة. يمكنك الاستمرار في استخدام Digitalsite بكامل الميزات.<br><br><strong>سنة إضافية مجانية:</strong> كهدية لعملاء Business، أضفنا لك سنة إضافية مجانية. حسابك سيعمل حتى ${formattedDateArabic}. مثلاً، إذا كان حسابك ينتهي في يناير 2025، الآن سيستمر حتى يناير 2026.`,
@@ -88,17 +88,24 @@ export function getBusinessWelcomeEmailText(data: BusinessWelcomeData): string {
     day: "numeric",
   });
 
-  // Video tutorial URL (placeholder)
-  const videoUrl = "https://digitalsite.com/migration-tutorial";
+  // Video tutorial URL
+  const videoUrl = "https://www.loom.com/share/d986e3304d934779a87a5073521524a6";
 
   const content: BilingualContent = {
     english: {
       greeting: `Welcome to the New Digitalsite, ${firstName}`,
-      mainContent: `Your Business account has been migrated to our new platform. We have created your new account with the credentials below. For security, please change your password after your first login.
+      mainContent: `Your Business account has been migrated to our new platform. We have created your new account with the credentials below.
 
 YOUR CREDENTIALS:
 Email: ${email}
-Password: ${temporaryPassword}`,
+Password: ${temporaryPassword}
+
+NEXT STEPS:
+1. Go to https://digitalsite.io/login
+2. Sign in with the credentials above, OR
+3. Click on "Forgot password?" to reset your auto-generated password
+
+For security, we recommend resetting your password after your first login.`,
       ctaText: "Watch Migration Tutorial",
       ctaUrl: videoUrl,
       additionalInfo: `Your Business plan benefits and settings have been preserved. You can continue using Digitalsite with full access to all Business features.
@@ -107,11 +114,18 @@ Password: ${temporaryPassword}`,
     },
     arabic: {
       greeting: `مرحبًا بك في Digitalsite الجديد، ${firstName}`,
-      mainContent: `تم إضافة حسابك من نوع Business إلى منصتنا الجديدة. قمنا بإنشاء حسابك الجديد باستخدام البيانات أدناه. للأمان، يرجى تغيير كلمة المرور بعد أول تسجيل دخول.
+      mainContent: `تم إضافة حسابك من نوع Business إلى منصتنا الجديدة. قمنا بإنشاء حسابك الجديد باستخدام البيانات أدناه.
 
 بيانات الدخول الخاصة بك:
 البريد الإلكتروني: ${email}
-كلمة المرور: ${temporaryPassword}`,
+كلمة المرور: ${temporaryPassword}
+
+الخطوات التالية:
+1. اذهب إلى https://digitalsite.io/login
+2. سجل الدخول باستخدام البيانات أعلاه، أو
+3. انقر على "نسيت كلمة المرور؟" لإعادة تعيين كلمة المرور التلقائية
+
+للأمان، نوصي بإعادة تعيين كلمة المرور بعد أول تسجيل دخول.`,
       ctaText: "شاهد الفيديو التوضيحي",
       ctaUrl: videoUrl,
       additionalInfo: `جميع ميزات خطة Business والإعدادات الخاصة بك محفوظة. يمكنك الاستمرار في استخدام Digitalsite بكامل الميزات.
