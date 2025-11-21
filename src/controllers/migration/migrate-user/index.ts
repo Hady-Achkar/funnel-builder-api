@@ -15,8 +15,7 @@ import {
 } from '../../../types/migration/migrate-user';
 import { oldUserDataSchema, OldUserData } from '../../../types/migration/old-user';
 import { BadRequestError } from '../../../errors/http-errors';
-import * as fs from 'fs';
-import * as path from 'path';
+import { azureBlobStorageService } from '../../../services/azure-blob-storage.service';
 
 // Old database client
 const oldDbClient = new PrismaClient({
@@ -29,7 +28,7 @@ const oldDbClient = new PrismaClient({
 });
 
 /**
- * Migration result for CSV report
+ * Migration result for each user
  */
 interface MigrationResult {
   email: string;
@@ -40,15 +39,16 @@ interface MigrationResult {
   emailSent: boolean;
   errorMessage: string;
   timestamp: string;
+  userId?: number;
+  temporaryPassword?: string;
 }
 
 /**
- * Generate CSV report from migration results
+ * Upload CSV report to Azure Blob Storage
  */
-function generateCSVReport(results: MigrationResult[]): string {
+async function uploadCSVToAzure(results: MigrationResult[]): Promise<string> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const desktopPath = 'C:\\Users\\User\\Desktop';
-  const csvFilePath = path.join(desktopPath, `migration-report-${timestamp}.csv`);
+  const fileName = `migration-report-${timestamp}.csv`;
 
   // CSV Header
   const header = 'Email,Status,Plan,Workspace Created,Workspace ID,Email Sent,Error Message,Timestamp\n';
@@ -67,10 +67,17 @@ function generateCSVReport(results: MigrationResult[]): string {
     ].join(',');
   }).join('\n');
 
-  // Write to file
-  fs.writeFileSync(csvFilePath, header + rows, 'utf-8');
+  const csvContent = header + rows;
+  const buffer = Buffer.from(csvContent, 'utf-8');
 
-  return csvFilePath;
+  // Upload to Azure Blob Storage
+  const uploadResult = await azureBlobStorageService.uploadBuffer(buffer, {
+    fileName,
+    contentType: 'text/csv',
+    folder: 'migration-reports',
+  });
+
+  return uploadResult.url;
 }
 
 /**
@@ -232,49 +239,58 @@ export async function migrateUser(
       console.log(`[Migration API] User ${result.email}: ${result.status}`);
     }
 
-    // 5. Generate CSV report
-    const csvFilePath = generateCSVReport(migrationResults);
-    console.log(`[Migration API] CSV report generated: ${csvFilePath}`);
+    // 5. Upload CSV report to Azure Blob Storage
+    const csvUrl = await uploadCSVToAzure(migrationResults);
+    console.log(`[Migration API] CSV report uploaded to Azure: ${csvUrl}`);
 
     // 6. Return response
     const totalProcessed = migrationResults.length;
     const overallSuccess = failedCount === 0;
 
-    return res.status(overallSuccess ? 200 : 207).json({
-      success: overallSuccess,
-      message: allUsers
-        ? `Processed ${totalProcessed} users: ${successCount} succeeded, ${skippedCount} skipped, ${failedCount} failed`
-        : migrationResults[0]?.status === 'SUCCESS'
-        ? 'User migrated successfully'
-        : migrationResults[0]?.status === 'SKIPPED'
-        ? 'User already exists'
-        : 'Migration failed',
-      csvReportPath: csvFilePath,
-      totalProcessed,
-      successCount,
-      failedCount,
-      skippedCount,
-      data: !allUsers && migrationResults.length === 1 ? {
-        email: migrationResults[0].email,
-        plan: migrationResults[0].plan,
-        workspaceCreated: migrationResults[0].workspaceCreated,
-        workspaceId: migrationResults[0].workspaceId || undefined,
-        emailSent: migrationResults[0].emailSent,
-      } : undefined,
-    });
+    // Return different response format based on single vs bulk migration
+    if (allUsers) {
+      // Bulk migration: concise response with CSV URL only
+      return res.status(overallSuccess ? 200 : 207).json({
+        success: overallSuccess,
+        message: `Processed ${totalProcessed} users: ${successCount} succeeded, ${skippedCount} skipped, ${failedCount} failed`,
+        csvReportUrl: csvUrl,
+        totalProcessed,
+        successCount,
+        failedCount,
+        skippedCount,
+      });
+    } else {
+      // Single user migration: detailed response with user data
+      return res.status(overallSuccess ? 200 : 207).json({
+        success: overallSuccess,
+        message: migrationResults[0]?.status === 'SUCCESS'
+          ? 'User migrated successfully'
+          : migrationResults[0]?.status === 'SKIPPED'
+          ? 'User already exists'
+          : 'Migration failed',
+        csvReportUrl: csvUrl,
+        data: migrationResults.length === 1 ? {
+          email: migrationResults[0].email,
+          plan: migrationResults[0].plan,
+          workspaceCreated: migrationResults[0].workspaceCreated,
+          workspaceId: migrationResults[0].workspaceId || undefined,
+          emailSent: migrationResults[0].emailSent,
+        } : undefined,
+      });
+    }
 
   } catch (error: any) {
     console.error('[Migration API] Error:', error);
     console.error('[Migration API] Request body:', req.body);
 
-    // Generate CSV report even on error if we have any results
-    let csvFilePath: string | undefined;
+    // Upload CSV report even on error if we have any results
+    let csvUrl: string | undefined;
     if (migrationResults.length > 0) {
       try {
-        csvFilePath = generateCSVReport(migrationResults);
-        console.log(`[Migration API] CSV report generated (with errors): ${csvFilePath}`);
+        csvUrl = await uploadCSVToAzure(migrationResults);
+        console.log(`[Migration API] CSV report uploaded to Azure (with errors): ${csvUrl}`);
       } catch (csvError) {
-        console.error('[Migration API] Failed to generate CSV report:', csvError);
+        console.error('[Migration API] Failed to upload CSV report to Azure:', csvError);
       }
     }
 
@@ -289,7 +305,7 @@ export async function migrateUser(
         message: 'Validation error',
         error: error.errors?.[0]?.message || 'Invalid request data',
         validationErrors: zodErrors,
-        csvReportPath: csvFilePath,
+        csvReportUrl: csvUrl,
       });
     }
 
@@ -298,7 +314,7 @@ export async function migrateUser(
         success: false,
         message: error.message,
         error: error.message,
-        csvReportPath: csvFilePath,
+        csvReportUrl: csvUrl,
       });
     }
 
@@ -306,7 +322,7 @@ export async function migrateUser(
       success: false,
       message: 'Migration failed',
       error: error.message || 'Unknown error occurred',
-      csvReportPath: csvFilePath,
+      csvReportUrl: csvUrl,
     });
   }
 }
