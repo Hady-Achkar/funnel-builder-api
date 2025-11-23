@@ -24,6 +24,7 @@ model User {
   plan                       UserPlan             @default(NO_PLAN)
   registrationSource         RegistrationSource?  @default(DIRECT)
   registrationToken          String?
+  addedBy                    String?
   referralLinkUsedId         Int?
   balance                    Float                @default(0)
   pendingBalance             Float                @default(0)

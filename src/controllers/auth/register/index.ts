@@ -8,6 +8,7 @@ import {
 } from "./utils/validate-invitation";
 import { decodeAdToken } from "./utils/validate-ad-token";
 import { decodeOuterPaymentToken } from "./utils/validate-outer-payment-token";
+import { checkTokenUsage } from "./utils/check-token-usage";
 import { BadRequestError, ConflictError } from "../../../errors";
 import { getPrisma } from "../../../lib/prisma";
 import { RegistrationSource } from "../../../generated/prisma-client";
@@ -26,6 +27,7 @@ export class RegisterController {
 
       // Determine registration source and validate tokens
       let registrationSource: RegistrationSource = RegistrationSource.DIRECT;
+      let addedBy: string | undefined;
 
       // Validate affiliate token if provided (but don't link it yet - that happens after payment)
       if (validatedData.affiliateToken) {
@@ -84,16 +86,36 @@ export class RegisterController {
           );
         }
 
-        const decodedToken = decodeOuterPaymentToken(
+        // Check if token has already been used
+        const isTokenUsed = await checkTokenUsage(
           validatedData.outerPaymentToken,
-          jwtSecret
+          prisma
         );
-        if (!decodedToken) {
+        if (isTokenUsed) {
           return next(
             new BadRequestError(
-              "The payment token appears to be invalid or expired. Please contact support for assistance."
+              "This invitation link has already been used. Each invitation can only be used once."
             )
           );
+        }
+
+        // Validate and decode token
+        const tokenValidation = decodeOuterPaymentToken(
+          validatedData.outerPaymentToken,
+          jwtSecret,
+          validatedData.email
+        );
+
+        if (!tokenValidation.decoded) {
+          return next(new BadRequestError(tokenValidation.error!));
+        }
+
+        // Store addedBy value from token
+        addedBy = tokenValidation.decoded.addedBy;
+
+        // If token contains a plan, override the request plan
+        if (tokenValidation.decoded.plan) {
+          validatedData.plan = tokenValidation.decoded.plan;
         }
 
         // Outer payment registration source takes precedence over ad and affiliate
@@ -259,7 +281,8 @@ export class RegisterController {
 
       const result = await RegisterService.register(
         validatedData,
-        registrationSource
+        registrationSource,
+        addedBy
       );
 
       res.status(201).json(result);
