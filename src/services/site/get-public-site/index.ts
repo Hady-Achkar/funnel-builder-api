@@ -36,21 +36,9 @@ export class GetPublicSiteService {
       //   throw new NotFoundError("Domain SSL certificate is not active");
       // }
 
-      // Step 3: Find connected site/funnel
-      const domainFunnelConnection = await prisma.funnelDomain.findFirst({
-        where: {
-          domainId: domain.id,
-          isActive: true,
-        },
-      });
-
-      if (!domainFunnelConnection) {
-        throw new NotFoundError("No site is connected to this domain");
-      }
-
-      // Step 4: Fetch site/funnel with related data
-      const funnel = await prisma.funnel.findUnique({
-        where: { id: domainFunnelConnection.funnelId },
+      // Step 3: Find the funnel by slug
+      const funnel = await prisma.funnel.findFirst({
+        where: { slug: funnelSlug },
         include: {
           pages: {
             select: {
@@ -73,8 +61,16 @@ export class GetPublicSiteService {
         throw new NotFoundError("Site not found");
       }
 
-      // Step 5: Validate that the funnel slug matches the provided funnelSlug parameter
-      if (funnel.slug !== funnelSlug) {
+      // Step 4: Verify this funnel is connected to the domain
+      const domainFunnelConnection = await prisma.funnelDomain.findFirst({
+        where: {
+          domainId: domain.id,
+          funnelId: funnel.id,
+          isActive: true,
+        },
+      });
+
+      if (!domainFunnelConnection) {
         throw new NotFoundError("Site not found for this domain");
       }
 

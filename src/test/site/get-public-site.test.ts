@@ -33,6 +33,7 @@ describe("Get Public Site Tests", () => {
       },
       funnel: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
       },
     };
 
@@ -192,10 +193,10 @@ describe("Get Public Site Tests", () => {
   describe("Success Cases", () => {
     it("should return site data for valid hostname with LIVE site (no password protection)", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -214,10 +215,10 @@ describe("Get Public Site Tests", () => {
 
     it("should include all pages in the response", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -232,10 +233,10 @@ describe("Get Public Site Tests", () => {
 
     it("should include settings in the response", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -260,10 +261,10 @@ describe("Get Public Site Tests", () => {
 
     it("should include active theme in the response", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -278,10 +279,10 @@ describe("Get Public Site Tests", () => {
 
     it("should order pages correctly", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -296,10 +297,10 @@ describe("Get Public Site Tests", () => {
     it("should handle site with null active theme", async () => {
       const funnelWithoutTheme = { ...mockFunnel, activeThemeId: null, activeTheme: null };
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithoutTheme);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithoutTheme);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -312,10 +313,10 @@ describe("Get Public Site Tests", () => {
     it("should handle site with null settings", async () => {
       const funnelWithoutSettings = { ...mockFunnel, settings: null };
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithoutSettings);
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithoutSettings);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -344,7 +345,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(protectedFunnel);
 
       const result = await GetPublicSiteService.getPublicSite(
         {
@@ -390,7 +391,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(protectedFunnel);
 
       vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(
         mockTokenPayload
@@ -430,7 +431,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(protectedFunnel);
 
       vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(null);
 
@@ -473,7 +474,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(protectedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(protectedFunnel);
 
       vi.spyOn(jwtLib, "verifyFunnelAccessToken").mockReturnValue(
         mockTokenPayload
@@ -502,7 +503,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite(
         {
@@ -538,27 +539,93 @@ describe("Get Public Site Tests", () => {
       ).rejects.toThrow("Domain not found");
     });
 
-    it("should throw NotFoundError when funnelSlug doesn't match the connected funnel", async () => {
+    it("should throw NotFoundError when funnelSlug doesn't exist", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
-      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
-        mockFunnelDomainConnection
-      );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null); // Funnel with this slug doesn't exist
 
-      // Request with a different funnelSlug than the one connected to the domain
+      // Request with a non-existent funnelSlug
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
-          funnelSlug: "wrong-funnel-slug",
+          funnelSlug: "non-existent-funnel",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
-          funnelSlug: "wrong-funnel-slug",
+          funnelSlug: "non-existent-funnel",
+        })
+      ).rejects.toThrow("Site not found");
+    });
+
+    it("should throw NotFoundError when funnel exists but is not connected to the domain", async () => {
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel); // Funnel exists
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(null); // But not connected to this domain
+
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
+        })
+      ).rejects.toThrow(NotFoundError);
+
+      await expect(
+        GetPublicSiteService.getPublicSite({
+          hostname: "example.mydigitalsite.io",
+          funnelSlug: "my-awesome-site",
         })
       ).rejects.toThrow("Site not found for this domain");
+    });
+
+    it("should support multiple funnels on the same domain", async () => {
+      // Create a second funnel
+      const mockFunnel2 = {
+        ...mockFunnel,
+        id: 2,
+        name: "Second Funnel",
+        slug: "second-funnel",
+      };
+
+      const mockFunnelDomainConnection2 = {
+        id: 2,
+        funnelId: 2,
+        domainId: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Test first funnel
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection
+      );
+
+      const result1 = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+        funnelSlug: "my-awesome-site",
+      });
+
+      expect(result1.site.id).toBe(1);
+      expect(result1.site.name).toBe("My Awesome Site");
+
+      // Test second funnel on same domain
+      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel2);
+      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
+        mockFunnelDomainConnection2
+      );
+
+      const result2 = await GetPublicSiteService.getPublicSite({
+        hostname: "example.mydigitalsite.io",
+        funnelSlug: "second-funnel",
+      });
+
+      expect(result2.site.id).toBe(2);
+      expect(result2.site.name).toBe("Second Funnel");
     });
 
     it("should throw NotFoundError for domain with PENDING status", async () => {
@@ -677,43 +744,21 @@ describe("Get Public Site Tests", () => {
   });
 
   describe("Error Cases - Connection Validation", () => {
-    it("should throw NotFoundError when no site is connected to domain", async () => {
+    it("should throw NotFoundError when funnel slug does not exist", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
-      mockPrisma.funnelDomain.findFirst.mockResolvedValue(null);
+      mockPrisma.funnel.findFirst.mockResolvedValue(null); // No funnel with this slug
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
-          funnelSlug: "my-awesome-site",
+          funnelSlug: "non-existent-funnel",
         })
       ).rejects.toThrow(NotFoundError);
 
       await expect(
         GetPublicSiteService.getPublicSite({
           hostname: "example.mydigitalsite.io",
-          funnelSlug: "my-awesome-site",
-        })
-      ).rejects.toThrow("No site is connected to this domain");
-    });
-
-    it("should throw NotFoundError when connected site does not exist", async () => {
-      mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
-      mockPrisma.funnelDomain.findFirst.mockResolvedValue(
-        mockFunnelDomainConnection
-      );
-      mockPrisma.funnel.findUnique.mockResolvedValue(null);
-
-      await expect(
-        GetPublicSiteService.getPublicSite({
-          hostname: "example.mydigitalsite.io",
-          funnelSlug: "my-awesome-site",
-        })
-      ).rejects.toThrow(NotFoundError);
-
-      await expect(
-        GetPublicSiteService.getPublicSite({
-          hostname: "example.mydigitalsite.io",
-          funnelSlug: "my-awesome-site",
+          funnelSlug: "non-existent-funnel",
         })
       ).rejects.toThrow("Site not found");
     });
@@ -726,7 +771,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(draftFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(draftFunnel);
 
       await expect(
         GetPublicSiteService.getPublicSite({
@@ -749,7 +794,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(archivedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(archivedFunnel);
 
       await expect(
         GetPublicSiteService.getPublicSite({
@@ -774,7 +819,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithNoPages);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithNoPages);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -790,7 +835,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(sharedFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(sharedFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -810,7 +855,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "www.example.com",
@@ -834,7 +879,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithGlobalTheme);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithGlobalTheme);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -854,7 +899,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(mockFunnel);
+      mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -881,7 +926,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithGlobalActive);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithGlobalActive);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
@@ -905,7 +950,7 @@ describe("Get Public Site Tests", () => {
       mockPrisma.funnelDomain.findFirst.mockResolvedValue(
         mockFunnelDomainConnection
       );
-      mockPrisma.funnel.findUnique.mockResolvedValue(funnelWithNoTheme);
+      mockPrisma.funnel.findFirst.mockResolvedValue(funnelWithNoTheme);
 
       const result = await GetPublicSiteService.getPublicSite({
         hostname: "example.mydigitalsite.io",
