@@ -36,9 +36,17 @@ export class GetPublicSiteService {
       //   throw new NotFoundError("Domain SSL certificate is not active");
       // }
 
-      // Step 3: Find the funnel by slug
+      // Step 3: Find the funnel by slug and workspace
+      // Note: Slugs are unique per workspace, so we must filter by the domain's workspace
+      if (!domain.workspaceId) {
+        throw new NotFoundError("Domain is not associated with any workspace");
+      }
+
       const funnel = await prisma.funnel.findFirst({
-        where: { slug: funnelSlug },
+        where: {
+          slug: funnelSlug,
+          workspaceId: domain.workspaceId,
+        },
         include: {
           pages: {
             select: {
