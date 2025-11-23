@@ -71,7 +71,30 @@ export class GetPublicSiteService {
       });
 
       if (!domainFunnelConnection) {
-        throw new NotFoundError("Site not found for this domain");
+        // Check what funnel is actually connected to this domain
+        const actualConnection = await prisma.funnelDomain.findFirst({
+          where: {
+            domainId: domain.id,
+            isActive: true,
+          },
+          include: {
+            funnel: {
+              select: { slug: true, name: true },
+            },
+          },
+        });
+
+        if (actualConnection) {
+          // Domain is connected to a different funnel
+          throw new NotFoundError(
+            `Funnel '${funnelSlug}' is not connected to this domain. The domain is currently connected to funnel '${actualConnection.funnel.slug}'`
+          );
+        }
+
+        // No funnel is connected to this domain at all
+        throw new NotFoundError(
+          `Funnel '${funnelSlug}' is not connected to this domain. No funnels are currently connected to this domain.`
+        );
       }
 
       // Step 6: Validate site status
