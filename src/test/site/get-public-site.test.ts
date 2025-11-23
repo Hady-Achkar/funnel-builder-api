@@ -562,7 +562,9 @@ describe("Get Public Site Tests", () => {
     it("should throw NotFoundError when funnel exists but is not connected to the domain", async () => {
       mockPrisma.domain.findUnique.mockResolvedValue(mockDomain);
       mockPrisma.funnel.findFirst.mockResolvedValue(mockFunnel); // Funnel exists
-      mockPrisma.funnelDomain.findFirst.mockResolvedValue(null); // But not connected to this domain
+      mockPrisma.funnelDomain.findFirst
+        .mockResolvedValueOnce(null) // First call: check if funnel is connected to domain
+        .mockResolvedValueOnce(null); // Second call: check what funnel is actually connected
 
       await expect(
         GetPublicSiteService.getPublicSite({
@@ -576,7 +578,7 @@ describe("Get Public Site Tests", () => {
           hostname: "example.mydigitalsite.io",
           funnelSlug: "my-awesome-site",
         })
-      ).rejects.toThrow("Site not found for this domain");
+      ).rejects.toThrow("Funnel 'my-awesome-site' is not connected to this domain. No funnels are currently connected to this domain.");
     });
 
     it("should support multiple funnels on the same domain", async () => {
