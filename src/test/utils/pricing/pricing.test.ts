@@ -32,7 +32,7 @@ describe("Pricing Utility", () => {
         expect(pricing).toEqual({
           amount: 59.99,
           title: "Partner Plan",
-          description: "Create unlimited websites with all Digitalsite features",
+          description: "Kwefi Exclusive Offer",
           isSubscription: false,
           frequency: "annually",
           frequencyInterval: 1000,
