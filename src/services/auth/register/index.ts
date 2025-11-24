@@ -23,7 +23,8 @@ import { RegistrationSource, UserPlan } from "../../../generated/prisma-client";
 export class RegisterService {
   static async register(
     data: RegisterRequest,
-    registrationSource: RegistrationSource
+    registrationSource: RegistrationSource,
+    addedBy?: string
   ): Promise<RegisterResponse> {
     try {
       const prisma = getPrisma();
@@ -37,7 +38,8 @@ export class RegisterService {
       if (registrationSource === RegistrationSource.WORKSPACE_INVITE) {
         userPlan = UserPlan.WORKSPACE_MEMBER;
       } else if (registrationSource === RegistrationSource.OUTER_PAYMENT) {
-        userPlan = UserPlan.AGENCY;
+        // Use plan from token (already set in data.plan by controller)
+        userPlan = data.plan || UserPlan.AGENCY;
       } else if (registrationSource === RegistrationSource.AD) {
         userPlan = UserPlan.NO_PLAN;
       }
@@ -79,6 +81,7 @@ export class RegisterService {
           plan: userPlan,
           registrationSource,
           registrationToken, // NEW: Save the token used during registration
+          addedBy, // NEW: Save who added this user (for OUTER_PAYMENT)
           trialStartDate,
           trialEndDate,
         },

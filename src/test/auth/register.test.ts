@@ -5,6 +5,7 @@ import { RegisterService } from "../../services/auth/register";
 import { getPrisma } from "../../lib/prisma";
 import { BadRequestError, ConflictError } from "../../errors";
 import { UserPlan, RegistrationSource } from "../../generated/prisma-client";
+import jwt from "jsonwebtoken";
 
 // Mock dependencies
 vi.mock("../../lib/prisma");
@@ -28,6 +29,7 @@ describe("Register Route - Complete Flow", () => {
     mockPrisma = {
       user: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
         create: vi.fn(),
       },
       workspaceMember: {
@@ -901,6 +903,355 @@ describe("Register Route - Complete Flow", () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       const error = (mockNext as any).mock.calls[0][0];
       expect(error.message).toContain("JWT secret not configured");
+    });
+  });
+
+  describe("Admin Invitation Token Tests", () => {
+    beforeEach(() => {
+      process.env.JWT_SECRET = "test-jwt-secret";
+
+      // Spy on RegisterService.register to verify it's called correctly
+      vi.spyOn(RegisterService, "register").mockResolvedValue({
+        message: "User registered successfully",
+        user: {
+          id: 1,
+          email: "test@example.com",
+          username: "testuser",
+          firstName: "John",
+          lastName: "Doe",
+          isAdmin: false,
+          plan: UserPlan.AGENCY,
+          verified: false,
+        },
+        workspace: {
+          id: 1,
+          name: "testuser's workspace",
+          slug: "testuser-workspace",
+          role: "OWNER" as const,
+          permissions: [] as any[],
+        },
+      });
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should register user with valid admin invitation token", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "ADM7K2X",
+          invitedEmail: "john.doe@example.com",
+          plan: "AGENCY",
+          type: "admin_invitation",
+          tokenId: "uuid-123",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "john.doe@example.com",
+        username: "johndoe",
+        firstName: "John",
+        lastName: "Doe",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null); // No existing user with token
+      mockPrisma.user.findUnique.mockResolvedValue(null); // No duplicate email/username
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(RegisterService.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: "john.doe@example.com",
+          plan: "AGENCY", // Plan from token
+        }),
+        "OUTER_PAYMENT",
+        "ADM7K2X" // addedBy from token
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+    });
+
+    it("should reject expired admin invitation token", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "ADM7K2X",
+          invitedEmail: "john.doe@example.com",
+          plan: "AGENCY",
+          type: "admin_invitation",
+          tokenId: "uuid-123",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "0s" } // Expired immediately
+      );
+
+      // Wait to ensure token expires
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      mockReq.body = {
+        email: "john.doe@example.com",
+        username: "johndoe",
+        firstName: "John",
+        lastName: "Doe",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            "This invitation link has expired. Please request a new invitation from your administrator.",
+        })
+      );
+    });
+
+    it("should reject already used admin invitation token", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "XPL9M4N",
+          invitedEmail: "user@example.com",
+          plan: "BUSINESS",
+          type: "admin_invitation",
+          tokenId: "uuid-456",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "user@example.com",
+        username: "testuser",
+        firstName: "Test",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      // Token already used by another user
+      mockPrisma.user.findFirst.mockResolvedValue({ id: 999 } as any);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            "This invitation link has already been used. Each invitation can only be used once.",
+        })
+      );
+    });
+
+    it("should reject token with email mismatch", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "QRT5W8Z",
+          invitedEmail: "invited@example.com",
+          plan: "AGENCY",
+          type: "admin_invitation",
+          tokenId: "uuid-789",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "different@example.com", // Different email
+        username: "testuser",
+        firstName: "Test",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            "This invitation was sent to a different email address. Please use the email address from your invitation.",
+        })
+      );
+    });
+
+    it("should reject token with invalid admin code", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "INVALID",
+          invitedEmail: "user@example.com",
+          plan: "AGENCY",
+          type: "admin_invitation",
+          tokenId: "uuid-101",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "user@example.com",
+        username: "testuser",
+        firstName: "Test",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            "This invitation link is invalid. Please check your email or contact support.",
+        })
+      );
+    });
+
+    it("should handle BUSINESS plan from admin invitation", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "VBN3H6Y",
+          invitedEmail: "business@example.com",
+          plan: "BUSINESS",
+          type: "admin_invitation",
+          tokenId: "uuid-202",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "business@example.com",
+        username: "businessuser",
+        firstName: "Business",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(RegisterService.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          plan: "BUSINESS",
+        }),
+        "OUTER_PAYMENT",
+        "VBN3H6Y"
+      );
+    });
+
+    it("should handle FREE plan from admin invitation", async () => {
+      const token = jwt.sign(
+        {
+          adminCode: "FGH2L9P",
+          invitedEmail: "free@example.com",
+          plan: "FREE",
+          type: "admin_invitation",
+          tokenId: "uuid-303",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "free@example.com",
+        username: "freeuser",
+        firstName: "Free",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(RegisterService.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          plan: "FREE",
+        }),
+        "OUTER_PAYMENT",
+        "FGH2L9P"
+      );
+    });
+
+    it("should verify addedBy is stored correctly", async () => {
+      const adminCode = "JKL4T7R";
+      const token = jwt.sign(
+        {
+          adminCode,
+          invitedEmail: "test@example.com",
+          plan: "AGENCY",
+          type: "admin_invitation",
+          tokenId: "uuid-404",
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
+
+      mockReq.body = {
+        email: "test@example.com",
+        username: "testuser",
+        firstName: "Test",
+        lastName: "User",
+        password: "password123",
+        outerPaymentToken: token,
+      };
+
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await RegisterController.register(
+        mockReq as Request,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(RegisterService.register).toHaveBeenCalledWith(
+        expect.anything(),
+        "OUTER_PAYMENT",
+        adminCode // Verify adminCode is passed as addedBy
+      );
     });
   });
 });

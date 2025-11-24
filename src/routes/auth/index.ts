@@ -9,6 +9,7 @@ import { verifyEmailController } from "../../controllers/auth/verify";
 import { forgotPasswordController } from "../../controllers/auth/forgot-password";
 import { resetPasswordController } from "../../controllers/auth/reset-password";
 import { LogoutController } from "../../controllers/auth/logout";
+import { GenerateAdminInvitationController } from "../../controllers/auth/admin-invitation";
 
 const router: Router = express.Router();
 
@@ -24,5 +25,8 @@ router.post("/logout", LogoutController.logout);
 router.get("/user/profile", authenticateToken, GetUserDataController.getUserData);
 router.get("/user/fresh-data", authenticateToken, GetFreshUserDataController.getFreshUserData);
 router.put("/user/profile", authenticateToken, UpdateUserProfileController.updateUserProfile);
+
+// Admin routes (require valid admin code)
+router.post("/admin/generate-invitation", GenerateAdminInvitationController.generateInvitation);
 
 export default router;

@@ -23,7 +23,7 @@ const PRICING = {
       AGENCY: {
         amount: 59.99,
         title: "Partner Plan",
-        description: "Create unlimited websites with all Digitalsite features",
+        description: "Kwefi Exclusive Offer",
         isSubscription: false, // One-time payment
         frequency: "annually" as const,
         frequencyInterval: 1000,
