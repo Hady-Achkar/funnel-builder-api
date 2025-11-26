@@ -40,18 +40,14 @@ export class RegisterService {
       } else if (registrationSource === RegistrationSource.OUTER_PAYMENT) {
         // Use plan from token (already set in data.plan by controller)
         userPlan = data.plan || UserPlan.AGENCY;
-      } else if (registrationSource === RegistrationSource.AD) {
-        userPlan = UserPlan.NO_PLAN;
       }
 
-      // Determine which token to save (priority: workspace > outerPayment > ad > affiliate)
+      // Determine which token to save (priority: workspace > outerPayment > affiliate)
       let registrationToken: string | undefined;
       if (data.workspaceInvitationToken) {
         registrationToken = data.workspaceInvitationToken;
       } else if (data.outerPaymentToken) {
         registrationToken = data.outerPaymentToken;
-      } else if (data.adToken) {
-        registrationToken = data.adToken;
       } else if (data.affiliateToken) {
         registrationToken = data.affiliateToken;
       }

@@ -6,7 +6,6 @@ import {
   decodeInvitationToken,
   validateTokenEmail,
 } from "./utils/validate-invitation";
-import { decodeAdToken } from "./utils/validate-ad-token";
 import { decodeOuterPaymentToken } from "./utils/validate-outer-payment-token";
 import { checkTokenUsage } from "./utils/check-token-usage";
 import { BadRequestError, ConflictError } from "../../../errors";
@@ -46,33 +45,6 @@ export class RegisterController {
 
         // Only set registration source, don't link affiliate yet (happens after payment)
         registrationSource = RegistrationSource.AFFILIATE;
-      }
-
-      // Validate ad token if provided
-      if (validatedData.adToken) {
-        const jwtSecret = process.env.JWT_SECRET;
-        if (!jwtSecret) {
-          return next(
-            new BadRequestError(
-              "We're experiencing a configuration issue. Please try again later or contact support."
-            )
-          );
-        }
-
-        const decodedToken = decodeAdToken(
-          validatedData.adToken,
-          jwtSecret
-        );
-        if (!decodedToken) {
-          return next(
-            new BadRequestError(
-              "The ad campaign link appears to be invalid or expired. Please use a valid link or register directly."
-            )
-          );
-        }
-
-        // Ad registration source takes precedence over affiliate
-        registrationSource = RegistrationSource.AD;
       }
 
       // Validate outer payment token if provided

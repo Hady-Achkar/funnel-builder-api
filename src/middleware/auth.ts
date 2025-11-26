@@ -14,6 +14,55 @@ const NO_PLAN_ALLOWED_ROUTES = [
   "/api/auth/user/fresh-data", // Allow getting fresh user data
 ];
 
+/**
+ * Optional authentication middleware
+ * Sets req.userId if valid token is present, but allows request to continue without auth
+ * Use this for routes that support both authenticated and unauthenticated access
+ */
+export const optionalAuthenticateToken = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  // Check for token in cookie first, then fallback to Authorization header
+  let token = req.cookies?.authToken;
+
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1];
+  }
+
+  // No token - continue without authentication
+  if (!token) {
+    return next();
+  }
+
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    // Continue without auth if JWT secret not configured
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as any;
+    const userId = decoded.id;
+
+    const user = await getPrisma().user.findUnique({
+      where: { id: userId },
+      select: { id: true, isAdmin: true },
+    });
+
+    if (user) {
+      req.userId = userId;
+      req.isAdmin = user.isAdmin || false;
+    }
+  } catch (err) {
+    // Invalid token - continue without auth
+  }
+
+  next();
+};
+
 export const authenticateToken = async (
   req: AuthRequest,
   res: Response,
