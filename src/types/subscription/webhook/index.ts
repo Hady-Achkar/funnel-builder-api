@@ -12,9 +12,10 @@ export enum WebhookEventType {
 
 // Payment details from webhook
 export const WebhookPaymentDetails = z.object({
-  email: z.string().email(),
-  firstName: z.string(),
-  lastName: z.string(),
+  // For partner plan (payment-first), these come from customer_details instead
+  email: z.string().email().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   planType: z.string().optional(),
   addonType: z.string().optional(),
   frequency: z.string(), // monthly, annually
@@ -82,6 +83,10 @@ export const PaymentWebhookRequest = z.object({
         sellerId: z.number(),
       })
       .optional(),
+    // Partner plan specific fields
+    isPartnerPlan: z.boolean().optional(),
+    plan: z.string().optional(), // "partner" for partner plan flow
+    registrationSource: z.string().optional(), // "AD" for partner plan flow
   }),
 
   // Additional fields

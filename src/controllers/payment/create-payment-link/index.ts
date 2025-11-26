@@ -1,25 +1,53 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
-import { createPaymentLinkRequest } from "../../../types/payment/create-payment-link";
+import {
+  createPaymentLinkRequest,
+  createPartnerPaymentLinkRequest,
+} from "../../../types/payment/create-payment-link";
 import { CreatePaymentLinkService } from "../../../services/payment/create-payment-link";
 import { BadRequestError } from "../../../errors";
 import { getPrisma } from "../../../lib/prisma";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../../../middleware/auth";
 import { PaymentLinkPricing } from "../../../utils/pricing";
+import { PaymentType, UserPlan } from "../../../generated/prisma-client";
 
 export class CreatePaymentLinkController {
+  /**
+   * Create payment link - handles both:
+   * 1. Authenticated users (existing behavior)
+   * 2. Public Partner Plan requests (when plan: "partner" is passed)
+   */
   static async createPaymentLink(
     req: AuthRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
+      const prisma = getPrisma();
+
+      // Check if this is a Partner Plan request (public, unauthenticated)
+      if (req.body.plan === "partner") {
+        return await CreatePaymentLinkController.handlePartnerPlanRequest(
+          req,
+          res,
+          next
+        );
+      }
+
+      // Otherwise, require authentication
+      if (!req.userId) {
+        return next(
+          new BadRequestError(
+            "Authentication required. Please login to create a payment link."
+          )
+        );
+      }
+
       // 1. VALIDATE REQUEST with Zod
       const validatedData = createPaymentLinkRequest.parse(req.body);
 
-      const prisma = getPrisma();
-      const userId = req.userId!; // Guaranteed by authenticateToken middleware
+      const userId = req.userId;
 
       // 2. FETCH USER DATA from authenticated token
       const user = await prisma.user.findUnique({
@@ -198,5 +226,137 @@ export class CreatePaymentLinkController {
       // Pass other errors to error handler
       next(error);
     }
+  }
+
+  /**
+   * Handle Partner Plan request (public, payment-first registration)
+   * User pays first, then gets auto-registered on webhook
+   * User details (firstName, lastName, email, phone) come from MamoPay after payment
+   */
+  private static async handlePartnerPlanRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    // 1. VALIDATE REQUEST - only plan: "partner" required
+    createPartnerPaymentLinkRequest.parse(req.body);
+
+    console.log("[CreatePaymentLink] Partner Plan request received");
+
+    // 2. GET PRICING CONFIG FOR PARTNER PLAN (AGENCY from AD source)
+    const pricingConfig = PaymentLinkPricing.getPlanPurchasePricing(
+      "AD",
+      UserPlan.AGENCY
+    );
+
+    if (!pricingConfig) {
+      return next(new BadRequestError("Partner Plan pricing not configured"));
+    }
+
+    const metadata = PaymentLinkPricing.getMetadata();
+
+    // 3. VALIDATE ENV VARIABLES
+    if (!process.env.MAMOPAY_API_URL) {
+      throw new Error("MamoPay API URL is not configured");
+    }
+    if (!process.env.MAMOPAY_API_KEY) {
+      throw new Error("MamoPay API key is not configured");
+    }
+
+    // 4. BUILD CUSTOM_DATA (no userId - indicates payment-first flow)
+    // User details will come from MamoPay's customer_details in the webhook
+    const customData = {
+      details: {
+        planType: UserPlan.AGENCY,
+        paymentType: PaymentType.PLAN_PURCHASE,
+        frequency: pricingConfig.frequency,
+        frequencyInterval: pricingConfig.frequencyInterval,
+        trialDays: pricingConfig.freeTrialPeriodInDays,
+        trialEndDate: new Date().toISOString(),
+      },
+      // Partner plan specific data
+      isPartnerPlan: true,
+      plan: "partner",
+      registrationSource: "AD",
+    };
+
+    // 5. BUILD MAMOPAY PAYLOAD
+    // enable_customer_details: true - MamoPay will collect user details
+    const mamoPayPayload = {
+      title: pricingConfig.title,
+      description: pricingConfig.description,
+      amount: pricingConfig.amount,
+      amount_currency: "USD",
+      enable_customer_details: true,
+      enable_quantity: false,
+      enable_tips: false,
+      return_url: metadata.returnUrl,
+      failure_return_url: metadata.failureReturnUrl,
+      terms_and_conditions_url: metadata.termsAndConditionsUrl,
+      custom_data: customData,
+      ...(pricingConfig.isSubscription && {
+        subscription: {
+          frequency: pricingConfig.frequency,
+          frequency_interval: pricingConfig.frequencyInterval,
+        },
+      }),
+      processing_fee_percentage: 2,
+    };
+
+    // 6. CALL MAMOPAY API
+    const mamoPayApiUrl = `${process.env.MAMOPAY_API_URL}/manage_api/v1/links`;
+
+    console.log(
+      "[CreatePaymentLink] Partner Plan - Sending to MamoPay:",
+      JSON.stringify(mamoPayPayload, null, 2)
+    );
+
+    const response = await fetch(mamoPayApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.MAMOPAY_API_KEY}`,
+      },
+      body: JSON.stringify(mamoPayPayload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[CreatePaymentLink] Partner Plan - MamoPay error:", {
+        status: response.status,
+        body: errorText,
+      });
+      return next(
+        new BadRequestError(
+          "Payment link creation failed. Please try again later."
+        )
+      );
+    }
+
+    const mamoPayData = await response.json();
+
+    console.log("[CreatePaymentLink] Partner Plan - Payment link created:", {
+      linkId: mamoPayData.id,
+    });
+
+    // 7. RETURN RESPONSE
+    res.status(200).json({
+      message: "Payment link created successfully",
+      paymentLink: {
+        id: mamoPayData.id,
+        url: mamoPayData.link_url,
+        paymentUrl: mamoPayData.payment_url,
+        title: mamoPayData.title,
+        description: mamoPayData.description,
+        amount: mamoPayData.amount,
+        currency: mamoPayData.amount_currency,
+        frequency: pricingConfig.frequency,
+        frequencyInterval: pricingConfig.frequencyInterval,
+        trialPeriodDays: pricingConfig.freeTrialPeriodInDays,
+        active: mamoPayData.active,
+        createdDate: mamoPayData.created_date,
+        planType: UserPlan.AGENCY,
+      },
+    });
   }
 }

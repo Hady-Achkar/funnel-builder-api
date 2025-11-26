@@ -8,6 +8,7 @@ import {
 import { PlanPurchaseProcessor } from "./processors/plan-purchase";
 import { PlanPurchaseWithAffiliateProcessor } from "./processors/plan-purchase-with-affiliate";
 import { AddonPurchaseProcessor } from "./processors/addon-purchase";
+import { PartnerPlanPurchaseProcessor } from "./processors/partner-plan-purchase";
 import { fetchAndStoreSubscriberId } from "../../../utils/mamopay-utils/fetch-and-store-subscriber-id";
 
 export class PaymentWebhookService {
@@ -90,6 +91,32 @@ export class PaymentWebhookService {
       // 6. Route to appropriate processor based on paymentType and affiliateLink
       const paymentType = validatedData.custom_data.details.paymentType;
       const hasAffiliateLink = !!validatedData.custom_data.affiliateLink;
+      const isPartnerPlan = !!validatedData.custom_data.isPartnerPlan;
+
+      // Partner Plan purchase (payment-first registration flow)
+      // Routes here when: isPartnerPlan flag is true (set by plan: "partner" request)
+      if (paymentType === "PLAN_PURCHASE" && isPartnerPlan) {
+        console.log("[Webhook] Routing to PartnerPlanPurchaseProcessor");
+        const result = await PartnerPlanPurchaseProcessor.process(validatedData);
+
+        // Fetch and store subscriberId from MamoPay (only for subscription-based payments)
+        if (validatedData.subscription_id && result.subscriptionId) {
+          await fetchAndStoreSubscriberId(
+            result.subscriptionId,
+            validatedData.subscription_id
+          );
+        }
+
+        return {
+          received: true,
+          message: result.message,
+          data: {
+            userId: result.userId,
+            paymentId: result.paymentId,
+            subscriptionId: result.subscriptionId,
+          },
+        };
+      }
 
       if (paymentType === "PLAN_PURCHASE" && !hasAffiliateLink) {
         const result = await PlanPurchaseProcessor.process(validatedData);

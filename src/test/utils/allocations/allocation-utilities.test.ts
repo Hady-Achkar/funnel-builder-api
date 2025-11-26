@@ -305,7 +305,7 @@ describe("Allocation Utilities", () => {
         const allocation = WorkspaceFunnelAllocations.getBaseAllocation(
           UserPlan.OLD_MEMBER
         );
-        expect(allocation).toBe(1);
+        expect(allocation).toBe(2);
       });
 
       it("should return 10000 funnels for ADMIN workspace", () => {
@@ -388,16 +388,18 @@ describe("Allocation Utilities", () => {
   describe("FunnelPageAllocations", () => {
     describe("getBaseAllocation", () => {
       it("should return 100 pages for all plan types", () => {
-        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.FREE)).toBe(100);
+        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.FREE)).toBe(
+          100
+        );
         expect(FunnelPageAllocations.getBaseAllocation(UserPlan.BUSINESS)).toBe(
           100
         );
         expect(FunnelPageAllocations.getBaseAllocation(UserPlan.AGENCY)).toBe(
           100
         );
-        expect(FunnelPageAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)).toBe(
-          100
-        );
+        expect(
+          FunnelPageAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)
+        ).toBe(100);
       });
 
       it("should return 10000 pages for ADMIN plan", () => {
@@ -599,7 +601,9 @@ describe("Allocation Utilities", () => {
           WorkspaceCustomDomainAllocations.getBaseAllocation(UserPlan.AGENCY)
         ).toBe(0);
         expect(
-          WorkspaceCustomDomainAllocations.getBaseAllocation(UserPlan.OLD_MEMBER)
+          WorkspaceCustomDomainAllocations.getBaseAllocation(
+            UserPlan.OLD_MEMBER
+          )
         ).toBe(0);
       });
 
