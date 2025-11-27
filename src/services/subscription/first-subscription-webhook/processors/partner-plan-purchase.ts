@@ -232,7 +232,11 @@ export class PartnerPlanPurchaseProcessor {
         firstName,
         lastName,
         email,
-        phone: customer_details.phone_number || undefined,
+        phone:
+          customer_details.phone_number &&
+          customer_details.phone_number !== "-"
+            ? customer_details.phone_number
+            : undefined,
         transactionId,
         amount,
         currency: amount_currency,

@@ -178,8 +178,8 @@ function mapToColumnValues(
     text: data.email,
   };
 
-  // Phone column (phone type)
-  if (data.phone) {
+  // Phone column (phone type) - skip if empty or dash
+  if (data.phone && data.phone !== "-") {
     columnValues[COLUMN_MAPPING.phone] = {
       phone: data.phone,
       countryShortName: getCountryFromPhone(data.phone),
