@@ -91,11 +91,16 @@ export class PaymentWebhookService {
       // 6. Route to appropriate processor based on paymentType and affiliateLink
       const paymentType = validatedData.custom_data.details.paymentType;
       const hasAffiliateLink = !!validatedData.custom_data.affiliateLink;
+
+      // Partner Plan identifiers - ALL must be present for Partner Plan flow
       const isPartnerPlan = !!validatedData.custom_data.isPartnerPlan;
+      const isPartnerPlanFlow = validatedData.custom_data.plan === "partner";
+      const isAdSource = validatedData.custom_data.registrationSource === "AD";
 
       // Partner Plan purchase (payment-first registration flow)
-      // Routes here when: isPartnerPlan flag is true (set by plan: "partner" request)
-      if (paymentType === "PLAN_PURCHASE" && isPartnerPlan) {
+      // Routes here when: ALL three Partner Plan identifiers are present
+      // This ensures only payments from the specific MamoPay Partner Plan flow are processed
+      if (paymentType === "PLAN_PURCHASE" && isPartnerPlan && isPartnerPlanFlow && isAdSource) {
         console.log("[Webhook] Routing to PartnerPlanPurchaseProcessor");
         const result = await PartnerPlanPurchaseProcessor.process(validatedData);
 

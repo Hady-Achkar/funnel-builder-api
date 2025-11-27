@@ -47,6 +47,18 @@ export class PartnerPlanPurchaseProcessor {
         amount_currency,
         subscription_id,
       } = webhookData;
+
+      // Validate this is actually a Partner Plan payment from the correct source
+      if (
+        !custom_data.isPartnerPlan ||
+        custom_data.plan !== "partner" ||
+        custom_data.registrationSource !== "AD"
+      ) {
+        throw new Error(
+          "Invalid Partner Plan payment: missing required identifiers (isPartnerPlan, plan=partner, registrationSource=AD)"
+        );
+      }
+
       const { details, registrationSource: sourceFromWebhook } = custom_data;
       const { frequency, frequencyInterval } = details;
 
