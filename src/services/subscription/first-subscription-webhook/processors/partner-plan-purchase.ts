@@ -18,6 +18,7 @@ import { generateTempPassword } from "../../../../utils/auth/generate-temp-passw
 import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
 import { addPartnerRegistration } from "../../../../monday";
+import { inviteToCircle } from "../../../../circle";
 
 interface PartnerPlanPurchaseResult {
   success: boolean;
@@ -240,6 +241,17 @@ export class PartnerPlanPurchaseProcessor {
       }).catch((err) => {
         console.error(
           "[PartnerPlanPurchase] Monday.com registration failed (non-blocking):",
+          err
+        );
+      });
+
+      // 8. Invite to Circle community (non-blocking)
+      inviteToCircle({
+        email,
+        name: `${firstName} ${lastName}`.trim(),
+      }).catch((err) => {
+        console.error(
+          "[PartnerPlanPurchase] Circle invitation failed (non-blocking):",
           err
         );
       });
