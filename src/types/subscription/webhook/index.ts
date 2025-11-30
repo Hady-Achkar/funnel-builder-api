@@ -85,8 +85,10 @@ export const PaymentWebhookRequest = z.object({
       .optional(),
     // Partner plan specific fields
     isPartnerPlan: z.boolean().optional(),
-    plan: z.string().optional(), // "partner" for partner plan flow
-    registrationSource: z.string().optional(), // "AD" for partner plan flow
+    // Business plan specific fields
+    isBusinessPlan: z.boolean().optional(),
+    plan: z.string().optional(), // "partner" for partner plan flow, "business" for business plan AD flow
+    registrationSource: z.string().optional(), // "AD" for partner/business plan flow
   }),
 
   // Additional fields
