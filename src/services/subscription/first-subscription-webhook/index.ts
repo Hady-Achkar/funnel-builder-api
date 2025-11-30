@@ -9,6 +9,7 @@ import { PlanPurchaseProcessor } from "./processors/plan-purchase";
 import { PlanPurchaseWithAffiliateProcessor } from "./processors/plan-purchase-with-affiliate";
 import { AddonPurchaseProcessor } from "./processors/addon-purchase";
 import { PartnerPlanPurchaseProcessor } from "./processors/partner-plan-purchase";
+import { BusinessPlanPurchaseProcessor } from "./processors/business-plan-purchase";
 import { fetchAndStoreSubscriberId } from "../../../utils/mamopay-utils/fetch-and-store-subscriber-id";
 
 export class PaymentWebhookService {
@@ -97,12 +98,42 @@ export class PaymentWebhookService {
       const isPartnerPlanFlow = validatedData.custom_data.plan === "partner";
       const isAdSource = validatedData.custom_data.registrationSource === "AD";
 
+      // Business Plan identifiers - ALL must be present for Business Plan AD flow
+      const isBusinessPlan = !!validatedData.custom_data.isBusinessPlan;
+      const isBusinessPlanFlow = validatedData.custom_data.plan === "business";
+
       // Partner Plan purchase (payment-first registration flow)
       // Routes here when: ALL three Partner Plan identifiers are present
       // This ensures only payments from the specific MamoPay Partner Plan flow are processed
       if (paymentType === "PLAN_PURCHASE" && isPartnerPlan && isPartnerPlanFlow && isAdSource) {
         console.log("[Webhook] Routing to PartnerPlanPurchaseProcessor");
         const result = await PartnerPlanPurchaseProcessor.process(validatedData);
+
+        // Fetch and store subscriberId from MamoPay (only for subscription-based payments)
+        if (validatedData.subscription_id && result.subscriptionId) {
+          await fetchAndStoreSubscriberId(
+            result.subscriptionId,
+            validatedData.subscription_id
+          );
+        }
+
+        return {
+          received: true,
+          message: result.message,
+          data: {
+            userId: result.userId,
+            paymentId: result.paymentId,
+            subscriptionId: result.subscriptionId,
+          },
+        };
+      }
+
+      // Business Plan purchase (payment-first registration flow from AD)
+      // Routes here when: ALL three Business Plan identifiers are present
+      // This ensures only payments from the specific MamoPay Business Plan AD flow are processed
+      if (paymentType === "PLAN_PURCHASE" && isBusinessPlan && isBusinessPlanFlow && isAdSource) {
+        console.log("[Webhook] Routing to BusinessPlanPurchaseProcessor");
+        const result = await BusinessPlanPurchaseProcessor.process(validatedData);
 
         // Fetch and store subscriberId from MamoPay (only for subscription-based payments)
         if (validatedData.subscription_id && result.subscriptionId) {

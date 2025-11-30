@@ -18,6 +18,16 @@ export type CreatePartnerPaymentLinkRequest = z.infer<
   typeof createPartnerPaymentLinkRequest
 >;
 
+// Business plan AD request (public, unauthenticated) - when plan: "business" is passed
+// User details come from MamoPay customer_details after payment succeeds
+export const createBusinessPaymentLinkRequest = z.object({
+  plan: z.literal("business"),
+});
+
+export type CreateBusinessPaymentLinkRequest = z.infer<
+  typeof createBusinessPaymentLinkRequest
+>;
+
 export const createPaymentLinkResponse = z.object({
   message: z.string(),
   paymentLink: z.object({

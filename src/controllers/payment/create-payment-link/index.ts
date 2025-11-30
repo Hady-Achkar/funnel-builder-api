@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import {
   createPaymentLinkRequest,
   createPartnerPaymentLinkRequest,
+  createBusinessPaymentLinkRequest,
 } from "../../../types/payment/create-payment-link";
 import { CreatePaymentLinkService } from "../../../services/payment/create-payment-link";
 import { BadRequestError } from "../../../errors";
@@ -29,6 +30,15 @@ export class CreatePaymentLinkController {
       // Check if this is a Partner Plan request (public, unauthenticated)
       if (req.body.plan === "partner") {
         return await CreatePaymentLinkController.handlePartnerPlanRequest(
+          req,
+          res,
+          next
+        );
+      }
+
+      // Check if this is a Business Plan AD request (public, unauthenticated)
+      if (req.body.plan === "business") {
+        return await CreatePaymentLinkController.handleBusinessPlanRequest(
           req,
           res,
           next
@@ -356,6 +366,138 @@ export class CreatePaymentLinkController {
         active: mamoPayData.active,
         createdDate: mamoPayData.created_date,
         planType: UserPlan.AGENCY,
+      },
+    });
+  }
+
+  /**
+   * Handle Business Plan AD request (public, payment-first registration)
+   * User pays first, then gets auto-registered on webhook
+   * User details (firstName, lastName, email, phone) come from MamoPay after payment
+   */
+  private static async handleBusinessPlanRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    // 1. VALIDATE REQUEST - only plan: "business" required
+    createBusinessPaymentLinkRequest.parse(req.body);
+
+    console.log("[CreatePaymentLink] Business Plan AD request received");
+
+    // 2. GET PRICING CONFIG FOR BUSINESS PLAN (BUSINESS from AD source)
+    const pricingConfig = PaymentLinkPricing.getPlanPurchasePricing(
+      "AD",
+      UserPlan.BUSINESS
+    );
+
+    if (!pricingConfig) {
+      return next(new BadRequestError("Business Plan pricing not configured"));
+    }
+
+    const metadata = PaymentLinkPricing.getMetadata();
+
+    // 3. VALIDATE ENV VARIABLES
+    if (!process.env.MAMOPAY_API_URL) {
+      throw new Error("MamoPay API URL is not configured");
+    }
+    if (!process.env.MAMOPAY_API_KEY) {
+      throw new Error("MamoPay API key is not configured");
+    }
+
+    // 4. BUILD CUSTOM_DATA (no userId - indicates payment-first flow)
+    // User details will come from MamoPay's customer_details in the webhook
+    const customData = {
+      details: {
+        planType: UserPlan.BUSINESS,
+        paymentType: PaymentType.PLAN_PURCHASE,
+        frequency: pricingConfig.frequency,
+        frequencyInterval: pricingConfig.frequencyInterval,
+        trialDays: pricingConfig.freeTrialPeriodInDays,
+        trialEndDate: new Date().toISOString(),
+      },
+      // Business plan AD specific data
+      isBusinessPlan: true,
+      plan: "business",
+      registrationSource: "AD",
+    };
+
+    // 5. BUILD MAMOPAY PAYLOAD
+    // enable_customer_details: true - MamoPay will collect user details
+    const mamoPayPayload = {
+      title: pricingConfig.title,
+      description: pricingConfig.description,
+      amount: pricingConfig.amount,
+      amount_currency: "USD",
+      enable_customer_details: true,
+      enable_quantity: false,
+      enable_tips: false,
+      return_url: metadata.returnUrl,
+      failure_return_url: metadata.failureReturnUrl,
+      terms_and_conditions_url: metadata.termsAndConditionsUrl,
+      custom_data: customData,
+      ...(pricingConfig.isSubscription && {
+        subscription: {
+          frequency: pricingConfig.frequency,
+          frequency_interval: pricingConfig.frequencyInterval,
+        },
+      }),
+      processing_fee_percentage: 2,
+    };
+
+    // 6. CALL MAMOPAY API
+    const mamoPayApiUrl = `${process.env.MAMOPAY_API_URL}/manage_api/v1/links`;
+
+    console.log(
+      "[CreatePaymentLink] Business Plan AD - Sending to MamoPay:",
+      JSON.stringify(mamoPayPayload, null, 2)
+    );
+
+    const response = await fetch(mamoPayApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.MAMOPAY_API_KEY}`,
+      },
+      body: JSON.stringify(mamoPayPayload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[CreatePaymentLink] Business Plan AD - MamoPay error:", {
+        status: response.status,
+        body: errorText,
+      });
+      return next(
+        new BadRequestError(
+          "Payment link creation failed. Please try again later."
+        )
+      );
+    }
+
+    const mamoPayData = await response.json();
+
+    console.log("[CreatePaymentLink] Business Plan AD - Payment link created:", {
+      linkId: mamoPayData.id,
+    });
+
+    // 7. RETURN RESPONSE
+    res.status(200).json({
+      message: "Payment link created successfully",
+      paymentLink: {
+        id: mamoPayData.id,
+        url: mamoPayData.link_url,
+        paymentUrl: mamoPayData.payment_url,
+        title: mamoPayData.title,
+        description: mamoPayData.description,
+        amount: mamoPayData.amount,
+        currency: mamoPayData.amount_currency,
+        frequency: pricingConfig.frequency,
+        frequencyInterval: pricingConfig.frequencyInterval,
+        trialPeriodDays: pricingConfig.freeTrialPeriodInDays,
+        active: mamoPayData.active,
+        createdDate: mamoPayData.created_date,
+        planType: UserPlan.BUSINESS,
       },
     });
   }
