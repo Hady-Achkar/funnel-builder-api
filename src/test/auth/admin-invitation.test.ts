@@ -138,7 +138,7 @@ describe("Admin Invitation Tests", () => {
 
       const mockResponse = {
         invitationUrl:
-          "http://localhost:3000/register?outerPaymentToken=token123",
+          "http://localhost:3000/register?outerPayment=token123",
         token: "token123",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         message: "Invitation sent successfully",
@@ -173,7 +173,7 @@ describe("Admin Invitation Tests", () => {
 
       const mockResponse = {
         invitationUrl:
-          "http://localhost:3000/register?outerPaymentToken=token456",
+          "http://localhost:3000/register?outerPayment=token456",
         token: "token456",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         message: "Invitation sent successfully",
@@ -208,7 +208,7 @@ describe("Admin Invitation Tests", () => {
 
       const mockResponse = {
         invitationUrl:
-          "http://localhost:3000/register?outerPaymentToken=token789",
+          "http://localhost:3000/register?outerPayment=token789",
         token: "token789",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         message: "Invitation sent successfully",
@@ -243,7 +243,7 @@ describe("Admin Invitation Tests", () => {
 
       const mockResponse = {
         invitationUrl:
-          "http://localhost:3000/register?outerPaymentToken=token101",
+          "http://localhost:3000/register?outerPayment=token101",
         token: "token101",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         message: "Invitation sent successfully",
@@ -334,7 +334,7 @@ describe("Admin Invitation Tests", () => {
         };
 
         const mockResponse = {
-          invitationUrl: `http://localhost:3000/register?outerPaymentToken=token-${code}`,
+          invitationUrl: `http://localhost:3000/register?outerPayment=token-${code}`,
           token: `token-${code}`,
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           message: "Invitation sent successfully",

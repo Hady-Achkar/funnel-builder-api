@@ -45,7 +45,7 @@ export class GenerateAdminInvitationService {
         throw new Error("FRONTEND_URL is not configured");
       }
 
-      const invitationUrl = `${frontendUrl}/register?outerPaymentToken=${token}`;
+      const invitationUrl = `${frontendUrl}/register?outerPayment=${token}`;
 
       // Calculate expiry date (7 days from now)
       const expiresAt = new Date();
