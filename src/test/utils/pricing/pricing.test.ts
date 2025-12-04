@@ -15,7 +15,7 @@ describe("Pricing Utility", () => {
         expect(pricing).toEqual({
           amount: 499,
           title: "Business Plan",
-          description: "Create a mobile optimized site with advanced analytics",
+          description: "Promo - Lifetime access instead of yearly",
           isSubscription: false,
           frequency: "annually",
           frequencyInterval: 1000,
@@ -52,10 +52,10 @@ describe("Pricing Utility", () => {
         expect(pricing).toEqual({
           amount: 299,
           title: "Business Plan",
-          description: "Create a mobile optimized site with advanced analytics",
+          description: "Promo - Lifetime access instead of yearly",
           isSubscription: true,
           frequency: "annually",
-          frequencyInterval: 1,
+          frequencyInterval: 1000,
           freeTrialPeriodInDays: 0,
         });
       });

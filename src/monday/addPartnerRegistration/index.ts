@@ -159,7 +159,9 @@ const COLUMN_MAPPING = {
   addToDS: "color_mkn26kav", // Add to DS (status) - Done
   date: "date_mkn2z7rc", // Date column
   note: "text_mkn2vgtv", // Note (text) - transaction ID
+  invitedBy: "multiple_person_mky77mx7",
 };
+const INVITED_BY_USER_ID = 74353384;
 
 /**
  * Maps partner registration data to Monday.com column values format
@@ -231,6 +233,11 @@ function mapToColumnValues(
     label: "Done",
   };
 
+  // Invited By - Ahmad Naser Almuhtar
+  columnValues[COLUMN_MAPPING.invitedBy] = {
+    personsAndTeams: [{ id: INVITED_BY_USER_ID, kind: "person" }],
+  };
+
   return columnValues;
 }
 
@@ -275,7 +282,8 @@ export async function addPartnerRegistration(
     const config = getConfigFromEnv();
 
     // Create item name from full name
-    const itemName = `${validatedData.firstName} ${validatedData.lastName}`.trim();
+    const itemName =
+      `${validatedData.firstName} ${validatedData.lastName}`.trim();
 
     // Map data to column values
     const columnValues = mapToColumnValues(validatedData);

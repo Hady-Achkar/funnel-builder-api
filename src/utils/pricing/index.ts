@@ -13,7 +13,7 @@ const PRICING = {
       BUSINESS: {
         amount: 499,
         title: "Business Plan",
-        description: "Create a mobile optimized site with advanced analytics",
+        description: "Promo - Lifetime access instead of yearly",
         isSubscription: false, // One-time payment
         frequency: "annually" as const,
         frequencyInterval: 1000,
@@ -34,10 +34,10 @@ const PRICING = {
       BUSINESS: {
         amount: 299,
         title: "Business Plan",
-        description: "Create a mobile optimized site with advanced analytics",
+        description: "Promo - Lifetime access instead of yearly",
         isSubscription: true, // Yearly subscription
         frequency: "annually" as const,
-        frequencyInterval: 1,
+        frequencyInterval: 1000,
         freeTrialPeriodInDays: 0,
       },
     },
@@ -45,7 +45,7 @@ const PRICING = {
       BUSINESS: {
         amount: 499,
         title: "Business Plan",
-        description: "Create a mobile optimized site with advanced analytics",
+        description: "Promo - Lifetime access instead of yearly",
         isSubscription: false, // One-time payment
         frequency: "annually" as const,
         frequencyInterval: 1000,
