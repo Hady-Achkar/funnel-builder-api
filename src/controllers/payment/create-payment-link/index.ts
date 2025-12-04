@@ -297,7 +297,7 @@ export class CreatePaymentLinkController {
       description: pricingConfig.description,
       amount: pricingConfig.amount,
       amount_currency: "USD",
-      enable_customer_details: true,
+      // enable_customer_details: true,
       enable_quantity: false,
       enable_tips: false,
       return_url: metadata.returnUrl,
@@ -429,7 +429,7 @@ export class CreatePaymentLinkController {
       description: pricingConfig.description,
       amount: pricingConfig.amount,
       amount_currency: "USD",
-      enable_customer_details: true,
+      // enable_customer_details: true,
       enable_quantity: false,
       enable_tips: false,
       return_url: metadata.returnUrl,
@@ -477,9 +477,12 @@ export class CreatePaymentLinkController {
 
     const mamoPayData = await response.json();
 
-    console.log("[CreatePaymentLink] Business Plan AD - Payment link created:", {
-      linkId: mamoPayData.id,
-    });
+    console.log(
+      "[CreatePaymentLink] Business Plan AD - Payment link created:",
+      {
+        linkId: mamoPayData.id,
+      }
+    );
 
     // 7. RETURN RESPONSE
     res.status(200).json({

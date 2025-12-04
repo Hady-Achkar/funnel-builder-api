@@ -1,7 +1,4 @@
-import {
-  CreatePaymentLinkRequest,
-  CreatePaymentLinkResponse,
-} from "../../../types/payment/create-payment-link";
+import { CreatePaymentLinkResponse } from "../../../types/payment/create-payment-link";
 import { BadRequestError } from "../../../errors/http-errors";
 import { PaymentType, UserPlan } from "../../../generated/prisma-client";
 
@@ -28,7 +25,7 @@ interface AffiliateData {
   itemType: string;
   userId: number;
   commissionPercentage: number;
-  workspaceId?: number; 
+  workspaceId?: number;
 }
 
 // Type for workspace data from controller
@@ -109,7 +106,7 @@ export class CreatePaymentLinkService {
         description: data.description, // From centralized pricing config
         amount: data.amount, // From centralized pricing config
         amount_currency: "USD",
-        enable_customer_details: true,
+        // enable_customer_details: true,
         enable_quantity: false,
         enable_tips: false,
         return_url: data.returnUrl, // From centralized pricing metadata

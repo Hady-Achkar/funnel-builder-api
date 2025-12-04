@@ -81,7 +81,7 @@ export class CreateAddonPaymentLinkService {
         description: data.description,
         amount: data.amount,
         amount_currency: "USD",
-        enable_customer_details: true,
+        // enable_customer_details: true,
         enable_quantity: false,
         enable_tips: false,
         return_url: data.returnUrl,
