@@ -438,7 +438,7 @@ model TemplatePage {
   order          Int
   type           PageType @default(PAGE)
   settings       Json?
-  linkingId      String?  @unique
+  linkingId      String?
   seoTitle       String?
   seoDescription String?
   seoKeywords    String?
@@ -446,6 +446,7 @@ model TemplatePage {
   updatedAt      DateTime @updatedAt
   template       Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
+  @@unique([templateId, linkingId])
   @@index([templateId])
   @@map("template_pages")
 }

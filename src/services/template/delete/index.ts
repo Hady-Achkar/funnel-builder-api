@@ -12,7 +12,6 @@ import {
   ForbiddenError,
 } from "../../../errors";
 import { ZodError } from "zod";
-import { deleteTemplateImage } from "../../../helpers/template/shared";
 
 export const deleteTemplate = async (
   userId: number,
@@ -50,22 +49,8 @@ export const deleteTemplate = async (
       throw new ForbiddenError("You can only delete your own templates");
     }
 
-    const result = await prisma.$transaction(async (tx: any) => {
-      if (template.previewImages && template.previewImages.length > 0) {
-        for (const image of template.previewImages) {
-          try {
-            const urlParts = image.imageUrl.split("/");
-            const fileName = urlParts[urlParts.length - 1];
-            await deleteTemplateImage(fileName);
-          } catch (imageError) {
-            console.warn(
-              `Failed to delete image ${image.imageUrl}:`,
-              imageError
-            );
-          }
-        }
-      }
-
+    const result = await prisma.$transaction(async (tx) => {
+      // Delete template images records (actual image files are managed externally)
       await tx.templateImage.deleteMany({
         where: { templateId: validatedRequest.id },
       });
