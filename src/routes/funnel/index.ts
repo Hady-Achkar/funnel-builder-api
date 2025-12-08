@@ -5,7 +5,7 @@ import { updateFunnelController } from "../../controllers/funnel/update";
 import { getAllFunnelsController } from "../../controllers/funnel/getAll";
 import { getFunnelController } from "../../controllers/funnel/get";
 import { deleteFunnelController } from "../../controllers/funnel/delete";
-import { createFromTemplateController } from "../../controllers/funnel/createFromTemplate";
+import { CreateFunnelFromTemplateController } from "../../controllers/funnel/create-from-template";
 import { duplicateFunnelController } from "../../controllers/funnel/duplicate";
 import { GetFunnelsSummaryController } from "../../controllers/funnel/get-funnels-summary";
 const router: Router = express.Router();
@@ -13,7 +13,7 @@ const router: Router = express.Router();
 router.use(authenticateToken);
 
 router.post("/", createFunnelController);
-router.post("/from-template/:templateId", createFromTemplateController);
+router.post("/from-template", CreateFunnelFromTemplateController.create);
 router.get(
   "/:workspaceSlug/summary",
   GetFunnelsSummaryController.getFunnelsSummary
