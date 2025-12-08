@@ -1,12 +1,13 @@
 import { getPrisma } from "../../../lib/prisma";
-import { cacheService } from "../../../services/cache/cache.service";
 import { BadRequestError } from "../../../errors";
 import { ZodError } from "zod";
+import { Prisma } from "../../../generated/prisma-client";
 import {
   GetAllTemplatesQuery,
   getAllTemplatesQuery,
   getAllTemplatesResponse,
   GetAllTemplatesResponse,
+  TemplateSummaryItem,
 } from "../../../types/template/get-all";
 
 export const getAllTemplates = async (
@@ -16,212 +17,150 @@ export const getAllTemplates = async (
     const validatedQuery = getAllTemplatesQuery.parse(query);
     const prisma = getPrisma();
 
-    const allTemplatesKey = "templates:ids:all";
-    let allTemplateIds: number[] | null = null;
+    const where: Prisma.TemplateWhereInput = {};
 
-    try {
-      allTemplateIds = await cacheService.get<number[]>(allTemplatesKey);
-    } catch (cacheError) {
-      console.warn("Failed to get template IDs from cache:", cacheError);
+    const searchTerm = validatedQuery.search;
+    const searchAsNumber = searchTerm ? parseInt(searchTerm, 10) : NaN;
+    const isNumericSearch = !isNaN(searchAsNumber);
+    const hasSearch = !!searchTerm;
+
+    if (validatedQuery.categoryId !== undefined) {
+      where.categoryId = validatedQuery.categoryId;
     }
 
-    if (!allTemplateIds || allTemplateIds.length === 0) {
-      console.log("Cache miss: Fetching all templates from database");
+    if (validatedQuery.categorySlug) {
+      where.category = { slug: validatedQuery.categorySlug };
+    }
 
-      const allTemplates = await prisma.template.findMany({
-        include: {
-          category: {
-            select: {
-              name: true,
-              slug: true,
-            },
-          },
-          previewImages: {
-            orderBy: { order: "asc" },
-            select: {
-              imageUrl: true,
-              imageType: true,
-            },
-          },
-          _count: {
-            select: {
-              pages: true,
-            },
+    if (validatedQuery.isActive !== undefined) {
+      where.isActive = validatedQuery.isActive;
+    }
+
+    if (validatedQuery.isPublic !== undefined) {
+      where.isPublic = validatedQuery.isPublic;
+    }
+
+    if (validatedQuery.createdByUserId !== undefined) {
+      where.createdByUserId = validatedQuery.createdByUserId;
+    }
+
+    if (validatedQuery.tags) {
+      const tagsArray = validatedQuery.tags.split(",").map((t) => t.trim());
+      where.tags = { hasSome: tagsArray };
+    }
+
+    const isPagesCountSort = validatedQuery.orderBy === "pagesCount";
+    const needsInMemoryProcessing = isPagesCountSort || hasSearch;
+
+    let orderBy: Prisma.TemplateOrderByWithRelationInput | undefined;
+    if (!isPagesCountSort) {
+      orderBy = { [validatedQuery.orderBy]: validatedQuery.order };
+    }
+
+    const skip = (validatedQuery.page - 1) * validatedQuery.limit;
+
+    const templates = await prisma.template.findMany({
+      where,
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
           },
         },
-      });
-
-      const cachePromises = allTemplates.map(async (template) => {
-        const thumbnailUrl =
-          template.previewImages.find(
-            (img: any) => img.imageType === "THUMBNAIL"
-          )?.imageUrl || null;
-
-        const previewUrls = template.previewImages
-          .filter((img: any) => img.imageType === "PREVIEW")
-          .map((img: any) => img.imageUrl);
-
-        const summary = {
-          id: template.id,
-          name: template.name,
-          slug: template.slug,
-          description: template.description,
-          categoryId: template.categoryId,
-          categoryName: template.category.name,
-          categorySlug: template.category.slug,
-          tags: template.tags,
-          isActive: template.isActive,
-          isPublic: template.isPublic,
-          createdByUserId: template.createdByUserId,
-          usageCount: template.usageCount,
-          pagesCount: template._count.pages,
-          thumbnailUrl,
-          previewUrls,
-          createdAt: template.createdAt,
-          updatedAt: template.updatedAt,
-        };
-
-        await cacheService.setTemplateCache(template.id, "summary", summary, {
-          ttl: 0,
-        });
-        return summary;
-      });
-
-      await Promise.all(cachePromises);
-
-      allTemplateIds = allTemplates.map((t) => t.id);
-      await cacheService.set(allTemplatesKey, allTemplateIds, { ttl: 0 });
-    }
-
-    const templateSummaries: any[] = [];
-
-    for (const templateId of allTemplateIds) {
-      try {
-        let summary = await cacheService.getTemplateCache<any>(
-          templateId,
-          "summary"
-        );
-
-        if (!summary) {
-          console.log(
-            `Cache miss for template ${templateId}, fetching from DB`
-          );
-
-          try {
-            const template = await prisma.template.findUnique({
-              where: { id: templateId },
-              include: {
-                category: {
-                  select: {
-                    name: true,
-                    slug: true,
-                  },
-                },
-                previewImages: {
-                  orderBy: { order: "asc" },
-                  select: {
-                    imageUrl: true,
-                    imageType: true,
-                  },
-                },
-                _count: {
-                  select: {
-                    pages: true,
-                  },
-                },
-              },
-            });
-
-            if (template) {
-              const thumbnailUrl =
-                template.previewImages.find(
-                  (img: any) => img.imageType === "THUMBNAIL"
-                )?.imageUrl || null;
-
-              const previewUrls = template.previewImages
-                .filter((img: any) => img.imageType === "PREVIEW")
-                .map((img: any) => img.imageUrl);
-
-              summary = {
-                id: template.id,
-                name: template.name,
-                slug: template.slug,
-                description: template.description,
-                categoryId: template.categoryId,
-                categoryName: template.category.name,
-                categorySlug: template.category.slug,
-                tags: template.tags,
-                isActive: template.isActive,
-                isPublic: template.isPublic,
-                createdByUserId: template.createdByUserId,
-                usageCount: template.usageCount,
-                pagesCount: template._count.pages,
-                thumbnailUrl,
-                previewUrls,
-                createdAt: template.createdAt,
-                updatedAt: template.updatedAt,
-              };
-
-              await cacheService.setTemplateCache(
-                template.id,
-                "summary",
-                summary,
-                { ttl: 0 }
-              );
-            }
-          } catch (dbError) {
-            console.error(
-              `Failed to fetch template ${templateId} from DB:`,
-              dbError
-            );
-            continue;
-          }
-        }
-
-        if (summary) {
-          if (!summary.isActive || !summary.isPublic) continue;
-          if (
-            validatedQuery.category &&
-            summary.categorySlug !== validatedQuery.category
-          )
-            continue;
-
-          templateSummaries.push(summary);
-        }
-      } catch (err) {
-        console.warn(`Failed to get template ${templateId} from cache:`, err);
-      }
-    }
-
-    templateSummaries.sort((a, b) => {
-      const field = validatedQuery.orderBy;
-      const order = validatedQuery.order === "asc" ? 1 : -1;
-
-      if (field === "name") {
-        return order * a.name.localeCompare(b.name);
-      } else if (field === "usageCount") {
-        return order * (a.usageCount - b.usageCount);
-      } else if (field === "createdAt" || field === "updatedAt") {
-        return (
-          order * (new Date(a[field]).getTime() - new Date(b[field]).getTime())
-        );
-      }
-      return 0;
+        previewImages: {
+          orderBy: { order: "asc" },
+          select: {
+            imageUrl: true,
+            imageType: true,
+          },
+        },
+        _count: {
+          select: {
+            pages: true,
+            previewImages: true,
+          },
+        },
+      },
+      orderBy,
+      skip: needsInMemoryProcessing ? undefined : skip,
+      take: needsInMemoryProcessing ? undefined : validatedQuery.limit,
     });
 
-    const total = templateSummaries.length;
-    const skip = (validatedQuery.page - 1) * validatedQuery.limit;
-    const paginatedTemplates = templateSummaries.slice(
-      skip,
-      skip + validatedQuery.limit
-    );
+    let processedTemplates = templates.map((template) => {
+      const thumbnailUrl =
+        template.previewImages.find((img) => img.imageType === "THUMBNAIL")
+          ?.imageUrl || null;
+
+      const previewUrls = template.previewImages
+        .filter((img) => img.imageType === "PREVIEW")
+        .map((img) => img.imageUrl);
+
+      return {
+        id: template.id,
+        name: template.name,
+        slug: template.slug,
+        description: template.description,
+        categoryId: template.categoryId,
+        categoryName: template.category.name,
+        categorySlug: template.category.slug,
+        tags: template.tags,
+        isActive: template.isActive,
+        isPublic: template.isPublic,
+        createdByUserId: template.createdByUserId,
+        usageCount: template.usageCount,
+        pagesCount: template._count.pages,
+        imagesCount: template._count.previewImages,
+        thumbnailUrl,
+        previewUrls,
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+      };
+    });
+
+    if (hasSearch) {
+      const searchLower = searchTerm!.toLowerCase();
+
+      processedTemplates = processedTemplates.filter((t) => {
+        if (t.name.toLowerCase().includes(searchLower)) return true;
+        if (t.slug.toLowerCase().includes(searchLower)) return true;
+        if (t.description?.toLowerCase().includes(searchLower)) return true;
+        if (t.categoryName.toLowerCase().includes(searchLower)) return true;
+        if (t.categorySlug.toLowerCase().includes(searchLower)) return true;
+        if (t.tags.some((tag) => tag.toLowerCase().includes(searchLower)))
+          return true;
+
+        if (isNumericSearch) {
+          if (t.usageCount === searchAsNumber) return true;
+          if (t.pagesCount === searchAsNumber) return true;
+        }
+
+        return false;
+      });
+    }
+
+    if (isPagesCountSort) {
+      processedTemplates.sort((a, b) => {
+        const order = validatedQuery.order === "asc" ? 1 : -1;
+        return order * (a.pagesCount - b.pagesCount);
+      });
+    }
+
+    const total = processedTemplates.length;
+
+    if (needsInMemoryProcessing) {
+      processedTemplates = processedTemplates.slice(
+        skip,
+        skip + validatedQuery.limit
+      );
+    }
 
     const totalPages = Math.ceil(total / validatedQuery.limit);
     const hasNext = validatedQuery.page < totalPages;
     const hasPrev = validatedQuery.page > 1;
 
     const response = {
-      templates: paginatedTemplates,
+      templates: processedTemplates as TemplateSummaryItem[],
       pagination: {
         page: validatedQuery.page,
         limit: validatedQuery.limit,
@@ -231,9 +170,15 @@ export const getAllTemplates = async (
         hasPrev,
       },
       filters: {
+        search: validatedQuery.search ?? null,
         orderBy: validatedQuery.orderBy,
         order: validatedQuery.order,
-        category: validatedQuery.category,
+        categoryId: validatedQuery.categoryId ?? null,
+        categorySlug: validatedQuery.categorySlug ?? null,
+        isActive: validatedQuery.isActive ?? null,
+        isPublic: validatedQuery.isPublic ?? null,
+        createdByUserId: validatedQuery.createdByUserId ?? null,
+        tags: validatedQuery.tags ?? null,
       },
     };
 
