@@ -14,6 +14,7 @@ import domainFunnelRoutes from "./routes/domain-funnel";
 import themeRoutes from "./routes/theme";
 import imageFolderRoutes from "./routes/image-folder";
 import templateRoutes from "./routes/template";
+import templateCategoryRoutes from "./routes/template-category";
 import imageRoutes from "./routes/image";
 import formRoutes from "./routes/form";
 import formSubmissionRoutes from "./routes/form-submission";
@@ -113,6 +114,7 @@ export function createServer(): Express {
   app.use("/api/themes", themeRoutes);
   app.use("/api/image-folders", imageFolderRoutes);
   app.use("/api/templates", templateRoutes);
+  app.use("/api/template-categories", templateCategoryRoutes);
   app.use("/api/images", imageRoutes);
   app.use("/api/forms", formRoutes);
   app.use("/api/form-submissions", formSubmissionRoutes);

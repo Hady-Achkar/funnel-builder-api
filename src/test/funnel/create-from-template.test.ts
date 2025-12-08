@@ -13,12 +13,14 @@ import { PermissionManager } from "../../utils/workspace-utils/workspace-permiss
 import { WorkspaceFunnelAllocations } from "../../utils/allocations/workspace-funnel-allocations";
 import { cacheService } from "../../services/cache/cache.service";
 import * as generateSlugModule from "../../utils/funnel-utils/generate-slug";
+import * as generateUniqueNameModule from "../../services/funnel/create/utils/generateUniqueName";
 
 vi.mock("../../lib/prisma");
 vi.mock("../../utils/workspace-utils/workspace-permission-manager/permission-manager");
 vi.mock("../../utils/allocations/workspace-funnel-allocations");
 vi.mock("../../services/cache/cache.service");
 vi.mock("../../utils/funnel-utils/generate-slug");
+vi.mock("../../services/funnel/create/utils/generateUniqueName");
 
 describe("Create Funnel From Template", () => {
   let mockPrisma: {
@@ -82,6 +84,7 @@ describe("Create Funnel From Template", () => {
 
   const mockTemplate = {
     id: 1,
+    name: "Test Template",
     slug: "test-template",
     isActive: true,
     isPublic: true,
@@ -126,6 +129,7 @@ describe("Create Funnel From Template", () => {
     (WorkspaceFunnelAllocations.canCreateFunnel as ReturnType<typeof vi.fn>).mockReturnValue(true);
     (cacheService.del as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     (generateSlugModule.generateSlug as ReturnType<typeof vi.fn>).mockResolvedValue("my-new-funnel");
+    (generateUniqueNameModule.generateUniqueName as ReturnType<typeof vi.fn>).mockResolvedValue("My New Funnel");
 
     mockReq = {
       userId: userId,
@@ -161,7 +165,7 @@ describe("Create Funnel From Template", () => {
   });
 
   describe("Validation", () => {
-    it("should reject empty name", async () => {
+    it("should reject empty name when provided", async () => {
       mockReq.body = { ...validRequestBody, name: "" };
 
       await CreateFunnelFromTemplateController.create(
@@ -173,6 +177,37 @@ describe("Create Funnel From Template", () => {
       expect(mockNext).toHaveBeenCalled();
       const error = (mockNext as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(error.message).toBe("Funnel name cannot be empty");
+    });
+
+    it("should accept missing name (optional)", async () => {
+      mockReq.body = { workspaceSlug: "test-workspace", templateSlug: "test-template" };
+      mockPrisma.user.findUnique.mockResolvedValue({ id: userId });
+      mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
+      mockPrisma.funnel.count.mockResolvedValue(0);
+      mockPrisma.template.findUnique.mockResolvedValue(mockTemplate);
+      (generateUniqueNameModule.generateUniqueName as ReturnType<typeof vi.fn>).mockResolvedValue("Test Template");
+
+      mockPrisma.$transaction.mockImplementation(async (callback) => {
+        const txMock = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({ id: 1, name: "Test Template", slug: "test-template" }),
+            update: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          theme: { create: vi.fn().mockResolvedValue({ id: 1 }) },
+          funnelSettings: { create: vi.fn().mockResolvedValue({ id: 1 }) },
+          page: { createMany: vi.fn().mockResolvedValue({ count: 2 }) },
+          template: { update: vi.fn().mockResolvedValue({ id: 1, usageCount: 1 }) },
+        };
+        return callback(txMock);
+      });
+
+      await CreateFunnelFromTemplateController.create(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockRes.status).toHaveBeenCalledWith(201);
     });
 
     it("should reject missing workspaceSlug", async () => {
@@ -696,7 +731,7 @@ describe("Create Funnel From Template", () => {
     });
   });
 
-  describe("Optional Slug", () => {
+  describe("Optional Name and Slug", () => {
     beforeEach(() => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: userId });
       mockPrisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
@@ -743,14 +778,15 @@ describe("Create Funnel From Template", () => {
       );
     });
 
-    it("should generate slug from name when slug is not provided", async () => {
+    it("should fallback to template slug when slug is not provided", async () => {
       mockReq.body = { ...validRequestBody };
       delete mockReq.body.slug;
+      (generateSlugModule.generateSlug as ReturnType<typeof vi.fn>).mockResolvedValue("test-template");
 
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         const txMock = {
           funnel: {
-            create: vi.fn().mockResolvedValue({ id: 1, name: "My New Funnel", slug: "my-new-funnel" }),
+            create: vi.fn().mockResolvedValue({ id: 1, name: "My New Funnel", slug: "test-template" }),
             update: vi.fn().mockResolvedValue({ id: 1 }),
           },
           theme: {
@@ -775,9 +811,94 @@ describe("Create Funnel From Template", () => {
         mockNext
       );
 
+      // Should use template slug as fallback
       expect(generateSlugModule.generateSlug).toHaveBeenCalledWith(
         expect.anything(),
-        "My New Funnel",
+        "test-template",
+        mockWorkspace.id
+      );
+    });
+
+    it("should fallback to template name when name is not provided", async () => {
+      mockReq.body = { workspaceSlug: "test-workspace", templateSlug: "test-template" };
+      (generateUniqueNameModule.generateUniqueName as ReturnType<typeof vi.fn>).mockResolvedValue("Test Template");
+
+      mockPrisma.$transaction.mockImplementation(async (callback) => {
+        const txMock = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({ id: 1, name: "Test Template", slug: "test-template" }),
+            update: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          page: {
+            createMany: vi.fn().mockResolvedValue({ count: 2 }),
+          },
+          template: {
+            update: vi.fn().mockResolvedValue({ id: 1, usageCount: 1 }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateFunnelFromTemplateController.create(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      // Should use template name as fallback
+      expect(generateUniqueNameModule.generateUniqueName).toHaveBeenCalledWith(
+        "Test Template",
+        mockWorkspace.id
+      );
+    });
+
+    it("should create funnel with no name or slug provided (all fallbacks)", async () => {
+      mockReq.body = { workspaceSlug: "test-workspace", templateSlug: "test-template" };
+      (generateUniqueNameModule.generateUniqueName as ReturnType<typeof vi.fn>).mockResolvedValue("Test Template");
+      (generateSlugModule.generateSlug as ReturnType<typeof vi.fn>).mockResolvedValue("test-template");
+
+      mockPrisma.$transaction.mockImplementation(async (callback) => {
+        const txMock = {
+          funnel: {
+            create: vi.fn().mockResolvedValue({ id: 1, name: "Test Template", slug: "test-template" }),
+            update: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          funnelSettings: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          page: {
+            createMany: vi.fn().mockResolvedValue({ count: 2 }),
+          },
+          template: {
+            update: vi.fn().mockResolvedValue({ id: 1, usageCount: 1 }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await CreateFunnelFromTemplateController.create(
+        mockReq as AuthRequest,
+        mockRes as Response,
+        mockNext
+      );
+
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(generateUniqueNameModule.generateUniqueName).toHaveBeenCalledWith(
+        "Test Template",
+        mockWorkspace.id
+      );
+      expect(generateSlugModule.generateSlug).toHaveBeenCalledWith(
+        expect.anything(),
+        "test-template",
         mockWorkspace.id
       );
     });

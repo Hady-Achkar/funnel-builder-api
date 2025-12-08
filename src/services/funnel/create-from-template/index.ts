@@ -4,6 +4,7 @@ import {
   CreateFunnelFromTemplateResponse,
 } from "../../../types/funnel/create-from-template";
 import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
+import { generateUniqueName } from "../create/utils/generateUniqueName";
 import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
 import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
@@ -135,12 +136,13 @@ export class CreateFunnelFromTemplateService {
         );
       }
 
-      // Generate unique slug
-      const slug = await generateSlug(
-        prisma,
-        data.slug || data.name,
-        workspace.id
-      );
+      // Determine funnel name (use provided or fallback to template name)
+      const baseName = data.name || template.name;
+      const uniqueName = await generateUniqueName(baseName, workspace.id);
+
+      // Generate unique slug (use provided or fallback to template slug)
+      const baseSlug = data.slug || template.slug;
+      const uniqueSlug = await generateSlug(prisma, baseSlug, workspace.id);
 
       // Determine password protection based on workspace status
       let isPasswordProtected = false;
@@ -156,8 +158,8 @@ export class CreateFunnelFromTemplateService {
         // Create the funnel
         const funnel = await tx.funnel.create({
           data: {
-            name: data.name,
-            slug: slug,
+            name: uniqueName,
+            slug: uniqueSlug,
             status: $Enums.FunnelStatus.DRAFT,
             workspaceId: workspace.id,
             createdBy: userId,
