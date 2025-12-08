@@ -95,7 +95,7 @@ export class CreateTemplateFromFunnelService {
 
       // Create template with pages and images in a transaction
       const result = await prisma.$transaction(async (tx) => {
-        // Create the template
+        // Create the template (inactive and private by default)
         const template = await tx.template.create({
           data: {
             name: data.name,
@@ -103,8 +103,8 @@ export class CreateTemplateFromFunnelService {
             description: data.description,
             categoryId: data.categoryId,
             tags: data.tags ?? [],
-            isActive: true,
-            isPublic: true,
+            isActive: false,
+            isPublic: false,
             createdByUserId: userId,
           },
         });
