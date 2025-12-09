@@ -4,6 +4,7 @@ import { PageType } from "../../../generated/prisma-client";
 import {
   GetTemplatePagesResponse,
   getTemplatePagesResponse,
+  TemplateTheme,
 } from "../../../types/template/get-pages";
 
 export const getTemplatePages = async (
@@ -11,7 +12,7 @@ export const getTemplatePages = async (
 ): Promise<GetTemplatePagesResponse> => {
   const prisma = getPrisma();
 
-  // Find template by slug with pages (excluding content)
+  // Find template by slug with pages (excluding content) and theme
   const template = await prisma.template.findUnique({
     where: { slug: templateSlug },
     include: {
@@ -32,6 +33,7 @@ export const getTemplatePages = async (
           updatedAt: true,
         },
       },
+      theme: true,
     },
   });
 
@@ -57,5 +59,19 @@ export const getTemplatePages = async (
   // Combine: PAGE types first, then RESULT types
   const sortedPages = [...numberedPages, ...numberedResults];
 
-  return getTemplatePagesResponse.parse({ pages: sortedPages });
+  // Format theme response (only include styling fields, not internal IDs)
+  const theme: TemplateTheme | null = template.theme
+    ? {
+        backgroundColor: template.theme.backgroundColor,
+        textColor: template.theme.textColor,
+        buttonColor: template.theme.buttonColor,
+        buttonTextColor: template.theme.buttonTextColor,
+        borderColor: template.theme.borderColor,
+        optionColor: template.theme.optionColor,
+        fontFamily: template.theme.fontFamily,
+        borderRadius: template.theme.borderRadius,
+      }
+    : null;
+
+  return getTemplatePagesResponse.parse({ pages: sortedPages, theme });
 };

@@ -115,6 +115,7 @@ export class CreateFunnelFromTemplateService {
           pages: {
             orderBy: { order: "asc" },
           },
+          theme: true,
         },
       });
 
@@ -166,11 +167,20 @@ export class CreateFunnelFromTemplateService {
           },
         });
 
-        // Create custom theme linked to funnel
+        // Create custom theme linked to funnel (copy from template theme or use defaults)
         const theme = await tx.theme.create({
           data: {
             funnelId: funnel.id,
             type: $Enums.ThemeType.CUSTOM,
+            name: template.theme?.name ?? "Default Theme",
+            backgroundColor: template.theme?.backgroundColor ?? "#FFFFFF",
+            textColor: template.theme?.textColor ?? "#0d1911",
+            buttonColor: template.theme?.buttonColor ?? "#3c724b",
+            buttonTextColor: template.theme?.buttonTextColor ?? "#FFFFFF",
+            borderColor: template.theme?.borderColor ?? "#f0f0f0",
+            optionColor: template.theme?.optionColor ?? "#EFFFF3",
+            fontFamily: template.theme?.fontFamily ?? "Inter, sans-serif",
+            borderRadius: template.theme?.borderRadius ?? $Enums.BorderRadius.SOFT,
           },
         });
 

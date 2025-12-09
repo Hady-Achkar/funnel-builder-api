@@ -9,6 +9,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../../../errors";
+import { ThemeType } from "../../../generated/prisma-client";
 
 interface ReplaceTemplateFromFunnelParams {
   userId: number;
@@ -73,6 +74,7 @@ export class ReplaceTemplateFromFunnelService {
           pages: {
             orderBy: { order: "asc" },
           },
+          activeTheme: true,
         },
       });
 
@@ -86,12 +88,36 @@ export class ReplaceTemplateFromFunnelService {
         );
       }
 
-      // Replace pages in transaction
+      // Replace pages and theme in transaction
       await prisma.$transaction(async (tx) => {
         // Delete all existing template pages
         await tx.templatePage.deleteMany({
           where: { templateId: template.id },
         });
+
+        // Delete existing template theme
+        await tx.theme.deleteMany({
+          where: { templateId: template.id },
+        });
+
+        // Create new theme from funnel's active theme
+        if (funnel.activeTheme) {
+          await tx.theme.create({
+            data: {
+              name: funnel.activeTheme.name,
+              backgroundColor: funnel.activeTheme.backgroundColor,
+              textColor: funnel.activeTheme.textColor,
+              buttonColor: funnel.activeTheme.buttonColor,
+              buttonTextColor: funnel.activeTheme.buttonTextColor,
+              borderColor: funnel.activeTheme.borderColor,
+              optionColor: funnel.activeTheme.optionColor,
+              fontFamily: funnel.activeTheme.fontFamily,
+              borderRadius: funnel.activeTheme.borderRadius,
+              type: ThemeType.CUSTOM,
+              templateId: template.id,
+            },
+          });
+        }
 
         // Create new template pages from funnel pages
         const templatePagesData = funnel.pages.map((page) => ({

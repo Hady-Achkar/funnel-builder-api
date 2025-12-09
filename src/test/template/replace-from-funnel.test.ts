@@ -73,10 +73,24 @@ describe("Replace Template From Funnel", () => {
     id: 1,
   };
 
+  const mockActiveTheme = {
+    id: 1,
+    name: "Test Theme",
+    backgroundColor: "#FFFFFF",
+    textColor: "#000000",
+    buttonColor: "#3c724b",
+    buttonTextColor: "#FFFFFF",
+    borderColor: "#f0f0f0",
+    optionColor: "#EFFFF3",
+    fontFamily: "Inter, sans-serif",
+    borderRadius: "SOFT",
+  };
+
   const mockFunnel = {
     id: 1,
     slug: "test-funnel",
     pages: mockFunnelPages,
+    activeTheme: mockActiveTheme,
   };
 
   beforeEach(() => {
@@ -182,6 +196,10 @@ describe("Replace Template From Funnel", () => {
           templatePage: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             createMany: vi.fn().mockResolvedValue({ count: 2 }),
+          },
+          theme: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+            create: vi.fn().mockResolvedValue({ id: 2 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -372,6 +390,10 @@ describe("Replace Template From Funnel", () => {
               return Promise.resolve({ count: args.data.length });
             }),
           },
+          theme: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+            create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
           },
@@ -400,6 +422,10 @@ describe("Replace Template From Funnel", () => {
               createdPages = args.data;
               return Promise.resolve({ count: args.data.length });
             }),
+          },
+          theme: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+            create: vi.fn().mockResolvedValue({ id: 2 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -440,6 +466,10 @@ describe("Replace Template From Funnel", () => {
               createdPages = args.data;
               return Promise.resolve({ count: args.data.length });
             }),
+          },
+          theme: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+            create: vi.fn().mockResolvedValue({ id: 2 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -511,6 +541,10 @@ describe("Replace Template From Funnel", () => {
           templatePage: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             createMany: vi.fn().mockResolvedValue({ count: 2 }),
+          },
+          theme: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+            create: vi.fn().mockResolvedValue({ id: 2 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),

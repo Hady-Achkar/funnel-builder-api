@@ -9,6 +9,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../../../errors";
+import { ThemeType } from "../../../generated/prisma-client";
 
 interface CreateTemplateFromFunnelParams {
   userId: number;
@@ -67,6 +68,7 @@ export class CreateTemplateFromFunnelService {
           pages: {
             orderBy: { order: "asc" },
           },
+          activeTheme: true,
         },
       });
 
@@ -93,7 +95,7 @@ export class CreateTemplateFromFunnelService {
         throw new BadRequestError("A template with this slug already exists");
       }
 
-      // Create template with pages and images in a transaction
+      // Create template with pages, theme, and images in a transaction
       const result = await prisma.$transaction(async (tx) => {
         // Create the template (inactive and private by default)
         const template = await tx.template.create({
@@ -108,6 +110,25 @@ export class CreateTemplateFromFunnelService {
             createdByUserId: userId,
           },
         });
+
+        // Duplicate funnel's active theme for the template
+        if (funnel.activeTheme) {
+          await tx.theme.create({
+            data: {
+              name: funnel.activeTheme.name,
+              backgroundColor: funnel.activeTheme.backgroundColor,
+              textColor: funnel.activeTheme.textColor,
+              buttonColor: funnel.activeTheme.buttonColor,
+              buttonTextColor: funnel.activeTheme.buttonTextColor,
+              borderColor: funnel.activeTheme.borderColor,
+              optionColor: funnel.activeTheme.optionColor,
+              fontFamily: funnel.activeTheme.fontFamily,
+              borderRadius: funnel.activeTheme.borderRadius,
+              type: ThemeType.CUSTOM,
+              templateId: template.id,
+            },
+          });
+        }
 
         // Create template pages from funnel pages
         const templatePagesData = funnel.pages.map((page) => ({

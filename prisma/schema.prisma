@@ -333,12 +333,15 @@ model Theme {
   borderRadius    BorderRadius @default(SOFT)
   type            ThemeType    @default(CUSTOM)
   funnelId        Int?         @unique
+  templateId      Int?         @unique
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   funnels         Funnel[]     @relation("ActiveTheme")
   funnel          Funnel?      @relation("CustomTheme", fields: [funnelId], references: [id], onDelete: Cascade)
+  template        Template?    @relation("TemplateTheme", fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([funnelId])
+  @@index([templateId])
   @@index([type])
   @@map("themes")
 }
@@ -405,6 +408,7 @@ model Template {
   updatedAt       DateTime         @updatedAt
   previewImages   TemplateImage[]
   pages           TemplatePage[]
+  theme           Theme?           @relation("TemplateTheme")
   category        TemplateCategory @relation(fields: [categoryId], references: [id])
   createdBy       User             @relation(fields: [createdByUserId], references: [id])
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PageType } from "../../../generated/prisma-client";
+import { BorderRadius, PageType } from "../../../generated/prisma-client";
 
 export const getTemplatePagesParams = z.object({
   templateSlug: z
@@ -27,8 +27,22 @@ export const templatePageItem = z.object({
 
 export type TemplatePageItem = z.infer<typeof templatePageItem>;
 
+export const templateTheme = z.object({
+  backgroundColor: z.string(),
+  textColor: z.string(),
+  buttonColor: z.string(),
+  buttonTextColor: z.string(),
+  borderColor: z.string(),
+  optionColor: z.string(),
+  fontFamily: z.string(),
+  borderRadius: z.nativeEnum(BorderRadius),
+});
+
+export type TemplateTheme = z.infer<typeof templateTheme>;
+
 export const getTemplatePagesResponse = z.object({
   pages: z.array(templatePageItem),
+  theme: templateTheme.nullable(),
 });
 
 export type GetTemplatePagesResponse = z.infer<typeof getTemplatePagesResponse>;
