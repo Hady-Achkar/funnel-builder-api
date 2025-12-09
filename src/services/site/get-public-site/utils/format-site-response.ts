@@ -30,8 +30,16 @@ export function formatSiteResponse(funnel: FunnelWithRelations): Omit<
   GetPublicSiteResponse,
   "requiresPassword" | "hasAccess" | "tokenExpiry"
 > {
+  // Sort pages: PAGE types first (by order), then RESULT types (by order)
   const pages: PublicPage[] = funnel.pages
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => {
+      // PAGE type comes before RESULT type
+      if (a.type !== b.type) {
+        return a.type === PageType.PAGE ? -1 : 1;
+      }
+      // Within the same type, sort by order
+      return a.order - b.order;
+    })
     .map((page) => ({
       id: page.id,
       name: page.name,
