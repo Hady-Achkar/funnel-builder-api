@@ -59,16 +59,18 @@ export const getTemplatePages = async (
   // Combine: PAGE types first, then RESULT types
   const sortedPages = [...numberedPages, ...numberedResults];
 
-  // Format theme response (only include styling fields, not internal IDs)
+  // Format theme response (matching get-public-site format)
   const theme: TemplateTheme | null = template.theme
     ? {
+        primaryColor: template.theme.buttonColor,
+        secondaryColor: template.theme.borderColor,
+        fontFamily: template.theme.fontFamily,
         backgroundColor: template.theme.backgroundColor,
         textColor: template.theme.textColor,
         buttonColor: template.theme.buttonColor,
         buttonTextColor: template.theme.buttonTextColor,
         borderColor: template.theme.borderColor,
         optionColor: template.theme.optionColor,
-        fontFamily: template.theme.fontFamily,
         borderRadius: template.theme.borderRadius,
       }
     : null;
