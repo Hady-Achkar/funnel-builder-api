@@ -3,28 +3,37 @@ import { cacheService } from "../../../services/cache/cache.service";
 import {
   UpdateTemplateRequest,
   UpdateTemplateResponse,
-  updateTemplateRequest,
+  updateTemplateBody,
   updateTemplateResponse,
 } from "../../../types/template/update";
-import { NotFoundError, BadRequestError } from "../../../errors";
+import {
+  NotFoundError,
+  BadRequestError,
+  ForbiddenError,
+} from "../../../errors";
 import { ZodError } from "zod";
+import { transformSlug } from "../create-from-funnel/utils/transform-slug";
 
 export const updateTemplate = async (
   params: UpdateTemplateRequest
 ): Promise<UpdateTemplateResponse> => {
   try {
-    const validatedParams = updateTemplateRequest.parse(params);
-    const {
-      id: templateId,
-      thumbnail,
-      images,
-      ...updateData
-    } = validatedParams;
+    const { templateSlug, userId, isAdmin, body } = params;
+
+    // Check admin permission
+    if (!isAdmin) {
+      throw new ForbiddenError("Only administrators can update templates");
+    }
+
+    // Validate body
+    const validatedBody = updateTemplateBody.parse(body);
+    const { images, ...updateFields } = validatedBody;
 
     const prisma = getPrisma();
 
+    // Find template by slug
     const existingTemplate = await prisma.template.findUnique({
-      where: { id: templateId },
+      where: { slug: templateSlug },
       include: {
         previewImages: true,
       },
@@ -34,63 +43,82 @@ export const updateTemplate = async (
       throw new NotFoundError("Template not found");
     }
 
+    // If name is being updated, check uniqueness
+    if (updateFields.name) {
+      const nameConflict = await prisma.template.findFirst({
+        where: {
+          name: updateFields.name,
+          id: { not: existingTemplate.id },
+        },
+        select: { id: true },
+      });
+
+      if (nameConflict) {
+        throw new BadRequestError("A template with this name already exists");
+      }
+    }
+
+    // If slug is being updated, check uniqueness
+    if (updateFields.slug) {
+      const transformedSlug = transformSlug(updateFields.slug);
+      const slugConflict = await prisma.template.findFirst({
+        where: {
+          slug: transformedSlug,
+          id: { not: existingTemplate.id },
+        },
+        select: { id: true },
+      });
+
+      if (slugConflict) {
+        throw new BadRequestError("A template with this slug already exists");
+      }
+
+      updateFields.slug = transformedSlug;
+    }
+
+    // If categoryId is being updated, verify category exists
+    if (updateFields.categoryId) {
+      const category = await prisma.templateCategory.findUnique({
+        where: { id: updateFields.categoryId },
+        select: { id: true },
+      });
+
+      if (!category) {
+        throw new NotFoundError("Template category not found");
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
       // Prepare template update data - only include defined fields
       const templateUpdateData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, value]) => value !== undefined)
-      );
-
-      console.log(
-        "Template update data prepared:",
-        JSON.stringify(templateUpdateData, null, 2)
+        Object.entries(updateFields).filter(([_, value]) => value !== undefined)
       );
 
       // Update template if there's data to update
       if (Object.keys(templateUpdateData).length > 0) {
         await tx.template.update({
-          where: { id: templateId },
+          where: { id: existingTemplate.id },
           data: templateUpdateData,
         });
       }
 
       // Handle image updates if provided
-      if (thumbnail !== undefined || images !== undefined) {
+      if (images !== undefined) {
         // Delete existing preview images
         await tx.templateImage.deleteMany({
-          where: { templateId },
+          where: { templateId: existingTemplate.id },
         });
 
-        // Prepare new images to create
-        const imagesToCreate = [];
-
-        // Add thumbnail if provided
-        if (thumbnail) {
-          imagesToCreate.push({
-            templateId,
-            imageUrl: thumbnail,
-            imageType: "THUMBNAIL" as const,
-            order: 0,
-            caption: null,
-          });
-        }
-
-        // Add preview images if provided
-        if (images?.length) {
-          images.forEach((imageUrl, index) => {
-            imagesToCreate.push({
-              templateId,
-              imageUrl,
-              imageType: "PREVIEW" as const,
-              order: index + 1,
-              caption: null,
-            });
-          });
-        }
-
-        // Create all images
-        if (imagesToCreate.length > 0) {
+        // Create new images if array is not empty
+        if (images.length > 0) {
           await tx.templateImage.createMany({
-            data: imagesToCreate,
+            data: images.map((img) => ({
+              templateId: existingTemplate.id,
+              imageUrl: img.imageUrl,
+              imageType: img.imageType,
+              order: img.order,
+              caption: img.caption ?? null,
+            })),
           });
         }
       }
@@ -98,9 +126,8 @@ export const updateTemplate = async (
 
     // Update cache with new data
     try {
-      // Fetch the updated template with all relations for cache
       const updatedTemplateWithRelations = await prisma.template.findUnique({
-        where: { id: templateId },
+        where: { id: existingTemplate.id },
         include: {
           category: {
             select: {
@@ -160,9 +187,12 @@ export const updateTemplate = async (
           createdAt: updatedTemplateWithRelations.createdAt,
           updatedAt: updatedTemplateWithRelations.updatedAt,
         };
-        await cacheService.setTemplateCache(templateId, "full", fullCacheData, {
-          ttl: 0,
-        });
+        await cacheService.setTemplateCache(
+          existingTemplate.id,
+          "full",
+          fullCacheData,
+          { ttl: 0 }
+        );
 
         const thumbnailUrl =
           updatedTemplateWithRelations.previewImages.find(
@@ -194,7 +224,7 @@ export const updateTemplate = async (
         };
 
         await cacheService.setTemplateCache(
-          templateId,
+          existingTemplate.id,
           "summary",
           summaryCacheData,
           { ttl: 0 }
@@ -202,7 +232,7 @@ export const updateTemplate = async (
       }
     } catch (cacheError) {
       console.error(
-        `Failed to update cache for template ${templateId}:`,
+        `Failed to update cache for template ${existingTemplate.id}:`,
         cacheError
       );
     }
@@ -213,13 +243,15 @@ export const updateTemplate = async (
 
     return updateTemplateResponse.parse(response);
   } catch (error) {
-    console.error("Error in updateTemplate:", error);
-
     if (error instanceof ZodError) {
       const message = error.issues[0]?.message || "Invalid update data";
       throw new BadRequestError(message);
     }
-    if (error instanceof NotFoundError || error instanceof BadRequestError) {
+    if (
+      error instanceof NotFoundError ||
+      error instanceof BadRequestError ||
+      error instanceof ForbiddenError
+    ) {
       throw error;
     }
     throw new Error(
@@ -230,7 +262,6 @@ export const updateTemplate = async (
   }
 };
 
-// Export as default for backward compatibility
 export const updateService = {
   update: updateTemplate,
 };

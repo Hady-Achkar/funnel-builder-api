@@ -1,73 +1,98 @@
 import { z } from "zod";
+import { TemplateImageType } from "../../../generated/prisma-client";
 
-export const updateTemplateRequestBody = z.object({
-  name: z
-    .string({ message: "Name must be a string" })
-    .min(1, { message: "Name cannot be empty" })
-    .optional(),
-  slug: z
-    .string({ message: "Slug must be a string" })
-    .min(1, { message: "Slug cannot be empty" })
-    .optional(),
-  description: z
-    .string({ message: "Description must be a string" })
-    .optional()
-    .nullable(),
-  categoryId: z
-    .union([z.string(), z.number()], { message: "Category ID must be a string or number" })
-    .transform((val) => typeof val === 'string' ? parseInt(val, 10) : val)
-    .refine((val) => !isNaN(val) && val > 0, { message: "Category ID must be a positive number" })
-    .optional(),
-  isActive: z
-    .union([z.string(), z.boolean()], { message: "isActive must be a string or boolean" })
-    .transform((val) => typeof val === 'string' ? val === 'true' : val)
-    .optional(),
-  isPublic: z
-    .union([z.string(), z.boolean()], { message: "isPublic must be a string or boolean" })
-    .transform((val) => typeof val === 'string' ? val === 'true' : val)
-    .optional(),
-  tags: z
-    .union([
-      z.string().transform((str) => {
-        try {
-          return JSON.parse(str);
-        } catch {
-          return str.split(',').map(tag => tag.trim());
-        }
-      }),
-      z.array(z.string())
-    ], { message: "Tags must be an array or comma-separated string" })
-    .optional(),
-  thumbnail: z
-    .string({ message: "Thumbnail must be a string URL" })
-    .min(1, { message: "Thumbnail URL cannot be empty" })
-    .optional(),
-  images: z
-    .union([
-      z.string().transform((str) => {
-        try {
-          const parsed = JSON.parse(str);
-          return Array.isArray(parsed) ? parsed : [str];
-        } catch {
-          return [str];
-        }
-      }),
-      z.array(z.string({ message: "Each image URL must be a string" }))
-    ], { message: "Images must be an array or JSON string of URLs" })
+const slugRegex = /^[a-zA-Z0-9\s-]+$/;
+
+export const templateImageInputSchema = z.object({
+  imageUrl: z
+    .string({ message: "Image URL must be a string" })
+    .url("Image URL must be a valid URL"),
+  imageType: z.nativeEnum(TemplateImageType, {
+    message: "Image type must be either THUMBNAIL or PREVIEW",
+  }),
+  order: z
+    .number({ message: "Order must be a number" })
+    .int("Order must be an integer")
+    .min(0, "Order must be a non-negative integer"),
+  caption: z
+    .string({ message: "Caption must be a string" })
+    .max(255, "Caption must be less than 255 characters")
+    .nullable()
     .optional(),
 });
 
-export type UpdateTemplateRequestBody = z.infer<typeof updateTemplateRequestBody>;
+export type TemplateImageInput = z.infer<typeof templateImageInputSchema>;
 
-export const updateTemplateRequest = z.object({
-  id: z
-    .number({ message: "Template ID must be a number" })
-    .int({ message: "Template ID must be an integer" })
-    .positive({ message: "Template ID must be positive" }),
-  ...updateTemplateRequestBody.shape
+export const updateTemplateBody = z
+  .object({
+    name: z
+      .string({ message: "Name must be a string" })
+      .trim()
+      .min(1, { message: "Name cannot be empty" })
+      .max(255, { message: "Name must be less than 255 characters" })
+      .optional(),
+    slug: z
+      .string({ message: "Slug must be a string" })
+      .trim()
+      .min(1, { message: "Slug cannot be empty" })
+      .max(255, { message: "Slug must be less than 255 characters" })
+      .refine((val) => slugRegex.test(val), {
+        message: "Slug can only contain letters, numbers, spaces, and hyphens",
+      })
+      .optional(),
+    description: z
+      .string({ message: "Description must be a string" })
+      .nullable()
+      .optional(),
+    categoryId: z
+      .number({ message: "Category ID must be a number" })
+      .int({ message: "Category ID must be an integer" })
+      .positive({ message: "Category ID must be a positive number" })
+      .optional(),
+    tags: z
+      .array(z.string({ message: "Each tag must be a string" }), {
+        message: "Tags must be an array of strings",
+      })
+      .optional(),
+    isActive: z.boolean({ message: "isActive must be a boolean" }).optional(),
+    isPublic: z.boolean({ message: "isPublic must be a boolean" }).optional(),
+    images: z
+      .array(templateImageInputSchema, {
+        message: "Images must be an array of image objects",
+      })
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.images || data.images.length === 0) return true;
+      const thumbnailCount = data.images.filter(
+        (img) => img.imageType === TemplateImageType.THUMBNAIL
+      ).length;
+      return thumbnailCount === 1;
+    },
+    {
+      message: "Exactly one thumbnail image is required when providing images",
+      path: ["images"],
+    }
+  );
+
+export type UpdateTemplateBody = z.infer<typeof updateTemplateBody>;
+
+export const updateTemplateParams = z.object({
+  templateSlug: z
+    .string({ message: "Template slug is required" })
+    .trim()
+    .min(1, { message: "Template slug cannot be empty" }),
 });
 
-export type UpdateTemplateRequest = z.infer<typeof updateTemplateRequest>;
+export type UpdateTemplateParams = z.infer<typeof updateTemplateParams>;
+
+export interface UpdateTemplateRequest {
+  templateSlug: string;
+  userId: number;
+  isAdmin: boolean;
+  body: UpdateTemplateBody;
+}
 
 export const updateTemplateResponse = z.object({
   message: z.string(),
