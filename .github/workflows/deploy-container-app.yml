@@ -120,7 +120,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'test' }}
+    environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'dev') }}
 
     steps:
       - name: Checkout code
@@ -129,13 +129,15 @@ jobs:
       - name: Set environment-specific variables
         run: |
           if [ "${{ github.event.inputs.environment }}" == "production" ] || ([ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]); then
+            # Production deploys to digitalsite-api-test
             echo "DEPLOYMENT_ENV=production" >> $GITHUB_ENV
-            echo "CONTAINER_APP_ENV=digitalsite-prod-env" >> $GITHUB_ENV
-            echo "CONTAINER_APP_NAME=digitalsite-api-prod" >> $GITHUB_ENV
-          else
-            echo "DEPLOYMENT_ENV=test" >> $GITHUB_ENV
             echo "CONTAINER_APP_ENV=digitalsite-test-env" >> $GITHUB_ENV
             echo "CONTAINER_APP_NAME=digitalsite-api-test" >> $GITHUB_ENV
+          else
+            # Development deploys to digitalsite-api-dev
+            echo "DEPLOYMENT_ENV=dev" >> $GITHUB_ENV
+            echo "CONTAINER_APP_ENV=digitalsite-dev-env" >> $GITHUB_ENV
+            echo "CONTAINER_APP_NAME=digitalsite-api-dev" >> $GITHUB_ENV
           fi
 
       - name: Log in to Azure

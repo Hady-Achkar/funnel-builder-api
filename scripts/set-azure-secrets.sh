@@ -14,17 +14,22 @@ NC='\033[0m' # No Color
 
 # Configuration
 RESOURCE_GROUP="digitalsite-eu-rg"
-ENVIRONMENT=${1:-test}
+ENVIRONMENT=${1:-dev}
 
 # Set container app name based on environment
 if [ "$ENVIRONMENT" == "production" ]; then
-    CONTAINER_APP_NAME="digitalsite-api-prod"
+    CONTAINER_APP_NAME="digitalsite-api-test"  # Production runs on test container
     echo -e "${YELLOW}Setting secrets for PRODUCTION environment${NC}"
+    echo -e "${YELLOW}(Container: digitalsite-api-test)${NC}"
+elif [ "$ENVIRONMENT" == "dev" ]; then
+    CONTAINER_APP_NAME="digitalsite-api-dev"
+    echo -e "${YELLOW}Setting secrets for DEVELOPMENT environment${NC}"
 elif [ "$ENVIRONMENT" == "test" ]; then
+    # Legacy support - maps to production
     CONTAINER_APP_NAME="digitalsite-api-test"
-    echo -e "${YELLOW}Setting secrets for TEST environment${NC}"
+    echo -e "${YELLOW}Setting secrets for TEST environment (PRODUCTION)${NC}"
 else
-    echo -e "${RED}Error: Invalid environment. Use 'test' or 'production'${NC}"
+    echo -e "${RED}Error: Invalid environment. Use 'dev' or 'production'${NC}"
     exit 1
 fi
 
@@ -109,7 +114,6 @@ az containerapp update \
     "REDIS_TLS=$REDIS_TLS" \
     "CF_API_TOKEN=secretref:cf-api-token" \
     "CF_ACCOUNT_ID=$CF_ACCOUNT_ID" \
-    "CF_SUBDOMAIN=$CF_SUBDOMAIN" \
     "CF_SUBDOMAIN=$CF_SUBDOMAIN" \
     "CF_ZONE_ID=$CF_ZONE_ID" \
     "STORAGE_URL=$STORAGE_URL" \
