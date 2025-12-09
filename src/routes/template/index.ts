@@ -3,6 +3,8 @@ import { authenticateToken } from "../../middleware/auth";
 import { CreateTemplateFromFunnelController } from "../../controllers/template/create-from-funnel";
 import { ReplaceTemplateFromFunnelController } from "../../controllers/template/replace-from-funnel";
 import { getAllTemplatesController } from "../../controllers/template/get-all";
+import { getTemplatePagesController } from "../../controllers/template/get-pages";
+import { getTemplatePageController } from "../../controllers/template/get-page";
 import { updateTemplateController } from "../../controllers/template/update";
 import { deleteTemplateController } from "../../controllers/template/delete";
 
@@ -10,6 +12,8 @@ const router: Router = express.Router();
 
 // Public routes
 router.get("/", getAllTemplatesController);
+router.get("/:templateSlug/pages", getTemplatePagesController);
+router.get("/:templateSlug/pages/:linkingId", getTemplatePageController);
 
 // Protected routes
 router.use(authenticateToken);
