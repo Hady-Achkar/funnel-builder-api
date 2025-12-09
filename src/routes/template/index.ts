@@ -21,6 +21,6 @@ router.post("/from-funnel", CreateTemplateFromFunnelController.create);
 router.put("/:templateSlug/from-funnel", ReplaceTemplateFromFunnelController.replace);
 
 router.put("/:templateSlug", updateTemplateController);
-router.delete("/:id", deleteTemplateController);
+router.delete("/:templateSlug", deleteTemplateController);
 
 export default router;

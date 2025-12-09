@@ -1,7 +1,9 @@
 import { Response, NextFunction } from "express";
+import { ZodError } from "zod";
 import { AuthRequest } from "../../../middleware/auth";
 import { deleteTemplate } from "../../../services/template/delete";
-import { UnauthorizedError, BadRequestError } from "../../../errors";
+import { deleteTemplateParams } from "../../../types/template/delete";
+import { BadRequestError } from "../../../errors";
 
 export const deleteTemplateController = async (
   req: AuthRequest,
@@ -9,25 +11,24 @@ export const deleteTemplateController = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.userId;
-    if (!userId) {
-      throw new UnauthorizedError("Authentication required");
-    }
+    const { templateSlug } = deleteTemplateParams.parse(req.params);
+    const isAdmin = req.isAdmin || false;
 
-    const { id } = req.params;
-    
-    if (!id || isNaN(parseInt(id))) {
-      throw new BadRequestError("Valid template ID is required");
-    }
-
-    const result = await deleteTemplate(userId, parseInt(id));
+    const result = await deleteTemplate({
+      templateSlug,
+      isAdmin,
+    });
 
     res.status(200).json({
       success: true,
       message: result.message,
-      data: { deletedTemplateId: result.deletedTemplateId }
+      data: { deletedTemplateSlug: result.deletedTemplateSlug },
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      const message = error.issues[0]?.message || "Invalid request data";
+      return next(new BadRequestError(message));
+    }
     next(error);
   }
 };

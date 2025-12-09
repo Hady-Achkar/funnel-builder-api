@@ -1,20 +1,22 @@
 import { z } from "zod";
 
-export const deleteTemplateRequest = z.object({
-  id: z
-    .number({
-      message: "Template ID must be a number",
-    })
-    .positive("Template ID must be a positive number"),
+export const deleteTemplateParams = z.object({
+  templateSlug: z
+    .string({ message: "Template slug is required" })
+    .trim()
+    .min(1, { message: "Template slug cannot be empty" }),
 });
 
-export type DeleteTemplateRequest = z.infer<typeof deleteTemplateRequest>;
+export type DeleteTemplateParams = z.infer<typeof deleteTemplateParams>;
+
+export interface DeleteTemplateRequest {
+  templateSlug: string;
+  isAdmin: boolean;
+}
 
 export const deleteTemplateResponse = z.object({
-  message: z.string({
-    message: "Response message must be a string",
-  }),
-  deletedTemplateId: z.number(),
+  message: z.string(),
+  deletedTemplateSlug: z.string(),
 });
 
 export type DeleteTemplateResponse = z.infer<typeof deleteTemplateResponse>;
