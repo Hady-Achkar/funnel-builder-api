@@ -61,7 +61,7 @@ export function createServer(): Express {
     "http://localhost:3000", // Development frontend
     "http://localhost:3001", // Alternative dev port
     "http://localhost:4444", // Development API
-  ].filter(Boolean); // Remove undefined values
+  ].filter(Boolean); // Remove undefined values triggerrr
 
   app.use(
     cors({
