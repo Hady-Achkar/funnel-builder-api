@@ -16,6 +16,10 @@ import {
   NotFoundError,
 } from "../../../errors";
 import { $Enums } from "../../../generated/prisma-client";
+import {
+  replaceServerIdsInContent,
+  ServerIdMap,
+} from "../../../utils/funnel-utils/server-id-replacement";
 
 const DEFAULT_FUNNEL_PASSWORD =
   process.env.DEFAULT_FUNNEL_PASSWORD || "FunnelDefault123!";
@@ -116,6 +120,8 @@ export class CreateFunnelFromTemplateService {
             orderBy: { order: "asc" },
           },
           theme: true,
+          forms: true,
+          insights: true,
         },
       });
 
@@ -209,11 +215,53 @@ export class CreateFunnelFromTemplateService {
           },
         });
 
-        // Create pages from template pages (copy exact linkingId)
+        // Duplicate forms from template and build ID mapping
+        const formIdMap = new Map<number, number>();
+        for (const form of template.forms) {
+          const newForm = await tx.form.create({
+            data: {
+              name: form.name,
+              description: form.description,
+              formContent: form.formContent,
+              isActive: form.isActive,
+              funnelId: funnel.id,
+              // Webhooks are NOT copied - user should configure separately
+              webhookUrl: null,
+              webhookEnabled: false,
+              webhookHeaders: {},
+              webhookSecret: null,
+            },
+          });
+          formIdMap.set(form.id, newForm.id);
+        }
+
+        // Duplicate insights from template and build ID mapping
+        const insightIdMap = new Map<number, number>();
+        for (const insight of template.insights) {
+          const newInsight = await tx.insight.create({
+            data: {
+              type: insight.type,
+              name: insight.name,
+              description: insight.description,
+              content: insight.content,
+              settings: insight.settings,
+              funnelId: funnel.id,
+            },
+          });
+          insightIdMap.set(insight.id, newInsight.id);
+        }
+
+        // Build server ID map for content replacement
+        const serverIdMap: ServerIdMap = {
+          forms: formIdMap,
+          insights: insightIdMap,
+        };
+
+        // Create pages from template pages with server ID replacement
         const pagesData = template.pages.map((templatePage) => ({
           funnelId: funnel.id,
           name: templatePage.name,
-          content: templatePage.content,
+          content: replaceServerIdsInContent(templatePage.content, serverIdMap),
           order: templatePage.order,
           type: templatePage.type,
           linkingId: templatePage.linkingId,

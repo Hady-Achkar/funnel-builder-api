@@ -353,13 +353,16 @@ model Insight {
   description String?
   content     Json
   settings    Json?               @default("{}")
-  funnelId    Int
+  funnelId    Int?
+  templateId  Int?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   submissions InsightSubmission[]
-  funnel      Funnel              @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  funnel      Funnel?             @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  template    Template?           @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([funnelId])
+  @@index([templateId])
   @@index([type])
   @@map("insights")
 }
@@ -409,6 +412,8 @@ model Template {
   previewImages   TemplateImage[]
   pages           TemplatePage[]
   theme           Theme?           @relation("TemplateTheme")
+  forms           Form[]
+  insights        Insight[]
   category        TemplateCategory @relation(fields: [categoryId], references: [id])
   createdBy       User             @relation(fields: [createdByUserId], references: [id])
 
@@ -490,6 +495,7 @@ model Form {
   formContent         Json
   isActive            Boolean          @default(true)
   funnelId            Int?
+  templateId          Int?
   webhookUrl          String?
   webhookEnabled      Boolean          @default(false)
   webhookHeaders      Json?            @default("{}")
@@ -500,9 +506,11 @@ model Form {
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   submissions         FormSubmission[]
+  template            Template?        @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([isActive])
   @@index([funnelId])
+  @@index([templateId])
   @@index([webhookEnabled])
   @@map("forms")
 }

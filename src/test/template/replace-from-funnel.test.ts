@@ -17,6 +17,7 @@ describe("Replace Template From Funnel", () => {
     template: { findUnique: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
     templatePage: { deleteMany: ReturnType<typeof vi.fn>; createMany: ReturnType<typeof vi.fn> };
     funnel: { findFirst: ReturnType<typeof vi.fn> };
+    form: { findMany: ReturnType<typeof vi.fn> };
     $transaction: ReturnType<typeof vi.fn>;
   };
   let mockReq: Partial<AuthRequest>;
@@ -91,6 +92,7 @@ describe("Replace Template From Funnel", () => {
     slug: "test-funnel",
     pages: mockFunnelPages,
     activeTheme: mockActiveTheme,
+    insights: [],
   };
 
   beforeEach(() => {
@@ -113,6 +115,9 @@ describe("Replace Template From Funnel", () => {
       },
       funnel: {
         findFirst: vi.fn(),
+      },
+      form: {
+        findMany: vi.fn().mockResolvedValue([]),
       },
       $transaction: vi.fn(),
     };
@@ -200,6 +205,14 @@ describe("Replace Template From Funnel", () => {
           theme: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+          form: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -394,6 +407,14 @@ describe("Replace Template From Funnel", () => {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             create: vi.fn().mockResolvedValue({ id: 2 }),
           },
+          form: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
           },
@@ -426,6 +447,14 @@ describe("Replace Template From Funnel", () => {
           theme: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+          form: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -470,6 +499,14 @@ describe("Replace Template From Funnel", () => {
           theme: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+          form: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),
@@ -545,6 +582,14 @@ describe("Replace Template From Funnel", () => {
           theme: {
             deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             create: vi.fn().mockResolvedValue({ id: 2 }),
+          },
+          form: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+            create: vi.fn().mockResolvedValue({ id: 1 }),
           },
           template: {
             update: vi.fn().mockResolvedValue(mockTemplate),

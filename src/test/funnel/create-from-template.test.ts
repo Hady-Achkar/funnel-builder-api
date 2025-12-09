@@ -31,6 +31,8 @@ describe("Create Funnel From Template", () => {
     theme: { create: ReturnType<typeof vi.fn> };
     funnelSettings: { create: ReturnType<typeof vi.fn> };
     page: { createMany: ReturnType<typeof vi.fn> };
+    form: { create: ReturnType<typeof vi.fn> };
+    insight: { create: ReturnType<typeof vi.fn> };
     $transaction: ReturnType<typeof vi.fn>;
   };
   let mockReq: Partial<AuthRequest>;
@@ -89,6 +91,8 @@ describe("Create Funnel From Template", () => {
     isActive: true,
     isPublic: true,
     pages: mockTemplatePages,
+    forms: [],
+    insights: [],
   };
 
   beforeEach(() => {
@@ -118,6 +122,12 @@ describe("Create Funnel From Template", () => {
       },
       page: {
         createMany: vi.fn(),
+      },
+      form: {
+        create: vi.fn(),
+      },
+      insight: {
+        create: vi.fn(),
       },
       $transaction: vi.fn(),
     };

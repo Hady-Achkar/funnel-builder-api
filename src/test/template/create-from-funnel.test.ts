@@ -17,6 +17,7 @@ describe("Create Template From Funnel", () => {
     template: { findUnique: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
     templatePage: { createMany: ReturnType<typeof vi.fn> };
     templateImage: { createMany: ReturnType<typeof vi.fn> };
+    form: { findMany: ReturnType<typeof vi.fn> };
     $transaction: ReturnType<typeof vi.fn>;
   };
   let mockReq: Partial<AuthRequest>;
@@ -101,6 +102,9 @@ describe("Create Template From Funnel", () => {
       templateImage: {
         createMany: vi.fn(),
       },
+      form: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
       $transaction: vi.fn(),
     };
 
@@ -170,6 +174,7 @@ describe("Create Template From Funnel", () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: 1,
         pages: mockFunnelPages,
+        insights: [],
       });
 
       mockPrisma.template.findUnique.mockResolvedValue(null);
@@ -189,6 +194,16 @@ describe("Create Template From Funnel", () => {
           },
           templateImage: {
             createMany: vi.fn().mockResolvedValue({ count: 2 }),
+          },
+          theme: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          form: {
+            ...mockPrisma.form,
+            create: vi.fn().mockResolvedValue({ id: 1 }),
+          },
+          insight: {
+            create: vi.fn().mockResolvedValue({ id: 1 }),
           },
         };
         return callback(txMock);
@@ -444,6 +459,7 @@ describe("Create Template From Funnel", () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: 1,
         pages: mockFunnelPages,
+        insights: [],
       });
       mockPrisma.template.findUnique.mockResolvedValue({ id: 99 });
 
@@ -470,6 +486,7 @@ describe("Create Template From Funnel", () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: 1,
         pages: mockFunnelPages,
+        insights: [],
       });
       mockPrisma.template.findUnique.mockResolvedValue(null);
     });
@@ -573,6 +590,7 @@ describe("Create Template From Funnel", () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: 1,
         pages: mockFunnelPages,
+        insights: [],
       });
       mockPrisma.template.findUnique.mockResolvedValue(null);
     });
@@ -691,6 +709,7 @@ describe("Create Template From Funnel", () => {
       mockPrisma.funnel.findFirst.mockResolvedValue({
         id: 1,
         pages: mockFunnelPages,
+        insights: [],
       });
       mockPrisma.template.findUnique.mockResolvedValue(null);
     });

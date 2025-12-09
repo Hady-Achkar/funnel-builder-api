@@ -10,6 +10,10 @@ import {
   NotFoundError,
 } from "../../../errors";
 import { ThemeType } from "../../../generated/prisma-client";
+import {
+  replaceServerIdsInContent,
+  ServerIdMap,
+} from "../../../utils/funnel-utils/server-id-replacement";
 
 interface ReplaceTemplateFromFunnelParams {
   userId: number;
@@ -75,7 +79,13 @@ export class ReplaceTemplateFromFunnelService {
             orderBy: { order: "asc" },
           },
           activeTheme: true,
+          insights: true,
         },
+      });
+
+      // Fetch forms linked to the funnel (separate query since no relation exists)
+      const originalForms = await prisma.form.findMany({
+        where: { funnelId: funnel?.id },
       });
 
       if (!funnel) {
@@ -88,7 +98,7 @@ export class ReplaceTemplateFromFunnelService {
         );
       }
 
-      // Replace pages and theme in transaction
+      // Replace pages, theme, forms, and insights in transaction
       await prisma.$transaction(async (tx) => {
         // Delete all existing template pages
         await tx.templatePage.deleteMany({
@@ -97,6 +107,16 @@ export class ReplaceTemplateFromFunnelService {
 
         // Delete existing template theme
         await tx.theme.deleteMany({
+          where: { templateId: template.id },
+        });
+
+        // Delete existing template forms
+        await tx.form.deleteMany({
+          where: { templateId: template.id },
+        });
+
+        // Delete existing template insights
+        await tx.insight.deleteMany({
           where: { templateId: template.id },
         });
 
@@ -119,11 +139,53 @@ export class ReplaceTemplateFromFunnelService {
           });
         }
 
-        // Create new template pages from funnel pages
+        // Duplicate forms and build ID mapping
+        const formIdMap = new Map<number, number>();
+        for (const form of originalForms) {
+          const newForm = await tx.form.create({
+            data: {
+              name: form.name,
+              description: form.description,
+              formContent: form.formContent,
+              isActive: form.isActive,
+              templateId: template.id,
+              // Webhooks are NOT copied - user should configure separately
+              webhookUrl: null,
+              webhookEnabled: false,
+              webhookHeaders: {},
+              webhookSecret: null,
+            },
+          });
+          formIdMap.set(form.id, newForm.id);
+        }
+
+        // Duplicate insights and build ID mapping
+        const insightIdMap = new Map<number, number>();
+        for (const insight of funnel.insights) {
+          const newInsight = await tx.insight.create({
+            data: {
+              type: insight.type,
+              name: insight.name,
+              description: insight.description,
+              content: insight.content,
+              settings: insight.settings,
+              templateId: template.id,
+            },
+          });
+          insightIdMap.set(insight.id, newInsight.id);
+        }
+
+        // Build server ID map for content replacement
+        const serverIdMap: ServerIdMap = {
+          forms: formIdMap,
+          insights: insightIdMap,
+        };
+
+        // Create new template pages from funnel pages with server ID replacement
         const templatePagesData = funnel.pages.map((page) => ({
           templateId: template.id,
           name: page.name,
-          content: page.content,
+          content: replaceServerIdsInContent(page.content, serverIdMap),
           order: page.order,
           type: page.type,
           settings: null,
