@@ -1,109 +1,98 @@
 import {
+  DeleteTemplateRequest,
   DeleteTemplateResponse,
-  deleteTemplateRequest,
   deleteTemplateResponse,
 } from "../../../types/template/delete";
 import { getPrisma } from "../../../lib/prisma";
 import { cacheService } from "../../../services/cache/cache.service";
-import {
-  BadRequestError,
-  UnauthorizedError,
-  NotFoundError,
-  ForbiddenError,
-} from "../../../errors";
-import { ZodError } from "zod";
-import { deleteTemplateImage } from "../../../helpers/template/shared";
+import { azureBlobStorageService } from "../../../services/azure-blob-storage.service";
+import { NotFoundError, ForbiddenError } from "../../../errors";
+
+/**
+ * Extracts the blob path from an Azure blob URL
+ * Example URL: https://account.blob.core.windows.net/container/templates/filename.jpg
+ * Returns: templates/filename.jpg
+ */
+const extractBlobPathFromUrl = (url: string): string | null => {
+  try {
+    const urlObj = new URL(url);
+    // Remove leading slash and container name from pathname
+    // pathname looks like: /container/templates/filename.jpg
+    const pathParts = urlObj.pathname.split("/").filter(Boolean);
+    // Skip the container name (first part) and join the rest
+    if (pathParts.length > 1) {
+      return pathParts.slice(1).join("/");
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 export const deleteTemplate = async (
-  userId: number,
-  templateId: number
+  params: DeleteTemplateRequest
 ): Promise<DeleteTemplateResponse> => {
-  try {
-    if (!userId) throw new UnauthorizedError("User ID is required");
+  const { templateSlug, isAdmin } = params;
 
-    const validatedRequest = deleteTemplateRequest.parse({ id: templateId });
+  // Check admin permission
+  if (!isAdmin) {
+    throw new ForbiddenError("Only administrators can delete templates");
+  }
 
-    const prisma = getPrisma();
+  const prisma = getPrisma();
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, isAdmin: true },
-    });
-
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    const template = await prisma.template.findUnique({
-      where: { id: validatedRequest.id },
-      include: {
-        previewImages: true,
-        pages: true,
+  // Find template by slug with images
+  const template = await prisma.template.findUnique({
+    where: { slug: templateSlug },
+    include: {
+      previewImages: {
+        select: {
+          id: true,
+          imageUrl: true,
+        },
       },
-    });
+    },
+  });
 
-    if (!template) {
-      throw new NotFoundError("Template not found");
-    }
+  if (!template) {
+    throw new NotFoundError("Template not found");
+  }
 
-    if (!user.isAdmin && template.createdByUserId !== userId) {
-      throw new ForbiddenError("You can only delete your own templates");
-    }
-
-    const result = await prisma.$transaction(async (tx: any) => {
-      if (template.previewImages && template.previewImages.length > 0) {
-        for (const image of template.previewImages) {
-          try {
-            const urlParts = image.imageUrl.split("/");
-            const fileName = urlParts[urlParts.length - 1];
-            await deleteTemplateImage(fileName);
-          } catch (imageError) {
-            console.warn(
-              `Failed to delete image ${image.imageUrl}:`,
-              imageError
-            );
-          }
-        }
-      }
-
-      await tx.templateImage.deleteMany({
-        where: { templateId: validatedRequest.id },
-      });
-
-      await tx.templatePage.deleteMany({
-        where: { templateId: validatedRequest.id },
-      });
-
-      await tx.template.delete({
-        where: { id: validatedRequest.id },
-      });
-
-      return validatedRequest.id;
-    });
-
+  // Delete images from Azure blob storage (non-blocking errors)
+  for (const image of template.previewImages) {
     try {
-      await cacheService.invalidateTemplateCache(result);
-      await cacheService.del("templates:ids:all");
-    } catch (cacheError) {
+      const blobPath = extractBlobPathFromUrl(image.imageUrl);
+      if (blobPath) {
+        await azureBlobStorageService.deleteFile(blobPath);
+      }
+    } catch (azureError) {
       console.warn(
-        `Template cache invalidation failed but template was deleted:`,
-        cacheError
+        `Failed to delete image from Azure (ID: ${image.id}):`,
+        azureError
       );
     }
-
-    const response = {
-      message: "Template deleted successfully",
-      deletedTemplateId: result,
-    };
-
-    const validatedResponse = deleteTemplateResponse.parse(response);
-
-    return validatedResponse;
-  } catch (error) {
-    if (error instanceof ZodError) {
-      const message = error.issues[0]?.message || "Invalid data provided";
-      throw new BadRequestError(message);
-    }
-    throw error;
   }
+
+  // Delete template (cascade will handle TemplateImage and TemplatePage)
+  await prisma.template.delete({
+    where: { id: template.id },
+  });
+
+  // Invalidate cache
+  try {
+    await cacheService.invalidateTemplateCache(template.id);
+    await cacheService.del("templates:ids:all");
+  } catch (cacheError) {
+    console.warn(
+      `Template cache invalidation failed but template was deleted:`,
+      cacheError
+    );
+  }
+
+  const response = {
+    message: "Template deleted successfully",
+    deletedTemplateSlug: templateSlug,
+  };
+
+  return deleteTemplateResponse.parse(response);
 };

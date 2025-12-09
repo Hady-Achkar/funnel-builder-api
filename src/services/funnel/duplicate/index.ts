@@ -4,18 +4,17 @@ import {
 } from "../../../types/funnel/duplicate";
 import { getPrisma } from "../../../lib/prisma";
 import { $Enums } from "../../../generated/prisma-client";
-import { validateOriginalFunnel } from "./utils/validateOriginalFunnel";
 import { validateTargetWorkspace } from "./utils/validateTargetWorkspace";
 import { generateUniqueFunnelName } from "./utils/generateUniqueFunnelName";
-import {
-  generateLinkingIdMap,
-  replaceLinkingIdsInContent,
-  getNewLinkingIdForPage,
-} from "../../../utils/funnel-utils/linking-id-replacement";
 import { generateSlug } from "../../../utils/funnel-utils/generate-slug";
 import { PermissionManager } from "../../../utils/workspace-utils/workspace-permission-manager/permission-manager";
 import { PermissionAction } from "../../../utils/workspace-utils/workspace-permission-manager/types";
 import { WorkspaceFunnelAllocations } from "../../../utils/allocations/workspace-funnel-allocations";
+import { cacheService } from "../../cache/cache.service";
+import {
+  replaceServerIdsInContent,
+  ServerIdMap,
+} from "../../../utils/funnel-utils/server-id-replacement";
 
 export const duplicateFunnel = async (
   userId: number,
@@ -39,6 +38,7 @@ export const duplicateFunnel = async (
         },
         activeTheme: true,
         settings: true,
+        insights: true,
         workspace: {
           select: {
             id: true,
@@ -140,8 +140,10 @@ export const duplicateFunnel = async (
       targetWorkspaceId
     );
 
-    // Generate new linking ID mapping for all pages
-    const linkingMap = generateLinkingIdMap(originalFunnel.pages);
+    // Fetch forms linked to the original funnel (separate query since no relation exists)
+    const originalForms = await prisma.form.findMany({
+      where: { funnelId: originalFunnel.id },
+    });
 
     // Duplicate funnel and pages in transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -217,16 +219,55 @@ export const duplicateFunnel = async (
         });
       }
 
-      // Duplicate pages with updated linking IDs and content
+      // Duplicate forms and build serverId mapping
+      const formIdMap = new Map<number, number>();
+      for (const form of originalForms) {
+        const newForm = await tx.form.create({
+          data: {
+            name: form.name,
+            description: form.description,
+            formContent: form.formContent,
+            isActive: form.isActive,
+            funnelId: newFunnel.id,
+            webhookUrl: null, // Don't copy webhook config
+            webhookEnabled: false,
+            webhookHeaders: {},
+            webhookSecret: null,
+          },
+        });
+        formIdMap.set(form.id, newForm.id);
+      }
+
+      // Duplicate insights and build serverId mapping
+      const insightIdMap = new Map<number, number>();
+      for (const insight of originalFunnel.insights) {
+        const newInsight = await tx.insight.create({
+          data: {
+            type: insight.type,
+            name: insight.name,
+            description: insight.description,
+            content: insight.content,
+            settings: insight.settings,
+            funnelId: newFunnel.id,
+          },
+        });
+        insightIdMap.set(insight.id, newInsight.id);
+      }
+
+      // Build serverIdMap for content replacement
+      const serverIdMap: ServerIdMap = {
+        forms: formIdMap,
+        insights: insightIdMap,
+      };
+
+      // Duplicate pages with server IDs replaced for forms/insights
+      // Note: linkingIds are kept the same since they only need to be unique within a funnel
       const createdPages = [];
       for (const originalPage of originalFunnel.pages) {
-        const newLinkingId = getNewLinkingIdForPage(
-          originalPage.linkingId,
-          linkingMap
-        );
-        const updatedContent = replaceLinkingIdsInContent(
+        // Replace server IDs for forms/insights to ensure independent analytics
+        const updatedContent = replaceServerIdsInContent(
           originalPage.content,
-          linkingMap
+          serverIdMap
         );
 
         const newPage = await tx.page.create({
@@ -234,9 +275,9 @@ export const duplicateFunnel = async (
             name: originalPage.name,
             content: updatedContent,
             order: originalPage.order,
-            type: originalPage.type, // Preserve the original type
+            type: originalPage.type,
             funnelId: newFunnel.id,
-            linkingId: newLinkingId,
+            linkingId: originalPage.linkingId, // Keep original linkingId
             seoTitle: originalPage.seoTitle,
             seoDescription: originalPage.seoDescription,
             seoKeywords: originalPage.seoKeywords,
@@ -262,6 +303,20 @@ export const duplicateFunnel = async (
 
       return { funnel: newFunnelWithSettings, pages: createdPages };
     });
+
+    // Invalidate caches for target workspace
+    try {
+      await cacheService.del(`workspace:${targetWorkspaceId}:funnels:all`);
+      await cacheService.del(`workspace:${targetWorkspaceId}:funnels:list`);
+      await cacheService.del(
+        `user:${userId}:workspace:${targetWorkspaceId}:funnels`
+      );
+    } catch (cacheError) {
+      console.warn(
+        "Cache invalidation failed but funnel was duplicated:",
+        cacheError
+      );
+    }
 
     const response: DuplicateFunnelResponse = {
       message: "Funnel duplicated successfully",

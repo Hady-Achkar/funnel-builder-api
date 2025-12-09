@@ -72,6 +72,9 @@ describe("Funnel Duplication Tests", () => {
       page: {
         create: vi.fn(),
       },
+      form: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
       $transaction: vi.fn(),
     };
 
@@ -161,6 +164,7 @@ describe("Funnel Duplication Tests", () => {
           fontFamily: "Inter, sans-serif",
           borderRadius: $Enums.BorderRadius.SOFT,
         },
+        insights: [],
         pages: [
           {
             id: 1,
@@ -235,6 +239,8 @@ describe("Funnel Duplication Tests", () => {
           funnelSettings: {
             create: vi.fn(),
           },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -421,6 +427,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(originalFunnel);
@@ -445,6 +452,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -556,6 +565,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelName: string | null = null;
@@ -585,6 +595,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -621,6 +633,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelName: string | null = null;
@@ -652,6 +665,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -688,6 +703,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelName: string | null = null;
@@ -720,6 +736,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -756,6 +774,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdSlug: string | null = null;
@@ -785,6 +804,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -821,6 +842,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdSlug: string | null = null;
@@ -853,6 +875,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -889,6 +913,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelName: string | null = null;
@@ -920,6 +945,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -962,6 +989,7 @@ describe("Funnel Duplication Tests", () => {
             borderRadius: $Enums.BorderRadius.ROUNDED,
           },
           pages: [],
+          insights: [],
         };
 
         let createdThemeData: any = null;
@@ -998,6 +1026,8 @@ describe("Funnel Duplication Tests", () => {
             },
             page: { create: vi.fn() },
             funnelSettings: { create: vi.fn() },
+            form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+            insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           };
           return await callback(tx);
         });
@@ -1044,6 +1074,7 @@ describe("Funnel Duplication Tests", () => {
             borderRadius: $Enums.BorderRadius.SOFT,
           },
           pages: [],
+          insights: [],
         };
 
         let createdFunnelData: any = null;
@@ -1079,6 +1110,8 @@ describe("Funnel Duplication Tests", () => {
             },
             page: { create: vi.fn() },
             funnelSettings: { create: vi.fn() },
+            form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+            insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           };
           return await callback(tx);
         });
@@ -1122,6 +1155,7 @@ describe("Funnel Duplication Tests", () => {
           },
           customTheme: null, // No custom theme
           pages: [],
+          insights: [],
         };
 
         let createdThemeData: any = null;
@@ -1159,6 +1193,8 @@ describe("Funnel Duplication Tests", () => {
             },
             page: { create: vi.fn() },
             funnelSettings: { create: vi.fn() },
+            form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+            insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           };
           return await callback(tx);
         });
@@ -1202,6 +1238,7 @@ describe("Funnel Duplication Tests", () => {
           },
           customTheme: null,
           pages: [],
+          insights: [],
         };
 
         let createdFunnelData: any = null;
@@ -1237,6 +1274,8 @@ describe("Funnel Duplication Tests", () => {
             },
             page: { create: vi.fn() },
             funnelSettings: { create: vi.fn() },
+            form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+            insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           };
           return await callback(tx);
         });
@@ -1267,6 +1306,7 @@ describe("Funnel Duplication Tests", () => {
           customTheme: null,
           activeTheme: null,
           pages: [],
+          insights: [],
         };
 
         let createdThemeData: any = null;
@@ -1304,6 +1344,8 @@ describe("Funnel Duplication Tests", () => {
             },
             page: { create: vi.fn() },
             funnelSettings: { create: vi.fn() },
+            form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+            insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           };
           return await callback(tx);
         });
@@ -1345,6 +1387,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
         settings: {
           id: 1,
           funnelId: originalFunnelId,
@@ -1455,6 +1498,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
         settings: null, // No settings
       };
 
@@ -1549,6 +1593,7 @@ describe("Funnel Duplication Tests", () => {
             seoKeywords: null,
           },
         ],
+        insights: [],
       };
 
       const createdPages: any[] = [];
@@ -1584,6 +1629,8 @@ describe("Funnel Duplication Tests", () => {
             }),
           },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -1612,7 +1659,7 @@ describe("Funnel Duplication Tests", () => {
       expect(createdPages[1].funnelId).toBe(2);
     });
 
-    it("should generate NEW linkingId for each duplicated page", async () => {
+    it("should keep the same linkingId for duplicated pages (unique within funnel)", async () => {
       const originalFunnel = {
         id: originalFunnelId,
         name: "Original Funnel",
@@ -1651,6 +1698,7 @@ describe("Funnel Duplication Tests", () => {
             seoKeywords: null,
           },
         ],
+        insights: [],
       };
 
       let createdLinkingId: string | null = null;
@@ -1685,18 +1733,20 @@ describe("Funnel Duplication Tests", () => {
             }),
           },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
 
       await duplicateFunnel(userId, { workspaceSlug, funnelSlug }, {});
 
-      // Verify NEW linkingId was generated (not same as original)
+      // Verify linkingId is kept the same (unique within funnel, not across funnels)
       expect(createdLinkingId).toBeDefined();
-      expect(createdLinkingId).not.toBe("home");
+      expect(createdLinkingId).toBe("home");
     });
 
-    it("should replace old linkingIds in page content with new ones", async () => {
+    it("should preserve page content with linkingIds (links work within duplicated funnel)", async () => {
       const originalFunnel = {
         id: originalFunnelId,
         name: "Original Funnel",
@@ -1757,6 +1807,7 @@ describe("Funnel Duplication Tests", () => {
             seoKeywords: null,
           },
         ],
+        insights: [],
       };
 
       const createdPages: any[] = [];
@@ -1791,24 +1842,29 @@ describe("Funnel Duplication Tests", () => {
             }),
           },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
 
       await duplicateFunnel(userId, { workspaceSlug, funnelSlug }, {});
 
-      // Verify linkingIds were replaced in content
-      // Old linkingIds "home", "about", "contact" should NOT appear in new content
-      createdPages.forEach((page) => {
-        // Content should be updated (not exactly same as original)
-        expect(page.content).toBeDefined();
-      });
-
-      // Specifically check that content was transformed
+      // Verify content is preserved (linkingIds remain the same since they're unique within funnel)
       const homePage = createdPages.find((p) => p.name === "Home");
       expect(homePage).toBeDefined();
-      // Content should not contain old linkingIds directly
-      // (The service replaces them with new ones)
+      expect(homePage.content).toBe('<a href="about">About</a><a href="contact">Contact</a>');
+      expect(homePage.linkingId).toBe("home");
+
+      const aboutPage = createdPages.find((p) => p.name === "About");
+      expect(aboutPage).toBeDefined();
+      expect(aboutPage.content).toBe('<a href="home">Home</a>');
+      expect(aboutPage.linkingId).toBe("about");
+
+      const contactPage = createdPages.find((p) => p.name === "Contact");
+      expect(contactPage).toBeDefined();
+      expect(contactPage.content).toBe('<a href="home">Home</a><a href="about">About</a>');
+      expect(contactPage.linkingId).toBe("contact");
     });
   });
 
@@ -1844,6 +1900,7 @@ describe("Funnel Duplication Tests", () => {
           { id: 2, domainId: 20, funnelId: originalFunnelId },
         ],
         pages: [],
+        insights: [],
       };
 
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(originalFunnel);
@@ -1870,6 +1927,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           funnelDomain: {
             create: vi.fn().mockImplementation(() => {
               domainConnectionCreated = true;
@@ -1886,7 +1945,7 @@ describe("Funnel Duplication Tests", () => {
       expect(domainConnectionCreated).toBe(false);
     });
 
-    it("should NOT duplicate insights", async () => {
+    it("should duplicate insights with new IDs for independent analytics", async () => {
       const originalFunnel = {
         id: originalFunnelId,
         name: "Original Funnel",
@@ -1913,8 +1972,8 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         insights: [
-          { id: 1, type: $Enums.InsightType.SINGLE_CHOICE, funnelId: originalFunnelId },
-          { id: 2, type: $Enums.InsightType.MULTIPLE_CHOICE, funnelId: originalFunnelId },
+          { id: 1, type: $Enums.InsightType.SINGLE_CHOICE, name: "Quiz 1", description: null, content: {}, settings: {}, funnelId: originalFunnelId },
+          { id: 2, type: $Enums.InsightType.MULTIPLE_CHOICE, name: "Quiz 2", description: null, content: {}, settings: {}, funnelId: originalFunnelId },
         ],
         pages: [],
       };
@@ -1924,7 +1983,7 @@ describe("Funnel Duplication Tests", () => {
       mockPrisma.funnel.count.mockResolvedValue(0);
       mockPrisma.funnel.findMany.mockResolvedValue([]);
 
-      let insightCreated = false;
+      const createdInsights: any[] = [];
 
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         const tx = {
@@ -1943,10 +2002,12 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
           insight: {
-            create: vi.fn().mockImplementation(() => {
-              insightCreated = true;
-              return Promise.resolve({});
+            create: vi.fn().mockImplementation((data: any) => {
+              const newId = createdInsights.length + 10;
+              createdInsights.push({ id: newId, ...data.data });
+              return Promise.resolve({ id: newId, ...data.data });
             }),
           },
         };
@@ -1955,8 +2016,10 @@ describe("Funnel Duplication Tests", () => {
 
       await duplicateFunnel(userId, { workspaceSlug, funnelSlug }, {});
 
-      // Verify insights were NOT created
-      expect(insightCreated).toBe(false);
+      // Verify insights WERE created (now we duplicate them for independent analytics)
+      expect(createdInsights).toHaveLength(2);
+      expect(createdInsights[0].funnelId).toBe(2); // New funnel ID
+      expect(createdInsights[1].funnelId).toBe(2);
     });
   });
 
@@ -1989,6 +2052,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelData: any = null;
@@ -2021,6 +2085,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -2059,6 +2125,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelData: any = null;
@@ -2091,6 +2158,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -2124,6 +2193,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       const targetWorkspace = {
@@ -2168,6 +2238,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -2209,6 +2281,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       mockPrisma.funnel.findFirst.mockResolvedValueOnce(originalFunnel);
@@ -2233,6 +2306,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -2285,6 +2360,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: manyPages,
+        insights: [],
       };
 
       let pagesCreatedCount = 0;
@@ -2316,6 +2392,8 @@ describe("Funnel Duplication Tests", () => {
             }),
           },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });
@@ -2353,6 +2431,7 @@ describe("Funnel Duplication Tests", () => {
           borderRadius: $Enums.BorderRadius.SOFT,
         },
         pages: [],
+        insights: [],
       };
 
       let createdFunnelName: string | null = null;
@@ -2382,6 +2461,8 @@ describe("Funnel Duplication Tests", () => {
           },
           page: { create: vi.fn() },
           funnelSettings: { create: vi.fn() },
+          form: { create: vi.fn().mockResolvedValue({ id: 10 }) },
+          insight: { create: vi.fn().mockResolvedValue({ id: 10 }) },
         };
         return await callback(tx);
       });

@@ -1,65 +1,42 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
+import { ZodError } from "zod";
+import { AuthRequest } from "../../../middleware/auth";
 import { updateTemplate } from "../../../services/template/update";
-import { updateTemplateRequestBody } from "../../../types/template/update";
+import {
+  updateTemplateBody,
+  updateTemplateParams,
+} from "../../../types/template/update";
 import { BadRequestError } from "../../../errors";
-import { 
-  uploadTemplateThumbnail, 
-  uploadTemplatePreviewImages 
-} from "../../../helpers/template/shared";
 
 export const updateTemplateController = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
-    const files = req.files as
-      | { [fieldname: string]: Express.Multer.File[] }
-      | undefined;
+    const { templateSlug } = updateTemplateParams.parse(req.params);
+    const userId = req.userId;
+    const isAdmin = req.isAdmin || false;
 
-    if (!id || isNaN(parseInt(id))) {
-      throw new BadRequestError("Valid template ID is required");
+    if (!userId) {
+      throw new BadRequestError("User ID is required");
     }
 
-    const templateId = parseInt(id);
+    const validatedBody = updateTemplateBody.parse(req.body);
 
-    let thumbnailUrl: string | undefined;
-    let previewImageUrls: string[] | undefined;
-
-    // Handle thumbnail upload
-    if (files?.thumbnail?.[0]) {
-      try {
-        const uploadResult = await uploadTemplateThumbnail(files.thumbnail[0], templateId);
-        thumbnailUrl = uploadResult.url;
-      } catch (error) {
-        console.error("Thumbnail upload failed:", error);
-        throw new BadRequestError(`Thumbnail upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-
-    // Handle preview images upload
-    if (files?.images?.length) {
-      try {
-        const uploadResults = await uploadTemplatePreviewImages(files.images, templateId);
-        previewImageUrls = uploadResults.map(result => result.url);
-      } catch (error) {
-        console.error("Preview images upload failed:", error);
-        throw new BadRequestError(`Preview images upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-
-    const bodyData = {
-      ...req.body,
-      ...(thumbnailUrl !== undefined && { thumbnail: thumbnailUrl }),
-      ...(previewImageUrls !== undefined && { images: previewImageUrls }),
-    };
-
-    const validatedBody = updateTemplateRequestBody.parse(bodyData);
-    const result = await updateTemplate({ id: templateId, ...validatedBody });
+    const result = await updateTemplate({
+      templateSlug,
+      userId,
+      isAdmin,
+      body: validatedBody,
+    });
 
     res.json({ success: true, ...result });
   } catch (error) {
+    if (error instanceof ZodError) {
+      const message = error.issues[0]?.message || "Invalid request data";
+      return next(new BadRequestError(message));
+    }
     next(error);
   }
 };

@@ -461,14 +461,14 @@ vi.mock("axios");
 
 ### Template Routes (6 routes)
 
-| Method | Path                        | Controller                | Status  |
-| ------ | --------------------------- | ------------------------- | ------- |
-| GET    | `/api/template`             | getAllTemplatesController | ❌ TODO |
-| GET    | `/api/template/:id`         | getTemplateByIdController | ❌ TODO |
-| POST   | `/api/template`             | createTemplateController  | ❌ TODO |
-| POST   | `/api/template/from-funnel` | createTemplateController  | ❌ TODO |
-| PUT    | `/api/template/:id`         | updateTemplateController  | ❌ TODO |
-| DELETE | `/api/template/:id`         | deleteTemplateController  | ❌ TODO |
+| Method | Path                        | Controller                              | Status  |
+| ------ | --------------------------- | --------------------------------------- | ------- |
+| GET    | `/api/template`             | getAllTemplatesController               | ❌ TODO |
+| GET    | `/api/template/:id`         | getTemplateByIdController               | ❌ TODO |
+| POST   | `/api/template`             | createTemplateController                | ❌ TODO |
+| POST   | `/api/template/from-funnel` | CreateTemplateFromFunnelController.create | ✅ DONE |
+| PUT    | `/api/template/:id`         | updateTemplateController                | ❌ TODO |
+| DELETE | `/api/template/:id`         | deleteTemplateController                | ❌ TODO |
 
 ### Form Routes (4 routes)
 
@@ -587,11 +587,11 @@ vi.mock("axios");
 
 **Total Routes**: 92
 
-- ❌ TODO: 76
-- ✅ DONE: 16
+- ❌ TODO: 75
+- ✅ DONE: 17
 - 🚧 WIP: 0
 
-**Completion**: 17.39%
+**Completion**: 18.48%
 
 ---
 

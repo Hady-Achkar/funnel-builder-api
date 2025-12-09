@@ -1,44 +1,35 @@
 import express, { Router } from "express";
-import multer from "multer";
 import { authenticateToken } from "../../middleware/auth";
-import { createTemplateController } from "../../controllers/template/create";
+import { CreateTemplateFromFunnelController } from "../../controllers/template/create-from-funnel";
+import { ReplaceTemplateFromFunnelController } from "../../controllers/template/replace-from-funnel";
 import { getAllTemplatesController } from "../../controllers/template/get-all";
-import { getTemplateByIdController } from "../../controllers/template/get-by-id";
+import { searchTemplatesController } from "../../controllers/template/search";
+import { getTemplatePagesController } from "../../controllers/template/get-pages";
+import { getTemplatePageController } from "../../controllers/template/get-page";
 import { updateTemplateController } from "../../controllers/template/update";
 import { deleteTemplateController } from "../../controllers/template/delete";
 
 const router: Router = express.Router();
 
-// Create multer instance for file uploads
-// File validation is handled in the service layer helpers
-const upload = multer({
-  storage: multer.memoryStorage(),
-});
-
 // Public routes
 router.get("/", getAllTemplatesController);
-router.get("/:id", getTemplateByIdController);
+router.get("/summary", searchTemplatesController);
+router.get("/:templateSlug/pages", getTemplatePagesController);
+router.get("/:templateSlug/pages/:linkingId", getTemplatePageController);
 
 // Protected routes
 router.use(authenticateToken);
 
-router.post("/", upload.fields([
-  { name: 'thumbnail', maxCount: 1 },
-  { name: 'preview_images', maxCount: 10 }
-]), createTemplateController);
+// Create template from funnel - JSON body, images as URLs
+router.post("/from-funnel", CreateTemplateFromFunnelController.create);
 
-// More flexible upload configuration for from-funnel endpoint
-// File validation is handled in the service layer helpers
-const fromFunnelUpload = multer({
-  storage: multer.memoryStorage(),
-}).any(); // Accept any fields temporarily for debugging
+// Replace template pages from funnel - Admin only
+router.put(
+  "/:templateSlug/from-funnel",
+  ReplaceTemplateFromFunnelController.replace
+);
 
-router.post("/from-funnel", fromFunnelUpload, createTemplateController);
-
-router.put("/:id", upload.fields([
-  { name: 'thumbnail', maxCount: 1 },
-  { name: 'images', maxCount: 10 }
-]), updateTemplateController);
-router.delete("/:id", deleteTemplateController);
+router.put("/:templateSlug", updateTemplateController);
+router.delete("/:templateSlug", deleteTemplateController);
 
 export default router;
