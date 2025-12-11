@@ -1,0 +1,67 @@
+import { z } from "zod";
+
+export const updateFunnelSettingsRequest = z.object({
+  workspaceSlug: z.string().min(1, "Workspace slug is required"),
+  funnelSlug: z.string().min(1, "Funnel slug is required"),
+
+  defaultSeoTitle: z.string().nullable().optional(),
+
+  defaultSeoDescription: z.string().nullable().optional(),
+
+  // Can be an array of strings (including empty array), null, or undefined
+  defaultSeoKeywords: z
+    .array(z.string())
+    .nullable()
+    .optional(),
+
+  favicon: z.string().nullable().optional(),
+
+  ogImage: z.string().nullable().optional(),
+
+  googleAnalyticsId: z.string().nullable().optional(),
+
+  facebookPixelId: z.string().nullable().optional(),
+
+  customTrackingScripts: z.any().optional(),
+
+  enableCookieConsent: z.boolean().optional(),
+
+  cookieConsentText: z.string().nullable().optional(),
+
+  privacyPolicyUrl: z
+    .union([
+      z.string().url("Privacy policy must be a valid URL"),
+      z.literal(""),
+      z.null(),
+    ])
+    .optional()
+    .transform((val) => (val === "" ? null : val)),
+
+  termsOfServiceUrl: z
+    .union([
+      z.string().url("Terms of service must be a valid URL"),
+      z.literal(""),
+      z.null(),
+    ])
+    .optional()
+    .transform((val) => (val === "" ? null : val)),
+
+  language: z.string().nullable().optional(),
+
+  timezone: z.string().nullable().optional(),
+
+  dateFormat: z.string().nullable().optional(),
+});
+
+export type UpdateFunnelSettingsRequest = z.infer<
+  typeof updateFunnelSettingsRequest
+>;
+
+export const updateFunnelSettingsResponse = z.object({
+  message: z.string(),
+  success: z.boolean(),
+});
+
+export type UpdateFunnelSettingsResponse = z.infer<
+  typeof updateFunnelSettingsResponse
+>;

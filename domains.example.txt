@@ -426,7 +426,7 @@ export default factories.createCoreController('api::domain.domain', ({ strapi }:
           type: 'A',
           name: sub,
           content: '74.234.194.84',
-          ttl: 3600,
+          ttl: 0,
           proxied: true,
         });
 

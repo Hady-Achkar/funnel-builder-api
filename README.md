@@ -25,17 +25,20 @@ A production-ready Express TypeScript application with CloudFlare integration, R
 ## Setup
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Configure environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Set up database**
+
    ```bash
    npm run db:migrate
    npm run db:generate
@@ -58,9 +61,9 @@ NODE_ENV=development
 JWT_SECRET=your-super-secret-jwt-key
 
 # CloudFlare Configuration
-CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
-CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
-CLOUDFLARE_ZONE_ID=your-cloudflare-zone-id
+CF_API_TOKEN=your-cloudflare-api-token
+CF_ACCOUNT_ID=your-cloudflare-account-id
+CF_ZONE_ID=your-cloudflare-zone-id
 CLOUDFLARE_SAAS_TARGET=fallback.digitalsite.ai
 PLATFORM_MAIN_DOMAIN=digitalsite.ai
 ```
@@ -68,15 +71,18 @@ PLATFORM_MAIN_DOMAIN=digitalsite.ai
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 
 ### Users
+
 - `GET /api/users/profile` - Get user profile
 - `PUT /api/users/profile` - Update profile
 - `DELETE /api/users/account` - Delete account
 
 ### Funnels
+
 - `POST /api/funnels` - Create funnel
 - `GET /api/funnels` - Get user funnels
 - `GET /api/funnels/:id` - Get specific funnel
@@ -84,6 +90,7 @@ PLATFORM_MAIN_DOMAIN=digitalsite.ai
 - `DELETE /api/funnels/:id` - Delete funnel
 
 ### Pages
+
 - `POST /api/pages/funnels/:funnelId/pages` - Create page
 - `GET /api/pages/funnels/:funnelId/pages` - Get funnel pages
 - `GET /api/pages/:id` - Get page
@@ -93,6 +100,7 @@ PLATFORM_MAIN_DOMAIN=digitalsite.ai
 - `GET /api/pages/link/:linkingId` - Public page access
 
 ### Domains
+
 - `POST /api/domains/custom` - Create custom domain
 - `POST /api/domains/subdomain` - Create subdomain
 - `GET /api/domains` - Get user domains
@@ -107,6 +115,7 @@ PLATFORM_MAIN_DOMAIN=digitalsite.ai
 ## CloudFlare Integration
 
 ### Custom Domains
+
 1. User provides hostname (e.g., `www.example.com`)
 2. System creates CloudFlare custom hostname
 3. Returns DNS instructions for user's domain provider
@@ -116,6 +125,7 @@ PLATFORM_MAIN_DOMAIN=digitalsite.ai
 7. SSL certificate auto-issued when verified
 
 ### Subdomains
+
 1. User provides subdomain name (e.g., `mystore`)
 2. System creates `mystore.digitalsite.ai`
 3. CloudFlare A record created automatically

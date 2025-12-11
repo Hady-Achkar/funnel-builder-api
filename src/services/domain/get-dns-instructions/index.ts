@@ -1,0 +1,1 @@
+export * from "./get-dns-instructions.service";

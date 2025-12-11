@@ -1,0 +1,120 @@
+import { getPrisma } from "../../../lib/prisma";
+import { RenewalWebhookResponse } from "../../../types/subscription/renewal-webhook";
+import { PlanRenewalProcessor } from "./processors/plan-renewal";
+import { AddonRenewalProcessor } from "./processors/addon-renewal";
+import { fetchAndStoreSubscriberId } from "../../../utils/mamopay-utils/fetch-and-store-subscriber-id";
+
+export class RenewalWebhookService {
+  static async processWebhook(data: unknown): Promise<RenewalWebhookResponse> {
+    try {
+      const prisma = getPrisma();
+
+      // 1. Early return if not an object
+      if (typeof data !== "object" || data === null) {
+        console.log("[RenewalWebhook] Invalid payload format - not an object");
+        return {
+          received: true,
+          ignored: true,
+          reason: "Invalid payload format",
+        };
+      }
+
+      const webhookData = data as any;
+
+      // 2. Check event type - only process subscription.succeeded
+      if (webhookData.event_type !== "subscription.succeeded") {
+        console.log(
+          `[RenewalWebhook] Ignoring event type: ${webhookData.event_type}`
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason: "Only subscription.succeeded events are processed",
+        };
+      }
+
+      // 3. Check status - only process captured
+      if (webhookData.status !== "captured") {
+        console.log(`[RenewalWebhook] Ignoring status: ${webhookData.status}`);
+        return {
+          received: true,
+          ignored: true,
+          reason: `Status not captured: ${webhookData.status}`,
+        };
+      }
+
+      // 4. Check if subscription_id exists (one-time payments don't have subscription_id)
+      const subscriptionId = webhookData.subscription_id;
+      if (!subscriptionId) {
+        console.log(
+          "[RenewalWebhook] Missing subscription_id - likely a one-time payment, not a renewal"
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason: "No subscription_id - one-time payment, not a renewal",
+        };
+      }
+
+      // 5. Check if payment already exists (idempotency)
+      const transactionId = webhookData.id;
+      if (!transactionId) {
+        console.log("[RenewalWebhook] Missing transaction ID");
+        return {
+          received: true,
+          ignored: true,
+          reason: "Missing transaction ID",
+        };
+      }
+
+      const existingPayment = await prisma.payment.findFirst({
+        where: { transactionId: transactionId },
+      });
+
+      if (existingPayment) {
+        console.log(
+          `[RenewalWebhook] Payment already processed: ${transactionId}`
+        );
+        return {
+          received: true,
+          ignored: true,
+          reason: "Payment already processed",
+        };
+      }
+
+      // 5. Determine payment type and route to appropriate processor
+      const paymentType =
+        webhookData.custom_data?.details?.paymentType || "PLAN_PURCHASE";
+
+      console.log(`[RenewalWebhook] Routing to processor for: ${paymentType}`);
+
+      let result;
+      if (paymentType === "ADDON_PURCHASE") {
+        result = await AddonRenewalProcessor.process(webhookData);
+      } else {
+        // Default to plan renewal for PLAN_PURCHASE or any other type
+        result = await PlanRenewalProcessor.process(webhookData);
+      }
+
+      // 6. Fetch and store subscriberId from MamoPay
+      await fetchAndStoreSubscriberId(
+        result.subscriptionId,
+        webhookData.subscription_id
+      );
+
+      return {
+        received: true,
+        message: result.message,
+        data: {
+          userId: result.userId,
+          paymentId: result.paymentId,
+          subscriptionId: result.subscriptionId,
+          addonId: result.addonId, // Will be undefined for plan renewals
+        },
+      };
+    } catch (error) {
+      console.error("[RenewalWebhook] Unexpected error:", error);
+      throw error;
+    }
+  }
+}

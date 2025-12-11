@@ -1,0 +1,41 @@
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../../../middleware/auth";
+import { getAllInsightSubmissions } from "../../../services/insight-submission/get-all";
+import { getAllInsightSubmissionsRequest } from "../../../types/insight-submission/get-all";
+
+export const getAllInsightSubmissionsController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.userId as number;
+    const workspaceSlug = req.params.workspaceSlug;
+    const funnelSlug = req.params.funnelSlug;
+
+    // Build request data with proper validation
+    const rawRequestData = {
+      workspaceSlug,
+      funnelSlug,
+      ...(req.query.type && { type: req.query.type }),
+      ...(req.query.insightId && { insightId: req.query.insightId }),
+      ...(req.query.sessionId && { sessionId: req.query.sessionId }),
+      ...(req.query.startDate && { startDate: req.query.startDate }),
+      ...(req.query.endDate && { endDate: req.query.endDate }),
+      ...(req.query.completedOnly && { completedOnly: req.query.completedOnly }),
+      ...(req.query.sortBy && { sortBy: req.query.sortBy }),
+      ...(req.query.sortOrder && { sortOrder: req.query.sortOrder }),
+      ...(req.query.page && { page: req.query.page }),
+      ...(req.query.limit && { limit: req.query.limit }),
+    };
+
+    // Validate and transform request data using Zod
+    const requestData = getAllInsightSubmissionsRequest.parse(rawRequestData);
+
+    const result = await getAllInsightSubmissions(userId, requestData);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

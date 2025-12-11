@@ -1,17 +1,80 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { getPrisma } from "../lib/prisma";
 
 export interface AuthRequest extends Request {
   userId?: number;
+  isAdmin?: boolean;
 }
 
-export const authenticateToken = (
+// Routes that NO_PLAN users can access (whitelist)
+const NO_PLAN_ALLOWED_ROUTES = [
+  "/api/payment/create-payment-link",
+  "/api/auth/user", // Allow getting user data (will match /api/auth/user/*)
+  "/api/auth/user/fresh-data", // Allow getting fresh user data
+];
+
+/**
+ * Optional authentication middleware
+ * Sets req.userId if valid token is present, but allows request to continue without auth
+ * Use this for routes that support both authenticated and unauthenticated access
+ */
+export const optionalAuthenticateToken = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): void => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+): Promise<void> => {
+  // Check for token in cookie first, then fallback to Authorization header
+  let token = req.cookies?.authToken;
+
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1];
+  }
+
+  // No token - continue without authentication
+  if (!token) {
+    return next();
+  }
+
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    // Continue without auth if JWT secret not configured
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as any;
+    const userId = decoded.id;
+
+    const user = await getPrisma().user.findUnique({
+      where: { id: userId },
+      select: { id: true, isAdmin: true },
+    });
+
+    if (user) {
+      req.userId = userId;
+      req.isAdmin = user.isAdmin || false;
+    }
+  } catch (err) {
+    // Invalid token - continue without auth
+  }
+
+  next();
+};
+
+export const authenticateToken = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  // Check for token in cookie first, then fallback to Authorization header
+  let token = req.cookies?.authToken;
+
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1];
+  }
 
   if (!token) {
     res.status(401).json({ error: "Access token required" });
@@ -24,13 +87,55 @@ export const authenticateToken = (
     return;
   }
 
-  jwt.verify(token, jwtSecret, (err: any, decoded: any) => {
-    if (err) {
-      res.status(403).json({ error: "Invalid or expired token" });
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as any;
+    const userId = decoded.id; // Changed from decoded.userId to decoded.id
+
+    // Get user from database to check trial status, plan, and admin status
+    const user = await getPrisma().user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        trialEndDate: true,
+        plan: true,
+        isAdmin: true,
+      },
+    });
+
+    if (!user) {
+      res.status(401).json({ error: "User not found. Please login again." });
       return;
     }
 
-    req.userId = decoded.userId;
+    // Check if trial has expired (only for users with trial end date)
+    if (user.trialEndDate && new Date() > user.trialEndDate) {
+      res.status(403).json({
+        error: "Trial period has expired. Please upgrade your plan to continue.",
+        trialExpired: true
+      });
+      return;
+    }
+
+    // Check if user has NO_PLAN and is trying to access restricted route
+    const requestPath = req.originalUrl.split('?')[0]; // Get full path without query params
+    const isAllowedRoute = NO_PLAN_ALLOWED_ROUTES.some(route =>
+      requestPath === route || requestPath.startsWith(route)
+    );
+
+    if (user.plan === "NO_PLAN" && !isAllowedRoute) {
+      res.status(403).json({
+        error: "Please purchase a plan to access this feature. Create a payment link to get started.",
+        requiresPlan: true,
+        planType: user.plan,
+      });
+      return;
+    }
+
+    req.userId = userId;
+    req.isAdmin = user.isAdmin || false;
     next();
-  });
+  } catch (err) {
+    res.status(403).json({ error: "Invalid or expired token" });
+    return;
+  }
 };

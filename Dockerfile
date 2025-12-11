@@ -1,24 +1,83 @@
-FROM node:18-alpine
-
-# Install pnpm
-RUN npm install -g pnpm
-
+# Multi-stage build for Azure Container Apps
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy pnpm files
-COPY package.json pnpm-lock.yaml* ./
+# Install pnpm
+RUN npm install -g pnpm@10.14.0
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile --prod
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma/
 
+# Install all dependencies
+RUN pnpm install --frozen-lockfile
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm@10.14.0
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma client (will be generated in src/generated/prisma-client)
+RUN pnpm exec prisma generate
 
 # Build the application
 RUN pnpm run build
 
-# Generate Prisma client
-RUN pnpm exec prisma generate
+# Stage 3: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-EXPOSE 3000
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init && \
+    npm install -g pnpm@10.14.0
 
-CMD ["pnpm", "start"]
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install production dependencies AND prisma CLI for migrations
+RUN pnpm install --frozen-lockfile && \
+    pnpm store prune
+
+# Copy built application
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Copy generated Prisma client from builder stage to the correct location
+# The compiled JS expects it at ./generated relative to dist
+COPY --from=builder --chown=nodejs:nodejs /app/src/generated ./dist/generated
+
+# Copy Prisma schema and migrations for deployment
+COPY --chown=nodejs:nodejs prisma ./prisma
+
+# Create necessary directories and fix permissions
+RUN mkdir -p /app/logs && \
+    chown -R nodejs:nodejs /app/logs && \
+    chown -R nodejs:nodejs /app/node_modules
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 4444
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4444/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application (prestart script will run migrations)
+CMD ["npm", "start"]

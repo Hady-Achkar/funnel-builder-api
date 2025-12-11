@@ -1,0 +1,30 @@
+import { z } from "zod";
+import { PageType } from "../../../generated/prisma-client";
+
+export const getPageRequest = z.object({
+  pageId: z.coerce
+    .number({
+      message: "Page ID must be a number",
+    })
+    .positive("Page ID must be a positive number"),
+});
+
+export type GetPageRequest = z.infer<typeof getPageRequest>;
+
+export const getPageResponse = z.object({
+  id: z.number(),
+  name: z.string(),
+  content: z.any(), // Can be string or parsed JSON (array/object)
+  order: z.number(),
+  type: z.enum(PageType),
+  linkingId: z.string(),
+  seoTitle: z.string().nullable(),
+  seoDescription: z.string().nullable(),
+  seoKeywords: z.string().nullable(),
+  funnelId: z.number(),
+  visits: z.number().default(0), // Number of page visits (explicitly 0 if none)
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]),
+});
+
+export type GetPageResponse = z.infer<typeof getPageResponse>;

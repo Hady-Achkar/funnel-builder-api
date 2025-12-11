@@ -1,0 +1,16 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Branch naming validation
+branch=$(git rev-parse --abbrev-ref HEAD)
+valid_pattern="^(feature|patch|fix|terraform|azure)\/.*$"
+
+if [[ "$branch" != "main" && "$branch" != "develop" && ! $branch =~ $valid_pattern ]]; then
+  echo "❌ Branch name '$branch' does not follow naming convention."
+  echo "✅ Use: feature/, patch/, fix/, terraform/, or azure/ prefix"
+  echo "📝 Examples: feature/user-auth, fix/login-bug, azure/storage-setup"
+  exit 1
+fi
+
+# Run all tests before commit
+pnpm test --run

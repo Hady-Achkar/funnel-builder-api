@@ -1,0 +1,1 @@
+export { DeleteDomainService } from "./delete.service";

@@ -1,0 +1,1 @@
+export { DeleteDomainController } from "./delete.controller";

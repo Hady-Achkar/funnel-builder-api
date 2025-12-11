@@ -1,0 +1,194 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "test"
+        type: choice
+        options:
+          - test
+          - production
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_RESOURCE_GROUP: digitalsite-eu-rg
+  AZURE_CONTAINER_REGISTRY: digitalsiteeuacr
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "10.14.0"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: funnel_builder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run database migrations
+        run: pnpm exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+
+      - name: Create .env.test file
+        run: |
+          cat > .env.test << 'EOF'
+          NODE_ENV=test
+          PORT=3001
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/funnel_builder_test
+          JWT_SECRET=test-secret-key
+          REDIS_URL=redis://localhost:6379
+          REDIS_DB=1
+          CF_API_TOKEN=test-token
+          CF_ACCOUNT_ID=test-account
+          CF_ZONE_ID=test-zone
+          SENDGRID_API_KEY=test-sendgrid-key
+          SENDGRID_FROM_EMAIL=test@example.com
+          MAMOPAY_API_URL=https://sandbox.dev.business.mamopay.com
+          MAMOPAY_API_KEY=test-mamopay-key
+          FRONTEND_URL=https://testsite.com
+          EOF
+
+      - name: Run tests
+        run: pnpm test run
+
+      - name: Build application
+        run: pnpm run build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'dev') }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment-specific variables
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "production" ] || ([ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]); then
+            # Production deploys to digitalsite-api-test
+            echo "DEPLOYMENT_ENV=production" >> $GITHUB_ENV
+            echo "CONTAINER_APP_ENV=digitalsite-test-env" >> $GITHUB_ENV
+            echo "CONTAINER_APP_NAME=digitalsite-api-test" >> $GITHUB_ENV
+          else
+            # Development deploys to digitalsite-api-dev
+            echo "DEPLOYMENT_ENV=dev" >> $GITHUB_ENV
+            echo "CONTAINER_APP_ENV=digitalsite-dev-env" >> $GITHUB_ENV
+            echo "CONTAINER_APP_NAME=digitalsite-api-dev" >> $GITHUB_ENV
+          fi
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to ACR
+        run: |
+          # Login to Azure Container Registry
+          az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+
+          # Build image using ACR build (serverless build)
+          IMAGE_TAG=${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_APP_NAME }}:${{ github.sha }}
+
+          echo "Building and pushing image: $IMAGE_TAG"
+          az acr build \
+            --registry ${{ env.AZURE_CONTAINER_REGISTRY }} \
+            --image ${{ env.CONTAINER_APP_NAME }}:${{ github.sha }} \
+            --image ${{ env.CONTAINER_APP_NAME }}:latest \
+            --file Dockerfile \
+            .
+
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          echo "Deploying ${{ env.IMAGE_TAG }} to ${{ env.CONTAINER_APP_NAME }}"
+
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.IMAGE_TAG }} \
+            --cpu 1.0 \
+            --memory 2.0Gi \
+            --min-replicas 1 \
+            --max-replicas 3 \
+            --output none
+
+          echo "Deployment initiated successfully"
+
+      - name: Show deployment URL
+        run: |
+          CONTAINER_APP_URL=$(az containerapp show \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn \
+            -o tsv)
+
+          echo "✅ Deployment to ${{ env.DEPLOYMENT_ENV }} completed"
+          echo "Container App URL: https://$CONTAINER_APP_URL"
+          echo "Revision: ${{ github.sha }}"
+          echo "Environment: ${{ env.DEPLOYMENT_ENV }}"
+          echo "Deployed at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"

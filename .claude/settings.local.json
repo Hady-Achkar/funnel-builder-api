@@ -5,7 +5,12 @@
       "Bash(npm test:*)",
       "Bash(npm run test:run:*)",
       "Bash(gh:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pkill:*)",
+      "Bash(az postgres flexible-server db create:*)"
     ],
     "deny": []
   }

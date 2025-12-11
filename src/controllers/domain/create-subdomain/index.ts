@@ -1,0 +1,1 @@
+export { CreateSubdomainController } from "./create-subdomain.controller";
