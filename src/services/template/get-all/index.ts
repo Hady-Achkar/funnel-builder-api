@@ -87,6 +87,11 @@ export const getAllTemplates = async (
       take: needsInMemoryProcessing ? undefined : validatedQuery.limit,
     });
 
+    let total: number;
+    if (!needsInMemoryProcessing) {
+      total = await prisma.template.count({ where });
+    }
+
     let processedTemplates = templates.map((template) => {
       const thumbnailUrl =
         template.previewImages.find((img) => img.imageType === "THUMBNAIL")
@@ -146,9 +151,8 @@ export const getAllTemplates = async (
       });
     }
 
-    const total = processedTemplates.length;
-
     if (needsInMemoryProcessing) {
+      total = processedTemplates.length;
       processedTemplates = processedTemplates.slice(
         skip,
         skip + validatedQuery.limit
